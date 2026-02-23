@@ -25,3 +25,6 @@ venv/
 
 # Logs
 *.log
+
+# Project context (local only)
+context/
