@@ -17,7 +17,14 @@ Construction CO₂ footprint calculator. Upload invoices, look up materials via 
 - Node.js 22+
 - pnpm 10+
 - Python 3.12+
+- Docker (Docker Desktop for Windows/macOS, Docker Engine for Linux)
 - pipx (for installing pre-commit)
+
+**Install pnpm:**
+
+```bash
+npm install -g pnpm
+```
 
 **Install pipx (not strictly needed for macOS or Windows, pip can be used as well, but pipx isolates the install.):**
 
@@ -48,14 +55,28 @@ pnpm dev
 
 Open http://localhost:5173 — you should see a centered page with "Byggspor" as a heading and "Construction CO₂ footprint calculator" below it.
 
+### Database
+
+```bash
+cp .env.example .env           # uses default local credentials
+docker compose up -d           # starts PostgreSQL on port 5432
+```
+
+Verify it's running:
+
+```bash
+docker compose ps              # should show byggspor-db-1 as "running"
+```
+
 ### Backend
 
 ```bash
 cd backend
-python -m venv venv
+python3 -m venv venv
 source venv/bin/activate       # Linux/macOS
 # venv\Scripts\activate        # Windows
 pip install -r requirements.txt
+alembic upgrade head           # creates all database tables
 flask --app app.main run --debug
 ```
 
