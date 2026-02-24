@@ -1,4 +1,7 @@
+from dotenv import load_dotenv
 from flask import Flask, jsonify
+
+load_dotenv()
 
 app = Flask(__name__)
 
@@ -6,3 +9,8 @@ app = Flask(__name__)
 @app.route("/health")
 def health_check():
     return jsonify(status="ok")
+
+
+from app.routes.nobb import nobb_bp  # noqa: E402
+
+app.register_blueprint(nobb_bp)
