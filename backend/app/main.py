@@ -11,6 +11,8 @@ def health_check():
     return jsonify(status="ok")
 
 
+from app.routes.invoice import invoice_bp  # noqa: E402
 from app.routes.nobb import nobb_bp  # noqa: E402
 
 app.register_blueprint(nobb_bp)
+app.register_blueprint(invoice_bp)
