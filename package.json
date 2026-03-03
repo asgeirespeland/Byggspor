@@ -1,0 +1,12 @@
+{
+  "name": "byggspor",
+  "private": true,
+  "scripts": {
+    "dev": "concurrently -n backend,frontend -c blue,green \"pnpm run dev:backend\" \"pnpm run dev:frontend\"",
+    "dev:backend": "cd backend && flask --app app.main run --reload",
+    "dev:frontend": "cd frontend && pnpm dev"
+  },
+  "devDependencies": {
+    "concurrently": "^9.1.2"
+  }
+}
