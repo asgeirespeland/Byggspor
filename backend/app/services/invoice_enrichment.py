@@ -35,16 +35,25 @@ def _check_catalog(
         nobb_number,
         material.id,
     )
+
+    # Reconstruct EPD response from stored fields
+    epd = None
+    if material.has_epd:
+        gwp_stages = {}
+        if material.gwp_per_unit is not None:
+            gwp_stages["a1_a3"] = {
+                "total": float(material.gwp_per_unit),
+                "fossil": None,
+                "biogenic": None,
+            }
+        epd = {"epd_number": material.epd_id, "gwp_stages": gwp_stages}
+
     return {
         "nobb_number": material.nobb_number,
         "name": material.product_name,
         "product_group": material.product_group,
         "has_epd": material.has_epd,
-        "epd": (
-            {"epd_number": material.epd_id, "gwp_stages": []}
-            if material.has_epd
-            else None
-        ),
+        "epd": epd,
         "_from_catalog": True,
         "_catalog_material_id": material.id,
     }

@@ -1,4 +1,4 @@
-import type { InvoiceResponse } from '../types/invoice'
+import type { InvoiceResponse, LineItem } from '../types/invoice'
 
 interface InvoiceTableProps {
   data: InvoiceResponse
@@ -41,6 +41,16 @@ export default function InvoiceTable({ data }: InvoiceTableProps) {
               <th className="px-4 py-3 font-medium">Enhet</th>
               <th className="px-4 py-3 font-medium text-right">Pris</th>
               <th className="px-4 py-3 font-medium text-right">Sum</th>
+              <th className="px-4 py-3 font-medium text-right">
+                CO₂ (kg)
+                <sup className="group relative ml-0.5 cursor-help text-white/60">
+                  ?
+                  <span className="pointer-events-none absolute top-full right-0 mt-2 z-10 hidden w-56 rounded bg-gray-900 px-3 py-2 text-xs font-normal text-gray-100 shadow-lg group-hover:block">
+                    GWP A1-A3 (produksjonsfase). Avfall (C1-C4) rapporteres
+                    separat.
+                  </span>
+                </sup>
+              </th>
               <th className="px-4 py-3 font-medium">EPD</th>
             </tr>
           </thead>
@@ -76,6 +86,9 @@ export default function InvoiceTable({ data }: InvoiceTableProps) {
                 <td className="px-4 py-3 text-right text-gray-800">
                   {item.line_total != null ? item.line_total.toFixed(2) : '—'}
                 </td>
+                <td className="px-4 py-3 text-right text-gray-800">
+                  <Co2Value item={item} />
+                </td>
                 <td className="px-4 py-3">
                   <EpdBadge
                     enriched={item.enriched}
@@ -89,7 +102,7 @@ export default function InvoiceTable({ data }: InvoiceTableProps) {
       </div>
 
       {/* Summary */}
-      <div className="flex gap-4 text-sm">
+      <div className="flex flex-wrap gap-4 text-sm">
         <span className="rounded bg-gray-100 px-3 py-1 text-gray-700">
           {data.line_items.length} linjer
         </span>
@@ -99,8 +112,47 @@ export default function InvoiceTable({ data }: InvoiceTableProps) {
             identifikator
           </span>
         )}
+        <TotalCo2 items={data.line_items} />
       </div>
     </div>
+  )
+}
+
+function getGwpA1A3(item: LineItem): number | null {
+  const stages = item.nobb_data?.epd?.gwp_stages
+  if (!stages) return null
+  const a1a3 = stages['a1_a3'] ?? stages['A1-A3']
+  return a1a3?.total ?? null
+}
+
+function Co2Value({ item }: { item: LineItem }) {
+  const gwp = getGwpA1A3(item)
+  if (gwp == null) return <span className="text-gray-400">—</span>
+
+  const qty = item.quantity ?? 1
+  const total = gwp * qty
+  return (
+    <span title={`${gwp.toFixed(4)} kg CO₂e/enhet × ${qty}`}>
+      {total.toFixed(2)}
+    </span>
+  )
+}
+
+function TotalCo2({ items }: { items: LineItem[] }) {
+  let total = 0
+  let count = 0
+  for (const item of items) {
+    const gwp = getGwpA1A3(item)
+    if (gwp != null) {
+      total += gwp * (item.quantity ?? 1)
+      count++
+    }
+  }
+  if (count === 0) return null
+  return (
+    <span className="rounded bg-green-100 px-3 py-1 text-green-800">
+      CO₂: {total.toFixed(2)} kg ({count}/{items.length} linjer)
+    </span>
   )
 }
 
