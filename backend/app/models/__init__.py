@@ -4,10 +4,11 @@ from app.models.material import Material
 from app.models.material_invoice import MaterialInvoice
 from app.models.organization import Organization
 from app.models.project import Project
+from app.models.project_material import ProjectMaterial
+from app.models.project_waste_item import ProjectWasteItem
 from app.models.transport import Transport
 from app.models.user import User
 from app.models.waste_invoice import WasteInvoice
-from app.models.waste_item import WasteItem
 
 __all__ = [
     "Energy",
@@ -16,8 +17,9 @@ __all__ = [
     "MaterialInvoice",
     "Organization",
     "Project",
+    "ProjectMaterial",
+    "ProjectWasteItem",
     "Transport",
     "User",
     "WasteInvoice",
-    "WasteItem",
 ]

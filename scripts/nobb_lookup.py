@@ -58,7 +58,9 @@ def main():
         print(f"\n  Name:         {result['name']}")
         print(f"  Secondary:    {result['secondary_text']}")
         print(f"  Description:  {(result.get('description') or '')[:120]}")
-        print(f"  Group:        {result['product_group']} ({result['product_group_number']})")
+        print(
+            f"  Group:        {result['product_group']} ({result['product_group_number']})"
+        )
         print(f"  Env labels:   {result['environment_labels']}")
         print(f"  Has EPD:      {result['has_epd']}")
 
@@ -70,7 +72,9 @@ def main():
             print(f"\n  EPD number:     {epd['epd_number']}")
             print(f"  Declared unit:  {epd['declared_unit']}")
             print(f"  Price unit factor: {epd['price_unit_factor']}")
-            print(f"\n  {'Stage':<10} {'Total':>10} {'Fossil':>10} {'Biogenic':>10}  kg CO2 eq.")
+            print(
+                f"\n  {'Stage':<10} {'Total':>10} {'Fossil':>10} {'Biogenic':>10}  kg CO2 eq."
+            )
             print(f"  {'-' * 52}")
             for stage, vals in epd["gwp_stages"].items():
                 t = vals["total"] if vals["total"] is not None else "-"

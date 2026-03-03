@@ -1,19 +1,64 @@
 import logging
 
+from sqlalchemy.orm import Session
+
 from app.services.nobb_client import lookup
 
 logger = logging.getLogger(__name__)
 
 
-def enrich_invoice(parsed_invoice: dict) -> dict:
+def _check_catalog(
+    session: Session, gtin: str | None, nobb_number: str | None
+) -> dict | None:
+    """Check the material catalog for a cached product entry.
+
+    Returns a dict mimicking NOBB API response format, or None if not found.
+    """
+    from app.models.material import Material
+
+    material = None
+    if gtin:
+        material = session.query(Material).filter(Material.gtin == gtin).first()
+    if material is None and nobb_number:
+        material = (
+            session.query(Material)
+            .filter(Material.nobb_number == str(nobb_number))
+            .first()
+        )
+
+    if material is None:
+        return None
+
+    logger.info(
+        "Catalog hit for gtin=%s nobb=%s (material_id=%s)",
+        gtin,
+        nobb_number,
+        material.id,
+    )
+    return {
+        "nobb_number": material.nobb_number,
+        "name": material.product_name,
+        "product_group": material.product_group,
+        "has_epd": material.has_epd,
+        "epd": (
+            {"epd_number": material.epd_id, "gwp_stages": []}
+            if material.has_epd
+            else None
+        ),
+        "_from_catalog": True,
+        "_catalog_material_id": material.id,
+    }
+
+
+def enrich_invoice(parsed_invoice: dict, session: Session | None = None) -> dict:
     """Enrich parsed invoice line items with NOBB product data and EPD.
 
-    For each line item with a GTIN or NOBB number, calls the NOBB API
-    to fetch product details. Items without identifiers or without
-    matches are flagged.
+    When a session is provided, checks the material catalog DB first.
+    Only calls the NOBB API for items not found in the catalog.
 
     Args:
         parsed_invoice: Output from ehf_parser.parse_invoice().
+        session: Optional SQLAlchemy session for catalog lookups.
 
     Returns:
         The same invoice dict with enrichment fields added to each line item.
@@ -28,6 +73,16 @@ def enrich_invoice(parsed_invoice: dict) -> dict:
             item["nobb_data"] = None
             continue
 
+        # Check catalog first if session is available
+        if session is not None:
+            catalog_result = _check_catalog(session, gtin, nobb_number)
+            if catalog_result is not None:
+                item["enriched"] = True
+                item["flagged"] = False
+                item["nobb_data"] = catalog_result
+                continue
+
+        # Fall through to NOBB API
         nobb_int = None
         if nobb_number:
             try:
