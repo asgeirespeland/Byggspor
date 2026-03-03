@@ -49,11 +49,11 @@ class Project(Base):
     customer: Mapped["Organization | None"] = relationship(
         foreign_keys=[customer_id],
     )
-    material_invoices: Mapped[list["MaterialInvoice"]] = relationship(
+    project_materials: Mapped[list["ProjectMaterial"]] = relationship(
         back_populates="project"
     )
     transports: Mapped[list["Transport"]] = relationship(back_populates="project")
-    waste_invoices: Mapped[list["WasteInvoice"]] = relationship(
+    project_waste_items: Mapped[list["ProjectWasteItem"]] = relationship(
         back_populates="project"
     )
     energies: Mapped[list["Energy"]] = relationship(back_populates="project")
