@@ -1,3 +1,18 @@
+"""Client for the NOBB API (Norwegian building materials database).
+
+Provides functions to search products by GTIN or NOBB number, fetch detailed
+item data, and extract EPD (Environmental Product Declaration) information
+including GWP (Global Warming Potential) stages from the item properties.
+
+The NOBB API uses basic auth. Credentials are read from NOBB_API_USERNAME
+and NOBB_API_PASSWORD environment variables.
+
+EPD GWP data comes in two formats depending on the product:
+  - Detailed: separate Total/Fossil/Biogenic/LULUC values per stage
+  - Simple: a single combined value per stage (e.g. "A1-A3 - global warming potential")
+Both formats are handled by extract_epd().
+"""
+
 import os
 
 import requests

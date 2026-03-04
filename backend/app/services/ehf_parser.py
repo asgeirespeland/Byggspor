@@ -1,3 +1,18 @@
+"""EHF invoice XML parser.
+
+Parses EHF (Elektronisk Handelsformat) invoices following the UBL 2.0 /
+PEPPOL BIS standard. Extracts invoice metadata (number, date, currency),
+supplier and buyer party info, and individual line items with product
+identifiers (GTIN from StandardItemIdentification, NOBB number from
+AdditionalItemProperty).
+
+Supports both standard EHF schemeID="GTIN" and BEAst Supply 4.0
+schemeID="0160" for GTIN identification.
+
+This parser is stateless and does no enrichment or DB writes. It returns
+a plain dict that can be passed to invoice_enrichment.enrich_invoice().
+"""
+
 import logging
 import xml.etree.ElementTree as ET
 

@@ -1,3 +1,20 @@
+"""Invoice enrichment service.
+
+Takes a parsed EHF invoice (from ehf_parser) and enriches each line item
+with product data from the NOBB API. For each item that has a GTIN or NOBB
+number, the service looks up the product to get name, product group, EPD
+status, and GWP data.
+
+When a DB session is provided, the material catalog table is checked first
+to avoid redundant API calls. Items already in the catalog are served from
+the DB; only cache misses hit the NOBB API.
+
+Each line item gets three fields added:
+  - enriched (bool): whether product data was found
+  - flagged (bool): whether the item needs attention (missing ID or no match)
+  - nobb_data (dict|None): the product data including EPD/GWP if available
+"""
+
 import logging
 
 from sqlalchemy.orm import Session
