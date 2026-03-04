@@ -1,3 +1,18 @@
+"""Client for the NOBB API (Norwegian building materials database).
+
+Provides functions to search products by GTIN or NOBB number, fetch detailed
+item data, and extract EPD (Environmental Product Declaration) information
+including GWP (Global Warming Potential) stages from the item properties.
+
+The NOBB API uses basic auth. Credentials are read from NOBB_API_USERNAME
+and NOBB_API_PASSWORD environment variables.
+
+EPD GWP data comes in two formats depending on the product:
+  - Detailed: separate Total/Fossil/Biogenic/LULUC values per stage
+  - Simple: a single combined value per stage (e.g. "A1-A3 - global warming potential")
+Both formats are handled by extract_epd().
+"""
+
 import os
 
 import requests
@@ -71,20 +86,26 @@ def extract_epd(item: dict) -> dict | None:
     epd_map = {p["propertyName"]: p.get("value", "") for p in epd_props}
 
     gwp_stages = {}
+    # Format 1: detailed breakdown ("Tot A1 To A3 GWP Total - global warming potential")
+    # Format 2: simple combined ("A1-A3 - global warming potential")
     stage_prefixes = [
-        ("a1_a3", "Tot A1 To A3"),
-        ("a4", "A4"),
-        ("a5", "A5"),
-        ("c1", "C1"),
-        ("c2", "C2"),
-        ("c3", "C3"),
-        ("c4", "C4"),
-        ("d", "D"),
+        ("a1_a3", "Tot A1 To A3", "A1-A3"),
+        ("a4", "A4", "A4"),
+        ("a5", "A5", "A5"),
+        ("c1", "C1", "C1"),
+        ("c2", "C2", "C2"),
+        ("c3", "C3", "C3"),
+        ("c4", "C4", "C4"),
+        ("d", "D", "D"),
     ]
-    for key, prefix in stage_prefixes:
-        total = epd_map.get(f"{prefix} GWP Total - global warming potential")
-        fossil = epd_map.get(f"{prefix} Fossil - global warming potential")
-        biogenic = epd_map.get(f"{prefix} Biogenic - global warming potential")
+    for key, detailed_prefix, simple_prefix in stage_prefixes:
+        # Try detailed format first
+        total = epd_map.get(f"{detailed_prefix} GWP Total - global warming potential")
+        fossil = epd_map.get(f"{detailed_prefix} Fossil - global warming potential")
+        biogenic = epd_map.get(f"{detailed_prefix} Biogenic - global warming potential")
+        # Fall back to simple format
+        if total is None:
+            total = epd_map.get(f"{simple_prefix} - global warming potential")
         if total is not None:
             gwp_stages[key] = {
                 "total": _to_float(total),

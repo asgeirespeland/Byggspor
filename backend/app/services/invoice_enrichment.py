@@ -1,3 +1,20 @@
+"""Invoice enrichment service.
+
+Takes a parsed EHF invoice (from ehf_parser) and enriches each line item
+with product data from the NOBB API. For each item that has a GTIN or NOBB
+number, the service looks up the product to get name, product group, EPD
+status, and GWP data.
+
+When a DB session is provided, the material catalog table is checked first
+to avoid redundant API calls. Items already in the catalog are served from
+the DB; only cache misses hit the NOBB API.
+
+Each line item gets three fields added:
+  - enriched (bool): whether product data was found
+  - flagged (bool): whether the item needs attention (missing ID or no match)
+  - nobb_data (dict|None): the product data including EPD/GWP if available
+"""
+
 import logging
 
 from sqlalchemy.orm import Session
@@ -35,16 +52,25 @@ def _check_catalog(
         nobb_number,
         material.id,
     )
+
+    # Reconstruct EPD response from stored fields
+    epd = None
+    if material.has_epd:
+        gwp_stages = {}
+        if material.gwp_per_unit is not None:
+            gwp_stages["a1_a3"] = {
+                "total": float(material.gwp_per_unit),
+                "fossil": None,
+                "biogenic": None,
+            }
+        epd = {"epd_number": material.epd_id, "gwp_stages": gwp_stages}
+
     return {
         "nobb_number": material.nobb_number,
         "name": material.product_name,
         "product_group": material.product_group,
         "has_epd": material.has_epd,
-        "epd": (
-            {"epd_number": material.epd_id, "gwp_stages": []}
-            if material.has_epd
-            else None
-        ),
+        "epd": epd,
         "_from_catalog": True,
         "_catalog_material_id": material.id,
     }

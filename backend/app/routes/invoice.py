@@ -1,16 +1,25 @@
+import logging
 import xml.etree.ElementTree as ET
 
 from flask import Blueprint, jsonify, request
 
+from app.database import SessionLocal
 from app.services.ehf_parser import parse_invoice
 from app.services.invoice_enrichment import enrich_invoice
+from app.services.material_service import upsert_catalog_entry
+
+logger = logging.getLogger(__name__)
 
 invoice_bp = Blueprint("invoice", __name__, url_prefix="/invoice")
 
 
 @invoice_bp.route("/parse", methods=["POST"])
 def parse_invoice_route():
-    """Parse and enrich an EHF invoice — stateless, no DB writes."""
+    """Parse and enrich an EHF invoice.
+
+    Uses the material catalog DB as a cache — checks catalog first,
+    falls back to NOBB API, then upserts results back into the catalog.
+    """
     if "file" not in request.files:
         return jsonify(error="No file provided. Use 'file' form field."), 400
 
@@ -27,10 +36,22 @@ def parse_invoice_route():
     except ET.ParseError as e:
         return jsonify(error=f"Invalid XML: {e}"), 422
 
+    session = SessionLocal()
     try:
-        enriched = enrich_invoice(parsed)
+        enriched = enrich_invoice(parsed, session=session)
+
+        # Upsert enriched items into the material catalog (cache for next time)
+        for item in enriched.get("line_items", []):
+            if item.get("nobb_data") and not item["nobb_data"].get("_from_catalog"):
+                upsert_catalog_entry(session, item)
+
+        session.commit()
     except Exception as e:
+        session.rollback()
+        logger.exception("Enrichment/caching failed")
         return jsonify(error=f"Enrichment failed: {e}"), 502
+    finally:
+        session.close()
 
     return jsonify(enriched)
 
