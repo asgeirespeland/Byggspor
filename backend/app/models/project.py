@@ -53,6 +53,9 @@ class Project(Base):
         back_populates="project"
     )
     transports: Mapped[list["Transport"]] = relationship(back_populates="project")
+    project_transports: Mapped[list["ProjectTransport"]] = relationship(
+        back_populates="project"
+    )
     project_waste_items: Mapped[list["ProjectWasteItem"]] = relationship(
         back_populates="project"
     )
