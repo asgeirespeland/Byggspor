@@ -6,7 +6,6 @@ from typing import Any
 
 from flask import g, jsonify
 
-from app.database import SessionLocal
 from app.models.organization_member import OrganizationMember, OrgRole
 from app.models.project_member import ProjectMember, ProjectRole
 from app.models.user import User
@@ -15,26 +14,21 @@ from app.models.user import User
 def _has_org_role(
     user: User,
     organization_id: int,
-    allowed_roles: tuple[OrgRole, ...],
-) -> bool:
-    """Check whether a user has one of the allowed roles in an organization."""
+) -> OrgRole | None:
+    """Return the user's role in an organization, or None."""
     if user.is_system_admin:
-        # App-level admins bypass organization role checks.
-        return True
+        return OrgRole.OWNER  # System admins bypass org role checks.
 
-    session = SessionLocal()
-    try:
-        membership = (
-            session.query(OrganizationMember)
-            .filter(
-                OrganizationMember.user_id == user.id,
-                OrganizationMember.organization_id == organization_id,
-            )
-            .one_or_none()
+    session = g.db
+    membership = (
+        session.query(OrganizationMember)
+        .filter(
+            OrganizationMember.user_id == user.id,
+            OrganizationMember.organization_id == organization_id,
         )
-        return bool(membership and membership.role in allowed_roles)
-    finally:
-        session.close()
+        .one_or_none()
+    )
+    return membership.role if membership else None
 
 
 def require_org_role(
@@ -53,15 +47,13 @@ def require_org_role(
             if not getattr(g, "current_user_id", None):
                 return jsonify(error="Unauthorized"), 401
 
-            session = SessionLocal()
-            try:
-                user = session.get(User, g.current_user_id)
-                if not user:
-                    return jsonify(error="Unauthorized"), 401
-            finally:
-                session.close()
+            session = g.db
+            user = session.get(User, g.current_user_id)
+            if not user:
+                return jsonify(error="Unauthorized"), 401
 
-            if not _has_org_role(user, int(org_id), allowed_roles):
+            role = _has_org_role(user, org_id)
+            if role not in allowed_roles:
                 return jsonify(error="Forbidden"), 403
 
             return fn(*args, **kwargs)
@@ -74,26 +66,21 @@ def require_org_role(
 def _has_project_role(
     user: User,
     project_id: int,
-    allowed_roles: tuple[ProjectRole, ...],
-) -> bool:
-    """Check whether a user has one of the allowed roles in a project."""
+) -> ProjectRole | None:
+    """Return the user's role in a project, or None."""
     if user.is_system_admin:
-        # App-level admins bypass project role checks.
-        return True
+        return ProjectRole.OWNER  # System admins bypass project role checks.
 
-    session = SessionLocal()
-    try:
-        membership = (
-            session.query(ProjectMember)
-            .filter(
-                ProjectMember.user_id == user.id,
-                ProjectMember.project_id == project_id,
-            )
-            .one_or_none()
+    session = g.db
+    membership = (
+        session.query(ProjectMember)
+        .filter(
+            ProjectMember.user_id == user.id,
+            ProjectMember.project_id == project_id,
         )
-        return bool(membership and membership.role in allowed_roles)
-    finally:
-        session.close()
+        .one_or_none()
+    )
+    return membership.role if membership else None
 
 
 def require_project_role(
@@ -112,15 +99,13 @@ def require_project_role(
             if not getattr(g, "current_user_id", None):
                 return jsonify(error="Unauthorized"), 401
 
-            session = SessionLocal()
-            try:
-                user = session.get(User, g.current_user_id)
-                if not user:
-                    return jsonify(error="Unauthorized"), 401
-            finally:
-                session.close()
+            session = g.db
+            user = session.get(User, g.current_user_id)
+            if not user:
+                return jsonify(error="Unauthorized"), 401
 
-            if not _has_project_role(user, int(project_id), allowed_roles):
+            role = _has_project_role(user, project_id)
+            if role not in allowed_roles:
                 return jsonify(error="Forbidden"), 403
 
             return fn(*args, **kwargs)
@@ -128,22 +113,3 @@ def require_project_role(
         return wrapper
 
     return decorator
-
-
-def ensure_project_role(project_id: int, allowed_roles: tuple[ProjectRole, ...]):
-    """Inline project-role guard for handlers where project_id comes from body/form."""
-    if not getattr(g, "current_user_id", None):
-        return jsonify(error="Unauthorized"), 401
-
-    session = SessionLocal()
-    try:
-        user = session.get(User, g.current_user_id)
-        if not user:
-            return jsonify(error="Unauthorized"), 401
-    finally:
-        session.close()
-
-    if not _has_project_role(user, project_id, allowed_roles):
-        return jsonify(error="Forbidden"), 403
-
-    return None

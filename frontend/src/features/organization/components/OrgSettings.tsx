@@ -1,16 +1,14 @@
 import { useState } from 'react'
 
-import { apiRequest } from '../shared/api/client'
-import type { OrgDto, OrgMemberDto } from '../shared/types'
-
-type OrgSettingsProps = {
-  token: string
-}
+import { apiRequest } from '../../../shared/api/client'
+import { useAuth } from '../../../shared/auth/useAuth'
+import type { OrgDto, OrgMemberDto } from '../../../shared/types'
 
 /**
  * Organization settings panel for creating orgs and managing member roles.
  */
-export default function OrgSettings({ token }: OrgSettingsProps) {
+export default function OrgSettings() {
+  const { token } = useAuth()
   const [organizationId, setOrganizationId] = useState('')
   const [newOrgName, setNewOrgName] = useState('')
   const [newOrgType, setNewOrgType] = useState('COMPANY')

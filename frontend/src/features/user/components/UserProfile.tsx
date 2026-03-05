@@ -1,16 +1,14 @@
 import { useState } from 'react'
 
-import { apiRequest } from '../shared/api/client'
-import type { UserDto } from '../shared/types'
-
-type UserProfileProps = {
-  token: string
-}
+import { apiRequest } from '../../../shared/api/client'
+import { useAuth } from '../../../shared/auth/useAuth'
+import type { UserDto } from '../../../shared/types'
 
 /**
  * Profile view for loading and updating the currently authenticated user.
  */
-export default function UserProfile({ token }: UserProfileProps) {
+export default function UserProfile() {
+  const { token } = useAuth()
   const [user, setUser] = useState<UserDto | null>(null)
   const [name, setName] = useState('')
   const [phone, setPhone] = useState('')

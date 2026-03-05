@@ -1,8 +1,8 @@
 from __future__ import annotations
 
 from flask import Blueprint, g, jsonify, request
+from sqlalchemy.exc import IntegrityError
 
-from app.database import SessionLocal
 from app.middleware.roles import require_org_role
 from app.models.organization import Organization, OrgType
 from app.models.organization_member import OrganizationMember, OrgRole
@@ -70,11 +70,9 @@ def _serialize_member(member: OrganizationMember, user: User) -> dict:
         "joined_at": member.joined_at.isoformat() if member.joined_at else None,
         "user": {
             "id": user.id,
-            "clerk_id": user.clerk_id,
             "email": user.email,
             "name": user.name,
             "phone": user.phone,
-            "is_system_admin": user.is_system_admin,
         },
     }
 
@@ -96,50 +94,49 @@ def create_organization():
     if not org_type:
         return jsonify(error="org_type must be one of COMPANY or CUSTOMER"), 400
 
-    session = SessionLocal()
+    session = g.db
+    user = session.get(User, current_user_id)
+    if not user:
+        return jsonify(error="Unauthorized"), 401
+
+    org = Organization(
+        name=name,
+        org_number=payload.get("org_number"),
+        address=payload.get("address"),
+        phone=payload.get("phone"),
+        email=payload.get("email"),
+        org_type=org_type,
+    )
+    session.add(org)
+    session.flush()
+
+    # The creator immediately gets OWNER role in this organization.
+    owner_membership = OrganizationMember(
+        user_id=user.id,
+        organization_id=org.id,
+        role=OrgRole.OWNER,
+    )
+    session.add(owner_membership)
+
     try:
-        user = session.get(User, current_user_id)
-        if not user:
-            return jsonify(error="Unauthorized"), 401
-
-        org = Organization(
-            name=name,
-            org_number=payload.get("org_number"),
-            address=payload.get("address"),
-            phone=payload.get("phone"),
-            email=payload.get("email"),
-            org_type=org_type,
-        )
-        session.add(org)
-        session.flush()
-
-        # The creator immediately gets OWNER role in this organization.
-        owner_membership = OrganizationMember(
-            user_id=user.id,
-            organization_id=org.id,
-            role=OrgRole.OWNER,
-        )
-        session.add(owner_membership)
-
         session.commit()
-        session.refresh(org)
-        return jsonify(_serialize_org(org)), 201
-    finally:
-        session.close()
+    except IntegrityError:
+        session.rollback()
+        return jsonify(error="Conflict: duplicate or invalid data"), 409
+
+    session.refresh(org)
+    return jsonify(_serialize_org(org)), 201
 
 
 @organization_bp.route("/<int:organization_id>", methods=["GET"])
 @require_org_role((OrgRole.OWNER, OrgRole.ADMIN, OrgRole.MEMBER, OrgRole.VIEWER))
 def get_organization(organization_id: int):
     """Read organization details for any organization member role."""
-    session = SessionLocal()
-    try:
-        org = session.get(Organization, organization_id)
-        if not org:
-            return jsonify(error="Organization not found"), 404
-        return jsonify(_serialize_org(org))
-    finally:
-        session.close()
+    session = g.db
+    org = session.get(Organization, organization_id)
+    if not org:
+        return jsonify(error="Organization not found"), 404
+    return jsonify(_serialize_org(org))
 
 
 @organization_bp.route("/<int:organization_id>", methods=["PATCH"])
@@ -148,62 +145,69 @@ def update_organization(organization_id: int):
     """Update organization metadata (restricted to OWNER/ADMIN)."""
     payload = request.get_json(silent=True) or {}
 
-    session = SessionLocal()
+    session = g.db
+    org = session.get(Organization, organization_id)
+    if not org:
+        return jsonify(error="Organization not found"), 404
+
+    if "name" in payload:
+        new_name = (payload.get("name") or "").strip()
+        if not new_name:
+            return jsonify(error="name cannot be empty"), 400
+        org.name = new_name
+    if "org_number" in payload:
+        org.org_number = payload.get("org_number")
+    if "address" in payload:
+        org.address = payload.get("address")
+    if "phone" in payload:
+        org.phone = payload.get("phone")
+    if "email" in payload:
+        org.email = payload.get("email")
+
+    if "org_type" in payload:
+        parsed_org_type = _parse_org_type(payload.get("org_type"))
+        if not parsed_org_type:
+            return jsonify(error="org_type must be one of COMPANY or CUSTOMER"), 400
+        org.org_type = parsed_org_type
+
     try:
-        org = session.get(Organization, organization_id)
-        if not org:
-            return jsonify(error="Organization not found"), 404
-
-        if "name" in payload:
-            org.name = (payload.get("name") or "").strip() or org.name
-        if "org_number" in payload:
-            org.org_number = payload.get("org_number")
-        if "address" in payload:
-            org.address = payload.get("address")
-        if "phone" in payload:
-            org.phone = payload.get("phone")
-        if "email" in payload:
-            org.email = payload.get("email")
-
-        if "org_type" in payload:
-            parsed_org_type = _parse_org_type(payload.get("org_type"))
-            if not parsed_org_type:
-                return jsonify(error="org_type must be one of COMPANY or CUSTOMER"), 400
-            org.org_type = parsed_org_type
-
         session.commit()
-        session.refresh(org)
-        return jsonify(_serialize_org(org))
-    finally:
-        session.close()
+    except IntegrityError:
+        session.rollback()
+        return jsonify(error="Conflict: duplicate or invalid data"), 409
+
+    session.refresh(org)
+    return jsonify(_serialize_org(org))
 
 
 @organization_bp.route("/<int:organization_id>/members", methods=["GET"])
 @require_org_role((OrgRole.OWNER, OrgRole.ADMIN))
 def get_organization_members(organization_id: int):
     """List organization members for admin-level roles."""
-    session = SessionLocal()
-    try:
-        org = session.get(Organization, organization_id)
-        if not org:
-            return jsonify(error="Organization not found"), 404
+    session = g.db
+    org = session.get(Organization, organization_id)
+    if not org:
+        return jsonify(error="Organization not found"), 404
 
-        members = (
-            session.query(OrganizationMember, User)
-            .join(User, User.id == OrganizationMember.user_id)
-            .filter(OrganizationMember.organization_id == organization_id)
-            .all()
-        )
+    members = (
+        session.query(OrganizationMember, User)
+        .join(User, User.id == OrganizationMember.user_id)
+        .filter(OrganizationMember.organization_id == organization_id)
+        .all()
+    )
 
-        return jsonify([_serialize_member(member, user) for member, user in members])
-    finally:
-        session.close()
+    return jsonify([_serialize_member(member, user) for member, user in members])
 
 
 @organization_bp.route("/<int:organization_id>/members", methods=["POST"])
 @require_org_role((OrgRole.OWNER, OrgRole.ADMIN))
 def add_organization_member(organization_id: int):
-    """Add or update an organization member role (upsert behavior)."""
+    """Add or update an organization member role (upsert behavior).
+
+    ADMINs are intentionally allowed to assign any role, including OWNER.
+    This is by design: org admins act as trusted delegates for business owners
+    and need the ability to manage the full role hierarchy.
+    """
     payload = request.get_json(silent=True) or {}
 
     user_id = payload.get("user_id")
@@ -214,40 +218,72 @@ def add_organization_member(organization_id: int):
     if not role:
         return jsonify(error="role must be one of OWNER, ADMIN, MEMBER, VIEWER"), 400
 
-    session = SessionLocal()
-    try:
-        org = session.get(Organization, organization_id)
-        if not org:
-            return jsonify(error="Organization not found"), 404
+    session = g.db
+    org = session.get(Organization, organization_id)
+    if not org:
+        return jsonify(error="Organization not found"), 404
 
-        user = session.get(User, int(user_id))
-        if not user:
-            return jsonify(error="User not found"), 404
+    user = session.get(User, user_id)
+    if not user:
+        return jsonify(error="User not found"), 404
 
-        existing = (
-            session.query(OrganizationMember)
-            .filter(
-                OrganizationMember.organization_id == organization_id,
-                OrganizationMember.user_id == user.id,
-            )
-            .one_or_none()
+    existing = (
+        session.query(OrganizationMember)
+        .filter(
+            OrganizationMember.organization_id == organization_id,
+            OrganizationMember.user_id == user.id,
         )
+        .one_or_none()
+    )
 
-        # If the user is already a member, treat this as a role update.
-        if existing:
-            existing.role = role
+    # If the user is already a member, treat this as a role update.
+    if existing:
+        existing.role = role
+        try:
             session.commit()
-            session.refresh(existing)
-            return jsonify(_serialize_member(existing, user))
+        except IntegrityError:
+            session.rollback()
+            return jsonify(error="Conflict: duplicate or invalid data"), 409
+        session.refresh(existing)
+        return jsonify(_serialize_member(existing, user))
 
-        member = OrganizationMember(
-            organization_id=organization_id,
-            user_id=user.id,
-            role=role,
-        )
-        session.add(member)
+    member = OrganizationMember(
+        organization_id=organization_id,
+        user_id=user.id,
+        role=role,
+    )
+    session.add(member)
+
+    try:
         session.commit()
-        session.refresh(member)
-        return jsonify(_serialize_member(member, user)), 201
-    finally:
-        session.close()
+    except IntegrityError:
+        session.rollback()
+        return jsonify(error="Conflict: duplicate or invalid data"), 409
+
+    session.refresh(member)
+    return jsonify(_serialize_member(member, user)), 201
+
+
+@organization_bp.route(
+    "/<int:organization_id>/members/<int:user_id>", methods=["DELETE"]
+)
+@require_org_role((OrgRole.OWNER, OrgRole.ADMIN))
+def remove_organization_member(organization_id: int, user_id: int):
+    """Remove a member from an organization."""
+    session = g.db
+
+    membership = (
+        session.query(OrganizationMember)
+        .filter(
+            OrganizationMember.organization_id == organization_id,
+            OrganizationMember.user_id == user_id,
+        )
+        .one_or_none()
+    )
+
+    if not membership:
+        return jsonify(error="Membership not found"), 404
+
+    session.delete(membership)
+    session.commit()
+    return "", 204

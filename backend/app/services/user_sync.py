@@ -35,7 +35,7 @@ def upsert_user_from_clerk(session: Session, claims: dict) -> User:
     """Create or update a local user record from Clerk JWT claims."""
     clerk_id = claims.get("sub")
     if not clerk_id:
-        raise ValueError("Token mangler sub-claim")
+        raise ValueError("Token missing sub claim")
 
     email = _claim_email(claims) or f"{clerk_id}@clerk.local"
     name = _claim_name(claims)
@@ -43,7 +43,15 @@ def upsert_user_from_clerk(session: Session, claims: dict) -> User:
     user = session.query(User).filter(User.clerk_id == clerk_id).one_or_none()
     if not user:
         # Fallback for migrated data where clerk_id may not have been stored yet.
-        user = session.query(User).filter(User.email == email).one_or_none()
+        # Only allow linking if the existing user has no clerk_id set (i.e. a
+        # legacy record that was never associated with Clerk). This prevents an
+        # attacker from hijacking an already-linked account by registering a
+        # Clerk account with the same email.
+        user = (
+            session.query(User)
+            .filter(User.email == email, User.clerk_id.is_(None))
+            .one_or_none()
+        )
 
     if user:
         # Keep local profile fields in sync with Clerk on each authenticated request.
