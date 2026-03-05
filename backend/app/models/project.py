@@ -3,7 +3,7 @@ from __future__ import annotations
 import enum
 from datetime import datetime
 
-from sqlalchemy import DateTime, Enum, ForeignKey, Integer, String, func
+from sqlalchemy import DateTime, Enum, ForeignKey, Integer, String, event, func
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.database import Base
@@ -62,4 +62,21 @@ class Project(Base):
     energies: Mapped[list["Energy"]] = relationship(back_populates="project")
     generated_invoices: Mapped[list["GeneratedInvoice"]] = relationship(
         back_populates="project"
+    )
+    project_memberships: Mapped[list["ProjectMember"]] = relationship(
+        back_populates="project",
+        cascade="all, delete-orphan",
+    )
+
+
+@event.listens_for(Project, "after_insert")
+def _add_creator_to_project_members(mapper, connection, target: Project):
+    from app.models.project_member import ProjectMember, ProjectRole
+
+    connection.execute(
+        ProjectMember.__table__.insert().values(
+            user_id=target.created_by_user_id,
+            project_id=target.id,
+            role=ProjectRole.OWNER.name,
+        )
     )

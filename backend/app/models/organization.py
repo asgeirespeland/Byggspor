@@ -31,7 +31,10 @@ class Organization(Base):
         DateTime, server_default=func.now(), onupdate=func.now(), nullable=False
     )
 
-    users: Mapped[list["User"]] = relationship(back_populates="organization")
+    organization_memberships: Mapped[list["OrganizationMember"]] = relationship(
+        back_populates="organization",
+        cascade="all, delete-orphan",
+    )
     projects: Mapped[list["Project"]] = relationship(
         back_populates="organization",
         foreign_keys="Project.organization_id",
