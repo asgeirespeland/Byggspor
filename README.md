@@ -53,7 +53,7 @@ pnpm install
 pnpm dev
 ```
 
-Open http://localhost:5173 — you should see a centered page with "Byggspor" as a heading and "Construction CO₂ footprint calculator" below it.
+Open <http://localhost:5173> — you should see a centered page with "Byggspor" as a heading and "Construction CO₂ footprint calculator" below it.
 
 ### Database
 
@@ -80,11 +80,28 @@ alembic upgrade head           # creates all database tables
 flask --app app.main run --debug
 ```
 
-Open http://localhost:5000/health — you should see:
+Open <http://localhost:5000/health> — you should see:
 
 ```json
 {"status": "ok"}
 ```
+
+### Clerk Auth (local setup)
+
+This project uses Clerk for authentication.
+
+1. Ask a teammate/project admin for shared Clerk dev values.
+2. Copy `.env.example` to `.env` and set:
+   - `VITE_CLERK_PUBLISHABLE_KEY`
+   - `CLERK_ISSUER`
+   - `CLERK_JWT_AUDIENCE` (optional)
+   - `CLERK_JWKS_URL` (optional)
+3. Start frontend and backend as usual.
+
+Sign-in routes:
+
+- `http://localhost:5173/sign-in`
+- `http://localhost:5173/sign-up`
 
 ### Verify Frontend Build
 

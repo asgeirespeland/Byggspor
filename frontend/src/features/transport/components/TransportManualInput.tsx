@@ -1,6 +1,6 @@
 import { useState } from 'react'
+import { useAuth } from '@clerk/react'
 
-import { useAuth } from '../../../shared/auth/useAuth'
 import { createManualTrip } from '../api/transport'
 
 interface TransportManualInputProps {
@@ -12,7 +12,7 @@ export default function TransportManualInput({
   projectId,
   onTripCreated,
 }: TransportManualInputProps) {
-  const { token } = useAuth()
+  const { isLoaded, isSignedIn, getToken } = useAuth()
   const [driverName, setDriverName] = useState('')
   const [regNr, setRegNr] = useState('')
   const [startAddress, setStartAddress] = useState('')
@@ -23,6 +23,15 @@ export default function TransportManualInput({
   const [error, setError] = useState<string | null>(null)
   const [success, setSuccess] = useState(false)
 
+  const authReady = isLoaded && isSignedIn
+
+  async function requireToken(): Promise<string> {
+    const token = await getToken()
+    if (!token) {
+      throw new Error('Ikke autentisert')
+    }
+    return token
+  }
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     setError(null)
@@ -36,6 +45,7 @@ export default function TransportManualInput({
 
     setSaving(true)
     try {
+      const token = await requireToken()
       await createManualTrip(
         {
           project_id: projectId,
@@ -148,7 +158,7 @@ export default function TransportManualInput({
 
       <button
         type="submit"
-        disabled={saving}
+        disabled={saving || !authReady}
         className="rounded-md bg-[#30466e] px-5 py-2 text-sm text-white transition-colors hover:bg-[#222e45] disabled:opacity-50"
       >
         {saving ? 'Lagrer...' : 'Legg til tur'}

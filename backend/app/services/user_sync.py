@@ -6,47 +6,58 @@ from app.models.user import User
 
 
 def _claim_email(claims: dict) -> str | None:
-    """Extract email from common Clerk token claim shapes."""
+    """Extract the user's email from Clerk claims and normalize it to lowercase.
+    Returns None if no supported email claim is present.
+    """
     if claims.get("email"):
-        return claims["email"]
+        email = claims["email"]
+        if isinstance(email, str):
+            return email.strip().lower()
 
     emails = claims.get("email_addresses")
-    if isinstance(emails, list) and emails:
-        first = emails[0]
-        if isinstance(first, dict):
-            return first.get("email_address")
-        if isinstance(first, str):
-            return first
+    if isinstance(emails, list):
+        for item in emails:
+            if isinstance(item, dict) and item.get("email_address"):
+                return item["email_address"].strip().lower()
+            if isinstance(item, str):
+                return item.strip().lower()
+
     return None
 
 
 def _claim_name(claims: dict) -> str:
-    """Prefer full name claim, then compose from given/family name."""
+    """Extract the user's display name from Clerk claims with simple fallbacks.
+    Prefers a full name, then builds one from given and family name.
+    """
     if claims.get("name"):
-        return claims["name"]
+        return str(claims["name"]).strip()
 
-    given = claims.get("given_name", "")
-    family = claims.get("family_name", "")
+    given = str(claims.get("given_name", "")).strip()
+    family = str(claims.get("family_name", "")).strip()
     full = f"{given} {family}".strip()
+
     return full or "Unknown user"
 
 
 def upsert_user_from_clerk(session: Session, claims: dict) -> User:
-    """Create or update a local user record from Clerk JWT claims."""
+    """Create or update a local user record from the authenticated Clerk identity.
+    Uses Clerk's subject claim as the primary identity and only links legacy users
+    by email if they are not already linked.
+    """
     clerk_id = claims.get("sub")
     if not clerk_id:
         raise ValueError("Token missing sub claim")
 
-    email = _claim_email(claims) or f"{clerk_id}@clerk.local"
+    email = _claim_email(claims)
+    if not email:
+        raise ValueError("Token missing email claim")
+
     name = _claim_name(claims)
 
     user = session.query(User).filter(User.clerk_id == clerk_id).one_or_none()
+
     if not user:
-        # Fallback for migrated data where clerk_id may not have been stored yet.
-        # Only allow linking if the existing user has no clerk_id set (i.e. a
-        # legacy record that was never associated with Clerk). This prevents an
-        # attacker from hijacking an already-linked account by registering a
-        # Clerk account with the same email.
+        # Link a legacy user by emailif not already been connected to Clerk.
         user = (
             session.query(User)
             .filter(User.email == email, User.clerk_id.is_(None))
@@ -54,7 +65,7 @@ def upsert_user_from_clerk(session: Session, claims: dict) -> User:
         )
 
     if user:
-        # Keep local profile fields in sync with Clerk on each authenticated request.
+        # Keep local profile fields synchronized with the latest trusted Clerk claims.
         if user.clerk_id != clerk_id:
             user.clerk_id = clerk_id
         if user.email != email:
@@ -63,6 +74,7 @@ def upsert_user_from_clerk(session: Session, claims: dict) -> User:
             user.name = name
         return user
 
+    # Create a new local user when no existing Clerk-linked or migratable user is found.
     user = User(
         clerk_id=clerk_id,
         email=email,

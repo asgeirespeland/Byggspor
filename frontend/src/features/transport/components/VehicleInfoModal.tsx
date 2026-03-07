@@ -1,6 +1,6 @@
 import { useState } from 'react'
+import { useAuth } from '@clerk/react'
 
-import { useAuth } from '../../../shared/auth/useAuth'
 import { updateVehicle } from '../api/transport'
 import type { Vehicle } from '../types/transport'
 
@@ -17,12 +17,22 @@ export default function VehicleInfoModal({
   onClose,
   onSaved,
 }: VehicleInfoModalProps) {
-  const { token } = useAuth()
+  const { isLoaded, isSignedIn, getToken } = useAuth()
   const [make, setMake] = useState(vehicle.make ?? '')
   const [model, setModel] = useState(vehicle.model ?? '')
   const [fuelType, setFuelType] = useState(vehicle.fuel_type ?? '')
   const [saving, setSaving] = useState(false)
   const [error, setError] = useState<string | null>(null)
+
+  const authReady = isLoaded && isSignedIn
+
+  async function requireToken(): Promise<string> {
+    const token = await getToken()
+    if (!token) {
+      throw new Error('Ikke autentisert')
+    }
+    return token
+  }
 
   const handleSave = async () => {
     if (!make || !model || !fuelType) {
@@ -34,6 +44,7 @@ export default function VehicleInfoModal({
     setError(null)
 
     try {
+      const token = await requireToken()
       await updateVehicle(
         vehicle.id,
         { make, model, fuel_type: fuelType },
@@ -113,7 +124,7 @@ export default function VehicleInfoModal({
           </button>
           <button
             onClick={handleSave}
-            disabled={saving}
+            disabled={saving || !authReady}
             className="rounded-md bg-[#30466e] px-4 py-2 text-sm text-white transition-colors hover:bg-[#222e45] disabled:opacity-50"
           >
             {saving ? 'Lagrer...' : 'Lagre'}

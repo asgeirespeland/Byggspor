@@ -1,12 +1,5 @@
-import { AuthProvider } from '../shared/auth/AuthProvider'
-import AppShell from './AppShell'
+import AppRoutes from './routes'
 
-function App() {
-  return (
-    <AuthProvider>
-      <AppShell />
-    </AuthProvider>
-  )
+export default function App() {
+  return <AppRoutes />
 }
-
-export default App
