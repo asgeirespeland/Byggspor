@@ -2,6 +2,7 @@ import { useState } from 'react'
 
 import { InvoiceUpload } from '../features/invoice'
 import { OrgSettings } from '../features/organization'
+import { TransportUpload } from '../features/transport'
 import { UserProfile } from '../features/user'
 import { useAuth } from '../shared/auth/useAuth'
 
@@ -9,7 +10,7 @@ import { useAuth } from '../shared/auth/useAuth'
  * Temporary app shell with a lightweight view switcher.
  * Will be replaced by a proper router in a future issue.
  */
-type View = 'invoice' | 'profile' | 'org'
+type View = 'invoice' | 'transport' | 'profile' | 'org'
 
 export default function AppShell() {
   const [view, setView] = useState<View>('invoice')
@@ -46,6 +47,12 @@ export default function AppShell() {
             Invoice
           </button>
           <button
+            onClick={() => setView('transport')}
+            className="rounded border px-3 py-2 text-sm"
+          >
+            Transport
+          </button>
+          <button
             onClick={() => setView('profile')}
             className="rounded border px-3 py-2 text-sm"
           >
@@ -60,6 +67,7 @@ export default function AppShell() {
         </div>
 
         {view === 'invoice' && <InvoiceUpload />}
+        {view === 'transport' && <TransportUpload />}
         {view === 'profile' && <UserProfile />}
         {view === 'org' && <OrgSettings />}
       </div>
