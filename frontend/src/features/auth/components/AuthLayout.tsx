@@ -3,7 +3,7 @@ import { SignIn, SignUp, useAuth } from '@clerk/react'
 
 export default function AuthLayout() {
   const location = useLocation()
-  const isSignUp = location.pathname === '/sign-up'
+  const isSignUp = location.pathname.startsWith('/sign-up')
   const { isLoaded, isSignedIn } = useAuth()
 
   if (!isLoaded) {

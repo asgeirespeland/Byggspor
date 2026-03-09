@@ -10,8 +10,8 @@ import { UserProfile } from '../features/user'
 export default function AppRoutes() {
   return (
     <Routes>
-      <Route path="/sign-in" element={<AuthLayout />} />
-      <Route path="/sign-up" element={<AuthLayout />} />
+      <Route path="/sign-in/*" element={<AuthLayout />} />
+      <Route path="/sign-up/*" element={<AuthLayout />} />
 
       <Route element={<ProtectedRoute />}>
         <Route element={<AppShell />}>
