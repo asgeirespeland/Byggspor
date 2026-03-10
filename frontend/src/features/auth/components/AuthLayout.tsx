@@ -24,9 +24,19 @@ export default function AuthLayout() {
         <h1 className="mb-4 text-2xl font-bold text-gray-900">Byggspor</h1>
 
         {isSignUp ? (
-          <SignUp routing="virtual" signInUrl="/sign-in" forceRedirectUrl="/" />
+          <SignUp
+            path="/sign-up"
+            routing="path"
+            signInUrl="/sign-in"
+            forceRedirectUrl="/"
+          />
         ) : (
-          <SignIn routing="virtual" signUpUrl="/sign-up" forceRedirectUrl="/" />
+          <SignIn
+            path="/sign-in"
+            routing="path"
+            signUpUrl="/sign-up"
+            forceRedirectUrl="/"
+          />
         )}
       </div>
     </div>
