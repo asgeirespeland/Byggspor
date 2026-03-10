@@ -10,6 +10,13 @@ from jwt import ExpiredSignatureError, InvalidTokenError, PyJWKClient
 from app.services.user_sync import upsert_user_from_clerk
 
 PUBLIC_PATHS = {"/health"}
+PROTECTED_PREFIXES = (
+    "/users",
+    "/invoice",
+    "/transport",
+    "/organization",
+    "/nobb",
+)
 
 
 def _extract_bearer_token(auth_header: str) -> str | None:
@@ -66,15 +73,18 @@ def _verify_clerk_jwt(token: str) -> dict:
 
 
 def authenticate_request():
+    """Authenticate protected API routes using Clerk JWT and sync the local user."""
     g.current_user_id = None
     g.current_user = None
     g.clerk_claims = None
 
-    # Let CORS preflight pass through without auth
     if request.method == "OPTIONS":
         return None
 
     if request.path in PUBLIC_PATHS:
+        return None
+
+    if not request.path.startswith(PROTECTED_PREFIXES):
         return None
 
     token = _extract_bearer_token(request.headers.get("Authorization", ""))
