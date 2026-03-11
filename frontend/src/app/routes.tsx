@@ -6,6 +6,7 @@ import { InvoiceUpload } from '../features/invoice'
 import { OrgSettings } from '../features/organization'
 import { TransportUpload } from '../features/transport'
 import { UserProfile } from '../features/user'
+import GlobalDashboard from '@/features/dashboard/components/GlobalDashboard'
 
 export default function AppRoutes() {
   return (
@@ -15,7 +16,8 @@ export default function AppRoutes() {
 
       <Route element={<ProtectedRoute />}>
         <Route element={<AppShell />}>
-          <Route index element={<InvoiceUpload />} />
+          <Route index element={<GlobalDashboard />} />
+          <Route path="projects/:projectId" element={<InvoiceUpload />} />
           <Route path="transport" element={<TransportUpload />} />
           <Route path="profile" element={<UserProfile />} />
           <Route path="organization" element={<OrgSettings />} />
