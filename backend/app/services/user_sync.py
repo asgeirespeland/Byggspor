@@ -65,16 +65,15 @@ def upsert_user_from_clerk(session: Session, claims: dict) -> User:
         )
 
     if user:
-        # Keep local profile fields synchronized with the latest trusted Clerk claims.
+        # Keep identity fields synchronized with Clerk, but preserve the local
+        # profile name after the account has been created or linked.
         if user.clerk_id != clerk_id:
             user.clerk_id = clerk_id
         if user.email != email:
             user.email = email
-        if user.name != name:
-            user.name = name
         return user
 
-    # Create a new local user when no existing Clerk-linked or migratable user is found.
+    # Seed the initial local profile name from Clerk for new users.
     user = User(
         clerk_id=clerk_id,
         email=email,
