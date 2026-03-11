@@ -1,14 +1,14 @@
 import { useState } from 'react'
+import { useAuth } from '@clerk/react'
 
 import { apiRequest } from '../../../shared/api/client'
-import { useAuth } from '../../../shared/auth/useAuth'
 import type { UserDto } from '../../../shared/types'
 
 /**
  * Profile view for loading and updating the currently authenticated user.
  */
 export default function UserProfile() {
-  const { token } = useAuth()
+  const { isLoaded, isSignedIn, getToken } = useAuth()
   const [user, setUser] = useState<UserDto | null>(null)
   const [name, setName] = useState('')
   const [phone, setPhone] = useState('')
@@ -16,6 +16,13 @@ export default function UserProfile() {
   const [message, setMessage] = useState('')
   const [error, setError] = useState('')
 
+  async function requireToken(): Promise<string> {
+    const token = await getToken()
+    if (!token) {
+      throw new Error('Ikke autentisert')
+    }
+    return token
+  }
   /** Fetches /users/me and hydrates editable form state. */
   async function loadProfile() {
     setLoading(true)
@@ -23,6 +30,7 @@ export default function UserProfile() {
     setError('')
 
     try {
+      const token = await requireToken()
       const data = await apiRequest<UserDto>('/users/me', {
         token,
       })
@@ -48,6 +56,7 @@ export default function UserProfile() {
     setError('')
 
     try {
+      const token = await requireToken()
       const updated = await apiRequest<UserDto>(`/users/${user.id}`, {
         method: 'PATCH',
         token,
@@ -67,6 +76,8 @@ export default function UserProfile() {
     }
   }
 
+  const authReady = isLoaded && isSignedIn
+
   return (
     <section className="rounded bg-white p-6">
       <div className="mb-4 flex items-center justify-between">
@@ -74,15 +85,15 @@ export default function UserProfile() {
         <button
           onClick={loadProfile}
           className="rounded border px-3 py-2 text-sm"
-          disabled={loading || !token}
+          disabled={loading || !authReady}
         >
           {loading ? 'Laster…' : 'Hent profil'}
         </button>
       </div>
 
-      {!token && (
+      {!authReady && (
         <p className="mb-3 rounded bg-amber-100 px-3 py-2 text-sm text-amber-900">
-          Legg inn Bearer-token øverst for å bruke profilen.
+          Du må være logget inn for å bruke profilen
         </p>
       )}
 

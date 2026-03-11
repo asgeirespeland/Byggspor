@@ -1,6 +1,6 @@
 import { useState } from 'react'
+import { useAuth } from '@clerk/react'
 
-import { useAuth } from '../../../shared/auth/useAuth'
 import { confirmTrips, removeTrip } from '../api/transport'
 import { useTransportParse } from '../hooks/useTransportParse'
 import TransportManualInput from './TransportManualInput'
@@ -9,13 +9,23 @@ import TransportTripTable from './TransportTripTable'
 const DEFAULT_PROJECT_ID = 1
 
 export default function TransportUpload() {
-  const { token } = useAuth()
+  const { isLoaded, isSignedIn, getToken } = useAuth()
   const [selectedFile, setSelectedFile] = useState<File | null>(null)
   const [isDragging, setIsDragging] = useState(false)
   const [fileError, setFileError] = useState<string | null>(null)
   const [confirming, setConfirming] = useState(false)
   const [showManual, setShowManual] = useState(false)
   const { parse, reset, data, setData, loading, error } = useTransportParse()
+
+  const authReady = isLoaded && isSignedIn
+
+  async function requireToken(): Promise<string> {
+    const token = await getToken()
+    if (!token) {
+      throw new Error('Ikke autentisert')
+    }
+    return token
+  }
 
   const handleDragEnter = () => setIsDragging(true)
 
@@ -50,7 +60,8 @@ export default function TransportUpload() {
   }
 
   const handleParse = async () => {
-    if (!selectedFile) return
+    if (!selectedFile || !authReady) return
+    const token = await requireToken()
     await parse(selectedFile, DEFAULT_PROJECT_ID, token || undefined)
   }
 
@@ -67,12 +78,21 @@ export default function TransportUpload() {
       trips: data.trips.filter((t) => t.project_transport_id !== tripId),
       project_transports_count: data.project_transports_count - 1,
     })
-    removeTrip(tripId, token || undefined).catch(() => {})
+
+    void (async () => {
+      try {
+        const token = await requireToken()
+        await removeTrip(tripId, token)
+      } catch {
+        // keep optimistic UI even if backend delete fails
+      }
+    })()
   }
 
   const handleConfirmTrips = async (tripIds: number[]) => {
     setConfirming(true)
     try {
+      const token = await requireToken()
       await confirmTrips(tripIds, token || undefined)
       handleClear()
     } catch {
@@ -183,10 +203,13 @@ export default function TransportUpload() {
               onRemoveTrip={handleRemoveTrip}
               onConfirmTrips={handleConfirmTrips}
               onVehicleUpdated={() => {
-                // Re-parse to get updated CO2 values
-                if (selectedFile) {
-                  parse(selectedFile, DEFAULT_PROJECT_ID, token || undefined)
-                }
+                void (async () => {
+                  // Re-parse to get updated CO2 values
+                  if (selectedFile && authReady) {
+                    const token = await requireToken()
+                    parse(selectedFile, DEFAULT_PROJECT_ID, token || undefined)
+                  }
+                })()
               }}
               confirming={confirming}
             />

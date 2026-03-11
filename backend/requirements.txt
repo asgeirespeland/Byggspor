@@ -1,5 +1,6 @@
 flask
 flask-cors
+PyJWT[crypto]
 psycopg2-binary
 sqlalchemy
 alembic

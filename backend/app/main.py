@@ -1,8 +1,9 @@
 from dotenv import load_dotenv
-from flask import Flask, g, jsonify, request
+from flask import Flask, g, jsonify
 from flask_cors import CORS
 
 from app.database import SessionLocal
+from app.middleware.auth import authenticate_request
 
 load_dotenv()
 
@@ -17,19 +18,9 @@ def open_session():
 
 
 @app.before_request
-def authenticate_request():
-    """Stub: extract user identity from Authorization header.
-
-    TODO: integrate Clerk JWT verification (decode + validate signature).
-    For now this is a placeholder so that endpoints are testable once a
-    real auth layer is wired up.
-    """
-    g.current_user_id = None
-    auth_header = request.headers.get("Authorization", "")
-    if auth_header.startswith("Bearer "):
-        _token = auth_header[7:]
-        # TODO: decode and verify Clerk JWT, then set g.current_user_id
-        # from the token claims. For now endpoints will still return 401.
+def run_authentication():
+    """Authenticate request and populate g.current_user / g.current_user_id."""
+    return authenticate_request()
 
 
 @app.teardown_request

@@ -43,6 +43,7 @@ cp .env.example .env
 ```
 
 Required variables:
+
 - `DATABASE_URL` — PostgreSQL connection string
 - `NOBB_API_USERNAME` — NOBB Export API username
 - `NOBB_API_PASSWORD` — NOBB Export API password
@@ -90,6 +91,38 @@ backend/
 ├── requirements.txt
 └── ruff.toml
 ```
+
+## Authentication (Clerk JWT)
+
+The backend verifies Clerk JWTs on protected routes and syncs users to the local database on first authenticated request.
+
+### Environment variables
+
+Add these in `.env`:
+
+- `CLERK_ISSUER` (required)
+- `CLERK_JWT_AUDIENCE` (optional)
+- `CLERK_JWKS_URL` (optional)
+If `CLERK_JWKS_URL` is not set, backend uses `<CLERK_ISSUER>/.well-known/jwks.json`
+
+### Behavior
+
+- `/health` is public.
+- Other routes require `Authorization: Bearer <token>`.
+- Invalid or expired token returns 401.
+- Valid token sets request user context (`g.current_user_id`).
+- First login creates/updates local user using Clerk claims (`sub`, email, name).
+
+### Local testing
+
+1. Start backend: ```flask --app app.main run```.
+2. From frontend, sign in via Clerk.
+3. Call `/users/me` from the app (`Hent profil`).
+4. Verify:
+
+- Request succeeds with valid token.
+- Request fails with `401` without token.
+- Local `users` row is created/updated on first login.
 
 ## API Endpoints
 

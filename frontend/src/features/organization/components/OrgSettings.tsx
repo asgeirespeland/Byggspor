@@ -1,14 +1,14 @@
 import { useState } from 'react'
+import { useAuth } from '@clerk/react'
 
 import { apiRequest } from '../../../shared/api/client'
-import { useAuth } from '../../../shared/auth/useAuth'
 import type { OrgDto, OrgMemberDto } from '../../../shared/types'
 
 /**
  * Organization settings panel for creating orgs and managing member roles.
  */
 export default function OrgSettings() {
-  const { token } = useAuth()
+  const { isLoaded, isSignedIn, getToken } = useAuth()
   const [organizationId, setOrganizationId] = useState('')
   const [newOrgName, setNewOrgName] = useState('')
   const [newOrgType, setNewOrgType] = useState('COMPANY')
@@ -19,6 +19,16 @@ export default function OrgSettings() {
   const [loading, setLoading] = useState(false)
   const [message, setMessage] = useState('')
   const [error, setError] = useState('')
+
+  const authReady = isLoaded && isSignedIn
+
+  async function requireToken(): Promise<string> {
+    const token = await getToken()
+    if (!token) {
+      throw new Error('Ikke autentiserty')
+    }
+    return token
+  }
 
   /** Creates a new organization and assigns creator as OWNER on backend. */
   async function createOrganization() {
@@ -32,6 +42,7 @@ export default function OrgSettings() {
     setMessage('')
 
     try {
+      const token = await requireToken()
       const created = await apiRequest<OrgDto>('/organizations', {
         method: 'POST',
         token,
@@ -66,6 +77,7 @@ export default function OrgSettings() {
     setMessage('')
 
     try {
+      const token = await requireToken()
       const org = await apiRequest<OrgDto>(`/organizations/${organizationId}`, {
         token,
       })
@@ -100,6 +112,7 @@ export default function OrgSettings() {
     setMessage('')
 
     try {
+      const token = await requireToken()
       await apiRequest(`/organizations/${organizationId}/members`, {
         method: 'POST',
         token,
@@ -142,7 +155,7 @@ export default function OrgSettings() {
         </select>
         <button
           onClick={createOrganization}
-          disabled={loading || !token}
+          disabled={loading || !authReady}
           className="rounded border px-3 py-2 text-sm"
         >
           Opprett org
@@ -174,7 +187,7 @@ export default function OrgSettings() {
         </select>
         <button
           onClick={inviteMember}
-          disabled={loading || !token}
+          disabled={loading || !authReady}
           className="rounded border px-3 py-2 text-sm"
         >
           Inviter / oppdater
@@ -184,7 +197,7 @@ export default function OrgSettings() {
       <div className="mb-4 flex gap-3">
         <button
           onClick={loadOrganization}
-          disabled={loading || !token}
+          disabled={loading || !authReady}
           className="rounded bg-black px-4 py-2 text-sm text-white"
         >
           Last org + medlemmer
