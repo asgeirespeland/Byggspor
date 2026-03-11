@@ -93,9 +93,11 @@ def authenticate_request():
 
     try:
         claims = _verify_clerk_jwt(token)
+        current_app.logger.debug(f"Authenticated request for user {claims.get('sub')}")
     except ExpiredSignatureError:
         return jsonify(error="Token expired"), 401
-    except InvalidTokenError:
+    except InvalidTokenError as e:
+        current_app.logger.debug("Invalid token: %s", e)
         return jsonify(error="Invalid token"), 401
     except RuntimeError as exc:
         return jsonify(error=str(exc)), 500
@@ -109,6 +111,7 @@ def authenticate_request():
 
     try:
         user = upsert_user_from_clerk(session, claims)
+        current_app.logger.debug("User synced: %s", user.id)
         session.commit()
         g.current_user_id = user.id
         g.current_user = user

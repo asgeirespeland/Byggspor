@@ -4,8 +4,8 @@ import { cn } from '@/lib/utils'
 
 const navItems = [
   { to: '/', label: 'Dashboard', icon: LayoutDashboard, end: true },
-  { to: '/organization', label: 'Organization', icon: Building2 },
-  { to: '/settings', label: 'Settings', icon: Settings },
+  { to: '/organization', label: 'Organisasjon', icon: Building2 },
+  { to: '/settings', label: 'Innstillinger', icon: Settings },
 ]
 
 export default function Sidebar() {
