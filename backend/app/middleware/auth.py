@@ -9,14 +9,10 @@ from jwt import ExpiredSignatureError, InvalidTokenError, PyJWKClient
 
 from app.services.user_sync import upsert_user_from_clerk
 
-PUBLIC_PATHS = {"/health"}
-PROTECTED_PREFIXES = (
-    "/users",
-    "/invoice",
-    "/transport",
-    "/organization",
-    "/nobb",
-)
+# Explicitly public — everything else requires a valid Clerk JWT
+PUBLIC_PATHS = {
+    "/health",
+}
 
 
 def _extract_bearer_token(auth_header: str) -> str | None:
@@ -54,9 +50,7 @@ def _verify_clerk_jwt(token: str) -> dict:
     issuer = _clerk_issuer()
     audience = _clerk_audience()
     jwks_url = _jwks_url()
-
     signing_key = _jwks_client(jwks_url).get_signing_key_from_jwt(token).key
-
     claims = jwt.decode(
         token,
         signing_key,
@@ -65,28 +59,26 @@ def _verify_clerk_jwt(token: str) -> dict:
         audience=audience if audience else None,
         options={"verify_aud": bool(audience)},
     )
-
     if "sub" not in claims:
         raise InvalidTokenError("Missing subject claim")
-
     return claims
 
 
 def authenticate_request():
-    """Authenticate protected API routes using Clerk JWT and sync the local user."""
+    """Authenticate all routes except explicitly public ones using Clerk JWT."""
     g.current_user_id = None
     g.current_user = None
     g.clerk_claims = None
 
+    # Always allow CORS preflight through
     if request.method == "OPTIONS":
         return None
 
+    # Explicitly public paths — no token needed
     if request.path in PUBLIC_PATHS:
         return None
 
-    if not request.path.startswith(PROTECTED_PREFIXES):
-        return None
-
+    # Everything else requires a valid token
     token = _extract_bearer_token(request.headers.get("Authorization", ""))
     if not token:
         return jsonify(error="Unauthorized"), 401

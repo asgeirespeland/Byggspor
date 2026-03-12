@@ -1,29 +1,36 @@
 import { useEffect, useState } from 'react'
 import { useAuth } from '@clerk/react'
 import { Navigate, Outlet, useLocation } from 'react-router-dom'
-
 import { apiRequest } from '../../../shared/api/client'
+
+type SyncState = 'idle' | 'syncing' | 'ready'
+
+type UserMe = {
+  id: number
+  organization_id: number | null
+}
 
 export default function ProtectedRoute() {
   const { isLoaded, isSignedIn, userId, getToken } = useAuth()
   const location = useLocation()
-  const [syncState, setSyncState] = useState<'idle' | 'syncing' | 'ready'>(
-    'idle',
-  )
+  const [syncState, setSyncState] = useState<SyncState>('idle')
   const [syncError, setSyncError] = useState('')
   const [syncAttempted, setSyncAttempted] = useState(false)
   const [retryCount, setRetryCount] = useState(0)
+  const [organizationId, setOrganizationId] = useState<
+    number | null | undefined
+  >(undefined)
 
   useEffect(() => {
     if (!isLoaded || !isSignedIn || !userId) {
       setSyncState('idle')
       setSyncError('')
       setSyncAttempted(false)
+      setOrganizationId(undefined)
       return
     }
-    if (syncAttempted && retryCount === 0) {
-      return
-    }
+
+    if (syncAttempted && retryCount === 0) return
 
     let cancelled = false
 
@@ -37,9 +44,10 @@ export default function ProtectedRoute() {
           throw new Error('Ikke autentisert')
         }
 
-        await apiRequest('/users/me', { token })
+        const user = await apiRequest<UserMe>('/users/me', { token })
         if (cancelled) return
 
+        setOrganizationId(user.organization_id)
         setSyncState('ready')
         setSyncAttempted(true)
       } catch (err) {
@@ -55,7 +63,6 @@ export default function ProtectedRoute() {
     }
 
     void syncUser()
-
     return () => {
       cancelled = true
     }
@@ -81,10 +88,10 @@ export default function ProtectedRoute() {
     )
   }
 
-  if (syncState === 'syncing') {
+  if (syncState === 'syncing' || organizationId === undefined) {
     return (
       <div className="min-h-screen grid place-items-center text-gray-600">
-        Synkroniserer brukerprofil
+        Synkroniserer brukerprofil...
       </div>
     )
   }
@@ -104,6 +111,10 @@ export default function ProtectedRoute() {
         </div>
       </div>
     )
+  }
+
+  if (organizationId === null && location.pathname !== '/onboarding') {
+    return <Navigate to="/onboarding" replace />
   }
 
   return <Outlet />

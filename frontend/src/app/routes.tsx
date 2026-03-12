@@ -7,6 +7,7 @@ import { OrgSettings } from '../features/organization'
 import { TransportUpload } from '../features/transport'
 import { UserProfile } from '../features/user'
 import GlobalDashboard from '@/features/dashboard/components/GlobalDashboard'
+import OnboardingPage from '@/features/onboarding/components/OnboardingPage'
 
 export default function AppRoutes() {
   return (
@@ -15,6 +16,8 @@ export default function AppRoutes() {
       <Route path="/sign-up/*" element={<AuthLayout />} />
 
       <Route element={<ProtectedRoute />}>
+        <Route path="/onboarding" element={<OnboardingPage />} />
+
         <Route element={<AppShell />}>
           <Route index element={<GlobalDashboard />} />
           <Route path="projects/:projectId" element={<InvoiceUpload />} />
