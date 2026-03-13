@@ -1,6 +1,8 @@
 import { useState } from 'react'
 import { useAuth } from '@clerk/react'
-
+import { Label } from '@/components/ui/label'
+import { Input } from '@/components/ui/input'
+import { Button } from '@/components/ui/button'
 import { createManualTrip } from '../api/transport'
 
 interface TransportManualInputProps {
@@ -32,6 +34,7 @@ export default function TransportManualInput({
     }
     return token
   }
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     setError(null)
@@ -74,95 +77,87 @@ export default function TransportManualInput({
   }
 
   return (
-    <form onSubmit={handleSubmit} className="mt-6 space-y-4">
-      <h4 className="text-lg font-semibold text-gray-800">
+    <form onSubmit={handleSubmit} className="mt-4 space-y-4">
+      <h4 className="text-sm font-semibold text-gray-700">
         Legg til tur manuelt
       </h4>
 
       <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
-        <div>
-          <label className="mb-1 block text-sm font-medium text-gray-700">
-            Sjåfør
-          </label>
-          <input
+        <div className="space-y-1.5">
+          <Label htmlFor="driverName">Sjåfør</Label>
+          <Input
+            id="driverName"
             value={driverName}
             onChange={(e) => setDriverName(e.target.value)}
             placeholder="Navn"
-            className="w-full rounded border px-3 py-2 text-sm"
           />
         </div>
-        <div>
-          <label className="mb-1 block text-sm font-medium text-gray-700">
-            Reg.nr *
-          </label>
-          <input
+        <div className="space-y-1.5">
+          <Label htmlFor="regNr">Reg.nr *</Label>
+          <Input
+            id="regNr"
             value={regNr}
             onChange={(e) => setRegNr(e.target.value)}
             placeholder="AB12345"
-            className="w-full rounded border px-3 py-2 text-sm"
             required
           />
         </div>
-        <div>
-          <label className="mb-1 block text-sm font-medium text-gray-700">
-            Fra
-          </label>
-          <input
+        <div className="space-y-1.5">
+          <Label htmlFor="startAddress">Fra</Label>
+          <Input
+            id="startAddress"
             value={startAddress}
             onChange={(e) => setStartAddress(e.target.value)}
             placeholder="Startadresse"
-            className="w-full rounded border px-3 py-2 text-sm"
           />
         </div>
-        <div>
-          <label className="mb-1 block text-sm font-medium text-gray-700">
-            Til
-          </label>
-          <input
+        <div className="space-y-1.5">
+          <Label htmlFor="endAddress">Til</Label>
+          <Input
+            id="endAddress"
             value={endAddress}
             onChange={(e) => setEndAddress(e.target.value)}
             placeholder="Sluttadresse"
-            className="w-full rounded border px-3 py-2 text-sm"
           />
         </div>
-        <div>
-          <label className="mb-1 block text-sm font-medium text-gray-700">
-            Avstand (km) *
-          </label>
-          <input
+        <div className="space-y-1.5">
+          <Label htmlFor="distanceKm">Avstand (km) *</Label>
+          <Input
+            id="distanceKm"
             type="number"
             step="0.1"
             min="0"
             value={distanceKm}
             onChange={(e) => setDistanceKm(e.target.value)}
             placeholder="0.0"
-            className="w-full rounded border px-3 py-2 text-sm"
             required
           />
         </div>
-        <div>
-          <label className="mb-1 block text-sm font-medium text-gray-700">
-            Dato
-          </label>
-          <input
+        <div className="space-y-1.5">
+          <Label htmlFor="tripDate">Dato</Label>
+          <Input
+            id="tripDate"
             type="date"
             value={tripDate}
             onChange={(e) => setTripDate(e.target.value)}
-            className="w-full rounded border px-3 py-2 text-sm"
           />
         </div>
       </div>
 
-      {error && <p className="text-sm text-red-600">{error}</p>}
-      {success && <p className="text-sm text-green-600">Tur lagt til!</p>}
+      {error && (
+        <p className="rounded-md border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-600">
+          {error}
+        </p>
+      )}
+      {success && (
+        <p className="rounded-md border border-emerald-200 bg-emerald-50 px-3 py-2 text-sm text-emerald-700">
+          Tur lagt til!
+        </p>
+      )}
 
-      <button
-        type="submit"
-        disabled={saving || !authReady}
-        className="rounded-md bg-[#30466e] px-5 py-2 text-sm text-white transition-colors hover:bg-[#222e45] disabled:opacity-50"
-      >
-        {saving ? 'Lagrer...' : 'Legg til tur'}
-      </button>
+      <Button type="submit" disabled={saving || !authReady}>
+        {saving ? 'Lagrer…' : 'Legg til tur'}
+      </Button>
     </form>
   )
 }

@@ -58,6 +58,7 @@ def _verify_clerk_jwt(token: str) -> dict:
         issuer=issuer,
         audience=audience if audience else None,
         options={"verify_aud": bool(audience)},
+        leeway=60,
     )
     if "sub" not in claims:
         raise InvalidTokenError("Missing subject claim")
@@ -66,6 +67,8 @@ def _verify_clerk_jwt(token: str) -> dict:
 
 def authenticate_request():
     """Authenticate all routes except explicitly public ones using Clerk JWT."""
+    print("PATH:", request.path)
+    print("AUTH HEADER:", request.headers.get("Authorization", "MISSING"))
     g.current_user_id = None
     g.current_user = None
     g.clerk_claims = None

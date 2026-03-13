@@ -1,13 +1,11 @@
 import { Navigate, Route, Routes } from 'react-router-dom'
-
 import AppShell from './AppShell'
 import { AuthLayout, ProtectedRoute } from '../features/auth'
-import { InvoiceUpload } from '../features/invoice'
 import { OrgSettings } from '../features/organization'
-import { TransportUpload } from '../features/transport'
 import { UserProfile } from '../features/user'
 import GlobalDashboard from '@/features/dashboard/components/GlobalDashboard'
 import OnboardingPage from '@/features/onboarding/components/OnboardingPage'
+import ProjectDashboard from '@/features/dashboard/components/ProjectDashboard'
 
 export default function AppRoutes() {
   return (
@@ -20,8 +18,7 @@ export default function AppRoutes() {
 
         <Route element={<AppShell />}>
           <Route index element={<GlobalDashboard />} />
-          <Route path="projects/:projectId" element={<InvoiceUpload />} />
-          <Route path="transport" element={<TransportUpload />} />
+          <Route path="projects/:projectId" element={<ProjectDashboard />} />
           <Route path="profile" element={<UserProfile />} />
           <Route path="organization" element={<OrgSettings />} />
         </Route>
