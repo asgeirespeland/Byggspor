@@ -43,7 +43,6 @@ export default function CreateProjectDialog({ open, onOpenChange }: Props) {
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
     const token = (await getToken()) ?? undefined
-    console.log('token', token)
     const result = await create({ name: form.navn }, token)
     if (result) {
       setForm(empty)
