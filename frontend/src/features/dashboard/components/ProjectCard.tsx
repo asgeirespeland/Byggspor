@@ -13,132 +13,11 @@ import {
   TooltipContent,
   TooltipTrigger,
 } from '@/components/ui/tooltip'
+import { STATUS_CONFIG } from '@/features/project/constants'
+import ConfidenceGauge from './ConfidenceGauge'
 import type { Project } from '../../project/hooks/useProjects'
 
-type Props = {
-  project: Project
-}
-
-const STATUS_CONFIG = {
-  active: {
-    label: 'Aktiv',
-    className: 'bg-emerald-50 text-emerald-700 ring-1 ring-emerald-200',
-    dot: 'bg-emerald-500',
-  },
-  completed: {
-    label: 'Fullført',
-    className: 'bg-blue-50 text-blue-700 ring-1 ring-blue-200',
-    dot: 'bg-blue-500',
-  },
-  archived: {
-    label: 'Arkivert',
-    className: 'bg-gray-100 text-gray-500 ring-1 ring-gray-200',
-    dot: 'bg-gray-400',
-  },
-}
-
-function ConfidenceGaugeFull({ score }: { score: number }) {
-  const radius = 54
-  const cx = 70
-  const cy = 70
-  const circumference = Math.PI * radius
-  const progress = (score / 100) * circumference
-  const color = score >= 75 ? '#10b981' : score >= 50 ? '#f59e0b' : '#ef4444'
-  const label = score >= 75 ? 'Høy' : score >= 50 ? 'Middels' : 'Lav'
-
-  return (
-    <div className="flex flex-col items-center gap-1">
-      <svg width="140" height="80" viewBox="0 0 140 80">
-        <path
-          d={`M ${cx - radius} ${cy} A ${radius} ${radius} 0 0 1 ${cx + radius} ${cy}`}
-          fill="none"
-          stroke="#e5e7eb"
-          strokeWidth="10"
-          strokeLinecap="round"
-        />
-        <path
-          d={`M ${cx - radius} ${cy} A ${radius} ${radius} 0 0 1 ${cx + radius} ${cy}`}
-          fill="none"
-          stroke={color}
-          strokeWidth="10"
-          strokeLinecap="round"
-          strokeDasharray={`${progress} ${circumference}`}
-          style={{ transition: 'stroke-dasharray 0.6s ease' }}
-        />
-        <text
-          x={cx}
-          y={cy - 8}
-          textAnchor="middle"
-          fontSize="22"
-          fontWeight="700"
-          fill="#111827"
-        >
-          {score}
-        </text>
-        <text
-          x={cx}
-          y={cy + 10}
-          textAnchor="middle"
-          fontSize="11"
-          fill="#6b7280"
-        >
-          / 100
-        </text>
-      </svg>
-      <span
-        className="text-xs font-semibold px-2 py-0.5 rounded-full"
-        style={{ color, backgroundColor: `${color}18` }}
-      >
-        {label} konfidens
-      </span>
-    </div>
-  )
-}
-
-function ConfidenceGaugeCompact({ score }: { score: number }) {
-  const radius = 30
-  const cx = 36
-  const cy = 36
-  const circumference = Math.PI * radius
-  const progress = (score / 100) * circumference
-  const color = score >= 75 ? '#10b981' : score >= 50 ? '#f59e0b' : '#ef4444'
-
-  return (
-    <div className="flex items-center gap-2">
-      <svg width="72" height="44" viewBox="0 0 72 44">
-        <path
-          d={`M ${cx - radius} ${cy} A ${radius} ${radius} 0 0 1 ${cx + radius} ${cy}`}
-          fill="none"
-          stroke="#e5e7eb"
-          strokeWidth="6"
-          strokeLinecap="round"
-        />
-        <path
-          d={`M ${cx - radius} ${cy} A ${radius} ${radius} 0 0 1 ${cx + radius} ${cy}`}
-          fill="none"
-          stroke={color}
-          strokeWidth="6"
-          strokeLinecap="round"
-          strokeDasharray={`${progress} ${circumference}`}
-          style={{ transition: 'stroke-dasharray 0.6s ease' }}
-        />
-        <text
-          x={cx}
-          y={cy - 4}
-          textAnchor="middle"
-          fontSize="14"
-          fontWeight="700"
-          fill="#111827"
-        >
-          {score}
-        </text>
-      </svg>
-      <span className="text-xs text-gray-400">/ 100</span>
-    </div>
-  )
-}
-
-export default function ProjectCard({ project }: Props) {
+export default function ProjectCard({ project }: { project: Project }) {
   const [expanded, setExpanded] = useState(false)
   const navigate = useNavigate()
 
@@ -225,17 +104,17 @@ export default function ProjectCard({ project }: Props) {
               </div>
             </div>
 
-            {/* Confidence gauge: full on md+, compact with tooltip on smaller */}
+            {/* Confidence gauge: full on wider screens, compact with tooltip on smaller */}
             <div className="hidden min-[704px]:flex flex-col items-center">
               <p className="mb-1 text-xs font-medium text-gray-500">
                 CO₂ Konfidens
               </p>
-              <ConfidenceGaugeFull score={confidenceScore} />
+              <ConfidenceGauge score={confidenceScore} />
             </div>
             <div className="min-[704px]:hidden">
               <Tooltip>
                 <TooltipTrigger>
-                  <ConfidenceGaugeCompact score={confidenceScore} />
+                  <ConfidenceGauge score={confidenceScore} size="compact" />
                 </TooltipTrigger>
                 <TooltipContent>CO₂ Konfidens</TooltipContent>
               </Tooltip>

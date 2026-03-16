@@ -1,10 +1,9 @@
-import type { InvoiceResponse, LineItem } from '../types/invoice'
+import type { InvoiceResponse } from '../types/invoice'
+import Co2Value from './Co2Value'
+import EpdBadge from './EpdBadge'
+import InvoiceTotalCo2 from './InvoiceTotalCo2'
 
-interface InvoiceTableProps {
-  data: InvoiceResponse
-}
-
-export default function InvoiceTable({ data }: InvoiceTableProps) {
+export default function InvoiceTable({ data }: { data: InvoiceResponse }) {
   return (
     <div className="mt-6 space-y-4">
       {/* Invoice metadata */}
@@ -112,76 +111,8 @@ export default function InvoiceTable({ data }: InvoiceTableProps) {
             identifikator
           </span>
         )}
-        <TotalCo2 items={data.line_items} />
+        <InvoiceTotalCo2 items={data.line_items} />
       </div>
     </div>
-  )
-}
-
-function getGwpA1A3(item: LineItem): number | null {
-  const stages = item.nobb_data?.epd?.gwp_stages
-  if (!stages) return null
-  const a1a3 = stages['a1_a3'] ?? stages['A1-A3']
-  return a1a3?.total ?? null
-}
-
-function Co2Value({ item }: { item: LineItem }) {
-  const gwp = getGwpA1A3(item)
-  if (gwp == null) return <span className="text-gray-400">—</span>
-
-  const qty = item.quantity ?? 1
-  const total = gwp * qty
-  return (
-    <span title={`${gwp.toFixed(4)} kg CO₂e/enhet × ${qty}`}>
-      {total.toFixed(2)}
-    </span>
-  )
-}
-
-function TotalCo2({ items }: { items: LineItem[] }) {
-  let total = 0
-  let count = 0
-  for (const item of items) {
-    const gwp = getGwpA1A3(item)
-    if (gwp != null) {
-      total += gwp * (item.quantity ?? 1)
-      count++
-    }
-  }
-  if (count === 0) return null
-  return (
-    <span className="rounded bg-green-100 px-3 py-1 text-green-800">
-      CO₂: {total.toFixed(2)} kg ({count}/{items.length} linjer)
-    </span>
-  )
-}
-
-function EpdBadge({
-  enriched,
-  hasEpd,
-}: {
-  enriched: boolean
-  hasEpd: boolean
-}) {
-  if (!enriched) {
-    return (
-      <span className="inline-block rounded bg-amber-100 px-2 py-0.5 text-xs text-amber-600">
-        Ikke søkbar
-      </span>
-    )
-  }
-
-  if (hasEpd) {
-    return (
-      <span className="inline-block rounded bg-green-100 px-2 py-0.5 text-xs font-medium text-green-700">
-        EPD
-      </span>
-    )
-  }
-
-  return (
-    <span className="inline-block rounded bg-red-100 px-2 py-0.5 text-xs font-medium text-red-700">
-      Ingen EPD
-    </span>
   )
 }
