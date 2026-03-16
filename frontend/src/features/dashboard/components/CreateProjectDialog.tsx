@@ -44,7 +44,10 @@ export default function CreateProjectDialog({ open, onOpenChange }: Props) {
     e.preventDefault()
     const token = (await getToken()) ?? undefined
     console.log('token', token)
-    const result = await create({ name: form.navn }, token)
+    const result = await create(
+      { name: form.navn, customer_name: form.kunde || undefined },
+      token,
+    )
     if (result) {
       setForm(empty)
       onOpenChange(false)

@@ -171,7 +171,7 @@ export default function ProjectCard({ project }: Props) {
               <div className="flex items-center gap-2">
                 <span className="w-20 text-xs text-gray-400">Kunde</span>
                 <span className="text-gray-700">
-                  {project.customer_id ? `Kunde #${project.customer_id}` : '—'}
+                  {project.customer_name ?? '—'}
                 </span>
               </div>
               <div className="flex items-center gap-2">

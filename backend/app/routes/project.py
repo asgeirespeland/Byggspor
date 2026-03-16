@@ -3,6 +3,7 @@ from __future__ import annotations
 from flask import Blueprint, g, jsonify, request
 from sqlalchemy.exc import IntegrityError
 
+from app.models.organization import Organization, OrgType
 from app.models.organization_member import OrganizationMember
 from app.models.project import Project, ProjectStatus
 
@@ -19,6 +20,7 @@ def _serialize_project(project: Project) -> dict:
         "organization_id": project.organization_id,
         "created_by_user_id": project.created_by_user_id,
         "customer_id": project.customer_id,
+        "customer_name": project.customer.name if project.customer else None,
         "created_at": project.created_at.isoformat() if project.created_at else None,
         "updated_at": project.updated_at.isoformat() if project.updated_at else None,
         "completed_at": project.completed_at.isoformat()
@@ -56,12 +58,29 @@ def create_project():
     if not organization_id:
         return jsonify(error="User is not a member of any organization"), 400
 
+    customer_id = payload.get("customer_id") or None
+    customer_name = (payload.get("customer_name") or "").strip()
+    if customer_name and not customer_id:
+        customer = (
+            session.query(Organization)
+            .filter(
+                Organization.name == customer_name,
+                Organization.org_type == OrgType.CUSTOMER,
+            )
+            .first()
+        )
+        if not customer:
+            customer = Organization(name=customer_name, org_type=OrgType.CUSTOMER)
+            session.add(customer)
+            session.flush()
+        customer_id = customer.id
+
     project = Project(
         name=name,
         organization_id=organization_id,
         created_by_user_id=current_user_id,
         project_number=payload.get("project_number") or None,
-        customer_id=payload.get("customer_id") or None,
+        customer_id=customer_id,
         status=ProjectStatus.ACTIVE,
     )
 

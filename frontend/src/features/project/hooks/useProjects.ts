@@ -10,6 +10,7 @@ export type Project = {
   organization_id: number
   created_by_user_id: number
   customer_id: number | null
+  customer_name: string | null
   created_at: string
   updated_at: string
   completed_at: string | null
