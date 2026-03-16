@@ -1,74 +1,68 @@
 import { useEffect, useState } from 'react'
 import { useAuth } from '@clerk/react'
 import { Navigate, Outlet, useLocation } from 'react-router-dom'
-
 import { apiRequest } from '../../../shared/api/client'
+
+type UserMe = {
+  id: number
+  organization_id: number | null
+}
+
+type SyncState =
+  | { status: 'loading' }
+  | { status: 'error'; message: string }
+  | { status: 'ready'; organizationId: number | null }
 
 export default function ProtectedRoute() {
   const { isLoaded, isSignedIn, userId, getToken } = useAuth()
   const location = useLocation()
-  const [syncState, setSyncState] = useState<'idle' | 'syncing' | 'ready'>(
-    'idle',
-  )
-  const [syncError, setSyncError] = useState('')
-  const [syncAttempted, setSyncAttempted] = useState(false)
-  const [retryCount, setRetryCount] = useState(0)
+  const [sync, setSync] = useState<SyncState>({ status: 'loading' })
 
+  // Re-run from scratch whenever the signed-in user changes
   useEffect(() => {
-    if (!isLoaded || !isSignedIn || !userId) {
-      setSyncState('idle')
-      setSyncError('')
-      setSyncAttempted(false)
-      return
-    }
-    if (syncAttempted && retryCount === 0) {
+    if (!isLoaded) return
+
+    if (!isSignedIn || !userId) {
+      setSync({ status: 'loading' })
       return
     }
 
     let cancelled = false
 
-    async function syncUser() {
-      setSyncState('syncing')
-      setSyncError('')
-
+    async function run() {
+      setSync({ status: 'loading' })
       try {
         const token = await getToken()
-        if (!token) {
-          throw new Error('Ikke autentisert')
-        }
+        if (!token) throw new Error('Ikke autentisert')
 
-        await apiRequest('/users/me', { token })
+        const user = await apiRequest<UserMe>('/users/me', { token })
         if (cancelled) return
 
-        setSyncState('ready')
-        setSyncAttempted(true)
+        setSync({ status: 'ready', organizationId: user.organization_id })
       } catch (err) {
         if (cancelled) return
-        setSyncState('idle')
-        setSyncAttempted(true)
-        setSyncError(
-          err instanceof Error
-            ? err.message
-            : 'Klarte ikke synkronisere brukerprofil',
-        )
+        setSync({
+          status: 'error',
+          message:
+            err instanceof Error
+              ? err.message
+              : 'Klarte ikke synkronisere brukerprofil',
+        })
       }
     }
 
-    void syncUser()
-
+    void run()
     return () => {
       cancelled = true
     }
-  }, [isLoaded, isSignedIn, userId, getToken, retryCount, syncAttempted])
+  }, [isLoaded, isSignedIn, userId]) // eslint-disable-line react-hooks/exhaustive-deps
 
+  // Clerk still initializing
   if (!isLoaded) {
-    return (
-      <div className="min-h-screen grid place-items-center text-gray-600">
-        Laster autentisering
-      </div>
-    )
+    return <Loader text="Laster autentisering…" />
   }
 
+  // Not signed in
   if (!isSignedIn) {
     return (
       <Navigate
@@ -81,23 +75,21 @@ export default function ProtectedRoute() {
     )
   }
 
-  if (syncState === 'syncing') {
-    return (
-      <div className="min-h-screen grid place-items-center text-gray-600">
-        Synkroniserer brukerprofil
-      </div>
-    )
+  // Fetching user profile
+  if (sync.status === 'loading') {
+    return <Loader text="Synkroniserer brukerprofil…" />
   }
 
-  if (syncError) {
+  // Fetch failed
+  if (sync.status === 'error') {
     return (
       <div className="min-h-screen grid place-items-center px-4">
         <div className="max-w-md rounded border border-red-300 bg-red-50 p-4 text-red-800">
-          <p className="text-sm">{syncError}</p>
+          <p className="text-sm">{sync.message}</p>
           <button
             type="button"
             className="mt-3 rounded border border-red-400 px-3 py-2 text-sm"
-            onClick={() => setRetryCount((count) => count + 1)}
+            onClick={() => setSync({ status: 'loading' })}
           >
             Prøv igjen
           </button>
@@ -106,5 +98,18 @@ export default function ProtectedRoute() {
     )
   }
 
+  // No org yet — force onboarding
+  if (sync.organizationId === null && location.pathname !== '/onboarding') {
+    return <Navigate to="/onboarding" replace />
+  }
+
   return <Outlet />
+}
+
+function Loader({ text }: { text: string }) {
+  return (
+    <div className="min-h-screen grid place-items-center text-gray-600">
+      {text}
+    </div>
+  )
 }

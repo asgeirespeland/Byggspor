@@ -1,5 +1,5 @@
 import { useState } from 'react'
-
+import { Button } from '@/components/ui/button'
 import type { Trip, TransportParseResponse } from '../types/transport'
 import VehicleInfoModal from './VehicleInfoModal'
 
@@ -40,74 +40,81 @@ export default function TransportTripTable({
     }
   }
 
-  const handleConfirm = () => {
-    onConfirmTrips(Array.from(selected))
-  }
-
   return (
-    <div className="mt-6 space-y-4">
-      {/* Report metadata */}
-      <div className="flex flex-wrap gap-x-6 gap-y-1 text-sm text-gray-600">
-        <span>
-          <span className="font-medium text-gray-800">Turer:</span>{' '}
-          {data.project_transports_count}
+    <div className="space-y-4">
+      {/* Metadata */}
+      <div className="flex flex-wrap gap-3">
+        <span className="rounded-full bg-gray-100 px-3 py-1 text-xs font-medium text-gray-600">
+          {data.project_transports_count} turer
         </span>
-        <span>
-          <span className="font-medium text-gray-800">Kjøretøy:</span>{' '}
-          {data.vehicles_count}
+        <span className="rounded-full bg-gray-100 px-3 py-1 text-xs font-medium text-gray-600">
+          {data.vehicles_count} kjøretøy
         </span>
         {data.flagged_count > 0 && (
-          <span className="text-amber-700">
-            <span className="font-medium">{data.flagged_count}</span> mangler
-            utslippsdata
+          <span className="rounded-full bg-amber-100 px-3 py-1 text-xs font-medium text-amber-700">
+            {data.flagged_count} mangler utslippsdata
           </span>
         )}
       </div>
 
-      {/* Trip table */}
-      <div className="overflow-x-auto rounded-md border border-gray-200">
+      {/* Table */}
+      <div className="overflow-x-auto rounded-xl border border-gray-200">
         <table className="w-full text-left text-sm">
-          <thead className="bg-[#30466e] text-white">
+          <thead className="border-b border-gray-200 bg-gray-50">
             <tr>
               <th className="px-4 py-3">
                 <input
                   type="checkbox"
                   checked={selected.size === data.trips.length}
                   onChange={toggleAll}
-                  className="rounded"
+                  className="rounded border-gray-300"
                 />
               </th>
-              <th className="px-4 py-3 font-medium">Dato</th>
-              <th className="px-4 py-3 font-medium">Sjåfør</th>
-              <th className="px-4 py-3 font-medium">Rute</th>
-              <th className="px-4 py-3 font-medium">Reg.nr</th>
-              <th className="px-4 py-3 font-medium text-right">Km</th>
-              <th className="px-4 py-3 font-medium text-right">CO₂ (kg)</th>
-              <th className="px-4 py-3 font-medium">Status</th>
-              <th className="px-4 py-3 font-medium" />
+              <th className="px-4 py-3 text-xs font-semibold uppercase tracking-wide text-gray-400">
+                Dato
+              </th>
+              <th className="px-4 py-3 text-xs font-semibold uppercase tracking-wide text-gray-400">
+                Sjåfør
+              </th>
+              <th className="px-4 py-3 text-xs font-semibold uppercase tracking-wide text-gray-400">
+                Rute
+              </th>
+              <th className="px-4 py-3 text-xs font-semibold uppercase tracking-wide text-gray-400">
+                Reg.nr
+              </th>
+              <th className="px-4 py-3 text-right text-xs font-semibold uppercase tracking-wide text-gray-400">
+                Km
+              </th>
+              <th className="px-4 py-3 text-right text-xs font-semibold uppercase tracking-wide text-gray-400">
+                CO₂ (kg)
+              </th>
+              <th className="px-4 py-3 text-xs font-semibold uppercase tracking-wide text-gray-400">
+                Status
+              </th>
+              <th className="px-4 py-3" />
             </tr>
           </thead>
           <tbody className="divide-y divide-gray-100">
             {data.trips.map((trip) => (
               <tr
                 key={trip.project_transport_id}
-                className={
+                className={`transition-colors ${
                   trip.flagged
                     ? 'bg-amber-50'
                     : selected.has(trip.project_transport_id)
                       ? 'bg-white'
                       : 'bg-gray-50'
-                }
+                }`}
               >
                 <td className="px-4 py-3">
                   <input
                     type="checkbox"
                     checked={selected.has(trip.project_transport_id)}
                     onChange={() => toggleTrip(trip.project_transport_id)}
-                    className="rounded"
+                    className="rounded border-gray-300"
                   />
                 </td>
-                <td className="px-4 py-3 text-gray-600">—</td>
+                <td className="px-4 py-3 text-gray-400">—</td>
                 <td className="px-4 py-3 text-gray-800">
                   {trip.driver_name ?? '—'}
                 </td>
@@ -133,8 +140,7 @@ export default function TransportTripTable({
                 <td className="px-4 py-3">
                   <button
                     onClick={() => onRemoveTrip(trip.project_transport_id)}
-                    className="text-xs text-red-500 hover:text-red-700"
-                    title="Fjern tur"
+                    className="text-xs text-red-400 transition-colors hover:text-red-600"
                   >
                     Fjern
                   </button>
@@ -145,22 +151,21 @@ export default function TransportTripTable({
         </table>
       </div>
 
-      {/* Summary and confirm */}
-      <div className="flex flex-wrap items-center gap-4 text-sm">
-        <span className="rounded bg-gray-100 px-3 py-1 text-gray-700">
+      {/* Summary + confirm */}
+      <div className="flex flex-wrap items-center gap-3">
+        <span className="rounded-full bg-gray-100 px-3 py-1 text-xs font-medium text-gray-600">
           {selected.size} av {data.trips.length} valgt
         </span>
         <TotalCo2 trips={data.trips} selected={selected} />
-        <button
-          onClick={handleConfirm}
+        <Button
+          className="ml-auto"
+          onClick={() => onConfirmTrips(Array.from(selected))}
           disabled={selected.size === 0 || confirming}
-          className="ml-auto rounded-md bg-[#30466e] px-5 py-2 text-sm text-white transition-colors hover:bg-[#222e45] disabled:opacity-50"
         >
-          {confirming ? 'Bekrefter...' : 'Bekreft valgte turer'}
-        </button>
+          {confirming ? 'Bekrefter…' : 'Bekreft valgte turer'}
+        </Button>
       </div>
 
-      {/* Vehicle info modal */}
       {editVehicle && editVehicle.vehicle && (
         <VehicleInfoModal
           vehicle={editVehicle.vehicle}
@@ -175,16 +180,15 @@ export default function TransportTripTable({
 function Co2Badge({ trip, onFix }: { trip: Trip; onFix: () => void }) {
   if (!trip.flagged) {
     return (
-      <span className="inline-block rounded bg-green-100 px-2 py-0.5 text-xs font-medium text-green-700">
+      <span className="inline-block rounded-full bg-emerald-100 px-2.5 py-0.5 text-xs font-medium text-emerald-700">
         OK
       </span>
     )
   }
-
   return (
     <button
       onClick={onFix}
-      className="inline-block cursor-pointer rounded bg-amber-100 px-2 py-0.5 text-xs font-medium text-amber-700 hover:bg-amber-200"
+      className="inline-block rounded-full bg-amber-100 px-2.5 py-0.5 text-xs font-medium text-amber-700 transition-colors hover:bg-amber-200"
     >
       Mangler data
     </button>
@@ -209,7 +213,7 @@ function TotalCo2({
   }
   if (count === 0) return null
   return (
-    <span className="rounded bg-green-100 px-3 py-1 text-green-800">
+    <span className="rounded-full bg-emerald-100 px-3 py-1 text-xs font-medium text-emerald-700">
       CO₂: {total.toFixed(2)} kg ({count} turer)
     </span>
   )
