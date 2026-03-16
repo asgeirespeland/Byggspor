@@ -1,4 +1,5 @@
 import { NavLink } from 'react-router-dom'
+import { UserButton, useUser } from '@clerk/react'
 import { LayoutDashboard, Building2, Settings } from 'lucide-react'
 import { cn } from '@/lib/utils'
 
@@ -9,49 +10,66 @@ const navItems = [
 ]
 
 export default function Sidebar() {
+  const { user } = useUser()
   return (
-    <aside className="flex h-screen w-48 flex-col items-center border-r bg-white py-4">
-      {/* Logo */}
-      <div className="mb-8 flex items-center justify-center w-full px-4">
-        <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-violet-600 text-white text-sm font-bold">
-          B
-        </div>
-        <span className="ml-3 text-sm font-bold text-gray-900 whitespace-nowrap">
-          Byggspor
-        </span>
-      </div>
+    <div className="relative z-50 shrink-0 w-16 sm:w-16 sm:hover:w-48 md:w-48 transition-all duration-200">
+      <aside className="group absolute min-[380px]:static inset-y-0 left-0 z-50 flex h-screen w-16 hover:w-48 md:w-48 flex-col items-center border-r bg-white py-4 overflow-hidden transition-all duration-200 hover:shadow-lg min-[380px]:hover:shadow-none">
+        {/* Nav items */}
+        <nav className="flex flex-col gap-1 w-full px-2">
+          {/* Logo — same layout as nav items */}
+          <div className="flex items-center gap-3 rounded-lg px-3 py-2.5 mb-4">
+            <div className="flex h-[18px] w-[18px] shrink-0 items-center justify-center rounded bg-violet-600 text-white text-[10px] font-bold">
+              B
+            </div>
+            <span className="opacity-0 md:opacity-100 group-hover:opacity-100 transition-opacity duration-200 whitespace-nowrap text-sm font-bold text-gray-900">
+              Byggspor
+            </span>
+          </div>
+          {navItems.map(({ to, label, icon: Icon, end }) => (
+            <NavLink
+              key={to}
+              to={to}
+              end={end}
+              className={({ isActive }) =>
+                cn(
+                  'flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors',
+                  isActive
+                    ? 'bg-violet-50 text-violet-600'
+                    : 'text-gray-500 hover:bg-gray-100 hover:text-gray-900',
+                )
+              }
+            >
+              {({ isActive }) => (
+                <>
+                  <Icon
+                    size={18}
+                    className={cn(
+                      'shrink-0',
+                      isActive ? 'text-violet-600' : 'text-gray-400',
+                    )}
+                  />
+                  <span className="opacity-0 md:opacity-100 group-hover:opacity-100 transition-opacity duration-200 whitespace-nowrap">
+                    {label}
+                  </span>
+                </>
+              )}
+            </NavLink>
+          ))}
+        </nav>
 
-      {/* Nav items */}
-      <nav className="flex flex-col gap-1 w-full px-2">
-        {navItems.map(({ to, label, icon: Icon, end }) => (
-          <NavLink
-            key={to}
-            to={to}
-            end={end}
-            className={({ isActive }) =>
-              cn(
-                'flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors',
-                isActive
-                  ? 'bg-violet-50 text-violet-600'
-                  : 'text-gray-500 hover:bg-gray-100 hover:text-gray-900',
-              )
-            }
-          >
-            {({ isActive }) => (
-              <>
-                <Icon
-                  size={18}
-                  className={cn(
-                    'shrink-0',
-                    isActive ? 'text-violet-600' : 'text-gray-400',
-                  )}
-                />
-                <span className="whitespace-nowrap">{label}</span>
-              </>
-            )}
-          </NavLink>
-        ))}
-      </nav>
-    </aside>
+        {/* Spacer */}
+        <div className="flex-1" />
+
+        {/* User */}
+        <div className="w-full px-2">
+          <div className="flex items-center gap-3 rounded-lg px-3 py-2.5">
+            <UserButton />
+            <span className="opacity-0 md:opacity-100 group-hover:opacity-100 transition-opacity duration-200 whitespace-nowrap text-sm font-medium text-gray-700 truncate">
+              {user?.firstName ?? ''}
+            </span>
+          </div>
+        </div>
+      </aside>
+    </div>
   )
 }
