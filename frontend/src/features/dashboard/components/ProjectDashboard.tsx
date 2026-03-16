@@ -1,5 +1,5 @@
 import { useParams, useNavigate } from 'react-router-dom'
-import { useState } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
 import {
   ArrowLeft,
   Loader2,
@@ -11,6 +11,8 @@ import {
   FileBarChart2,
   Hash,
   Building2,
+  ChevronLeft,
+  ChevronRight,
 } from 'lucide-react'
 import { useProject } from '@/features/project/hooks/useProject'
 import InvoiceUpload from '@/features/invoice/components/InvoiceUpload'
@@ -141,7 +143,7 @@ function RightSidebar({ project }: { project: Project }) {
   const confidenceScore = 72
 
   return (
-    <div className="flex w-60 shrink-0 flex-col gap-3 self-stretch">
+    <div className="flex w-full lg:w-60 shrink-0 flex-col gap-3 self-stretch">
       {/* Confidence score */}
       <div className="rounded-xl border border-gray-200 bg-white p-4 shadow-sm">
         <p className="mb-3 text-xs font-semibold uppercase tracking-wide text-gray-400">
@@ -213,6 +215,29 @@ export default function ProjectDashboard() {
   const navigate = useNavigate()
   const [activeTab, setActiveTab] = useState<Tab>('materials')
   const state = useProject(Number(projectId))
+  const tabsRef = useRef<HTMLDivElement>(null)
+  const [canScrollLeft, setCanScrollLeft] = useState(false)
+  const [canScrollRight, setCanScrollRight] = useState(false)
+
+  const updateScrollIndicators = useCallback(() => {
+    const el = tabsRef.current
+    if (!el) return
+    setCanScrollLeft(el.scrollLeft > 0)
+    setCanScrollRight(el.scrollLeft + el.clientWidth < el.scrollWidth - 1)
+  }, [])
+
+  useEffect(() => {
+    const el = tabsRef.current
+    if (!el) return
+    updateScrollIndicators()
+    el.addEventListener('scroll', updateScrollIndicators, { passive: true })
+    const ro = new ResizeObserver(updateScrollIndicators)
+    ro.observe(el)
+    return () => {
+      el.removeEventListener('scroll', updateScrollIndicators)
+      ro.disconnect()
+    }
+  }, [updateScrollIndicators, state.status])
 
   if (state.status === 'loading') {
     return (
@@ -266,11 +291,11 @@ export default function ProjectDashboard() {
       </div>
 
       {/* Main layout: left content + right sidebar */}
-      <div className="flex items-start gap-4">
+      <div className="flex flex-col lg:flex-row items-start gap-4">
         {/* Left: KPIs + tabbed content */}
-        <div className="flex min-w-0 flex-1 flex-col gap-4">
+        <div className="flex min-w-0 flex-1 flex-col gap-4 w-full">
           {/* KPI row */}
-          <div className="flex gap-3">
+          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3">
             <KpiCard
               label="Totalt CO₂"
               value="—"
@@ -310,22 +335,37 @@ export default function ProjectDashboard() {
 
           {/* Tabbed panel */}
           <div className="rounded-xl border border-gray-200 bg-white shadow-sm overflow-hidden">
-            <div className="flex border-b border-gray-200">
-              {TABS.map((tab) => (
-                <button
-                  key={tab.id}
-                  type="button"
-                  onClick={() => setActiveTab(tab.id)}
-                  className={`flex items-center gap-2 px-5 py-3.5 text-sm font-medium transition-colors border-b-2 -mb-px ${
-                    activeTab === tab.id
-                      ? 'border-gray-900 text-gray-900'
-                      : 'border-transparent text-gray-400 hover:text-gray-600 hover:border-gray-300'
-                  }`}
-                >
-                  {tab.icon}
-                  {tab.label}
-                </button>
-              ))}
+            <div className="relative border-b border-gray-200">
+              {canScrollLeft && (
+                <div className="pointer-events-none absolute left-0 top-0 z-10 flex h-full w-10 items-center justify-start bg-gradient-to-r from-white via-white/80 to-transparent pl-1">
+                  <ChevronLeft className="h-4 w-4 text-gray-400" />
+                </div>
+              )}
+              <div
+                ref={tabsRef}
+                className="flex overflow-x-auto overflow-y-hidden scrollbar-hide"
+              >
+                {TABS.map((tab) => (
+                  <button
+                    key={tab.id}
+                    type="button"
+                    onClick={() => setActiveTab(tab.id)}
+                    className={`flex shrink-0 items-center gap-2 px-5 py-3.5 text-sm font-medium transition-colors border-b-2 -mb-px ${
+                      activeTab === tab.id
+                        ? 'border-gray-900 text-gray-900'
+                        : 'border-transparent text-gray-400 hover:text-gray-600 hover:border-gray-300'
+                    }`}
+                  >
+                    {tab.icon}
+                    {tab.label}
+                  </button>
+                ))}
+              </div>
+              {canScrollRight && (
+                <div className="pointer-events-none absolute right-0 top-0 z-10 flex h-full w-10 items-center justify-end bg-gradient-to-l from-white via-white/80 to-transparent pr-1">
+                  <ChevronRight className="h-4 w-4 text-gray-400" />
+                </div>
+              )}
             </div>
             <div className="p-6">
               {activeTab === 'materials' && <InvoiceUpload />}

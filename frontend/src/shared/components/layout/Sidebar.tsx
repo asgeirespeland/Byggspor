@@ -10,13 +10,13 @@ const navItems = [
 
 export default function Sidebar() {
   return (
-    <aside className="flex h-screen w-16 flex-col items-center border-r bg-white py-4 hover:w-48 transition-all duration-200 overflow-hidden group">
+    <aside className="flex h-screen w-48 flex-col items-center border-r bg-white py-4">
       {/* Logo */}
       <div className="mb-8 flex items-center justify-center w-full px-4">
         <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-violet-600 text-white text-sm font-bold">
           B
         </div>
-        <span className="ml-3 text-sm font-bold text-gray-900 opacity-0 group-hover:opacity-100 transition-opacity duration-200 whitespace-nowrap">
+        <span className="ml-3 text-sm font-bold text-gray-900 whitespace-nowrap">
           Byggspor
         </span>
       </div>
@@ -46,9 +46,7 @@ export default function Sidebar() {
                     isActive ? 'text-violet-600' : 'text-gray-400',
                   )}
                 />
-                <span className="opacity-0 group-hover:opacity-100 transition-opacity duration-200 whitespace-nowrap">
-                  {label}
-                </span>
+                <span className="whitespace-nowrap">{label}</span>
               </>
             )}
           </NavLink>

@@ -8,6 +8,11 @@ import {
   ArrowRight,
 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from '@/components/ui/tooltip'
 import type { Project } from '../../project/hooks/useProjects'
 
 type Props = {
@@ -32,23 +37,18 @@ const STATUS_CONFIG = {
   },
 }
 
-// Confidence score gauge — SVG arc-based semi-circle
-function ConfidenceGauge({ score }: { score: number }) {
+function ConfidenceGaugeFull({ score }: { score: number }) {
   const radius = 54
   const cx = 70
   const cy = 70
-  const circumference = Math.PI * radius // half circle
+  const circumference = Math.PI * radius
   const progress = (score / 100) * circumference
-
-  // Color based on score
   const color = score >= 75 ? '#10b981' : score >= 50 ? '#f59e0b' : '#ef4444'
-
   const label = score >= 75 ? 'Høy' : score >= 50 ? 'Middels' : 'Lav'
 
   return (
     <div className="flex flex-col items-center gap-1">
       <svg width="140" height="80" viewBox="0 0 140 80">
-        {/* Track */}
         <path
           d={`M ${cx - radius} ${cy} A ${radius} ${radius} 0 0 1 ${cx + radius} ${cy}`}
           fill="none"
@@ -56,7 +56,6 @@ function ConfidenceGauge({ score }: { score: number }) {
           strokeWidth="10"
           strokeLinecap="round"
         />
-        {/* Progress */}
         <path
           d={`M ${cx - radius} ${cy} A ${radius} ${radius} 0 0 1 ${cx + radius} ${cy}`}
           fill="none"
@@ -66,7 +65,6 @@ function ConfidenceGauge({ score }: { score: number }) {
           strokeDasharray={`${progress} ${circumference}`}
           style={{ transition: 'stroke-dasharray 0.6s ease' }}
         />
-        {/* Score text */}
         <text
           x={cx}
           y={cy - 8}
@@ -93,6 +91,49 @@ function ConfidenceGauge({ score }: { score: number }) {
       >
         {label} konfidens
       </span>
+    </div>
+  )
+}
+
+function ConfidenceGaugeCompact({ score }: { score: number }) {
+  const radius = 30
+  const cx = 36
+  const cy = 36
+  const circumference = Math.PI * radius
+  const progress = (score / 100) * circumference
+  const color = score >= 75 ? '#10b981' : score >= 50 ? '#f59e0b' : '#ef4444'
+
+  return (
+    <div className="flex items-center gap-2">
+      <svg width="72" height="44" viewBox="0 0 72 44">
+        <path
+          d={`M ${cx - radius} ${cy} A ${radius} ${radius} 0 0 1 ${cx + radius} ${cy}`}
+          fill="none"
+          stroke="#e5e7eb"
+          strokeWidth="6"
+          strokeLinecap="round"
+        />
+        <path
+          d={`M ${cx - radius} ${cy} A ${radius} ${radius} 0 0 1 ${cx + radius} ${cy}`}
+          fill="none"
+          stroke={color}
+          strokeWidth="6"
+          strokeLinecap="round"
+          strokeDasharray={`${progress} ${circumference}`}
+          style={{ transition: 'stroke-dasharray 0.6s ease' }}
+        />
+        <text
+          x={cx}
+          y={cy - 4}
+          textAnchor="middle"
+          fontSize="14"
+          fontWeight="700"
+          fill="#111827"
+        >
+          {score}
+        </text>
+      </svg>
+      <span className="text-xs text-gray-400">/ 100</span>
     </div>
   )
 }
@@ -161,11 +202,11 @@ export default function ProjectCard({ project }: Props) {
       {/* Expandable drawer */}
       <div
         className={`overflow-hidden transition-all duration-300 ease-in-out ${
-          expanded ? 'max-h-64' : 'max-h-0'
+          expanded ? 'max-h-96' : 'max-h-0'
         }`}
       >
         <div className="border-t border-gray-100 bg-gray-50/60 px-5 py-4">
-          <div className="flex items-center justify-between gap-6">
+          <div className="flex flex-wrap items-center gap-6">
             {/* Left: metadata */}
             <div className="space-y-2 text-sm">
               <div className="flex items-center gap-2">
@@ -184,19 +225,27 @@ export default function ProjectCard({ project }: Props) {
               </div>
             </div>
 
-            {/* Center: confidence gauge */}
-            <div className="flex flex-col items-center">
+            {/* Confidence gauge: full on md+, compact with tooltip on smaller */}
+            <div className="hidden min-[704px]:flex flex-col items-center">
               <p className="mb-1 text-xs font-medium text-gray-500">
                 CO₂ Konfidens
               </p>
-              <ConfidenceGauge score={confidenceScore} />
+              <ConfidenceGaugeFull score={confidenceScore} />
+            </div>
+            <div className="min-[704px]:hidden">
+              <Tooltip>
+                <TooltipTrigger>
+                  <ConfidenceGaugeCompact score={confidenceScore} />
+                </TooltipTrigger>
+                <TooltipContent>CO₂ Konfidens</TooltipContent>
+              </Tooltip>
             </div>
 
             {/* Right: open project button */}
             <Button
               size="sm"
               variant="outline"
-              className="gap-1.5 shrink-0"
+              className="gap-1.5 shrink-0 ml-auto cursor-pointer"
               onClick={(e) => {
                 e.stopPropagation()
                 navigate(`/projects/${project.id}`)

@@ -1,6 +1,7 @@
 import { ClerkProvider } from '@clerk/react'
 import { createRoot } from 'react-dom/client'
 import { BrowserRouter } from 'react-router-dom'
+import { TooltipProvider } from '@/components/ui/tooltip'
 import './index.css'
 import App from './app/App'
 
@@ -11,8 +12,10 @@ if (!PUBLISHABLE_KEY) {
 }
 createRoot(document.getElementById('root')!).render(
   <ClerkProvider publishableKey={PUBLISHABLE_KEY} afterSignOutUrl="/">
-    <BrowserRouter>
-      <App />
-    </BrowserRouter>
+    <TooltipProvider>
+      <BrowserRouter>
+        <App />
+      </BrowserRouter>
+    </TooltipProvider>
   </ClerkProvider>,
 )

@@ -2,6 +2,11 @@ import { useState } from 'react'
 import { Search, Plus, Loader2 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from '@/components/ui/tooltip'
 import CreateProjectDialog from './CreateProjectDialog'
 import ProjectCard from './ProjectCard'
 import { useProjects } from '../../project/hooks/useProjects'
@@ -26,7 +31,7 @@ export default function GlobalDashboard() {
       </div>
 
       {/* Stat cards */}
-      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
+      <div className="grid grid-cols-2 gap-4 lg:grid-cols-4">
         {[
           {
             label: 'Prosjekter',
@@ -50,7 +55,7 @@ export default function GlobalDashboard() {
 
       {/* Project list */}
       <div className="rounded-xl border bg-white p-6 shadow-sm">
-        <div className="mb-4 flex items-center justify-between gap-4">
+        <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
           <h2 className="text-sm font-semibold text-gray-700">Prosjekter</h2>
           <div className="flex items-center gap-3">
             <div className="relative">
@@ -59,17 +64,28 @@ export default function GlobalDashboard() {
                 placeholder="Søk prosjekter..."
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
-                className="pl-8 w-56 h-8 text-sm"
+                className="pl-8 w-40 sm:w-56 h-8 text-sm"
               />
             </div>
-            <Button
-              size="sm"
-              onClick={() => setDialogOpen(true)}
-              className="gap-1.5"
-            >
-              <Plus className="h-4 w-4" />
-              Opprett nytt prosjekt
-            </Button>
+            <Tooltip>
+              <TooltipTrigger
+                render={
+                  <Button
+                    size="sm"
+                    onClick={() => setDialogOpen(true)}
+                    className="gap-1.5 shrink-0 cursor-pointer"
+                  >
+                    <Plus className="h-4 w-4" />
+                    <span className="hidden lg:inline">
+                      Opprett nytt prosjekt
+                    </span>
+                  </Button>
+                }
+              />
+              <TooltipContent className="lg:hidden">
+                Opprett nytt prosjekt
+              </TooltipContent>
+            </Tooltip>
           </div>
         </div>
 
