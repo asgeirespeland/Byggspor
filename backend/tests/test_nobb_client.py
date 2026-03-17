@@ -4,6 +4,7 @@ import pytest
 import requests
 
 from app.services.nobb_client import (
+    _get_session,
     _to_float,
     extract_epd,
     get_item_details,
@@ -17,7 +18,7 @@ from tests.conftest import MOCK_NOBB_ITEM_SIMPLE_EPD
 
 
 def mock_response(json_data, status_code=200):
-    resp = magicMock()
+    resp = MagicMock()
     resp.status_code = status_code
     resp.json.return_value = json_data
     if status_code >= 400:

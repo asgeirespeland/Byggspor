@@ -32,7 +32,7 @@ class TestInvoiceMetadata:
         result = parse_invoice(minimal_ehf_xml)
         assert result["buyer"]["name"] == "Kunde AS"
 
-    def returns_none_supplier_when_absent(self, ehf_xml_with_nobb):
+    def _test_returns_none_supplier_when_absent(self, ehf_xml_with_nobb):
         result = parse_invoice(ehf_xml_with_nobb)
         assert result["supplier"] is None
 
@@ -106,7 +106,7 @@ class TestLineItemGTIN:
 class TestLineItemNobb:
     def test_extracts_nobb_from_additional_property(self, ehf_xml_with_nobb):
         item = parse_invoice(ehf_xml_with_nobb)["line_items"][0]
-        assert item["nobb"] == "12345678"
+        assert item["nobb_number"] == "12345678"
 
     def test_item_with_nobb_is_not_flagged(self, ehf_xml_with_nobb):
         item = parse_invoice(ehf_xml_with_nobb)["line_items"][0]
@@ -190,7 +190,7 @@ class TestParseErrors:
         assert result["invoice_number"] == "INV-001"
 
 
-def test_returns_empty_line_items_list_when_no_lines(self):
+def test_returns_empty_line_items_list_when_no_lines():
     xml = """\
 <?xml version="1.0" encoding="UTF-8"?>
 <Invoice xmlns="urn:oasis:names:specification:ubl:schema:xsd:Invoice-2"

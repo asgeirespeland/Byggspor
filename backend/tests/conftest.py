@@ -212,7 +212,7 @@ MOCK_NOBB_ITEM_DETAILED_EPD = {
             {"propertyName": "EPD registration number", "value": "EPD-NOR-12345"},
             {"propertyName": "Declared unit", "value": "1 stk"},
             {
-                "propertyName": "{ruff_bypass}",
+                "propertyName": ruff_bypass,
                 "value": "15.0",
             },
             {"propertyName": "Calcuation factor to NOBB price unit", "value": "1.0"},
