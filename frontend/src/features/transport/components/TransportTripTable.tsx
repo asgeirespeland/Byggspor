@@ -1,7 +1,9 @@
 import { useState } from 'react'
 import { Button } from '@/components/ui/button'
-import type { Trip, TransportParseResponse } from '../types/transport'
+import type { TransportParseResponse } from '../types/transport'
 import VehicleInfoModal from './VehicleInfoModal'
+import Co2Badge from './Co2Badge'
+import TransportTotalCo2 from './TransportTotalCo2'
 
 interface TransportTripTableProps {
   data: TransportParseResponse
@@ -21,7 +23,9 @@ export default function TransportTripTable({
   const [selected, setSelected] = useState<Set<number>>(
     () => new Set(data.trips.map((t) => t.project_transport_id)),
   )
-  const [editVehicle, setEditVehicle] = useState<Trip | null>(null)
+  const [editVehicle, setEditVehicle] = useState<(typeof data.trips)[0] | null>(
+    null,
+  )
 
   const toggleTrip = (id: number) => {
     setSelected((prev) => {
@@ -156,7 +160,7 @@ export default function TransportTripTable({
         <span className="rounded-full bg-gray-100 px-3 py-1 text-xs font-medium text-gray-600">
           {selected.size} av {data.trips.length} valgt
         </span>
-        <TotalCo2 trips={data.trips} selected={selected} />
+        <TransportTotalCo2 trips={data.trips} selected={selected} />
         <Button
           className="ml-auto"
           onClick={() => onConfirmTrips(Array.from(selected))}
@@ -174,47 +178,5 @@ export default function TransportTripTable({
         />
       )}
     </div>
-  )
-}
-
-function Co2Badge({ trip, onFix }: { trip: Trip; onFix: () => void }) {
-  if (!trip.flagged) {
-    return (
-      <span className="inline-block rounded-full bg-emerald-100 px-2.5 py-0.5 text-xs font-medium text-emerald-700">
-        OK
-      </span>
-    )
-  }
-  return (
-    <button
-      onClick={onFix}
-      className="inline-block rounded-full bg-amber-100 px-2.5 py-0.5 text-xs font-medium text-amber-700 transition-colors hover:bg-amber-200"
-    >
-      Mangler data
-    </button>
-  )
-}
-
-function TotalCo2({
-  trips,
-  selected,
-}: {
-  trips: Trip[]
-  selected: Set<number>
-}) {
-  let total = 0
-  let count = 0
-  for (const trip of trips) {
-    if (!selected.has(trip.project_transport_id)) continue
-    if (trip.total_co2_kg != null) {
-      total += trip.total_co2_kg
-      count++
-    }
-  }
-  if (count === 0) return null
-  return (
-    <span className="rounded-full bg-emerald-100 px-3 py-1 text-xs font-medium text-emerald-700">
-      CO₂: {total.toFixed(2)} kg ({count} turer)
-    </span>
   )
 }

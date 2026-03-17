@@ -131,11 +131,15 @@ export default function TransportUpload({ projectId }: Props) {
             className="hidden"
             onChange={(e) => acceptFile(e.target.files)}
           />
-          <label htmlFor="transport-file-input">
-            <Button size="sm" className="mt-3 cursor-pointer">
-              <span>Velg fil</span>
-            </Button>
-          </label>
+          <Button
+            size="sm"
+            className="mt-3 cursor-pointer"
+            onClick={() =>
+              document.getElementById('transport-file-input')?.click()
+            }
+          >
+            Velg fil
+          </Button>
         </div>
       )}
 
