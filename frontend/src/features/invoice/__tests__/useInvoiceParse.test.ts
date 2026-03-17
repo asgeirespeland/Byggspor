@@ -22,7 +22,7 @@ vi.mock('@clerk/react', () => ({
   }),
 }))
 
-vi.mock('../../../../shared/api/client', () => ({
+vi.mock('@/shared/api/client', () => ({
   postFile: vi.fn(),
 }))
 

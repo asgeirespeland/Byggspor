@@ -14,7 +14,7 @@ import type { TransportParseResponse } from '@/features/transport/types/transpor
 
 // ── Mocks ─────────────────────────────────────────────────────────────────────
 
-vi.mock('../../api/transport', () => ({
+vi.mock('@/features/transport/api/transport', () => ({
   parseTransportFile: vi.fn(),
 }))
 
