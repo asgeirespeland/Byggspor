@@ -63,7 +63,12 @@ docker compose up -d           # starts PostgreSQL on port 5432
 ```
 
 Verify it's running:
+Cant find docs/testing.md.
+Cant see any changes to github workflow ci.yml file either..
+Is "pnpm test" command added somewhere else?
+Is "pytest" command added somewhere else?
 
+When testing, both commands worked locally, but cant see them in the ci.yml file.
 ```bash
 docker compose ps              # should show byggspor-db-1 as "running"
 ```
