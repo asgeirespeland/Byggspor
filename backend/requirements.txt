@@ -6,3 +6,4 @@ sqlalchemy
 alembic
 python-dotenv
 requests
+pytest

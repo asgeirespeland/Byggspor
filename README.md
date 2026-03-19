@@ -63,7 +63,6 @@ docker compose up -d           # starts PostgreSQL on port 5432
 ```
 
 Verify it's running:
-
 ```bash
 docker compose ps              # should show byggspor-db-1 as "running"
 ```
