@@ -4,7 +4,6 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import FormDialog from '@/shared/components/FormDialog'
 import { useCreateProject } from '@/features/project/hooks/useCreateProject'
-import { useAuth } from '@clerk/react'
 
 export type BasicProjectForm = {
   navn: string
@@ -26,8 +25,7 @@ type Props = {
 export default function CreateProjectDialog({ open, onOpenChange }: Props) {
   const [form, setForm] = useState<BasicProjectForm>(empty)
   const navigate = useNavigate()
-  const { getToken } = useAuth()
-  const { create, loading } = useCreateProject()
+  const { mutateAsync: create, isPending } = useCreateProject()
 
   function handleChange(e: React.ChangeEvent<HTMLInputElement>) {
     setForm((prev) => ({ ...prev, [e.target.name]: e.target.value }))
@@ -35,16 +33,13 @@ export default function CreateProjectDialog({ open, onOpenChange }: Props) {
 
   async function handleSubmit(e: React.SyntheticEvent<HTMLFormElement>) {
     e.preventDefault()
-    const token = (await getToken()) ?? undefined
-    const result = await create(
-      { name: form.navn, customer_name: form.kunde || undefined },
-      token,
-    )
-    if (result) {
-      setForm(empty)
-      onOpenChange(false)
-      navigate(`/projects/${result.id}`)
-    }
+    const result = await create({
+      name: form.navn,
+      customer_name: form.kunde || undefined,
+    })
+    setForm(empty)
+    onOpenChange(false)
+    navigate(`/projects/${result.id}`)
   }
 
   return (
@@ -56,7 +51,7 @@ export default function CreateProjectDialog({ open, onOpenChange }: Props) {
       submitLabel="Opprett prosjekt"
       loadingLabel="Oppretter..."
       submitDisabled={!form.navn.trim()}
-      loading={loading}
+      loading={isPending}
       onSubmit={handleSubmit}
     >
       <div className="space-y-1.5">

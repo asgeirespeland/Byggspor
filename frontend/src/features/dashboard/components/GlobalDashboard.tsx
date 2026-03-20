@@ -3,26 +3,25 @@ import CreateProjectDialog from './CreateProjectDialog'
 import ProjectCard from './ProjectCard'
 import ItemListPanel from '@/shared/components/ItemListPanel'
 import { useProjects } from '../../project/hooks/useProjects'
+import { useAppContext } from '@/shared/hooks/useAppContext'
 
 export default function GlobalDashboard() {
   const [dialogOpen, setDialogOpen] = useState(false)
-  const projectsState = useProjects()
-
-  const projects =
-    projectsState.status === 'ready' ? projectsState.projects : []
+  const { data: projects = [], isLoading, error } = useProjects()
+  const { organization } = useAppContext()
 
   return (
     <div className="space-y-6">
-      <div>
-        <h1 className="text-2xl font-bold text-gray-900">Dashboard</h1>
-      </div>
+      <h1 className="text-2xl font-bold text-gray-900">
+        {organization?.name ?? '\u00A0'}
+      </h1>
 
       {/* Stat cards */}
       <div className="grid grid-cols-2 gap-4 lg:grid-cols-4">
         {[
           {
             label: 'Prosjekter',
-            value: projectsState.status === 'ready' ? projects.length : '—',
+            value: !isLoading ? projects.length : '—',
           },
           { label: 'Transport', value: '—' },
           { label: 'Faktura', value: '—' },
@@ -52,10 +51,8 @@ export default function GlobalDashboard() {
         emptyLabel="Ingen prosjekter enda"
         emptyHint="Prosjekter vil vises her når de er lagt til"
         onAdd={() => setDialogOpen(true)}
-        loading={projectsState.status === 'loading'}
-        error={
-          projectsState.status === 'error' ? projectsState.message : undefined
-        }
+        loading={isLoading}
+        error={error?.message}
       />
 
       <CreateProjectDialog open={dialogOpen} onOpenChange={setDialogOpen} />

@@ -1,4 +1,5 @@
-import { useEffect, useState, useCallback } from 'react'
+import { useState } from 'react'
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { useAuth } from '@clerk/react'
 
 import { apiRequest } from '@/shared/api/client'
@@ -11,55 +12,52 @@ import AddMemberDialog from './AddMemberDialog'
 export default function OrgSettings() {
   const { getToken } = useAuth()
   const { organizationId, organization } = useAppContext()
-  const [members, setMembers] = useState<OrgMemberDto[]>([])
-  const [loading, setLoading] = useState(true)
-  const [error, setError] = useState('')
+  const queryClient = useQueryClient()
   const [dialogOpen, setDialogOpen] = useState(false)
 
-  const loadMembers = useCallback(async () => {
-    setLoading(true)
-    setError('')
-    try {
+  const {
+    data: members = [],
+    isLoading,
+    error,
+  } = useQuery({
+    queryKey: ['organizations', organizationId, 'members'],
+    queryFn: async () => {
       const token = await getToken()
       if (!token) throw new Error('Ikke autentisert')
-      const data = await apiRequest<OrgMemberDto[]>(
+      return apiRequest<OrgMemberDto[]>(
         `/organizations/${organizationId}/members`,
         { token },
       )
-      setMembers(data)
-    } catch (err) {
-      setError(
-        err instanceof Error ? err.message : 'Klarte ikke hente medlemmer',
-      )
-    } finally {
-      setLoading(false)
-    }
-  }, [getToken, organizationId])
+    },
+  })
 
-  useEffect(() => {
-    void loadMembers()
-  }, [loadMembers])
+  const addMember = useMutation({
+    mutationFn: async ({ userId, role }: { userId: string; role: string }) => {
+      const token = await getToken()
+      if (!token) throw new Error('Ikke autentisert')
+      return apiRequest(`/organizations/${organizationId}/members`, {
+        method: 'POST',
+        token,
+        body: { user_id: Number(userId), role },
+      })
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({
+        queryKey: ['organizations', organizationId, 'members'],
+      })
+    },
+  })
 
   async function handleAddMember(userId: string, role: string) {
-    const token = await getToken()
-    if (!token) throw new Error('Ikke autentisert')
-    await apiRequest(`/organizations/${organizationId}/members`, {
-      method: 'POST',
-      token,
-      body: { user_id: Number(userId), role },
-    })
+    await addMember.mutateAsync({ userId, role })
     setDialogOpen(false)
-    await loadMembers()
   }
 
   return (
     <div className="space-y-6">
-      <div>
-        <h1 className="text-2xl font-bold text-gray-900">Organisasjon</h1>
-        <p className="mt-1 text-sm text-gray-500">
-          {organization?.name ?? '\u00A0'}
-        </p>
-      </div>
+      <h1 className="text-2xl font-bold text-gray-900">
+        {organization?.name ?? '\u00A0'}
+      </h1>
 
       <ItemListPanel
         title="Medlemmer"
@@ -75,15 +73,15 @@ export default function OrgSettings() {
         emptyLabel="Ingen medlemmer enda"
         emptyHint="Medlemmer vil vises her når de er lagt til"
         onAdd={() => setDialogOpen(true)}
-        loading={loading}
-        error={error}
+        loading={isLoading}
+        error={error?.message}
       />
 
       <AddMemberDialog
         open={dialogOpen}
         onOpenChange={setDialogOpen}
         onSubmit={handleAddMember}
-        loading={loading}
+        loading={addMember.isPending}
       />
     </div>
   )
