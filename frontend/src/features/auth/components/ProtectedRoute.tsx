@@ -2,6 +2,8 @@ import { useEffect, useState } from 'react'
 import { useAuth } from '@clerk/react'
 import { Navigate, Outlet, useLocation } from 'react-router-dom'
 import { apiRequest } from '../../../shared/api/client'
+import { AppProvider } from '@/shared/context/AppContext'
+import type { OrgDto } from '@/shared/types'
 
 type UserMe = {
   id: number
@@ -11,7 +13,11 @@ type UserMe = {
 type SyncState =
   | { status: 'loading' }
   | { status: 'error'; message: string }
-  | { status: 'ready'; organizationId: number | null }
+  | {
+      status: 'ready'
+      organizationId: number | null
+      organization: OrgDto | null
+    }
 
 export default function ProtectedRoute() {
   const { isLoaded, isSignedIn, userId, getToken } = useAuth()
@@ -38,7 +44,20 @@ export default function ProtectedRoute() {
         const user = await apiRequest<UserMe>('/users/me', { token })
         if (cancelled) return
 
-        setSync({ status: 'ready', organizationId: user.organization_id })
+        let organization: OrgDto | null = null
+        if (user.organization_id) {
+          organization = await apiRequest<OrgDto>(
+            `/organizations/${user.organization_id}`,
+            { token },
+          )
+          if (cancelled) return
+        }
+
+        setSync({
+          status: 'ready',
+          organizationId: user.organization_id,
+          organization,
+        })
       } catch (err) {
         if (cancelled) return
         setSync({
@@ -103,7 +122,16 @@ export default function ProtectedRoute() {
     return <Navigate to="/onboarding" replace />
   }
 
-  return <Outlet />
+  return (
+    <AppProvider
+      value={{
+        organizationId: sync.organizationId!,
+        organization: sync.organization,
+      }}
+    >
+      <Outlet />
+    </AppProvider>
+  )
 }
 
 function Loader({ text }: { text: string }) {

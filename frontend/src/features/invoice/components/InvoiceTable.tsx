@@ -29,28 +29,44 @@ export default function InvoiceTable({ data }: { data: InvoiceResponse }) {
       </div>
 
       {/* Line items table */}
-      <div className="overflow-x-auto rounded-md border border-gray-200">
-        <table className="w-full text-sm text-left">
-          <thead className="bg-[#30466e] text-white">
+      <div className="overflow-x-auto rounded-xl border border-gray-200">
+        <table className="w-full text-left text-sm">
+          <thead className="border-b border-gray-200 bg-gray-50">
             <tr>
-              <th className="px-4 py-3 font-medium">Navn</th>
-              <th className="px-4 py-3 font-medium">GTIN</th>
-              <th className="px-4 py-3 font-medium">NOBB</th>
-              <th className="px-4 py-3 font-medium text-right">Antall</th>
-              <th className="px-4 py-3 font-medium">Enhet</th>
-              <th className="px-4 py-3 font-medium text-right">Pris</th>
-              <th className="px-4 py-3 font-medium text-right">Sum</th>
-              <th className="px-4 py-3 font-medium text-right">
+              <th className="px-4 py-3 text-xs font-semibold uppercase tracking-wide text-gray-400">
+                Navn
+              </th>
+              <th className="px-4 py-3 text-xs font-semibold uppercase tracking-wide text-gray-400">
+                GTIN
+              </th>
+              <th className="px-4 py-3 text-xs font-semibold uppercase tracking-wide text-gray-400">
+                NOBB
+              </th>
+              <th className="px-4 py-3 text-right text-xs font-semibold uppercase tracking-wide text-gray-400">
+                Antall
+              </th>
+              <th className="px-4 py-3 text-xs font-semibold uppercase tracking-wide text-gray-400">
+                Enhet
+              </th>
+              <th className="px-4 py-3 text-right text-xs font-semibold uppercase tracking-wide text-gray-400">
+                Pris
+              </th>
+              <th className="px-4 py-3 text-right text-xs font-semibold uppercase tracking-wide text-gray-400">
+                Sum
+              </th>
+              <th className="px-4 py-3 text-right text-xs font-semibold uppercase tracking-wide text-gray-400">
                 CO₂ (kg)
-                <sup className="group relative ml-0.5 cursor-help text-white/60">
+                <sup className="group relative ml-0.5 cursor-help text-gray-300">
                   ?
-                  <span className="pointer-events-none absolute top-full right-0 mt-2 z-10 hidden w-56 rounded bg-gray-900 px-3 py-2 text-xs font-normal text-gray-100 shadow-lg group-hover:block">
+                  <span className="pointer-events-none absolute top-full right-0 z-10 mt-2 hidden w-56 rounded bg-gray-900 px-3 py-2 text-xs font-normal text-gray-100 shadow-lg group-hover:block">
                     GWP A1-A3 (produksjonsfase). Avfall (C1-C4) rapporteres
                     separat.
                   </span>
                 </sup>
               </th>
-              <th className="px-4 py-3 font-medium">EPD</th>
+              <th className="px-4 py-3 text-xs font-semibold uppercase tracking-wide text-gray-400">
+                EPD
+              </th>
             </tr>
           </thead>
           <tbody className="divide-y divide-gray-100">

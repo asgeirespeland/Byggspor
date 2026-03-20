@@ -184,8 +184,10 @@ export default function ProjectDashboard() {
           </div>
         </div>
 
-        {/* Right sidebar */}
-        <ProjectSidebar project={project} />
+        {/* Right sidebar — first on mobile, right column on large screens */}
+        <div className="order-first lg:order-last w-full lg:w-auto">
+          <ProjectSidebar project={project} />
+        </div>
       </div>
     </div>
   )
