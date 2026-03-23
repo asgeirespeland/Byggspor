@@ -180,7 +180,7 @@ export default function ProjectDashboard() {
                 <TransportUpload projectId={project.id} />
               )}
               {activeTab === 'waste' && <WasteTab />}
-              {activeTab === 'energy' && <EnergyTab />}
+              {activeTab === 'energy' && <EnergyTab projectId={project.id} />}
             </div>
           </div>
         </div>
