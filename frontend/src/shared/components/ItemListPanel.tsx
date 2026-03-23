@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { Search, Plus, Loader2 } from 'lucide-react'
+import { useDeferredLoading } from '@/shared/hooks/useDeferredLoading'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import {
@@ -38,6 +39,7 @@ export default function ItemListPanel<T>({
   error,
 }: Props<T>) {
   const [search, setSearch] = useState('')
+  const showLoading = useDeferredLoading(!!loading)
 
   const filtered = search
     ? items.filter((item) => filterFn(item, search.toLowerCase()))
@@ -75,7 +77,7 @@ export default function ItemListPanel<T>({
         </div>
       </div>
 
-      {loading && (
+      {showLoading && (
         <div className="flex items-center justify-center gap-2 py-12 text-gray-400">
           <Loader2 className="h-4 w-4 animate-spin" />
           <span className="text-sm">Laster...</span>

@@ -1,5 +1,6 @@
 import { useParams, useNavigate } from 'react-router-dom'
 import { useState } from 'react'
+import { useDeferredLoading } from '@/shared/hooks/useDeferredLoading'
 import {
   ArrowLeft,
   Loader2,
@@ -46,13 +47,14 @@ export default function ProjectDashboard() {
   const [activeTab, setActiveTab] = useState<Tab>('materials')
   const { data: project, isLoading, error } = useProject(Number(projectId))
   const { data: co2 } = useCo2Summary(Number(projectId))
+  const showLoading = useDeferredLoading(isLoading)
   const {
     ref: tabsRef,
     canScrollLeft,
     canScrollRight,
   } = useScrollIndicators([isLoading])
 
-  if (isLoading) {
+  if (showLoading) {
     return (
       <div className="flex items-center justify-center gap-2 py-24 text-gray-400">
         <Loader2 className="h-5 w-5 animate-spin" />
@@ -60,6 +62,8 @@ export default function ProjectDashboard() {
       </div>
     )
   }
+
+  if (isLoading) return null
 
   if (error || !project) {
     return (

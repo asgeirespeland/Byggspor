@@ -1,5 +1,6 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { useAuth } from '@clerk/react'
+import { toast } from 'sonner'
 
 import {
   listProjectMaterials,
@@ -35,6 +36,12 @@ export function useUploadInvoice(projectId: number) {
         queryKey: ['project-materials', projectId],
       })
       queryClient.invalidateQueries({ queryKey: ['co2-summary', projectId] })
+      toast.success('Faktura lastet opp')
+    },
+    onError: (err) => {
+      toast.error(
+        err instanceof Error ? err.message : 'Kunne ikke laste opp faktura',
+      )
     },
   })
 }
@@ -54,6 +61,12 @@ export function useDeleteInvoice(projectId: number) {
         queryKey: ['project-materials', projectId],
       })
       queryClient.invalidateQueries({ queryKey: ['co2-summary', projectId] })
+      toast.success('Faktura slettet')
+    },
+    onError: (err) => {
+      toast.error(
+        err instanceof Error ? err.message : 'Kunne ikke slette faktura',
+      )
     },
   })
 }

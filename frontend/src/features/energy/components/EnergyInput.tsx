@@ -3,6 +3,7 @@ import { Zap, Trash2, Loader2, Pencil, Check, X } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
+import { useDeferredLoading } from '@/shared/hooks/useDeferredLoading'
 import {
   useEnergies,
   usePriceZones,
@@ -27,6 +28,7 @@ export default function EnergyInput({ projectId }: EnergyInputProps) {
   )
 
   const { data: entries, isLoading: entriesLoading } = useEnergies(projectId)
+  const showEntriesLoading = useDeferredLoading(entriesLoading)
   const { data: zones } = usePriceZones()
   const calculateMutation = useCalculateEnergy(projectId)
   const updateMutation = useUpdateEnergy(projectId)
@@ -151,7 +153,7 @@ export default function EnergyInput({ projectId }: EnergyInputProps) {
       )}
 
       {/* Entries table */}
-      {entriesLoading && (
+      {showEntriesLoading && (
         <div className="flex items-center justify-center gap-2 py-8 text-gray-400">
           <Loader2 className="h-4 w-4 animate-spin" />
           <span className="text-sm">Laster…</span>

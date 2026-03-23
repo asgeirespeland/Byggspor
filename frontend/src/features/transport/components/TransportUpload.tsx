@@ -1,8 +1,10 @@
 import { useState } from 'react'
 import { useQueryClient } from '@tanstack/react-query'
+import { toast } from 'sonner'
 import FileDropZone from '@/shared/components/FileDropZone'
 import SelectedFileBar from '@/shared/components/SelectedFileBar'
 import { useFileSelect } from '@/shared/hooks/useFileSelect'
+import { useDeferredLoading } from '@/shared/hooks/useDeferredLoading'
 import { useRequireToken } from '@/shared/hooks/useRequireToken'
 import { confirmTrips, removeTrip } from '../api/transport'
 import { useTransportParse } from '../hooks/useTransportParse'
@@ -28,6 +30,7 @@ export default function TransportUpload({ projectId }: Props) {
   })
   const { data: reportGroups, isLoading: reportsLoading } =
     useProjectTransports(projectId)
+  const showReportsLoading = useDeferredLoading(reportsLoading)
   const deleteReportMutation = useDeleteTransportReport(projectId)
   const [confirming, setConfirming] = useState(false)
   const [showManual, setShowManual] = useState(false)
@@ -71,8 +74,9 @@ export default function TransportUpload({ projectId }: Props) {
       await confirmTrips(tripIds, token)
       invalidateTransportData()
       clear()
+      toast.success('Turer bekreftet')
     } catch {
-      // keep data visible for retry
+      toast.error('Kunne ikke bekrefte turer')
     } finally {
       setConfirming(false)
     }
@@ -163,7 +167,7 @@ export default function TransportUpload({ projectId }: Props) {
         )}
       </div>
 
-      {reportsLoading && (
+      {showReportsLoading && (
         <p className="text-sm text-gray-400 text-center py-4">
           Laster transportdata…
         </p>

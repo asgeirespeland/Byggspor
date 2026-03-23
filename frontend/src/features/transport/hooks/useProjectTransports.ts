@@ -1,5 +1,6 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { useAuth } from '@clerk/react'
+import { toast } from 'sonner'
 
 import {
   listProjectTransports,
@@ -34,6 +35,12 @@ export function useDeleteTransportReport(projectId: number) {
         queryKey: ['project-transports', projectId],
       })
       queryClient.invalidateQueries({ queryKey: ['co2-summary', projectId] })
+      toast.success('Kjørerapport slettet')
+    },
+    onError: (err) => {
+      toast.error(
+        err instanceof Error ? err.message : 'Kunne ikke slette kjørerapport',
+      )
     },
   })
 }

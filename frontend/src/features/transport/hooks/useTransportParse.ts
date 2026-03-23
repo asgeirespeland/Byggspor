@@ -1,4 +1,5 @@
 import { useCallback, useState } from 'react'
+import { toast } from 'sonner'
 
 import { parseTransportFile } from '../api/transport'
 import type { TransportParseResponse } from '../types/transport'
@@ -17,8 +18,14 @@ export function useTransportParse() {
       try {
         const result = await parseTransportFile(file, projectId, token)
         setData(result)
+        toast.success('Transportfil analysert')
       } catch (err) {
-        setError(err instanceof Error ? err.message : 'Unknown error')
+        const message =
+          err instanceof Error
+            ? err.message
+            : 'Kunne ikke analysere transportfil'
+        setError(message)
+        toast.error(message)
       } finally {
         setLoading(false)
       }
