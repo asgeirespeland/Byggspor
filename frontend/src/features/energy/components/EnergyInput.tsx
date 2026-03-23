@@ -10,7 +10,7 @@ import {
   useUpdateEnergy,
   useDeleteEnergy,
 } from '../hooks/useEnergies'
-import type { EnergyEntry, PriceZone } from '../types/energy'
+import type { EnergyEntry, EnergyUpdateInput, PriceZone } from '../types/energy'
 
 const MAX_VISIBLE_ROWS = 10
 const ROW_HEIGHT_PX = 41 // matches py-2.5 + text
@@ -225,11 +225,7 @@ export default function EnergyInput({ projectId }: EnergyInputProps) {
 interface EnergyRowProps {
   entry: EnergyEntry
   zones: { value: string; label: string }[] | undefined
-  onUpdate: (data: {
-    kwh_used?: number
-    price_zone?: string | null
-    recorded_date?: string | null
-  }) => void
+  onUpdate: (data: EnergyUpdateInput) => void
   onDelete: () => void
   isUpdating: boolean
   isDeleting: boolean
@@ -263,7 +259,7 @@ function EnergyRow({
 
     onUpdate({
       kwh_used: kwh,
-      price_zone: editZone || null,
+      price_zone: (editZone as PriceZone) || null,
       recorded_date: editDate || null,
     })
     setEditing(false)
