@@ -16,10 +16,16 @@ import { STATUS_CONFIG } from '@/features/project/constants'
 import { useScrollIndicators } from '@/shared/hooks/useScrollIndicators'
 import InvoiceUpload from '@/features/invoice/components/InvoiceUpload'
 import { TransportUpload } from '@/features/transport'
+import { useCo2Summary } from '../hooks/useCo2Summary'
 import WasteTab from './tabs/WasteTab'
 import EnergyTab from './tabs/EnergyTab'
 import KpiCard from './KpiCard'
 import ProjectSidebar from './ProjectSidebar'
+
+function formatKg(value: number | undefined): string {
+  if (value == null || value === 0) return '—'
+  return value.toLocaleString('nb-NO', { maximumFractionDigits: 1 })
+}
 
 type Tab = 'materials' | 'transport' | 'waste' | 'energy'
 
@@ -39,6 +45,7 @@ export default function ProjectDashboard() {
   const navigate = useNavigate()
   const [activeTab, setActiveTab] = useState<Tab>('materials')
   const { data: project, isLoading, error } = useProject(Number(projectId))
+  const { data: co2 } = useCo2Summary(Number(projectId))
   const {
     ref: tabsRef,
     canScrollLeft,
@@ -105,36 +112,36 @@ export default function ProjectDashboard() {
           <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3">
             <KpiCard
               label="Totalt CO₂"
-              value="—"
+              value={formatKg(co2?.total_co2_kg)}
               unit="kg CO₂e"
               icon={<Leaf className="h-3.5 w-3.5 text-emerald-600" />}
               accent="bg-emerald-50"
             />
             <KpiCard
               label="Materialer"
-              value="—"
+              value={formatKg(co2?.categories.materials.total_co2_kg)}
               unit="kg CO₂e"
               icon={<Package className="h-3.5 w-3.5 text-blue-600" />}
               accent="bg-blue-50"
             />
             <KpiCard
               label="Transport"
-              value="—"
+              value={formatKg(co2?.categories.transport.total_co2_kg)}
               unit="kg CO₂e"
               icon={<Truck className="h-3.5 w-3.5 text-orange-600" />}
               accent="bg-orange-50"
             />
             <KpiCard
               label="Avfall"
-              value="—"
+              value={formatKg(co2?.categories.waste.total_co2_kg)}
               unit="kg CO₂e"
               icon={<Trash2 className="h-3.5 w-3.5 text-red-500" />}
               accent="bg-red-50"
             />
             <KpiCard
               label="Energi"
-              value="—"
-              unit="kWh"
+              value={formatKg(co2?.categories.energy.total_co2_kg)}
+              unit="kg CO₂e"
               icon={<Zap className="h-3.5 w-3.5 text-yellow-600" />}
               accent="bg-yellow-50"
             />
@@ -189,7 +196,10 @@ export default function ProjectDashboard() {
 
         {/* Right sidebar — first on mobile, right column on large screens */}
         <div className="order-first lg:order-last w-full lg:w-auto">
-          <ProjectSidebar project={project} />
+          <ProjectSidebar
+            project={project}
+            confidenceScore={co2?.overall_confidence ?? null}
+          />
         </div>
       </div>
     </div>

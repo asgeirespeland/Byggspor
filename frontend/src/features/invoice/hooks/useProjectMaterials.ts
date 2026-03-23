@@ -34,6 +34,7 @@ export function useUploadInvoice(projectId: number) {
       queryClient.invalidateQueries({
         queryKey: ['project-materials', projectId],
       })
+      queryClient.invalidateQueries({ queryKey: ['co2-summary', projectId] })
     },
   })
 }
@@ -52,6 +53,7 @@ export function useDeleteInvoice(projectId: number) {
       queryClient.invalidateQueries({
         queryKey: ['project-materials', projectId],
       })
+      queryClient.invalidateQueries({ queryKey: ['co2-summary', projectId] })
     },
   })
 }

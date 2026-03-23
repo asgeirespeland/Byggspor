@@ -33,6 +33,7 @@ export function useDeleteTransportReport(projectId: number) {
       queryClient.invalidateQueries({
         queryKey: ['project-transports', projectId],
       })
+      queryClient.invalidateQueries({ queryKey: ['co2-summary', projectId] })
     },
   })
 }

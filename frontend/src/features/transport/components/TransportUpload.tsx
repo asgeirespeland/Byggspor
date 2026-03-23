@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { useQueryClient } from '@tanstack/react-query'
 import FileDropZone from '@/shared/components/FileDropZone'
 import SelectedFileBar from '@/shared/components/SelectedFileBar'
 import { useFileSelect } from '@/shared/hooks/useFileSelect'
@@ -18,6 +19,7 @@ type Props = {
 }
 
 export default function TransportUpload({ projectId }: Props) {
+  const queryClient = useQueryClient()
   const { authReady, requireToken } = useRequireToken()
   const { parse, reset, data, setData, loading, error } = useTransportParse()
   const { selectedFile, fileError, acceptFile, clear } = useFileSelect({
@@ -30,10 +32,18 @@ export default function TransportUpload({ projectId }: Props) {
   const [confirming, setConfirming] = useState(false)
   const [showManual, setShowManual] = useState(false)
 
+  const invalidateTransportData = () => {
+    queryClient.invalidateQueries({ queryKey: ['co2-summary', projectId] })
+    queryClient.invalidateQueries({
+      queryKey: ['project-transports', projectId],
+    })
+  }
+
   const handleParse = async () => {
     if (!selectedFile || !authReady) return
     const token = await requireToken()
     await parse(selectedFile, projectId, token)
+    invalidateTransportData()
   }
 
   const handleRemoveTrip = (tripId: number) => {
@@ -47,6 +57,7 @@ export default function TransportUpload({ projectId }: Props) {
       try {
         const token = await requireToken()
         await removeTrip(tripId, token)
+        invalidateTransportData()
       } catch {
         // keep optimistic UI
       }
@@ -58,6 +69,7 @@ export default function TransportUpload({ projectId }: Props) {
     try {
       const token = await requireToken()
       await confirmTrips(tripIds, token)
+      invalidateTransportData()
       clear()
     } catch {
       // keep data visible for retry

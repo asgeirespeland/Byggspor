@@ -49,6 +49,7 @@ export function useCalculateEnergy(projectId: number) {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['energies', projectId] })
+      queryClient.invalidateQueries({ queryKey: ['co2-summary', projectId] })
     },
   })
 }
@@ -71,6 +72,7 @@ export function useUpdateEnergy(projectId: number) {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['energies', projectId] })
+      queryClient.invalidateQueries({ queryKey: ['co2-summary', projectId] })
     },
   })
 }
@@ -87,6 +89,7 @@ export function useDeleteEnergy(projectId: number) {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['energies', projectId] })
+      queryClient.invalidateQueries({ queryKey: ['co2-summary', projectId] })
     },
   })
 }

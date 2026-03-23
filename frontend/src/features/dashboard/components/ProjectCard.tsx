@@ -14,6 +14,7 @@ import {
   TooltipTrigger,
 } from '@/components/ui/tooltip'
 import { STATUS_CONFIG } from '@/features/project/constants'
+import { useCo2Summary } from '../hooks/useCo2Summary'
 import ConfidenceGauge from './ConfidenceGauge'
 import type { Project } from '../../project/hooks/useProjects'
 
@@ -22,9 +23,8 @@ export default function ProjectCard({ project }: { project: Project }) {
   const navigate = useNavigate()
 
   const status = STATUS_CONFIG[project.status] ?? STATUS_CONFIG.active
-
-  // Placeholder confidence score — replace with real data when available
-  const confidenceScore = 72
+  const { data: co2 } = useCo2Summary(project.id)
+  const confidenceScore = co2?.overall_confidence ?? null
 
   const createdDate = new Date(project.created_at).toLocaleDateString('nb-NO', {
     day: '2-digit',
@@ -105,20 +105,29 @@ export default function ProjectCard({ project }: { project: Project }) {
             </div>
 
             {/* Confidence gauge: full on wider screens, compact with tooltip on smaller */}
-            <div className="hidden min-[704px]:flex flex-col items-center">
-              <p className="mb-1 text-xs font-medium text-gray-500">
-                CO₂ Konfidens
-              </p>
-              <ConfidenceGauge score={confidenceScore} />
-            </div>
-            <div className="min-[704px]:hidden">
-              <Tooltip>
-                <TooltipTrigger>
-                  <ConfidenceGauge score={confidenceScore} size="compact" />
-                </TooltipTrigger>
-                <TooltipContent>CO₂ Konfidens</TooltipContent>
-              </Tooltip>
-            </div>
+            {confidenceScore != null ? (
+              <>
+                <div className="hidden min-[704px]:flex flex-col items-center">
+                  <p className="mb-1 text-xs font-medium text-gray-500">
+                    CO₂ Konfidens
+                  </p>
+                  <ConfidenceGauge score={Math.round(confidenceScore)} />
+                </div>
+                <div className="min-[704px]:hidden">
+                  <Tooltip>
+                    <TooltipTrigger>
+                      <ConfidenceGauge
+                        score={Math.round(confidenceScore)}
+                        size="compact"
+                      />
+                    </TooltipTrigger>
+                    <TooltipContent>CO₂ Konfidens</TooltipContent>
+                  </Tooltip>
+                </div>
+              </>
+            ) : (
+              <p className="text-xs text-gray-400">Ingen data</p>
+            )}
 
             {/* Right: open project button */}
             <Button
