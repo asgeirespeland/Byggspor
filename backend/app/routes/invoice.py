@@ -1,9 +1,11 @@
 import logging
 import xml.etree.ElementTree as ET
 
-from flask import Blueprint, jsonify, request
+from flask import Blueprint, g, jsonify, request
 
 from app.database import SessionLocal
+from app.models.material_invoice import MaterialInvoice
+from app.models.project_material import ProjectMaterial
 from app.services.ehf_parser import parse_invoice
 from app.services.invoice_enrichment import enrich_invoice
 from app.services.material_service import upsert_catalog_entry
@@ -99,3 +101,84 @@ def upload_invoice_route():
         return jsonify(error=f"Processing failed: {e}"), 500
     finally:
         session.close()
+
+
+@invoice_bp.route("/project/<int:project_id>", methods=["GET"])
+def list_project_materials(project_id: int):
+    """Return all materials for a project, grouped by source invoice."""
+    current_user_id = getattr(g, "current_user_id", None)
+    if not current_user_id:
+        return jsonify(error="Unauthorized"), 401
+
+    session = g.db
+    materials = (
+        session.query(ProjectMaterial)
+        .filter(ProjectMaterial.project_id == project_id)
+        .order_by(ProjectMaterial.created_at.desc())
+        .all()
+    )
+
+    # Group by source invoice
+    invoices_map: dict[int | None, dict] = {}
+    for pm in materials:
+        sid = pm.source_id
+        if sid not in invoices_map:
+            inv = pm.source_invoice
+            invoices_map[sid] = {
+                "invoice_id": sid,
+                "supplier_name": inv.supplier_name if inv else None,
+                "invoice_number": inv.invoice_number if inv else None,
+                "invoice_date": (
+                    inv.invoice_date.isoformat() if inv and inv.invoice_date else None
+                ),
+                "uploaded_at": (
+                    inv.uploaded_at.isoformat() if inv and inv.uploaded_at else None
+                ),
+                "items": [],
+            }
+        invoices_map[sid]["items"].append(
+            {
+                "id": pm.id,
+                "material_name": pm.material.product_name if pm.material else pm.notes,
+                "gtin": pm.material.gtin if pm.material else None,
+                "nobb_number": pm.material.nobb_number if pm.material else None,
+                "quantity": float(pm.quantity) if pm.quantity else None,
+                "unit": pm.unit,
+                "total_price": float(pm.total_price) if pm.total_price else None,
+                "total_co2_kg": float(pm.total_co2_kg) if pm.total_co2_kg else None,
+                "confidence_score": pm.confidence_score,
+                "flagged": pm.flagged,
+                "has_epd": pm.material.has_epd if pm.material else False,
+            }
+        )
+
+    return jsonify(list(invoices_map.values()))
+
+
+@invoice_bp.route("/source/<int:invoice_id>", methods=["DELETE"])
+def delete_invoice(invoice_id: int):
+    """Delete an invoice and all its associated project materials."""
+    current_user_id = getattr(g, "current_user_id", None)
+    if not current_user_id:
+        return jsonify(error="Unauthorized"), 401
+
+    session = g.db
+    count = (
+        session.query(ProjectMaterial)
+        .filter(ProjectMaterial.source_id == invoice_id)
+        .delete()
+    )
+    inv = (
+        session.query(MaterialInvoice).filter(MaterialInvoice.id == invoice_id).first()
+    )
+    if inv:
+        session.delete(inv)
+
+    try:
+        session.commit()
+    except Exception as e:
+        session.rollback()
+        logger.exception("Failed to delete invoice")
+        return jsonify(error=f"Failed to delete: {e}"), 500
+
+    return jsonify(message="Deleted", items_removed=count), 200
