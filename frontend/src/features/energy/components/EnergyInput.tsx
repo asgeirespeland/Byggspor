@@ -32,7 +32,7 @@ export default function EnergyInput({ projectId }: EnergyInputProps) {
   const { data: zones } = usePriceZones()
   const calculateMutation = useCalculateEnergy(projectId)
   const updateMutation = useUpdateEnergy(projectId)
-  const deleteMutation = useDeleteEnergy(projectId)
+  const deleteEnergy = useDeleteEnergy(projectId)
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
@@ -189,9 +189,9 @@ export default function EnergyInput({ projectId }: EnergyInputProps) {
                     onUpdate={(data) =>
                       updateMutation.mutate({ energyId: entry.id, data })
                     }
-                    onDelete={() => deleteMutation.mutate(entry.id)}
+                    onDelete={() => void deleteEnergy(entry.id)}
                     isUpdating={updateMutation.isPending}
-                    isDeleting={deleteMutation.isPending}
+                    isDeleting={false}
                   />
                 ))}
               </tbody>
