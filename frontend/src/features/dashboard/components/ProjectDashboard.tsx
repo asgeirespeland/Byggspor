@@ -38,14 +38,14 @@ export default function ProjectDashboard() {
   const { projectId } = useParams<{ projectId: string }>()
   const navigate = useNavigate()
   const [activeTab, setActiveTab] = useState<Tab>('materials')
-  const state = useProject(Number(projectId))
+  const { data: project, isLoading, error } = useProject(Number(projectId))
   const {
     ref: tabsRef,
     canScrollLeft,
     canScrollRight,
-  } = useScrollIndicators([state.status])
+  } = useScrollIndicators([isLoading])
 
-  if (state.status === 'loading') {
+  if (isLoading) {
     return (
       <div className="flex items-center justify-center gap-2 py-24 text-gray-400">
         <Loader2 className="h-5 w-5 animate-spin" />
@@ -54,10 +54,12 @@ export default function ProjectDashboard() {
     )
   }
 
-  if (state.status === 'error') {
+  if (error || !project) {
     return (
       <div className="flex flex-col items-center justify-center py-24 text-center">
-        <p className="text-sm text-red-500">{state.message}</p>
+        <p className="text-sm text-red-500">
+          {error?.message ?? 'Kunne ikke laste prosjekt'}
+        </p>
         <button
           type="button"
           className="mt-3 text-xs text-gray-400 underline"
@@ -69,7 +71,6 @@ export default function ProjectDashboard() {
     )
   }
 
-  const { project } = state
   const status = STATUS_CONFIG[project.status] ?? STATUS_CONFIG.active
 
   return (

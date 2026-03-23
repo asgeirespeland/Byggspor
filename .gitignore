@@ -29,3 +29,6 @@ venv/
 
 # Project context (local only)
 /context/
+
+#npm package lock
+package-lock.json
