@@ -8,6 +8,7 @@ from flask import Blueprint, g, jsonify, request
 from app.database import SessionLocal
 from app.models.project_transport import ProjectTransport
 from app.models.transport_report import TransportReport
+from app.models.vehicle import Vehicle
 from app.services.transport_service import process_transport_report
 
 logger = logging.getLogger(__name__)
@@ -58,6 +59,16 @@ def parse_transport_route():
         return jsonify(error=f"Processing failed: {e}"), 500
     finally:
         session.close()
+
+
+@transport_bp.route("/confirm", methods=["POST"])
+def confirm_trips():
+    """Mark parsed trips as confirmed (trips are already persisted on parse)."""
+    body = request.get_json(silent=True) or {}
+    trip_ids = body.get("trip_ids", [])
+    if not isinstance(trip_ids, list):
+        return jsonify(error="trip_ids must be a list"), 400
+    return jsonify(confirmed=len(trip_ids)), 200
 
 
 @transport_bp.route("/project/<int:project_id>", methods=["GET"])
@@ -152,3 +163,42 @@ def delete_transport_report(report_id: int):
         return jsonify(error=f"Failed to delete: {e}"), 500
 
     return jsonify(message="Deleted", trips_removed=count), 200
+
+
+@transport_bp.route("/trips/<int:trip_id>", methods=["DELETE"])
+def delete_trip(trip_id: int):
+    """Delete a single transport trip."""
+    session = g.db
+    trip = session.query(ProjectTransport).get(trip_id)
+    if not trip:
+        return jsonify(error="Trip not found"), 404
+    session.delete(trip)
+    try:
+        session.commit()
+    except Exception as e:
+        session.rollback()
+        logger.exception("Failed to delete trip")
+        return jsonify(error=f"Failed to delete: {e}"), 500
+    return jsonify(message="Deleted"), 200
+
+
+@transport_bp.route("/vehicles/<int:vehicle_id>", methods=["PATCH"])
+def update_vehicle(vehicle_id: int):
+    """Update vehicle details (make, model, fuel_type)."""
+    session = g.db
+    vehicle = session.query(Vehicle).get(vehicle_id)
+    if not vehicle:
+        return jsonify(error="Vehicle not found"), 404
+
+    body = request.get_json(silent=True) or {}
+    for field in ("make", "model", "fuel_type"):
+        if field in body:
+            setattr(vehicle, field, body[field])
+
+    try:
+        session.commit()
+    except Exception as e:
+        session.rollback()
+        logger.exception("Failed to update vehicle")
+        return jsonify(error=f"Failed to update: {e}"), 500
+    return jsonify(message="Updated"), 200
