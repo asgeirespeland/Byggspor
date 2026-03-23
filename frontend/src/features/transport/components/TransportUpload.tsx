@@ -1,14 +1,18 @@
 import { useState } from 'react'
 import { useQueryClient } from '@tanstack/react-query'
+import { toast } from 'sonner'
 import FileDropZone from '@/shared/components/FileDropZone'
 import SelectedFileBar from '@/shared/components/SelectedFileBar'
 import { useFileSelect } from '@/shared/hooks/useFileSelect'
+import { useDeferredLoading } from '@/shared/hooks/useDeferredLoading'
 import { useRequireToken } from '@/shared/hooks/useRequireToken'
 import { confirmTrips, removeTrip } from '../api/transport'
 import { useTransportParse } from '../hooks/useTransportParse'
 import {
   useProjectTransports,
   useDeleteTransportReport,
+  useDeleteTrip,
+  useUpdateTrip,
 } from '../hooks/useProjectTransports'
 import TransportManualInput from './TransportManualInput'
 import TransportTripTable from './TransportTripTable'
@@ -28,7 +32,10 @@ export default function TransportUpload({ projectId }: Props) {
   })
   const { data: reportGroups, isLoading: reportsLoading } =
     useProjectTransports(projectId)
-  const deleteReportMutation = useDeleteTransportReport(projectId)
+  const showReportsLoading = useDeferredLoading(reportsLoading)
+  const deleteReport = useDeleteTransportReport(projectId)
+  const deleteTrip = useDeleteTrip(projectId)
+  const updateTripMutation = useUpdateTrip(projectId)
   const [confirming, setConfirming] = useState(false)
   const [showManual, setShowManual] = useState(false)
 
@@ -71,8 +78,9 @@ export default function TransportUpload({ projectId }: Props) {
       await confirmTrips(tripIds, token)
       invalidateTransportData()
       clear()
+      toast.success('Turer bekreftet')
     } catch {
-      // keep data visible for retry
+      toast.error('Kunne ikke bekrefte turer')
     } finally {
       setConfirming(false)
     }
@@ -163,7 +171,7 @@ export default function TransportUpload({ projectId }: Props) {
         )}
       </div>
 
-      {reportsLoading && (
+      {showReportsLoading && (
         <p className="text-sm text-gray-400 text-center py-4">
           Laster transportdata…
         </p>
@@ -176,13 +184,24 @@ export default function TransportUpload({ projectId }: Props) {
           </p>
           {reportGroups.map((group) => (
             <ReportGroupCard
-              key={group.report_id}
+              key={group.report_id ?? 'manual'}
               group={group}
               onDelete={() => {
-                if (group.report_id != null)
-                  deleteReportMutation.mutate(group.report_id)
+                if (group.report_id != null) {
+                  void deleteReport(group.report_id)
+                } else {
+                  group.trips.forEach((t) => void deleteTrip(t.id))
+                }
               }}
-              isDeleting={deleteReportMutation.isPending}
+              onDeleteTrip={(tripId) => void deleteTrip(tripId)}
+              onUpdateTrip={(tripId, data) =>
+                updateTripMutation.mutate({ tripId, data })
+              }
+              updatingTripId={
+                updateTripMutation.isPending
+                  ? (updateTripMutation.variables?.tripId ?? null)
+                  : null
+              }
             />
           ))}
         </div>

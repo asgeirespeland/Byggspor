@@ -2,6 +2,7 @@ import { ClerkProvider } from '@clerk/react'
 import { QueryClientProvider } from '@tanstack/react-query'
 import { BrowserRouter } from 'react-router-dom'
 import { TooltipProvider } from '@/components/ui/tooltip'
+import { Toaster } from '@/components/ui/sonner'
 import { queryClient } from '@/shared/api/queryClient'
 import AppRoutes from './routes'
 
@@ -19,6 +20,7 @@ export default function App() {
           <BrowserRouter>
             <AppRoutes />
           </BrowserRouter>
+          <Toaster position="bottom-right" richColors />
         </TooltipProvider>
       </QueryClientProvider>
     </ClerkProvider>

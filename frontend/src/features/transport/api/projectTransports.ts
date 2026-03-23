@@ -45,3 +45,38 @@ export async function deleteTransportReport(
     token,
   })
 }
+
+export async function deleteTrip(
+  tripId: number,
+  token?: string,
+): Promise<void> {
+  await apiRequest(`/transport/trips/${tripId}`, {
+    method: 'DELETE',
+    token,
+  })
+}
+
+export interface TripUpdateInput {
+  driver_name?: string
+  trip_date?: string
+  start_address?: string | null
+  end_address?: string | null
+  distance_km?: number
+}
+
+export async function updateTrip(
+  tripId: number,
+  data: TripUpdateInput,
+  token?: string,
+): Promise<{
+  id: number
+  total_co2_kg: number | null
+  confidence_score: number | null
+  flagged: boolean
+}> {
+  return apiRequest(`/transport/trips/${tripId}`, {
+    method: 'PATCH',
+    body: data,
+    token,
+  })
+}

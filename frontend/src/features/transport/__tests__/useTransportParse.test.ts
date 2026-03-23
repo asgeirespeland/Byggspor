@@ -134,7 +134,7 @@ describe('useTransportParse — error handling', () => {
       await result.current.parse(makeFile(), 1)
     })
 
-    expect(result.current.error).toBe('Unknown error')
+    expect(result.current.error).toBe('Kunne ikke analysere transportfil')
   })
 })
 

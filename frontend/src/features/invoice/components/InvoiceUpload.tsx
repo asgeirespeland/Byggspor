@@ -1,6 +1,7 @@
 import FileDropZone from '@/shared/components/FileDropZone'
 import SelectedFileBar from '@/shared/components/SelectedFileBar'
 import { useFileSelect } from '@/shared/hooks/useFileSelect'
+import { useDeferredLoading } from '@/shared/hooks/useDeferredLoading'
 import {
   useUploadInvoice,
   useProjectMaterials,
@@ -19,6 +20,7 @@ export default function InvoiceUpload({ projectId }: Props) {
 
   const uploadMutation = useUploadInvoice(projectId)
   const { data: invoiceGroups, isLoading } = useProjectMaterials(projectId)
+  const showLoading = useDeferredLoading(isLoading)
   const deleteMutation = useDeleteInvoice(projectId)
 
   const handleUpload = () => {
@@ -71,7 +73,7 @@ export default function InvoiceUpload({ projectId }: Props) {
         </div>
       )}
 
-      {isLoading && (
+      {showLoading && (
         <p className="text-sm text-gray-400 text-center py-4">
           Laster materialer…
         </p>
