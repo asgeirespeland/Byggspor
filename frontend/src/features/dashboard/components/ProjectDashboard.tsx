@@ -175,7 +175,9 @@ export default function ProjectDashboard() {
               )}
             </div>
             <div className="p-6">
-              {activeTab === 'materials' && <InvoiceUpload />}
+              {activeTab === 'materials' && (
+                <InvoiceUpload projectId={project.id} />
+              )}
               {activeTab === 'transport' && (
                 <TransportUpload projectId={project.id} />
               )}
