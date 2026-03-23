@@ -8,9 +8,13 @@ import {
   TooltipTrigger,
 } from '@/components/ui/tooltip'
 
-export default function ProjectSidebar({ project }: { project: Project }) {
-  const confidenceScore = 72
-
+export default function ProjectSidebar({
+  project,
+  confidenceScore,
+}: {
+  project: Project
+  confidenceScore: number | null
+}) {
   return (
     <div className="flex w-full lg:w-60 shrink-0 flex-col gap-3 self-stretch">
       <div className="grid grid-cols-2 gap-3 lg:grid-cols-1">
@@ -32,7 +36,11 @@ export default function ProjectSidebar({ project }: { project: Project }) {
             </TooltipProvider>
           </div>
           <div className="flex justify-center">
-            <ConfidenceGauge score={confidenceScore} />
+            {confidenceScore != null ? (
+              <ConfidenceGauge score={Math.round(confidenceScore)} />
+            ) : (
+              <p className="text-sm text-gray-400 py-4">Ingen data ennå</p>
+            )}
           </div>
         </div>
 

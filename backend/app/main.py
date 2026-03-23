@@ -43,12 +43,14 @@ from app.routes.invoice import invoice_bp  # noqa: E402
 from app.routes.nobb import nobb_bp  # noqa: E402
 from app.routes.organization import organization_bp  # noqa: E402
 from app.routes.project import project_bp  # noqa: E402
+from app.routes.report import report_bp  # noqa: E402
 from app.routes.transport import transport_bp  # noqa: E402
 from app.routes.user import user_bp  # noqa: E402
 
 app.register_blueprint(energy_bp)
 app.register_blueprint(nobb_bp)
 app.register_blueprint(invoice_bp)
+app.register_blueprint(report_bp)
 app.register_blueprint(transport_bp)
 app.register_blueprint(user_bp)
 app.register_blueprint(organization_bp)

@@ -6,6 +6,7 @@ import { UserProfile } from '../features/user'
 import GlobalDashboard from '@/features/dashboard/components/GlobalDashboard'
 import OnboardingPage from '@/features/onboarding/components/OnboardingPage'
 import ProjectDashboard from '@/features/dashboard/components/ProjectDashboard'
+import SettingsPage from '@/features/settings/components/SettingsPage'
 
 function AppShell() {
   return (
@@ -32,6 +33,7 @@ export default function AppRoutes() {
           <Route path="projects/:projectId" element={<ProjectDashboard />} />
           <Route path="profile" element={<UserProfile />} />
           <Route path="organization" element={<OrgSettings />} />
+          <Route path="settings" element={<SettingsPage />} />
         </Route>
       </Route>
 
