@@ -11,6 +11,8 @@ import { useTransportParse } from '../hooks/useTransportParse'
 import {
   useProjectTransports,
   useDeleteTransportReport,
+  useDeleteTrip,
+  useUpdateTrip,
 } from '../hooks/useProjectTransports'
 import TransportManualInput from './TransportManualInput'
 import TransportTripTable from './TransportTripTable'
@@ -31,7 +33,9 @@ export default function TransportUpload({ projectId }: Props) {
   const { data: reportGroups, isLoading: reportsLoading } =
     useProjectTransports(projectId)
   const showReportsLoading = useDeferredLoading(reportsLoading)
-  const deleteReportMutation = useDeleteTransportReport(projectId)
+  const deleteReport = useDeleteTransportReport(projectId)
+  const deleteTrip = useDeleteTrip(projectId)
+  const updateTripMutation = useUpdateTrip(projectId)
   const [confirming, setConfirming] = useState(false)
   const [showManual, setShowManual] = useState(false)
 
@@ -180,13 +184,24 @@ export default function TransportUpload({ projectId }: Props) {
           </p>
           {reportGroups.map((group) => (
             <ReportGroupCard
-              key={group.report_id}
+              key={group.report_id ?? 'manual'}
               group={group}
               onDelete={() => {
-                if (group.report_id != null)
-                  deleteReportMutation.mutate(group.report_id)
+                if (group.report_id != null) {
+                  void deleteReport(group.report_id)
+                } else {
+                  group.trips.forEach((t) => void deleteTrip(t.id))
+                }
               }}
-              isDeleting={deleteReportMutation.isPending}
+              onDeleteTrip={(tripId) => void deleteTrip(tripId)}
+              onUpdateTrip={(tripId, data) =>
+                updateTripMutation.mutate({ tripId, data })
+              }
+              updatingTripId={
+                updateTripMutation.isPending
+                  ? (updateTripMutation.variables?.tripId ?? null)
+                  : null
+              }
             />
           ))}
         </div>
