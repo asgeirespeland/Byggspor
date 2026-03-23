@@ -1,121 +1,172 @@
+**Home** | [Setup Guide](docs/setup.md) | [Architecture](docs/architecture.md) | [Backend](docs/backend.md) | [Frontend](docs/frontend.md) | [Testing](docs/testing.md) | [Security](docs/security.md) | [Deployment](docs/deployment.md) | [Development](docs/development.md)
+
+---
+
 # Byggspor
 
-Construction CO₂ footprint calculator. Upload invoices, look up materials via NOBB, calculate emissions, and generate enriched EHF invoices with CO₂ data.
+Construction CO₂ footprint calculator for Norwegian building projects. Upload material invoices and transport reports, enrich them with environmental data from national APIs, and get a per-project emissions breakdown across four categories: **materials**, **transport**, **energy**, and **waste**.
+
+## Documentation
+
+| Document | Description |
+|----------|-------------|
+| [Setup Guide](docs/setup.md) | Prerequisites, environment variables, database, backend, frontend, pre-commit hooks |
+| [Architecture](docs/architecture.md) | System overview, tech stack, data model, external API integrations, data flow |
+| [Backend](docs/backend.md) | API endpoints, services, database models, migrations |
+| [Frontend](docs/frontend.md) | Feature modules, components, hooks, routing, UI patterns |
+| [Testing](docs/testing.md) | Test infrastructure, test suites, CI pipeline, coverage gaps |
+| [Security](docs/security.md) | Authentication flow, RBAC, secrets management, known limitations |
+| [Deployment](docs/deployment.md) | Vercel (frontend), OCI VM (backend), Caddy, DNS, production readiness |
+| [Development](docs/development.md) | Branching, PRs, commit conventions, linting, code quality tools |
 
 ## Tech Stack
 
-- **Frontend:** React + TypeScript + Tailwind CSS (Vite)
-- **Backend:** Python + Flask
-- **Database:** PostgreSQL
+| Layer | Technology |
+|-------|-----------|
+| Frontend | React 19, TypeScript 5.9, Vite 7, Tailwind CSS 4, shadcn/ui |
+| Auth (client) | Clerk React SDK |
+| Server state | TanStack Query |
+| Routing | React Router 7 |
+| Backend | Python 3.12, Flask, SQLAlchemy 2.0, Alembic |
+| Auth (server) | PyJWT + Clerk JWKS |
+| Database | PostgreSQL 16 (Docker Compose) |
+| CI | GitHub Actions |
+| Deployment | Vercel (frontend), OCI VM + Caddy (backend) |
 
-## Getting Started
+## Architecture
 
-### *PNPM used for all commands*
+```mermaid
+graph TD
+    subgraph Frontend["Frontend (SPA)"]
+        FE["React 19 · TypeScript · Vite"]
+    end
 
-### Prerequisites
+    subgraph Backend["Backend (API)"]
+        BE["Python 3.12 · Flask · SQLAlchemy"]
+    end
 
-- Node.js 22+
-- pnpm 10+
-- Python 3.12+
-- Docker (Docker Desktop for Windows/macOS, Docker Engine for Linux)
-- pipx (for installing pre-commit)
+    subgraph External["External APIs"]
+        NOBB["NOBB Export API"]
+        SVV["Vegvesen API"]
+        CLERK["Clerk JWKS"]
+    end
 
-**Install pnpm:**
+    subgraph Database
+        DB[("PostgreSQL 16")]
+    end
 
-```bash
-npm install -g pnpm
+    FE -->|"REST / JSON + Bearer JWT"| BE
+    BE --> NOBB
+    BE --> SVV
+    BE --> CLERK
+    BE --> DB
 ```
 
-**Install pipx (not strictly needed for macOS or Windows, pip can be used as well, but pipx isolates the install.):**
+Users upload **EHF invoices** (XML) to look up construction materials via the NOBB API and calculate CO₂ from EPD data. **Transport reports** (Abax XML) are enriched with vehicle emission data from the Vegvesen API. **Energy** consumption is entered manually and calculated using NVE's national grid emission factor. All data feeds into per-project KPI dashboards with confidence scores.
 
-| OS | Command |
-|---|---|
-| Linux (Debian/Ubuntu) | `sudo apt install pipx` |
-| macOS | `brew install pipx` |
-| Windows | `pip install --user pipx` |
+See [Architecture](docs/architecture.md) for the full breakdown.
 
-Then run `pipx ensurepath` and restart your terminal.
-
-### Pre-commit Hooks (one-time setup)
+## Quick Start
 
 ```bash
-pipx install pre-commit
-pre-commit install
-```
+# Clone and configure
+git clone <repo-url>
+cd byggspor
+cp .env.example .env          # fill in API credentials
 
-This enables automatic linting and formatting checks on every commit. Commits directly to `main` are blocked.
-
-### Frontend
-
-```bash
-cd frontend
-pnpm install
-pnpm dev
-```
-
-Open <http://localhost:5173> — you should see a centered page with "Byggspor" as a heading and "Construction CO₂ footprint calculator" below it.
-
-### Database
-
-```bash
-cp .env.example .env           # uses default local credentials
-docker compose up -d           # starts PostgreSQL on port 5432
-```
-
-Verify it's running:
-```bash
-docker compose ps              # should show byggspor-db-1 as "running"
-```
-
-### Backend
-
-```bash
+# Database setup (first time only)
+docker compose up -d
 cd backend
 python3 -m venv venv
-source venv/bin/activate       # Linux/macOS
-# venv\Scripts\activate        # Windows
+source venv/bin/activate
 pip install -r requirements.txt
-alembic upgrade head           # creates all database tables
-flask --app app.main run --debug
+alembic upgrade head           # create all tables
+cd ..
+
+# Start everything
+pnpm run dev
 ```
 
-Open <http://localhost:5000/health> — you should see:
+This starts PostgreSQL (Docker), the backend (Flask on port 5000), and the frontend (Vite on port 5173) concurrently.
 
-```json
-{"status": "ok"}
+For the step-by-step manual setup, see the [Setup Guide](docs/setup.md).
+
+| Service | URL |
+|---------|-----|
+| Frontend | http://localhost:5173 |
+| Backend | http://localhost:5000/health |
+| Database | localhost:5432 |
+
+## Project Structure
+
+```
+byggspor/
+├── frontend/                # React SPA
+│   └── src/
+│       ├── app/             # App shell, routes
+│       ├── components/ui/   # shadcn/ui primitives
+│       ├── features/        # Feature modules (auth, dashboard, invoice, transport, energy, ...)
+│       ├── shared/          # API client, hooks, context, types
+│       └── lib/             # Utilities
+│
+├── backend/                 # Flask REST API
+│   ├── app/
+│   │   ├── middleware/      # Auth (Clerk JWT), RBAC decorators
+│   │   ├── models/          # SQLAlchemy models (16)
+│   │   ├── routes/          # Flask blueprints (8)
+│   │   └── services/        # Business logic, external API clients (9)
+│   ├── alembic/             # Database migrations
+│   └── tests/               # pytest suite
+│
+├── docs/                    # Documentation
+├── docker-compose.yml       # PostgreSQL
+└── .github/workflows/       # CI pipeline
 ```
 
-### Clerk Auth (local setup)
+## CO₂ Categories
 
-This project uses Clerk for authentication.
+| Category | Data Source | Calculation |
+|----------|-----------|-------------|
+| Materials | EHF invoices (XML) | NOBB → EPD → GWP per unit × quantity |
+| Transport | Abax reports (XML) or manual | Vehicle CO₂/km (Vegvesen) × distance |
+| Energy | Manual kWh entry | kWh × 0.0119 kg CO₂eq (NVE national average) |
+| Waste | Manual entry | Waste type × quantity (planned) |
 
-1. Ask a teammate/project admin for shared Clerk dev values.
-2. Copy `.env.example` to `.env` and set:
-   - `VITE_CLERK_PUBLISHABLE_KEY`
-   - `CLERK_ISSUER`
-   - `CLERK_JWT_AUDIENCE` (optional)
-   - `CLERK_JWKS_URL` (optional)
-3. Start frontend and backend as usual.
+## Development Workflow
 
-Sign-in routes:
+- **Branching:** Feature branches off `main`, no dev/staging branch ([why](docs/development.md#branching-strategy))
+- **PRs:** One approval required, author merges, CI must pass
+- **CI:** GitHub Actions runs lint + format + test + build on every PR
+- **Pre-commit hooks:** Ruff (backend), ESLint + Prettier (frontend), branch protection
+- **Commits:** Category prefix encouraged (`feat:`, `fix:`, `ui:`, `chore:`, etc.)
 
-- `http://localhost:5173/sign-in`
-- `http://localhost:5173/sign-up`
+See [Development](docs/development.md) for full details.
 
-### Verify Frontend Build
+## Deployment
+
+| Component | Hosting |
+|-----------|---------|
+| Frontend | [Vercel](https://vercel.com/) — auto-deploys on push |
+| Backend | OCI VM (Ubuntu 24) — manual deploy, Caddy reverse proxy with auto TLS |
+| Database | PostgreSQL 16 in Docker on the same VM |
+| DNS | Cloudflare |
+
+See [Deployment](docs/deployment.md) for the full setup and production readiness issues.
+
+## Running Tests
 
 ```bash
+# Backend
+cd backend && source venv/bin/activate
+pytest
+
+# Frontend
 cd frontend
-pnpm build
+pnpm test
 ```
 
-Should complete with no errors and output built files to `frontend/dist/`.
+No external services or credentials needed — backend tests use in-memory SQLite and mock all APIs. See [Testing](docs/testing.md).
 
-## CI/CD
+---
 
-GitHub Actions runs on every PR to `main`:
-
-- **Frontend:** lint (ESLint) + format check (Prettier) + build (TypeScript + Vite)
-- **Backend:** lint + format check (Ruff)
-
-PRs must pass all checks before merging.
+**Home** | [Setup Guide](docs/setup.md) | [Architecture](docs/architecture.md) | [Backend](docs/backend.md) | [Frontend](docs/frontend.md) | [Testing](docs/testing.md) | [Security](docs/security.md) | [Deployment](docs/deployment.md) | [Development](docs/development.md)
