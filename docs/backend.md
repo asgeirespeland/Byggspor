@@ -121,16 +121,24 @@ When creating a project, you can pass `customer_name` to auto-create a `CUSTOMER
 | Method | Path | Auth | Description |
 |--------|------|------|-------------|
 | POST | `/invoice/parse` | Authenticated | Parse and enrich an EHF invoice (preview, no project link) |
-| POST | `/invoice/upload` | Authenticated | Parse, enrich, and persist invoice for a project |
+| POST | `/invoice/confirm` | Authenticated | Persist user-reviewed invoice line items to a project |
+| POST | `/invoice/upload` | Authenticated | Parse, enrich, and persist invoice for a project (single-step) |
 | GET | `/invoice/project/<project_id>` | Authenticated | List all materials for a project, grouped by source invoice |
+| PATCH | `/invoice/materials/<material_id>` | Authenticated | Update a project material's CO₂ value manually |
 | DELETE | `/invoice/source/<invoice_id>` | Authenticated | Delete invoice and all associated project materials |
 
-**`/invoice/parse`** — Upload an EHF XML file as multipart form data (`file` field). Returns enriched line items with NOBB product data and CO₂ values. Uses the material catalog as a cache.
+**Two-phase invoice flow:**
 
-**`/invoice/upload`** — Same as parse, but also persists to database. Requires `project_id` as a form field. Creates:
+**`/invoice/parse`** — Upload an EHF XML file as multipart form data (`file` field). Returns enriched line items with NOBB product data and CO₂ values. Uses the material catalog as a cache. Items missing EPD/GWP data are flagged for manual review.
+
+**`/invoice/confirm`** — Accepts a JSON body with `project_id`, `invoice` (the full enriched data from parse), and optional `overrides` mapping line index to `{ total_co2_kg }`. Creates `MaterialInvoice`, upserts `Material` catalog entries, and creates `ProjectMaterial` records. Overridden items get `manual_override=True`, `confidence_score=90`, `flagged=False`.
+
+**`/invoice/upload`** — Single-step alternative: parse, enrich, and persist in one call. Requires `project_id` as a form field. Creates:
 - `MaterialInvoice` (source record)
 - `Material` catalog entries (upserted)
 - `ProjectMaterial` records linking materials to the project
+
+**`PATCH /invoice/materials/<material_id>`** — Update a material's CO₂ value post-confirmation. Accepts `{ total_co2_kg }` (negative values allowed for biogenic carbon). Sets `manual_override=True`, `confidence_score=90`, `flagged=False`.
 
 ### NOBB Lookup (`/nobb`)
 
@@ -204,14 +212,14 @@ Stateless parser for EHF (Elektronisk Handelsformat) invoices following UBL 2.0 
 - Supplier and buyer party info (name, org number, address)
 - Line items with GTIN (from `StandardItemIdentification`, supports both `schemeID="GTIN"` and BEAst Supply 4.0 `schemeID="0160"`) and NOBB number (from `AdditionalItemProperty`)
 
-Items without a GTIN or NOBB number are flagged for manual review.
+Items without a GTIN or NOBB number are flagged for manual review. Items with a NOBB match but no EPD/GWP data are also flagged.
 
 ### Invoice Enrichment (`invoice_enrichment.py`)
 
 Takes parsed EHF data and enriches each line item:
 1. Checks the `materials` catalog table first (avoids redundant API calls)
 2. Falls back to NOBB API for cache misses
-3. Adds `enriched` (bool), `flagged` (bool), and `nobb_data` (dict) to each item
+3. Adds `enriched` (bool), `flagged` (bool), and `nobb_data` (dict) to each item. Items are flagged if they lack GWP data (not just missing identifiers).
 
 ### Material Service (`material_service.py`)
 
@@ -228,8 +236,9 @@ Orchestrates the full invoice processing pipeline:
 | Scenario | Score |
 |----------|-------|
 | EPD data available, CO₂ calculated | 80 |
+| Manual CO₂ override by user | 90 |
 | No EPD but item identified | 50 |
-| Item flagged (no GTIN/NOBB) | 20 |
+| Item flagged (no GTIN/NOBB or no EPD) | 20 |
 
 ### Transport Parser (`transport_parser.py`)
 

@@ -123,8 +123,10 @@ Each feature encapsulates its own components, hooks, API calls, types, and tests
   - Project sidebar with details and confidence gauge
 - `KpiCard` — Stat card displaying a label, value, unit, and icon with accent background.
 - `ProjectCard` — Clickable project card showing name, status, customer, and project number.
-- `ProjectSidebar` — Right-side panel showing project metadata and overall confidence score.
+- `ProjectSidebar` — Right-side panel showing project metadata, overall confidence score, flagged items widget, and confidence info link.
 - `ConfidenceGauge` — Visual confidence indicator.
+- `ConfidenceInfo` — Dialog explaining the confidence score scale (0–49 Lav, 50–79 Middels, 80–100 Høy) with tips on how to improve the score.
+- `FlaggedItems` — Sidebar widget listing flagged materials and transports that need attention. Supports inline CO₂ correction for materials and navigation to transport tab. Dismissable per-session ("Skjul") or permanently per-project (X button, stored in localStorage).
 - `CreateProjectDialog` — Form dialog for creating new projects with name, project number, and customer.
 
 **Hooks:**
@@ -153,8 +155,9 @@ Each feature encapsulates its own components, hooks, API calls, types, and tests
 ### invoice
 
 **Components:**
-- `InvoiceUpload` — File drop zone for EHF XML upload. After upload, displays uploaded invoices grouped by source with material line items.
-- `InvoiceGroupCard` — Collapsible card showing an invoice's supplier, date, and material line items with CO₂ data.
+- `InvoiceUpload` — Two-phase invoice flow: file drop zone for EHF XML → parse/preview → user review → confirm. After confirmation, displays uploaded invoices grouped by source with material line items.
+- `InvoicePreviewTable` — Review table shown after parsing. Displays enriched line items with flags ("Mangler ID", "Mangler EPD"), inline CO₂ input for flagged items, hover pencil edit for items with CO₂, override tracking, and summary badges. Supports fullscreen expand (80vw dialog). Negative CO₂ values allowed (biogenic carbon).
+- `InvoiceGroupCard` — Collapsible card showing a confirmed invoice's supplier, date, and material line items. Each row has inline CO₂ editing via hover pencil with "Korrigert" badge for overridden values.
 - `InvoiceTable` — Table displaying material line items with product name, GTIN, quantity, price, CO₂, and EPD badge.
 - `InvoiceTotalCo2` — Summary bar showing total CO₂ for an invoice group.
 - `EpdBadge` — Badge indicating EPD status (has EPD / no EPD / flagged).
@@ -163,17 +166,17 @@ Each feature encapsulates its own components, hooks, API calls, types, and tests
 **Hooks:**
 - `useInvoiceParse` — Parses an uploaded EHF file (preview, no persistence).
 - `useProjectMaterials` — Fetches all materials for a project grouped by invoice.
-- `useUploadInvoice` — Mutation to upload and persist an invoice for a project.
+- `useUpdateMaterial` — Mutation to update a material's CO₂ value (calls `PATCH /invoice/materials/:id`).
 - `useDeleteInvoice` — Optimistic delete with inline undo bar and CO₂ summary cache adjustment.
 
 **Types:**
-- `ParsedInvoice`, `InvoiceLineItem`, `NobbData`, `EpdData`
+- `InvoiceResponse`, `LineItem`, `NobbData`, `EpdData`, `ProjectInvoiceGroup`, `ProjectMaterialItem`
 
 ### transport
 
 **Components:**
 - `TransportUpload` — File drop zone for Abax XML upload plus manual trip entry toggle. After parsing, shows trip table with confirm/remove actions. Below, displays previously uploaded reports.
-- `TransportTripTable` — Table of parsed trips with vehicle info, distance, CO₂, and confidence. Supports per-trip removal and bulk confirm.
+- `TransportTripTable` — Table of parsed trips with vehicle info, distance, CO₂, and confidence. Supports per-trip removal, bulk confirm, and fullscreen expand (80vw dialog).
 - `TransportManualInput` — Manual trip entry form.
 - `ReportGroupCard` — Collapsible card for an uploaded transport report with its trips.
 - `TransportTotalCo2` — Summary bar for transport CO₂.
@@ -261,7 +264,7 @@ TanStack Query configured with:
 | `FileDropZone` | Drag-and-drop file upload area with visual feedback |
 | `SelectedFileBar` | Displays selected file name with upload/clear actions and loading state |
 | `ItemListPanel` | Generic searchable list with add button and empty state. Used for projects and org members. |
-| `CollapsibleGroupCard` | Expandable card for grouped data (invoices, transport reports) |
+| `CollapsibleGroupCard` | Expandable card for grouped data (invoices, transport reports) with fullscreen expand option (80vw dialog) |
 | `ErrorMessage` | Inline error display with optional suggestion text (renders `ApiError.suggestion` when present) |
 | `InlineUndoBar` | Inline undo bar with message and "Angre" button, shown in-place after optimistic deletion |
 | `FormDialog` | Generic dialog wrapper for forms |
