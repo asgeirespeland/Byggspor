@@ -350,13 +350,11 @@ def update_material(material_id: int):
 
     try:
         total_co2_kg = float(body["total_co2_kg"])
-        if total_co2_kg < 0:
-            raise ValueError("negative")
     except (ValueError, TypeError):
         raise ApiError(
-            "total_co2_kg må være et positivt tall.",
+            "total_co2_kg må være et tall.",
             code="INVALID_FIELD",
-            suggestion="Oppgi CO₂-verdi som et tall (f.eks. 12.5).",
+            suggestion="Oppgi CO₂-verdi som et tall (f.eks. 12.5 eller -271).",
         )
 
     session = g.db
