@@ -3,6 +3,7 @@ from __future__ import annotations
 from flask import Blueprint, g, jsonify, request
 from sqlalchemy.exc import IntegrityError
 
+from app.errors import ApiError
 from app.models.organization import Organization, OrgType
 from app.models.organization_member import OrganizationMember
 from app.models.project import Project, ProjectStatus
@@ -44,19 +45,29 @@ def create_project():
     """Create a new project linked to the authenticated user's organization."""
     current_user_id = getattr(g, "current_user_id", None)
     if not current_user_id:
-        return jsonify(error="Unauthorized"), 401
+        raise ApiError("Ikke autentisert.", code="UNAUTHORIZED", status=401)
 
     payload = request.get_json(silent=True) or {}
 
     name = payload.get("name", "").strip()
     if not name:
-        return jsonify(error="name is required"), 400
+        raise ApiError(
+            "Prosjektnavn er påkrevd.",
+            code="MISSING_FIELD",
+            suggestion="Oppgi et navn for prosjektet.",
+        )
 
     session = g.db
 
     organization_id = _get_user_org_id(session, current_user_id)
     if not organization_id:
-        return jsonify(error="User is not a member of any organization"), 400
+        raise ApiError(
+            "Brukeren er ikke medlem av noen organisasjon.",
+            code="NO_ORGANIZATION",
+            suggestion=(
+                "Du må være tilknyttet en organisasjon for å opprette prosjekter."
+            ),
+        )
 
     customer_id = payload.get("customer_id") or None
     customer_name = (payload.get("customer_name") or "").strip()
@@ -90,7 +101,11 @@ def create_project():
         session.commit()
     except IntegrityError:
         session.rollback()
-        return jsonify(error="Conflict: duplicate or invalid data"), 409
+        raise ApiError(
+            "Kunne ikke opprette prosjektet — duplikat eller ugyldig data.",
+            code="CONFLICT",
+            status=409,
+        )
 
     session.refresh(project)
     return jsonify(_serialize_project(project)), 201
@@ -101,13 +116,17 @@ def list_projects():
     """Return all projects belonging to the authenticated user's organization."""
     current_user_id = getattr(g, "current_user_id", None)
     if not current_user_id:
-        return jsonify(error="Unauthorized"), 401
+        raise ApiError("Ikke autentisert.", code="UNAUTHORIZED", status=401)
 
     session = g.db
 
     organization_id = _get_user_org_id(session, current_user_id)
     if not organization_id:
-        return jsonify(error="User is not a member of any organization"), 400
+        raise ApiError(
+            "Brukeren er ikke medlem av noen organisasjon.",
+            code="NO_ORGANIZATION",
+            suggestion="Du må være tilknyttet en organisasjon for å se prosjekter.",
+        )
 
     projects = (
         session.query(Project)
@@ -124,13 +143,16 @@ def get_project(project_id: int):
     """Return a single project by ID, scoped to the user's organization."""
     current_user_id = getattr(g, "current_user_id", None)
     if not current_user_id:
-        return jsonify(error="Unauthorized"), 401
+        raise ApiError("Ikke autentisert.", code="UNAUTHORIZED", status=401)
 
     session = g.db
 
     organization_id = _get_user_org_id(session, current_user_id)
     if not organization_id:
-        return jsonify(error="User is not a member of any organization"), 400
+        raise ApiError(
+            "Brukeren er ikke medlem av noen organisasjon.",
+            code="NO_ORGANIZATION",
+        )
 
     project = (
         session.query(Project)
@@ -142,6 +164,6 @@ def get_project(project_id: int):
     )
 
     if not project:
-        return jsonify(error="Project not found"), 404
+        raise ApiError("Prosjektet ble ikke funnet.", code="NOT_FOUND", status=404)
 
     return jsonify(_serialize_project(project))

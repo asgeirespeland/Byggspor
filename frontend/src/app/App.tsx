@@ -20,7 +20,7 @@ export default function App() {
           <BrowserRouter>
             <AppRoutes />
           </BrowserRouter>
-          <Toaster position="bottom-right" richColors />
+          <Toaster position="top-right" richColors />
         </TooltipProvider>
       </QueryClientProvider>
     </ClerkProvider>

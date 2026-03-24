@@ -111,6 +111,22 @@ def _parse_trip(element: ET.Element) -> dict:
     return trip
 
 
+def validate_turrapport_root(root: ET.Element) -> None:
+    """Check that the XML root looks like an Abax Turrapport.
+
+    Abax exports use <DocumentElement> as root with child elements
+    that contain trip fields (Reg.nr, Distanse, etc.).
+
+    Raises:
+        ValueError: If the document is not a recognized Abax Turrapport.
+    """
+    if root.tag != "DocumentElement":
+        raise ValueError(
+            f"Forventet Abax Turrapport (DocumentElement), "
+            f"men fant rotelementet «{root.tag.split('}')[-1]}»."
+        )
+
+
 def parse_turrapport(xml_content: str | bytes) -> dict:
     """Parse an Abax Turrapport XML and return structured trip data.
 
@@ -123,8 +139,10 @@ def parse_turrapport(xml_content: str | bytes) -> dict:
 
     Raises:
         ET.ParseError: If the XML is malformed.
+        ValueError: If the XML is not a recognized Abax Turrapport.
     """
     root = ET.fromstring(xml_content)
+    validate_turrapport_root(root)
 
     trips = []
     for entry in root:

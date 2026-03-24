@@ -1,3 +1,5 @@
+import ErrorMessage from '@/shared/components/ErrorMessage'
+import InlineUndoBar from '@/shared/components/InlineUndoBar'
 import FileDropZone from '@/shared/components/FileDropZone'
 import SelectedFileBar from '@/shared/components/SelectedFileBar'
 import { useFileSelect } from '@/shared/hooks/useFileSelect'
@@ -21,7 +23,8 @@ export default function InvoiceUpload({ projectId }: Props) {
   const uploadMutation = useUploadInvoice(projectId)
   const { data: invoiceGroups, isLoading } = useProjectMaterials(projectId)
   const showLoading = useDeferredLoading(isLoading)
-  const deleteMutation = useDeleteInvoice(projectId)
+  const { deleteInvoice, pendingInvoiceId, undoInvoiceDelete } =
+    useDeleteInvoice(projectId)
 
   const handleUpload = () => {
     if (!selectedFile) return
@@ -65,13 +68,10 @@ export default function InvoiceUpload({ projectId }: Props) {
         />
       )}
 
-      {uploadMutation.error && (
-        <div className="rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
-          {uploadMutation.error instanceof Error
-            ? uploadMutation.error.message
-            : 'Noe gikk galt'}
-        </div>
-      )}
+      <ErrorMessage
+        error={uploadMutation.error}
+        fallback="Kunne ikke laste opp faktura"
+      />
 
       {showLoading && (
         <p className="text-sm text-gray-400 text-center py-4">
@@ -79,24 +79,33 @@ export default function InvoiceUpload({ projectId }: Props) {
         </p>
       )}
 
-      {invoiceGroups && invoiceGroups.length > 0 && (
+      {(invoiceGroups && invoiceGroups.length > 0) ||
+      pendingInvoiceId != null ? (
         <div className="space-y-3">
-          <p className="text-xs font-semibold uppercase tracking-wide text-gray-400">
-            Opplastede fakturaer ({invoiceGroups.length})
-          </p>
-          {invoiceGroups.map((group) => (
+          {invoiceGroups && invoiceGroups.length > 0 && (
+            <p className="text-xs font-semibold uppercase tracking-wide text-gray-400">
+              Opplastede fakturaer ({invoiceGroups.length})
+            </p>
+          )}
+          {invoiceGroups?.map((group) => (
             <InvoiceGroupCard
               key={group.invoice_id}
               group={group}
               onDelete={() => {
                 if (group.invoice_id != null)
-                  deleteMutation.mutate(group.invoice_id)
+                  void deleteInvoice(group.invoice_id)
               }}
-              isDeleting={deleteMutation.isPending}
+              isDeleting={false}
             />
           ))}
+          {pendingInvoiceId != null && (
+            <InlineUndoBar
+              message="Faktura slettet"
+              onUndo={undoInvoiceDelete}
+            />
+          )}
         </div>
-      )}
+      ) : null}
     </div>
   )
 }

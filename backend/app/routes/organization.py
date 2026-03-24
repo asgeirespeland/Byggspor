@@ -3,6 +3,7 @@ from __future__ import annotations
 from flask import Blueprint, g, jsonify, request
 from sqlalchemy.exc import IntegrityError
 
+from app.errors import ApiError
 from app.middleware.roles import require_org_role
 from app.models.organization import Organization, OrgType
 from app.models.organization_member import OrganizationMember, OrgRole
@@ -82,22 +83,25 @@ def create_organization():
     """Create organization and auto-assign creator as OWNER."""
     current_user_id = getattr(g, "current_user_id", None)
     if not current_user_id:
-        return jsonify(error="Unauthorized"), 401
+        raise ApiError("Ikke autentisert.", code="UNAUTHORIZED", status=401)
 
     payload = request.get_json(silent=True) or {}
     name = (payload.get("name") or "").strip()
     org_type = _parse_org_type(payload.get("org_type"))
 
     if not name:
-        return jsonify(error="name is required"), 400
+        raise ApiError("Organisasjonsnavn er påkrevd.", code="MISSING_FIELD")
 
     if not org_type:
-        return jsonify(error="org_type must be one of COMPANY or CUSTOMER"), 400
+        raise ApiError(
+            "org_type må være COMPANY eller CUSTOMER.",
+            code="INVALID_FIELD",
+        )
 
     session = g.db
     user = session.get(User, current_user_id)
     if not user:
-        return jsonify(error="Unauthorized"), 401
+        raise ApiError("Ikke autentisert.", code="UNAUTHORIZED", status=401)
 
     org = Organization(
         name=name,
@@ -122,7 +126,11 @@ def create_organization():
         session.commit()
     except IntegrityError:
         session.rollback()
-        return jsonify(error="Conflict: duplicate or invalid data"), 409
+        raise ApiError(
+            "Kunne ikke opprette organisasjonen — duplikat eller ugyldig data.",
+            code="CONFLICT",
+            status=409,
+        )
 
     session.refresh(org)
     return jsonify(_serialize_org(org)), 201
@@ -135,7 +143,7 @@ def get_organization(organization_id: int):
     session = g.db
     org = session.get(Organization, organization_id)
     if not org:
-        return jsonify(error="Organization not found"), 404
+        raise ApiError("Organisasjonen ble ikke funnet.", code="NOT_FOUND", status=404)
     return jsonify(_serialize_org(org))
 
 
@@ -148,12 +156,15 @@ def update_organization(organization_id: int):
     session = g.db
     org = session.get(Organization, organization_id)
     if not org:
-        return jsonify(error="Organization not found"), 404
+        raise ApiError("Organisasjonen ble ikke funnet.", code="NOT_FOUND", status=404)
 
     if "name" in payload:
         new_name = (payload.get("name") or "").strip()
         if not new_name:
-            return jsonify(error="name cannot be empty"), 400
+            raise ApiError(
+                "Organisasjonsnavn kan ikke være tomt.",
+                code="INVALID_FIELD",
+            )
         org.name = new_name
     if "org_number" in payload:
         org.org_number = payload.get("org_number")
@@ -167,14 +178,21 @@ def update_organization(organization_id: int):
     if "org_type" in payload:
         parsed_org_type = _parse_org_type(payload.get("org_type"))
         if not parsed_org_type:
-            return jsonify(error="org_type must be one of COMPANY or CUSTOMER"), 400
+            raise ApiError(
+                "org_type må være COMPANY eller CUSTOMER.",
+                code="INVALID_FIELD",
+            )
         org.org_type = parsed_org_type
 
     try:
         session.commit()
     except IntegrityError:
         session.rollback()
-        return jsonify(error="Conflict: duplicate or invalid data"), 409
+        raise ApiError(
+            "Kunne ikke oppdatere organisasjonen — duplikat eller ugyldig data.",
+            code="CONFLICT",
+            status=409,
+        )
 
     session.refresh(org)
     return jsonify(_serialize_org(org))
@@ -187,7 +205,7 @@ def get_organization_members(organization_id: int):
     session = g.db
     org = session.get(Organization, organization_id)
     if not org:
-        return jsonify(error="Organization not found"), 404
+        raise ApiError("Organisasjonen ble ikke funnet.", code="NOT_FOUND", status=404)
 
     members = (
         session.query(OrganizationMember, User)
@@ -212,20 +230,23 @@ def add_organization_member(organization_id: int):
 
     user_id = payload.get("user_id")
     if user_id is None:
-        return jsonify(error="user_id is required"), 400
+        raise ApiError("user_id er påkrevd.", code="MISSING_FIELD")
 
     role = _parse_org_role(payload.get("role"))
     if not role:
-        return jsonify(error="role must be one of OWNER, ADMIN, MEMBER, VIEWER"), 400
+        raise ApiError(
+            "role må være en av OWNER, ADMIN, MEMBER, VIEWER.",
+            code="INVALID_FIELD",
+        )
 
     session = g.db
     org = session.get(Organization, organization_id)
     if not org:
-        return jsonify(error="Organization not found"), 404
+        raise ApiError("Organisasjonen ble ikke funnet.", code="NOT_FOUND", status=404)
 
     user = session.get(User, user_id)
     if not user:
-        return jsonify(error="User not found"), 404
+        raise ApiError("Brukeren ble ikke funnet.", code="NOT_FOUND", status=404)
 
     existing = (
         session.query(OrganizationMember)
@@ -243,7 +264,11 @@ def add_organization_member(organization_id: int):
             session.commit()
         except IntegrityError:
             session.rollback()
-            return jsonify(error="Conflict: duplicate or invalid data"), 409
+            raise ApiError(
+                "Duplikat eller ugyldig data.",
+                code="CONFLICT",
+                status=409,
+            )
         session.refresh(existing)
         return jsonify(_serialize_member(existing, user))
 
@@ -258,7 +283,11 @@ def add_organization_member(organization_id: int):
         session.commit()
     except IntegrityError:
         session.rollback()
-        return jsonify(error="Conflict: duplicate or invalid data"), 409
+        raise ApiError(
+            "Duplikat eller ugyldig data.",
+            code="CONFLICT",
+            status=409,
+        )
 
     session.refresh(member)
     return jsonify(_serialize_member(member, user)), 201
@@ -282,7 +311,7 @@ def remove_organization_member(organization_id: int, user_id: int):
     )
 
     if not membership:
-        return jsonify(error="Membership not found"), 404
+        raise ApiError("Medlemskapet ble ikke funnet.", code="NOT_FOUND", status=404)
 
     session.delete(membership)
     session.commit()

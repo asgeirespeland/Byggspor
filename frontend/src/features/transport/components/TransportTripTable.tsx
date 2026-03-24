@@ -21,7 +21,7 @@ export default function TransportTripTable({
   confirming,
 }: TransportTripTableProps) {
   const [selected, setSelected] = useState<Set<number>>(
-    () => new Set(data.trips.map((t) => t.project_transport_id)),
+    () => new Set(data.trips.map((t) => t.trip_index)),
   )
   const [editVehicle, setEditVehicle] = useState<(typeof data.trips)[0] | null>(
     null,
@@ -40,23 +40,24 @@ export default function TransportTripTable({
     if (selected.size === data.trips.length) {
       setSelected(new Set())
     } else {
-      setSelected(new Set(data.trips.map((t) => t.project_transport_id)))
+      setSelected(new Set(data.trips.map((t) => t.trip_index)))
     }
   }
 
   return (
     <div className="space-y-4">
-      {/* Metadata */}
+      {/* Metadata — derived from current trips so it updates on removal */}
       <div className="flex flex-wrap gap-3">
         <span className="rounded-full bg-gray-100 px-3 py-1 text-xs font-medium text-gray-600">
-          {data.project_transports_count} turer
+          {data.trips.length} turer
         </span>
         <span className="rounded-full bg-gray-100 px-3 py-1 text-xs font-medium text-gray-600">
-          {data.vehicles_count} kjøretøy
+          {new Set(data.trips.map((t) => t.vehicle_id).filter(Boolean)).size}{' '}
+          kjøretøy
         </span>
-        {data.flagged_count > 0 && (
+        {data.trips.filter((t) => t.flagged).length > 0 && (
           <span className="rounded-full bg-amber-100 px-3 py-1 text-xs font-medium text-amber-700">
-            {data.flagged_count} mangler utslippsdata
+            {data.trips.filter((t) => t.flagged).length} mangler utslippsdata
           </span>
         )}
       </div>
@@ -101,11 +102,11 @@ export default function TransportTripTable({
           <tbody className="divide-y divide-gray-100">
             {data.trips.map((trip) => (
               <tr
-                key={trip.project_transport_id}
+                key={trip.trip_index}
                 className={`transition-colors ${
                   trip.flagged
                     ? 'bg-amber-50'
-                    : selected.has(trip.project_transport_id)
+                    : selected.has(trip.trip_index)
                       ? 'bg-white'
                       : 'bg-gray-50'
                 }`}
@@ -113,8 +114,8 @@ export default function TransportTripTable({
                 <td className="px-4 py-3">
                   <input
                     type="checkbox"
-                    checked={selected.has(trip.project_transport_id)}
-                    onChange={() => toggleTrip(trip.project_transport_id)}
+                    checked={selected.has(trip.trip_index)}
+                    onChange={() => toggleTrip(trip.trip_index)}
                     className="rounded border-gray-300"
                   />
                 </td>
@@ -143,7 +144,7 @@ export default function TransportTripTable({
                 </td>
                 <td className="px-4 py-3">
                   <button
-                    onClick={() => onRemoveTrip(trip.project_transport_id)}
+                    onClick={() => onRemoveTrip(trip.trip_index)}
                     className="text-xs text-red-400 transition-colors hover:text-red-600"
                   >
                     Fjern

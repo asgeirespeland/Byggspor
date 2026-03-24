@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { Pencil, Trash2, Check, X } from 'lucide-react'
 import CollapsibleGroupCard from '@/shared/components/CollapsibleGroupCard'
+import InlineUndoBar from '@/shared/components/InlineUndoBar'
 import type {
   ProjectReportGroup,
   ProjectTripItem,
@@ -13,6 +14,8 @@ interface Props {
   onDeleteTrip: (tripId: number) => void
   onUpdateTrip: (tripId: number, data: TripUpdateInput) => void
   updatingTripId: number | null
+  pendingTripId: number | null
+  onUndoTripDelete: () => void
 }
 
 interface TripRowProps {
@@ -137,14 +140,14 @@ function TripRow({ trip, onDelete, onUpdate, isUpdating }: TripRowProps) {
           <button
             type="button"
             onClick={startEdit}
-            className="text-gray-400 transition-colors hover:text-blue-500"
+            className="text-gray-400 transition-colors hover:text-blue-500 cursor-pointer"
           >
             <Pencil className="h-3.5 w-3.5" />
           </button>
           <button
             type="button"
             onClick={onDelete}
-            className="text-gray-400 transition-colors hover:text-red-500"
+            className="text-gray-400 transition-colors hover:text-red-500 cursor-pointer"
           >
             <Trash2 className="h-3.5 w-3.5" />
           </button>
@@ -160,6 +163,8 @@ export default function ReportGroupCard({
   onDeleteTrip,
   onUpdateTrip,
   updatingTripId,
+  pendingTripId,
+  onUndoTripDelete,
 }: Props) {
   const totalCo2 = group.trips.reduce(
     (sum, t) => sum + (t.total_co2_kg ?? 0),
@@ -210,6 +215,9 @@ export default function ReportGroupCard({
           ))}
         </tbody>
       </table>
+      {pendingTripId != null && (
+        <InlineUndoBar message="Tur slettet" onUndo={onUndoTripDelete} />
+      )}
     </CollapsibleGroupCard>
   )
 }

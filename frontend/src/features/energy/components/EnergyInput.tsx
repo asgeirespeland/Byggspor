@@ -3,6 +3,7 @@ import { Zap, Trash2, Loader2, Pencil, Check, X } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
+import InlineUndoBar from '@/shared/components/InlineUndoBar'
 import { useDeferredLoading } from '@/shared/hooks/useDeferredLoading'
 import {
   useEnergies,
@@ -32,7 +33,8 @@ export default function EnergyInput({ projectId }: EnergyInputProps) {
   const { data: zones } = usePriceZones()
   const calculateMutation = useCalculateEnergy(projectId)
   const updateMutation = useUpdateEnergy(projectId)
-  const deleteEnergy = useDeleteEnergy(projectId)
+  const { deleteEnergy, pendingEnergyId, undoEnergyDelete } =
+    useDeleteEnergy(projectId)
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
@@ -205,19 +207,26 @@ export default function EnergyInput({ projectId }: EnergyInputProps) {
         </div>
       )}
 
-      {entries && entries.length === 0 && !entriesLoading && (
-        <div className="flex flex-col items-center justify-center py-10 text-center">
-          <div className="mx-auto mb-3 flex h-10 w-10 items-center justify-center rounded-xl bg-yellow-50">
-            <Zap className="h-5 w-5 text-yellow-500" />
-          </div>
-          <p className="text-sm text-gray-500">
-            Ingen energiregistreringer ennå
-          </p>
-          <p className="mt-0.5 text-xs text-gray-400">
-            Legg til strømforbruk i skjemaet over
-          </p>
-        </div>
+      {pendingEnergyId != null && (
+        <InlineUndoBar message="Energidata slettet" onUndo={undoEnergyDelete} />
       )}
+
+      {entries &&
+        entries.length === 0 &&
+        !entriesLoading &&
+        pendingEnergyId == null && (
+          <div className="flex flex-col items-center justify-center py-10 text-center">
+            <div className="mx-auto mb-3 flex h-10 w-10 items-center justify-center rounded-xl bg-yellow-50">
+              <Zap className="h-5 w-5 text-yellow-500" />
+            </div>
+            <p className="text-sm text-gray-500">
+              Ingen energiregistreringer ennå
+            </p>
+            <p className="mt-0.5 text-xs text-gray-400">
+              Legg til strømforbruk i skjemaet over
+            </p>
+          </div>
+        )}
     </div>
   )
 }
@@ -352,7 +361,7 @@ function EnergyRow({
           <button
             type="button"
             onClick={startEdit}
-            className="text-gray-400 transition-colors hover:text-blue-500"
+            className="text-gray-400 transition-colors hover:text-blue-500 cursor-pointer"
           >
             <Pencil className="h-3.5 w-3.5" />
           </button>
@@ -360,7 +369,7 @@ function EnergyRow({
             type="button"
             onClick={onDelete}
             disabled={isDeleting}
-            className="text-gray-400 transition-colors hover:text-red-500"
+            className="text-gray-400 transition-colors hover:text-red-500 cursor-pointer"
           >
             <Trash2 className="h-3.5 w-3.5" />
           </button>

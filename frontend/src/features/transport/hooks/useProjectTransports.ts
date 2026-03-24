@@ -1,3 +1,4 @@
+import { useState } from 'react'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { useAuth } from '@clerk/react'
 import { toast } from 'sonner'
@@ -10,6 +11,7 @@ import {
   type ProjectReportGroup,
   type TripUpdateInput,
 } from '../api/projectTransports'
+import { useOptimisticDelete } from '@/shared/hooks/useOptimisticDelete'
 
 export function useProjectTransports(projectId: number) {
   const { getToken } = useAuth()
@@ -25,116 +27,67 @@ export function useProjectTransports(projectId: number) {
 }
 
 export function useDeleteTransportReport(projectId: number) {
-  const { getToken } = useAuth()
-  const queryClient = useQueryClient()
-
-  return async (reportId: number) => {
-    const token = await getToken()
-    if (!token) {
-      toast.error('Ikke autentisert')
-      return
-    }
-
-    const snapshot = queryClient.getQueryData<ProjectReportGroup[]>([
-      'project-transports',
-      projectId,
-    ])
-    queryClient.setQueryData<ProjectReportGroup[]>(
-      ['project-transports', projectId],
-      (old) => old?.filter((g) => g.report_id !== reportId) ?? [],
-    )
-
-    let undone = false
-    let called = false
-    const fire = async () => {
-      if (undone || called) return
-      called = true
-      try {
-        await deleteTransportReport(reportId, token)
-        queryClient.invalidateQueries({ queryKey: ['co2-summary', projectId] })
-      } catch (err) {
-        if (snapshot)
-          queryClient.setQueryData(['project-transports', projectId], snapshot)
-        toast.error(
-          err instanceof Error ? err.message : 'Kunne ikke slette kjørerapport',
-        )
+  const { handleDelete, pendingId, undo } = useOptimisticDelete<
+    ProjectReportGroup[]
+  >({
+    projectId,
+    listQueryKey: ['project-transports', projectId],
+    co2Category: 'transport',
+    prepare: (snapshot, id) => {
+      const trips = snapshot?.find((g) => g.report_id === id)?.trips ?? []
+      return {
+        updatedList: snapshot?.filter((g) => g.report_id !== id) ?? [],
+        co2Delta: trips.reduce((sum, t) => sum + (t.total_co2_kg ?? 0), 0),
+        entryCountDelta: trips.length,
       }
-    }
+    },
+    deleteFn: deleteTransportReport,
+    errorMessage: 'Kunne ikke slette kjørerapport',
+  })
 
-    toast.success('Kjørerapport slettet', {
-      action: {
-        label: 'Angre',
-        onClick: () => {
-          undone = true
-          if (snapshot)
-            queryClient.setQueryData(
-              ['project-transports', projectId],
-              snapshot,
-            )
-        },
-      },
-      onAutoClose: fire,
-      onDismiss: fire,
-    })
+  return {
+    deleteReport: handleDelete,
+    pendingReportId: pendingId,
+    undoReportDelete: undo,
   }
 }
 
 export function useDeleteTrip(projectId: number) {
-  const { getToken } = useAuth()
-  const queryClient = useQueryClient()
+  const [groupId, setGroupId] = useState<number | null>(null)
 
-  return async (tripId: number) => {
-    const token = await getToken()
-    if (!token) {
-      toast.error('Ikke autentisert')
-      return
-    }
-
-    const snapshot = queryClient.getQueryData<ProjectReportGroup[]>([
-      'project-transports',
-      projectId,
-    ])
-    queryClient.setQueryData<ProjectReportGroup[]>(
-      ['project-transports', projectId],
-      (old) =>
-        old?.map((g) => ({
-          ...g,
-          trips: g.trips.filter((t) => t.id !== tripId),
-        })) ?? [],
-    )
-
-    let undone = false
-    let called = false
-    const fire = async () => {
-      if (undone || called) return
-      called = true
-      try {
-        await deleteTrip(tripId, token)
-        queryClient.invalidateQueries({ queryKey: ['co2-summary', projectId] })
-      } catch (err) {
-        if (snapshot)
-          queryClient.setQueryData(['project-transports', projectId], snapshot)
-        toast.error(
-          err instanceof Error ? err.message : 'Kunne ikke slette tur',
-        )
+  const { handleDelete, pendingId, undo } = useOptimisticDelete<
+    ProjectReportGroup[]
+  >({
+    projectId,
+    listQueryKey: ['project-transports', projectId],
+    co2Category: 'transport',
+    prepare: (snapshot, tripId) => {
+      const trip = snapshot
+        ?.flatMap((g) => g.trips)
+        .find((t) => t.id === tripId)
+      setGroupId(
+        snapshot?.find((g) => g.trips.some((t) => t.id === tripId))
+          ?.report_id ?? null,
+      )
+      return {
+        updatedList:
+          snapshot?.map((g) => ({
+            ...g,
+            trips: g.trips.filter((t) => t.id !== tripId),
+          })) ?? [],
+        co2Delta: trip?.total_co2_kg ?? 0,
+        entryCountDelta: 1,
       }
-    }
+    },
+    deleteFn: deleteTrip,
+    errorMessage: 'Kunne ikke slette tur',
+  })
 
-    toast.success('Tur slettet', {
-      action: {
-        label: 'Angre',
-        onClick: () => {
-          undone = true
-          if (snapshot)
-            queryClient.setQueryData(
-              ['project-transports', projectId],
-              snapshot,
-            )
-        },
-      },
-      onAutoClose: fire,
-      onDismiss: fire,
-    })
+  return {
+    deleteTrip: handleDelete,
+    pendingTripId: pendingId,
+    pendingTripGroupId: pendingId != null ? groupId : null,
+    undoTripDelete: undo,
   }
 }
 

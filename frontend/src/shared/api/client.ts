@@ -9,6 +9,33 @@ type RequestOptions = {
 }
 
 /**
+ * Structured API error with optional machine-readable code and user suggestion.
+ */
+export class ApiError extends Error {
+  code: string
+  suggestion: string | null
+
+  constructor(message: string, code: string, suggestion: string | null) {
+    super(message)
+    this.name = 'ApiError'
+    this.code = code
+    this.suggestion = suggestion
+  }
+}
+
+/** Extract a structured error from a failed API response body. */
+function toApiError(
+  payload: Record<string, unknown> | null,
+  status: number,
+): ApiError {
+  const message =
+    (payload?.error as string) ?? `Forespørselen feilet (${status})`
+  const code = (payload?.code as string) ?? 'ERROR'
+  const suggestion = (payload?.suggestion as string) ?? null
+  return new ApiError(message, code, suggestion)
+}
+
+/**
  * Generic JSON request helper for backend endpoints.
  * Adds Authorization header when a bearer token is provided.
  */
@@ -35,10 +62,7 @@ export async function apiRequest<T>(
   const payload = await res.json().catch(() => null)
 
   if (!res.ok) {
-    const message =
-      (payload as { error?: string } | null)?.error ??
-      `Request failed (${res.status})`
-    throw new Error(message)
+    throw toApiError(payload as Record<string, unknown> | null, res.status)
   }
 
   return payload as T
@@ -70,7 +94,7 @@ export async function postFile<T>(
   const body = await res.json()
 
   if (!res.ok) {
-    throw new Error(body.error ?? `Request failed (${res.status})`)
+    throw toApiError(body as Record<string, unknown>, res.status)
   }
 
   return body as T

@@ -9,7 +9,7 @@ export interface Vehicle {
 }
 
 export interface Trip {
-  project_transport_id: number
+  trip_index: number
   driver_name: string | null
   registration_number: string
   start_address: string | null
@@ -22,14 +22,15 @@ export interface Trip {
   total_co2_kg: number | null
   confidence_score: number
   flagged: boolean
+  vehicle_id: number | null
   vehicle: Vehicle | null
 }
 
 export interface TransportParseResponse {
-  transport_report_id: number
   project_transports_count: number
   vehicles_count: number
   flagged_count: number
+  file_name: string | null
   trips: Trip[]
 }
 

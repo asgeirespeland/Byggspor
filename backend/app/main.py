@@ -3,12 +3,14 @@ from flask import Flask, g, jsonify
 from flask_cors import CORS
 
 from app.database import SessionLocal
+from app.errors import register_error_handlers
 from app.middleware.auth import authenticate_request
 
 load_dotenv()
 
 app = Flask(__name__)
 CORS(app)
+register_error_handlers(app)
 
 
 @app.before_request

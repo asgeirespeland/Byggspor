@@ -50,7 +50,7 @@ export default function CollapsibleGroupCard({
             onDelete()
           }}
           disabled={isDeleting}
-          className="text-gray-300 hover:text-red-500 transition-colors shrink-0"
+          className="text-gray-300 hover:text-red-500 transition-colors shrink-0 cursor-pointer"
         >
           <Trash2 className="h-3.5 w-3.5" />
         </button>
