@@ -104,7 +104,14 @@ def enrich_invoice(parsed_invoice: dict, session: Session | None = None) -> dict
             catalog_result = _check_catalog(session, gtin, nobb_number)
             if catalog_result is not None:
                 item["enriched"] = True
-                item["flagged"] = False
+                # Flag if catalog entry lacks GWP data
+                has_gwp = False
+                epd = catalog_result.get("epd")
+                if epd:
+                    stages = epd.get("gwp_stages", {})
+                    a1a3 = stages.get("a1_a3") or stages.get("A1-A3")
+                    has_gwp = isinstance(a1a3, dict) and a1a3.get("total") is not None
+                item["flagged"] = not has_gwp
                 item["nobb_data"] = catalog_result
                 continue
 
@@ -137,7 +144,14 @@ def enrich_invoice(parsed_invoice: dict, session: Session | None = None) -> dict
             item["nobb_data"] = None
         else:
             item["enriched"] = True
-            item["flagged"] = False
+            # Flag items missing EPD — we can't compute CO₂ without GWP data
+            has_gwp = False
+            epd = result.get("epd")
+            if epd:
+                stages = epd.get("gwp_stages", {})
+                a1a3 = stages.get("a1_a3") or stages.get("A1-A3")
+                has_gwp = isinstance(a1a3, dict) and a1a3.get("total") is not None
+            item["flagged"] = not has_gwp
             item["nobb_data"] = result
 
     return parsed_invoice
