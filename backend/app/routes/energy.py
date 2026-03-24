@@ -16,6 +16,7 @@ from datetime import date
 
 from flask import Blueprint, g, jsonify, request
 
+from app.errors import ApiError
 from app.models.energy import Energy, EnergySource, PriceZone
 
 logger = logging.getLogger(__name__)
@@ -80,38 +81,58 @@ def calculate_energy():
     """
     current_user_id = getattr(g, "current_user_id", None)
     if not current_user_id:
-        return jsonify(error="Unauthorized"), 401
+        raise ApiError("Ikke autentisert.", code="UNAUTHORIZED", status=401)
 
     payload = request.get_json(silent=True) or {}
 
     project_id = payload.get("project_id")
     if not project_id:
-        return jsonify(error="project_id is required"), 400
+        raise ApiError("project_id er påkrevd.", code="MISSING_FIELD")
     try:
         project_id = int(project_id)
     except (ValueError, TypeError):
-        return jsonify(error="project_id must be an integer"), 400
+        raise ApiError("project_id må være et heltall.", code="INVALID_FIELD")
 
     kwh_used = payload.get("kwh_used")
     if kwh_used is None:
-        return jsonify(error="kwh_used is required"), 400
+        raise ApiError(
+            "kwh_used er påkrevd.",
+            code="MISSING_FIELD",
+            suggestion="Oppgi strømforbruk i kilowattimer (kWh).",
+        )
     try:
         kwh_used = float(kwh_used)
         if kwh_used < 0:
-            return jsonify(error="kwh_used must be non-negative"), 400
+            raise ApiError(
+                "kwh_used kan ikke være negativt.",
+                code="INVALID_FIELD",
+                suggestion="Oppgi en positiv verdi for strømforbruk.",
+            )
     except (ValueError, TypeError):
-        return jsonify(error="kwh_used must be a number"), 400
+        raise ApiError(
+            "kwh_used må være et tall.",
+            code="INVALID_FIELD",
+            suggestion="Oppgi strømforbruk som et tall (f.eks. 1500.5).",
+        )
 
     price_zone_str = payload.get("price_zone")
     price_zone = _parse_price_zone(price_zone_str)
     if price_zone_str and not price_zone:
         valid = [z.value for z in PriceZone]
-        return jsonify(error=f"Invalid price_zone. Valid: {valid}"), 400
+        raise ApiError(
+            f"Ugyldig prissone. Gyldige verdier: {valid}",
+            code="INVALID_FIELD",
+            suggestion="Velg en prissone fra NO1 til NO5.",
+        )
 
     try:
         recorded_date = _parse_date(payload.get("recorded_date"))
     except ValueError:
-        return jsonify(error="recorded_date must be ISO format (YYYY-MM-DD)"), 400
+        raise ApiError(
+            "Ugyldig datoformat.",
+            code="INVALID_FIELD",
+            suggestion="Bruk formatet YYYY-MM-DD (f.eks. 2026-03-24).",
+        )
 
     emission_factor = NVE_NATIONAL_EMISSION_FACTOR
     total_co2_kg = round(kwh_used * emission_factor, 4)
@@ -132,10 +153,15 @@ def calculate_energy():
     try:
         session.commit()
         session.refresh(energy)
-    except Exception as e:
+    except Exception:
         session.rollback()
         logger.exception("Failed to save energy entry")
-        return jsonify(error=f"Failed to save: {e}"), 500
+        raise ApiError(
+            "Kunne ikke lagre energiposten.",
+            code="SAVE_FAILED",
+            status=500,
+            suggestion="Prøv igjen. Kontakt support hvis problemet vedvarer.",
+        )
 
     return jsonify(_serialize_energy(energy)), 201
 
@@ -149,12 +175,12 @@ def update_energy(energy_id: int):
     """
     current_user_id = getattr(g, "current_user_id", None)
     if not current_user_id:
-        return jsonify(error="Unauthorized"), 401
+        raise ApiError("Ikke autentisert.", code="UNAUTHORIZED", status=401)
 
     session = g.db
     energy = session.query(Energy).filter(Energy.id == energy_id).first()
     if not energy:
-        return jsonify(error="Energy entry not found"), 404
+        raise ApiError("Energiposten ble ikke funnet.", code="NOT_FOUND", status=404)
 
     payload = request.get_json(silent=True) or {}
 
@@ -162,32 +188,53 @@ def update_energy(energy_id: int):
         try:
             kwh = float(payload["kwh_used"])
             if kwh < 0:
-                return jsonify(error="kwh_used must be non-negative"), 400
+                raise ApiError(
+                    "kwh_used kan ikke være negativt.",
+                    code="INVALID_FIELD",
+                    suggestion="Oppgi en positiv verdi for strømforbruk.",
+                )
             energy.kwh_used = kwh
             energy.total_co2_kg = round(kwh * NVE_NATIONAL_EMISSION_FACTOR, 4)
         except (ValueError, TypeError):
-            return jsonify(error="kwh_used must be a number"), 400
+            raise ApiError(
+                "kwh_used må være et tall.",
+                code="INVALID_FIELD",
+                suggestion="Oppgi strømforbruk som et tall (f.eks. 1500.5).",
+            )
 
     if "price_zone" in payload:
         pz = _parse_price_zone(payload["price_zone"])
         if payload["price_zone"] and not pz:
             valid = [z.value for z in PriceZone]
-            return jsonify(error=f"Invalid price_zone. Valid: {valid}"), 400
+            raise ApiError(
+                f"Ugyldig prissone. Gyldige verdier: {valid}",
+                code="INVALID_FIELD",
+                suggestion="Velg en prissone fra NO1 til NO5.",
+            )
         energy.price_zone = pz
 
     if "recorded_date" in payload:
         try:
             energy.recorded_date = _parse_date(payload["recorded_date"])
         except ValueError:
-            return jsonify(error="recorded_date must be ISO format (YYYY-MM-DD)"), 400
+            raise ApiError(
+                "Ugyldig datoformat.",
+                code="INVALID_FIELD",
+                suggestion="Bruk formatet YYYY-MM-DD (f.eks. 2026-03-24).",
+            )
 
     try:
         session.commit()
         session.refresh(energy)
-    except Exception as e:
+    except Exception:
         session.rollback()
         logger.exception("Failed to update energy entry")
-        return jsonify(error=f"Failed to update: {e}"), 500
+        raise ApiError(
+            "Kunne ikke oppdatere energiposten.",
+            code="UPDATE_FAILED",
+            status=500,
+            suggestion="Prøv igjen. Kontakt support hvis problemet vedvarer.",
+        )
 
     return jsonify(_serialize_energy(energy)), 200
 
@@ -197,7 +244,7 @@ def list_energies(project_id: int):
     """List all energy entries for a project."""
     current_user_id = getattr(g, "current_user_id", None)
     if not current_user_id:
-        return jsonify(error="Unauthorized"), 401
+        raise ApiError("Ikke autentisert.", code="UNAUTHORIZED", status=401)
 
     session = g.db
     entries = (
@@ -215,21 +262,26 @@ def delete_energy(energy_id: int):
     """Delete a single energy entry."""
     current_user_id = getattr(g, "current_user_id", None)
     if not current_user_id:
-        return jsonify(error="Unauthorized"), 401
+        raise ApiError("Ikke autentisert.", code="UNAUTHORIZED", status=401)
 
     session = g.db
     energy = session.query(Energy).filter(Energy.id == energy_id).first()
     if not energy:
-        return jsonify(error="Energy entry not found"), 404
+        raise ApiError("Energiposten ble ikke funnet.", code="NOT_FOUND", status=404)
 
     session.delete(energy)
 
     try:
         session.commit()
-    except Exception as e:
+    except Exception:
         session.rollback()
         logger.exception("Failed to delete energy entry")
-        return jsonify(error=f"Failed to delete: {e}"), 500
+        raise ApiError(
+            "Kunne ikke slette energiposten.",
+            code="DELETE_FAILED",
+            status=500,
+            suggestion="Prøv igjen. Kontakt support hvis problemet vedvarer.",
+        )
 
     return jsonify(message="Deleted"), 200
 

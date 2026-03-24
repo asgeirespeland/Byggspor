@@ -7,70 +7,133 @@ from datetime import date
 from flask import Blueprint, g, jsonify, request
 
 from app.database import SessionLocal
+from app.errors import ApiError
 from app.models.project_transport import ProjectTransport, TransportSourceType
 from app.models.transport_report import TransportReport
 from app.models.vehicle import Vehicle
-from app.services.transport_service import process_transport_report
+from app.services.transport_service import (
+    preview_transport_report,
+    save_transport_report,
+)
 from app.services.vehicle_lookup import lookup_vehicle
 
 logger = logging.getLogger(__name__)
 
 transport_bp = Blueprint("transport", __name__, url_prefix="/transport")
 
+ABAX_XML_SUGGESTION = (
+    "Last opp en Abax Turrapport i XML-format (.xml). "
+    "Denne eksporteres fra Abax Fleet Management under «Rapporter» → «Turrapport»."
+)
+
 
 @transport_bp.route("/parse", methods=["POST"])
 def parse_transport_route():
-    """Parse, enrich, and persist an Abax Turrapport XML for a project.
+    """Parse and enrich an Abax Turrapport XML (preview only — nothing persisted).
 
-    Requires 'project_id' form field and 'file' upload (XML).
-    Looks up/creates vehicles, calculates CO₂, and persists all records.
+    Requires 'file' upload (XML). Returns enriched trip data with vehicle info
+    and CO₂ calculations for user review before confirmation.
     """
-    project_id = request.form.get("project_id")
-    if not project_id:
-        return jsonify(error="project_id is required."), 400
-
-    try:
-        project_id = int(project_id)
-    except (ValueError, TypeError):
-        return jsonify(error="project_id must be an integer."), 400
-
     if "file" not in request.files:
-        return jsonify(error="No file provided. Use 'file' form field."), 400
+        raise ApiError(
+            "Ingen fil ble sendt.",
+            code="NO_FILE",
+            suggestion=ABAX_XML_SUGGESTION,
+        )
 
     file = request.files["file"]
     if not file.filename or not file.filename.lower().endswith(".xml"):
-        return jsonify(error="File must be an XML file."), 400
+        raise ApiError(
+            "Filen må være i XML-format.",
+            code="INVALID_FILE_TYPE",
+            suggestion=ABAX_XML_SUGGESTION,
+        )
 
     xml_content = file.read()
     if not xml_content:
-        return jsonify(error="Uploaded file is empty."), 400
+        raise ApiError(
+            "Den opplastede filen er tom.",
+            code="EMPTY_FILE",
+            suggestion="Sjekk at filen inneholder data og prøv igjen.",
+        )
 
     session = SessionLocal()
     try:
-        result = process_transport_report(
-            session, project_id, xml_content, file_name=file.filename
+        result = preview_transport_report(session, xml_content)
+        result["file_name"] = file.filename
+        return jsonify(result), 200
+    except ET.ParseError:
+        session.rollback()
+        raise ApiError(
+            "Filen er ikke gyldig XML.",
+            code="INVALID_XML",
+            status=422,
+            suggestion=ABAX_XML_SUGGESTION,
         )
-        session.commit()
-        return jsonify(result), 201
-    except ET.ParseError as e:
+    except ValueError as e:
         session.rollback()
-        return jsonify(error=f"Invalid XML: {e}"), 422
-    except Exception as e:
+        raise ApiError(
+            str(e),
+            code="INVALID_FILE_FORMAT",
+            status=422,
+            suggestion=ABAX_XML_SUGGESTION,
+        )
+    except Exception:
         session.rollback()
-        logger.exception("Transport processing failed")
-        return jsonify(error=f"Processing failed: {e}"), 500
+        logger.exception("Transport parsing failed")
+        raise ApiError(
+            "Kunne ikke analysere transportrapporten.",
+            code="PROCESSING_FAILED",
+            status=500,
+            suggestion="Prøv igjen. Kontakt support hvis problemet vedvarer.",
+        )
     finally:
         session.close()
 
 
 @transport_bp.route("/confirm", methods=["POST"])
 def confirm_trips():
-    """Mark parsed trips as confirmed (trips are already persisted on parse)."""
+    """Persist user-confirmed trips to the database.
+
+    Expects JSON: { project_id, file_name?, trips: [...enriched trip objects] }
+    Only the trips included in the request body are saved.
+    """
     body = request.get_json(silent=True) or {}
-    trip_ids = body.get("trip_ids", [])
-    if not isinstance(trip_ids, list):
-        return jsonify(error="trip_ids must be a list"), 400
-    return jsonify(confirmed=len(trip_ids)), 200
+
+    project_id = body.get("project_id")
+    if not project_id:
+        raise ApiError("project_id er påkrevd.", code="MISSING_FIELD")
+    try:
+        project_id = int(project_id)
+    except (ValueError, TypeError):
+        raise ApiError("project_id må være et heltall.", code="INVALID_FIELD")
+
+    trips = body.get("trips")
+    if not isinstance(trips, list) or len(trips) == 0:
+        raise ApiError(
+            "Ingen turer å bekrefte.",
+            code="MISSING_FIELD",
+            suggestion="Velg minst én tur før du bekrefter.",
+        )
+
+    file_name = body.get("file_name")
+
+    session = SessionLocal()
+    try:
+        result = save_transport_report(session, project_id, trips, file_name)
+        session.commit()
+        return jsonify(result), 201
+    except Exception:
+        session.rollback()
+        logger.exception("Failed to confirm transport trips")
+        raise ApiError(
+            "Kunne ikke lagre turene.",
+            code="SAVE_FAILED",
+            status=500,
+            suggestion="Prøv igjen. Kontakt support hvis problemet vedvarer.",
+        )
+    finally:
+        session.close()
 
 
 @transport_bp.route("/project/<int:project_id>", methods=["GET"])
@@ -78,7 +141,7 @@ def list_project_transports(project_id: int):
     """Return all transport trips for a project, grouped by source report."""
     current_user_id = getattr(g, "current_user_id", None)
     if not current_user_id:
-        return jsonify(error="Unauthorized"), 401
+        raise ApiError("Ikke autentisert.", code="UNAUTHORIZED", status=401)
 
     session = g.db
     transports = (
@@ -145,7 +208,7 @@ def create_manual_trip():
     """Create a single manual transport trip for a project."""
     current_user_id = getattr(g, "current_user_id", None)
     if not current_user_id:
-        return jsonify(error="Unauthorized"), 401
+        raise ApiError("Ikke autentisert.", code="UNAUTHORIZED", status=401)
 
     body = request.get_json(silent=True) or {}
 
@@ -158,14 +221,25 @@ def create_manual_trip():
     )
     missing = [f for f in required if not body.get(f)]
     if missing:
-        return jsonify(error=f"Missing required fields: {', '.join(missing)}"), 400
+        raise ApiError(
+            f"Manglende felt: {', '.join(missing)}",
+            code="MISSING_FIELD",
+            suggestion=(
+                "Fyll ut alle påkrevde felt: prosjekt, sjåfør,"
+                " registreringsnummer, distanse og dato."
+            ),
+        )
 
     try:
         project_id = int(body["project_id"])
         distance_km = float(body["distance_km"])
         trip_date = date.fromisoformat(body["trip_date"])
     except (ValueError, TypeError) as e:
-        return jsonify(error=f"Invalid field value: {e}"), 400
+        raise ApiError(
+            f"Ugyldig feltverdi: {e}",
+            code="INVALID_FIELD",
+            suggestion="Sjekk at distanse er et tall og dato er i formatet YYYY-MM-DD.",
+        )
 
     session = g.db
     vehicle = lookup_vehicle(session, body["registration_number"])
@@ -196,10 +270,15 @@ def create_manual_trip():
     session.add(pt)
     try:
         session.commit()
-    except Exception as e:
+    except Exception:
         session.rollback()
         logger.exception("Failed to create manual trip")
-        return jsonify(error=f"Failed to create trip: {e}"), 500
+        raise ApiError(
+            "Kunne ikke opprette turen.",
+            code="CREATE_FAILED",
+            status=500,
+            suggestion="Prøv igjen. Kontakt support hvis problemet vedvarer.",
+        )
 
     return jsonify(
         id=pt.id,
@@ -214,12 +293,12 @@ def update_trip(trip_id: int):
     """Update a transport trip's driver, date, addresses, or distance."""
     current_user_id = getattr(g, "current_user_id", None)
     if not current_user_id:
-        return jsonify(error="Unauthorized"), 401
+        raise ApiError("Ikke autentisert.", code="UNAUTHORIZED", status=401)
 
     session = g.db
     trip = session.query(ProjectTransport).get(trip_id)
     if not trip:
-        return jsonify(error="Trip not found"), 404
+        raise ApiError("Turen ble ikke funnet.", code="NOT_FOUND", status=404)
 
     body = request.get_json(silent=True) or {}
 
@@ -231,7 +310,11 @@ def update_trip(trip_id: int):
         try:
             trip.trip_date = date.fromisoformat(body["trip_date"])
         except (ValueError, TypeError):
-            return jsonify(error="Invalid trip_date format"), 400
+            raise ApiError(
+                "Ugyldig datoformat.",
+                code="INVALID_FIELD",
+                suggestion="Bruk formatet YYYY-MM-DD (f.eks. 2026-03-24).",
+            )
 
     if "distance_km" in body:
         try:
@@ -242,14 +325,23 @@ def update_trip(trip_id: int):
                 trip.confidence_score = 80
                 trip.flagged = False
         except (ValueError, TypeError):
-            return jsonify(error="Invalid distance_km"), 400
+            raise ApiError(
+                "Ugyldig distanseverdi.",
+                code="INVALID_FIELD",
+                suggestion="Distanse må være et tall (f.eks. 42.5).",
+            )
 
     try:
         session.commit()
-    except Exception as e:
+    except Exception:
         session.rollback()
         logger.exception("Failed to update trip")
-        return jsonify(error=f"Failed to update: {e}"), 500
+        raise ApiError(
+            "Kunne ikke oppdatere turen.",
+            code="UPDATE_FAILED",
+            status=500,
+            suggestion="Prøv igjen. Kontakt support hvis problemet vedvarer.",
+        )
 
     return jsonify(
         id=trip.id,
@@ -264,7 +356,7 @@ def delete_transport_report(report_id: int):
     """Delete a transport report and all its associated trips."""
     current_user_id = getattr(g, "current_user_id", None)
     if not current_user_id:
-        return jsonify(error="Unauthorized"), 401
+        raise ApiError("Ikke autentisert.", code="UNAUTHORIZED", status=401)
 
     session = g.db
     count = (
@@ -278,10 +370,15 @@ def delete_transport_report(report_id: int):
 
     try:
         session.commit()
-    except Exception as e:
+    except Exception:
         session.rollback()
         logger.exception("Failed to delete transport report")
-        return jsonify(error=f"Failed to delete: {e}"), 500
+        raise ApiError(
+            "Kunne ikke slette rapporten.",
+            code="DELETE_FAILED",
+            status=500,
+            suggestion="Prøv igjen. Kontakt support hvis problemet vedvarer.",
+        )
 
     return jsonify(message="Deleted", trips_removed=count), 200
 
@@ -292,14 +389,19 @@ def delete_trip(trip_id: int):
     session = g.db
     trip = session.query(ProjectTransport).get(trip_id)
     if not trip:
-        return jsonify(error="Trip not found"), 404
+        raise ApiError("Turen ble ikke funnet.", code="NOT_FOUND", status=404)
     session.delete(trip)
     try:
         session.commit()
-    except Exception as e:
+    except Exception:
         session.rollback()
         logger.exception("Failed to delete trip")
-        return jsonify(error=f"Failed to delete: {e}"), 500
+        raise ApiError(
+            "Kunne ikke slette turen.",
+            code="DELETE_FAILED",
+            status=500,
+            suggestion="Prøv igjen. Kontakt support hvis problemet vedvarer.",
+        )
     return jsonify(message="Deleted"), 200
 
 
@@ -309,7 +411,7 @@ def update_vehicle(vehicle_id: int):
     session = g.db
     vehicle = session.query(Vehicle).get(vehicle_id)
     if not vehicle:
-        return jsonify(error="Vehicle not found"), 404
+        raise ApiError("Kjøretøyet ble ikke funnet.", code="NOT_FOUND", status=404)
 
     body = request.get_json(silent=True) or {}
     for field in ("make", "model", "fuel_type"):
@@ -318,8 +420,13 @@ def update_vehicle(vehicle_id: int):
 
     try:
         session.commit()
-    except Exception as e:
+    except Exception:
         session.rollback()
         logger.exception("Failed to update vehicle")
-        return jsonify(error=f"Failed to update: {e}"), 500
+        raise ApiError(
+            "Kunne ikke oppdatere kjøretøyet.",
+            code="UPDATE_FAILED",
+            status=500,
+            suggestion="Prøv igjen. Kontakt support hvis problemet vedvarer.",
+        )
     return jsonify(message="Updated"), 200

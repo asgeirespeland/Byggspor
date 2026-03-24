@@ -4,6 +4,7 @@ import xml.etree.ElementTree as ET
 from flask import Blueprint, g, jsonify, request
 
 from app.database import SessionLocal
+from app.errors import ApiError
 from app.models.material_invoice import MaterialInvoice
 from app.models.project_material import ProjectMaterial
 from app.services.ehf_parser import parse_invoice
@@ -14,6 +15,11 @@ logger = logging.getLogger(__name__)
 
 invoice_bp = Blueprint("invoice", __name__, url_prefix="/invoice")
 
+EHF_XML_SUGGESTION = (
+    "Last opp en EHF-faktura i XML-format (.xml). "
+    "Disse eksporteres vanligvis fra regnskapssystemet ditt (f.eks. Tripletex, Visma)."
+)
+
 
 @invoice_bp.route("/parse", methods=["POST"])
 def parse_invoice_route():
@@ -23,20 +29,44 @@ def parse_invoice_route():
     falls back to NOBB API, then upserts results back into the catalog.
     """
     if "file" not in request.files:
-        return jsonify(error="No file provided. Use 'file' form field."), 400
+        raise ApiError(
+            "Ingen fil ble sendt.",
+            code="NO_FILE",
+            suggestion=EHF_XML_SUGGESTION,
+        )
 
     file = request.files["file"]
     if not file.filename or not file.filename.lower().endswith(".xml"):
-        return jsonify(error="File must be an XML file."), 400
+        raise ApiError(
+            "Filen må være i XML-format.",
+            code="INVALID_FILE_TYPE",
+            suggestion=EHF_XML_SUGGESTION,
+        )
 
     xml_content = file.read()
     if not xml_content:
-        return jsonify(error="Uploaded file is empty."), 400
+        raise ApiError(
+            "Den opplastede filen er tom.",
+            code="EMPTY_FILE",
+            suggestion="Sjekk at filen inneholder data og prøv igjen.",
+        )
 
     try:
         parsed = parse_invoice(xml_content)
-    except ET.ParseError as e:
-        return jsonify(error=f"Invalid XML: {e}"), 422
+    except ET.ParseError:
+        raise ApiError(
+            "Filen er ikke gyldig XML.",
+            code="INVALID_XML",
+            status=422,
+            suggestion=EHF_XML_SUGGESTION,
+        )
+    except ValueError as e:
+        raise ApiError(
+            str(e),
+            code="INVALID_FILE_FORMAT",
+            status=422,
+            suggestion=EHF_XML_SUGGESTION,
+        )
 
     session = SessionLocal()
     try:
@@ -48,10 +78,18 @@ def parse_invoice_route():
                 upsert_catalog_entry(session, item)
 
         session.commit()
-    except Exception as e:
+    except Exception:
         session.rollback()
         logger.exception("Enrichment/caching failed")
-        return jsonify(error=f"Enrichment failed: {e}"), 502
+        raise ApiError(
+            "Kunne ikke berike fakturadata.",
+            code="ENRICHMENT_FAILED",
+            status=502,
+            suggestion=(
+                "Prøv igjen. Hvis problemet vedvarer,"
+                " kan det skyldes at NOBB-tjenesten er utilgjengelig."
+            ),
+        )
     finally:
         session.close()
 
@@ -67,25 +105,42 @@ def upload_invoice_route():
     """
     project_id = request.form.get("project_id")
     if not project_id:
-        return jsonify(error="project_id is required."), 400
+        raise ApiError(
+            "project_id er påkrevd.",
+            code="MISSING_FIELD",
+        )
 
     try:
         project_id = int(project_id)
     except (ValueError, TypeError):
-        return jsonify(error="project_id must be an integer."), 400
+        raise ApiError(
+            "project_id må være et heltall.",
+            code="INVALID_FIELD",
+        )
 
     if "file" not in request.files:
-        return jsonify(error="No file provided. Use 'file' form field."), 400
+        raise ApiError(
+            "Ingen fil ble sendt.",
+            code="NO_FILE",
+            suggestion=EHF_XML_SUGGESTION,
+        )
 
     file = request.files["file"]
     if not file.filename or not file.filename.lower().endswith(".xml"):
-        return jsonify(error="File must be an XML file."), 400
+        raise ApiError(
+            "Filen må være i XML-format.",
+            code="INVALID_FILE_TYPE",
+            suggestion=EHF_XML_SUGGESTION,
+        )
 
     xml_content = file.read()
     if not xml_content:
-        return jsonify(error="Uploaded file is empty."), 400
+        raise ApiError(
+            "Den opplastede filen er tom.",
+            code="EMPTY_FILE",
+            suggestion="Sjekk at filen inneholder data og prøv igjen.",
+        )
 
-    from app.database import SessionLocal
     from app.services.material_service import process_invoice_for_project
 
     session = SessionLocal()
@@ -93,12 +148,31 @@ def upload_invoice_route():
         result = process_invoice_for_project(session, project_id, xml_content)
         session.commit()
         return jsonify(result), 201
-    except ET.ParseError as e:
+    except ET.ParseError:
         session.rollback()
-        return jsonify(error=f"Invalid XML: {e}"), 422
-    except Exception as e:
+        raise ApiError(
+            "Filen er ikke gyldig XML.",
+            code="INVALID_XML",
+            status=422,
+            suggestion=EHF_XML_SUGGESTION,
+        )
+    except ValueError as e:
         session.rollback()
-        return jsonify(error=f"Processing failed: {e}"), 500
+        raise ApiError(
+            str(e),
+            code="INVALID_FILE_FORMAT",
+            status=422,
+            suggestion=EHF_XML_SUGGESTION,
+        )
+    except Exception:
+        session.rollback()
+        logger.exception("Invoice processing failed")
+        raise ApiError(
+            "Kunne ikke behandle fakturaen.",
+            code="PROCESSING_FAILED",
+            status=500,
+            suggestion="Prøv igjen. Kontakt support hvis problemet vedvarer.",
+        )
     finally:
         session.close()
 
@@ -108,7 +182,7 @@ def list_project_materials(project_id: int):
     """Return all materials for a project, grouped by source invoice."""
     current_user_id = getattr(g, "current_user_id", None)
     if not current_user_id:
-        return jsonify(error="Unauthorized"), 401
+        raise ApiError("Ikke autentisert.", code="UNAUTHORIZED", status=401)
 
     session = g.db
     materials = (
@@ -160,7 +234,7 @@ def delete_invoice(invoice_id: int):
     """Delete an invoice and all its associated project materials."""
     current_user_id = getattr(g, "current_user_id", None)
     if not current_user_id:
-        return jsonify(error="Unauthorized"), 401
+        raise ApiError("Ikke autentisert.", code="UNAUTHORIZED", status=401)
 
     session = g.db
     count = (
@@ -176,9 +250,14 @@ def delete_invoice(invoice_id: int):
 
     try:
         session.commit()
-    except Exception as e:
+    except Exception:
         session.rollback()
         logger.exception("Failed to delete invoice")
-        return jsonify(error=f"Failed to delete: {e}"), 500
+        raise ApiError(
+            "Kunne ikke slette fakturaen.",
+            code="DELETE_FAILED",
+            status=500,
+            suggestion="Prøv igjen. Kontakt support hvis problemet vedvarer.",
+        )
 
     return jsonify(message="Deleted", items_removed=count), 200

@@ -135,6 +135,21 @@ def _parse_line_item(line_el):
     }
 
 
+def validate_ehf_root(root: ET.Element) -> None:
+    """Check that the XML root looks like a UBL Invoice.
+
+    Raises:
+        ValueError: If the document is not a recognized EHF/UBL invoice.
+    """
+    tag = root.tag
+    # Accept UBL Invoice namespace or plain <Invoice> tag
+    if "Invoice" not in tag:
+        raise ValueError(
+            f"Forventet EHF-faktura (UBL Invoice), "
+            f"men fant rotelementet «{tag.split('}')[-1]}»."
+        )
+
+
 def parse_invoice(xml_content: str | bytes) -> dict:
     """Parse an EHF/UBL 2.0 invoice XML and return structured data.
 
@@ -146,8 +161,10 @@ def parse_invoice(xml_content: str | bytes) -> dict:
 
     Raises:
         ET.ParseError: If the XML is malformed.
+        ValueError: If the XML is not a recognized EHF invoice.
     """
     root = ET.fromstring(xml_content)
+    validate_ehf_root(root)
 
     invoice_number = _text(root, "cbc:ID")
     issue_date = _text(root, "cbc:IssueDate")

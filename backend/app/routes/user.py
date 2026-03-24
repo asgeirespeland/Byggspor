@@ -3,6 +3,7 @@ from __future__ import annotations
 from flask import Blueprint, g, jsonify, request
 from sqlalchemy.exc import IntegrityError
 
+from app.errors import ApiError
 from app.models.organization_member import OrganizationMember
 from app.models.user import User
 
@@ -37,12 +38,12 @@ def get_me():
     """Return the currently authenticated user profile."""
     current_user_id = getattr(g, "current_user_id", None)
     if not current_user_id:
-        return jsonify(error="Unauthorized"), 401
+        raise ApiError("Ikke autentisert.", code="UNAUTHORIZED", status=401)
 
     session = g.db
     user = session.get(User, current_user_id)
     if not user:
-        return jsonify(error="User not found"), 404
+        raise ApiError("Brukeren ble ikke funnet.", code="NOT_FOUND", status=404)
     return jsonify(_serialize_user(user, session))
 
 
@@ -51,7 +52,7 @@ def update_user(user_id: int):
     """Update user fields with self-service + system-admin override rules."""
     current_user_id = getattr(g, "current_user_id", None)
     if not current_user_id:
-        return jsonify(error="Unauthorized"), 401
+        raise ApiError("Ikke autentisert.", code="UNAUTHORIZED", status=401)
 
     payload = request.get_json(silent=True) or {}
     allowed_self_fields = {"name", "phone"}
@@ -60,11 +61,11 @@ def update_user(user_id: int):
     session = g.db
     current_user = session.get(User, current_user_id)
     if not current_user:
-        return jsonify(error="Unauthorized"), 401
+        raise ApiError("Ikke autentisert.", code="UNAUTHORIZED", status=401)
 
     target_user = session.get(User, user_id)
     if not target_user:
-        return jsonify(error="User not found"), 404
+        raise ApiError("Brukeren ble ikke funnet.", code="NOT_FOUND", status=404)
 
     is_self = current_user.id == target_user.id
     is_admin = current_user.is_system_admin
@@ -72,18 +73,22 @@ def update_user(user_id: int):
     # Normal users can only update themselves.
     # System admins can update any user.
     if not is_self and not is_admin:
-        return jsonify(error="Forbidden"), 403
+        raise ApiError("Ingen tilgang.", code="FORBIDDEN", status=403)
 
     disallowed_keys = set(payload.keys()) - (allowed_self_fields | allowed_admin_fields)
     if disallowed_keys:
-        return jsonify(error=f"Unsupported fields: {sorted(disallowed_keys)}"), 400
+        raise ApiError(
+            f"Ikke-støttede felt: {sorted(disallowed_keys)}",
+            code="INVALID_FIELD",
+        )
 
     # Check admin-only fields before applying any mutations.
     if "is_system_admin" in payload:
         if not is_admin:
-            return (
-                jsonify(error="Only system admins can update is_system_admin"),
-                403,
+            raise ApiError(
+                "Bare systemadministratorer kan endre is_system_admin.",
+                code="FORBIDDEN",
+                status=403,
             )
 
     # All permission checks passed — now apply mutations.
@@ -98,7 +103,11 @@ def update_user(user_id: int):
         session.commit()
     except IntegrityError:
         session.rollback()
-        return jsonify(error="Conflict: duplicate or invalid data"), 409
+        raise ApiError(
+            "Duplikat eller ugyldig data.",
+            code="CONFLICT",
+            status=409,
+        )
 
     session.refresh(target_user)
     return jsonify(_serialize_user(target_user, session))

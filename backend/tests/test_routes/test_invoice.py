@@ -71,22 +71,37 @@ class TestParseInvoiceRoute:
             content_type="multipart/form-data",
         )
         assert resp.status_code == 400
-        assert "No file provided" in resp.get_json()["error"]
+        data = resp.get_json()
+        assert data["code"] == "NO_FILE"
 
     def test_returns_400_for_non_xml_extension(self, client):
         resp = self._post_xml(client, b"irrelevant content", filename="invoice.pdf")
         assert resp.status_code == 400
-        assert "XML" in resp.get_json()["error"]
+        assert resp.get_json()["code"] == "INVALID_FILE_TYPE"
 
     def test_returns_400_for_empty_file(self, client):
         resp = self._post_xml(client, b"")
         assert resp.status_code == 400
-        assert "empty" in resp.get_json()["error"]
+        assert resp.get_json()["code"] == "EMPTY_FILE"
 
     def test_returns_422_for_malformed_xml(self, client):
         resp = self._post_xml(client, b"<not><valid xml")
         assert resp.status_code == 422
-        assert "Invalid XML" in resp.get_json()["error"]
+        assert resp.get_json()["code"] == "INVALID_XML"
+
+    def test_returns_422_for_non_ehf_xml(self, client):
+        non_ehf_xml = b"<SomeOtherRoot><child/></SomeOtherRoot>"
+        resp = self._post_xml(client, non_ehf_xml)
+        assert resp.status_code == 422
+        data = resp.get_json()
+        assert data["code"] == "INVALID_FILE_FORMAT"
+        assert "suggestion" in data
+
+    def test_error_response_contains_suggestion(self, client):
+        resp = self._post_xml(client, b"")
+        data = resp.get_json()
+        assert "suggestion" in data
+        assert len(data["suggestion"]) > 0
 
     def test_response_contains_line_items_key(self, client):
         with (
