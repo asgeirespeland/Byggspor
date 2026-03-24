@@ -1,4 +1,4 @@
-import { apiRequest } from '../../../shared/api/client'
+import { apiRequest, ApiError } from '../../../shared/api/client'
 import type {
   ManualTripInput,
   TransportParseResponse,
@@ -8,12 +8,10 @@ const BASE_URL = import.meta.env.VITE_API_URL ?? 'http://localhost:5000'
 
 export async function parseTransportFile(
   file: File,
-  projectId: number,
   token?: string,
 ): Promise<TransportParseResponse> {
   const form = new FormData()
   form.append('file', file)
-  form.append('project_id', String(projectId))
 
   const headers: Record<string, string> = {}
   if (token) {
@@ -28,18 +26,24 @@ export async function parseTransportFile(
 
   const body = await res.json()
   if (!res.ok) {
-    throw new Error(body.error ?? `Request failed (${res.status})`)
+    throw new ApiError(
+      body.error ?? `Forespørselen feilet (${res.status})`,
+      body.code ?? 'ERROR',
+      body.suggestion ?? null,
+    )
   }
   return body as TransportParseResponse
 }
 
 export async function confirmTrips(
-  tripIds: number[],
+  projectId: number,
+  trips: import('../types/transport').Trip[],
+  fileName: string | null,
   token?: string,
 ): Promise<void> {
   await apiRequest('/transport/confirm', {
     method: 'POST',
-    body: { trip_ids: tripIds },
+    body: { project_id: projectId, trips, file_name: fileName },
     token,
   })
 }

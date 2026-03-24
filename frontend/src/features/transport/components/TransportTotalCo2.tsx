@@ -10,7 +10,7 @@ export default function TransportTotalCo2({
   let total = 0
   let count = 0
   for (const trip of trips) {
-    if (!selected.has(trip.project_transport_id)) continue
+    if (!selected.has(trip.trip_index)) continue
     if (trip.total_co2_kg != null) {
       total += trip.total_co2_kg
       count++

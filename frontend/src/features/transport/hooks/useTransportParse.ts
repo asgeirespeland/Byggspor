@@ -7,31 +7,28 @@ import type { TransportParseResponse } from '../types/transport'
 export function useTransportParse() {
   const [data, setData] = useState<TransportParseResponse | null>(null)
   const [loading, setLoading] = useState(false)
-  const [error, setError] = useState<string | null>(null)
+  const [error, setError] = useState<Error | null>(null)
 
-  const parse = useCallback(
-    async (file: File, projectId: number, token?: string) => {
-      setLoading(true)
-      setError(null)
-      setData(null)
+  const parse = useCallback(async (file: File, token?: string) => {
+    setLoading(true)
+    setError(null)
+    setData(null)
 
-      try {
-        const result = await parseTransportFile(file, projectId, token)
-        setData(result)
-        toast.success('Transportfil analysert')
-      } catch (err) {
-        const message =
-          err instanceof Error
-            ? err.message
-            : 'Kunne ikke analysere transportfil'
-        setError(message)
-        toast.error(message)
-      } finally {
-        setLoading(false)
-      }
-    },
-    [],
-  )
+    try {
+      const result = await parseTransportFile(file, token)
+      setData(result)
+      toast.success('Transportfil analysert')
+    } catch (err) {
+      const error =
+        err instanceof Error
+          ? err
+          : new Error('Kunne ikke analysere transportfil')
+      setError(error)
+      toast.error(error.message)
+    } finally {
+      setLoading(false)
+    }
+  }, [])
 
   const reset = useCallback(() => {
     setData(null)

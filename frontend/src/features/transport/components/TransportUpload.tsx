@@ -1,12 +1,14 @@
 import { useState } from 'react'
 import { useQueryClient } from '@tanstack/react-query'
 import { toast } from 'sonner'
+import ErrorMessage from '@/shared/components/ErrorMessage'
+import InlineUndoBar from '@/shared/components/InlineUndoBar'
 import FileDropZone from '@/shared/components/FileDropZone'
 import SelectedFileBar from '@/shared/components/SelectedFileBar'
 import { useFileSelect } from '@/shared/hooks/useFileSelect'
 import { useDeferredLoading } from '@/shared/hooks/useDeferredLoading'
 import { useRequireToken } from '@/shared/hooks/useRequireToken'
-import { confirmTrips, removeTrip } from '../api/transport'
+import { confirmTrips } from '../api/transport'
 import { useTransportParse } from '../hooks/useTransportParse'
 import {
   useProjectTransports,
@@ -33,8 +35,10 @@ export default function TransportUpload({ projectId }: Props) {
   const { data: reportGroups, isLoading: reportsLoading } =
     useProjectTransports(projectId)
   const showReportsLoading = useDeferredLoading(reportsLoading)
-  const deleteReport = useDeleteTransportReport(projectId)
-  const deleteTrip = useDeleteTrip(projectId)
+  const { deleteReport, pendingReportId, undoReportDelete } =
+    useDeleteTransportReport(projectId)
+  const { deleteTrip, pendingTripId, pendingTripGroupId, undoTripDelete } =
+    useDeleteTrip(projectId)
   const updateTripMutation = useUpdateTrip(projectId)
   const [confirming, setConfirming] = useState(false)
   const [showManual, setShowManual] = useState(false)
@@ -49,33 +53,27 @@ export default function TransportUpload({ projectId }: Props) {
   const handleParse = async () => {
     if (!selectedFile || !authReady) return
     const token = await requireToken()
-    await parse(selectedFile, projectId, token)
-    invalidateTransportData()
+    await parse(selectedFile, token)
   }
 
-  const handleRemoveTrip = (tripId: number) => {
+  const handleRemoveTrip = (tripIndex: number) => {
     if (!data) return
     setData({
       ...data,
-      trips: data.trips.filter((t) => t.project_transport_id !== tripId),
+      trips: data.trips.filter((t) => t.trip_index !== tripIndex),
       project_transports_count: data.project_transports_count - 1,
     })
-    void (async () => {
-      try {
-        const token = await requireToken()
-        await removeTrip(tripId, token)
-        invalidateTransportData()
-      } catch {
-        // keep optimistic UI
-      }
-    })()
   }
 
-  const handleConfirmTrips = async (tripIds: number[]) => {
+  const handleConfirmTrips = async (tripIndices: number[]) => {
+    if (!data) return
     setConfirming(true)
     try {
       const token = await requireToken()
-      await confirmTrips(tripIds, token)
+      const selectedTrips = data.trips.filter((t) =>
+        tripIndices.includes(t.trip_index),
+      )
+      await confirmTrips(projectId, selectedTrips, data.file_name, token)
       invalidateTransportData()
       clear()
       toast.success('Turer bekreftet')
@@ -121,11 +119,10 @@ export default function TransportUpload({ projectId }: Props) {
         />
       )}
 
-      {error && (
-        <div className="rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
-          {error}
-        </div>
-      )}
+      <ErrorMessage
+        error={error}
+        fallback="Kunne ikke analysere transportfil"
+      />
 
       {data && (
         <>
@@ -137,7 +134,7 @@ export default function TransportUpload({ projectId }: Props) {
               void (async () => {
                 if (selectedFile && authReady) {
                   const token = await requireToken()
-                  parse(selectedFile, projectId, token)
+                  parse(selectedFile, token)
                 }
               })()
             }}
@@ -177,12 +174,14 @@ export default function TransportUpload({ projectId }: Props) {
         </p>
       )}
 
-      {reportGroups && reportGroups.length > 0 && (
+      {(reportGroups && reportGroups.length > 0) || pendingReportId != null ? (
         <div className="space-y-3">
-          <p className="text-xs font-semibold uppercase tracking-wide text-gray-400">
-            Opplastede kjørerapporter ({reportGroups.length})
-          </p>
-          {reportGroups.map((group) => (
+          {reportGroups && reportGroups.length > 0 && (
+            <p className="text-xs font-semibold uppercase tracking-wide text-gray-400">
+              Opplastede kjørerapporter ({reportGroups.length})
+            </p>
+          )}
+          {reportGroups?.map((group) => (
             <ReportGroupCard
               key={group.report_id ?? 'manual'}
               group={group}
@@ -202,10 +201,22 @@ export default function TransportUpload({ projectId }: Props) {
                   ? (updateTripMutation.variables?.tripId ?? null)
                   : null
               }
+              pendingTripId={
+                pendingTripId != null && pendingTripGroupId === group.report_id
+                  ? pendingTripId
+                  : null
+              }
+              onUndoTripDelete={undoTripDelete}
             />
           ))}
+          {pendingReportId != null && (
+            <InlineUndoBar
+              message="Kjørerapport slettet"
+              onUndo={undoReportDelete}
+            />
+          )}
         </div>
-      )}
+      ) : null}
     </div>
   )
 }

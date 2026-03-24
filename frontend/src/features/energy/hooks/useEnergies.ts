@@ -14,6 +14,7 @@ import type {
   EnergyEntry,
   EnergyUpdateInput,
 } from '../types/energy'
+import { useOptimisticDelete } from '@/shared/hooks/useOptimisticDelete'
 
 export function useEnergies(projectId: number) {
   const { getToken } = useAuth()
@@ -95,53 +96,22 @@ export function useUpdateEnergy(projectId: number) {
 }
 
 export function useDeleteEnergy(projectId: number) {
-  const { getToken } = useAuth()
-  const queryClient = useQueryClient()
+  const { handleDelete, pendingId, undo } = useOptimisticDelete<EnergyEntry[]>({
+    projectId,
+    listQueryKey: ['energies', projectId],
+    co2Category: 'energy',
+    prepare: (snapshot, id) => ({
+      updatedList: snapshot?.filter((e) => e.id !== id) ?? [],
+      co2Delta: snapshot?.find((e) => e.id === id)?.total_co2_kg ?? 0,
+      entryCountDelta: 1,
+    }),
+    deleteFn: deleteEnergy,
+    errorMessage: 'Kunne ikke slette energidata',
+  })
 
-  return async (energyId: number) => {
-    const token = await getToken()
-    if (!token) {
-      toast.error('Ikke autentisert')
-      return
-    }
-
-    const snapshot = queryClient.getQueryData<EnergyEntry[]>([
-      'energies',
-      projectId,
-    ])
-    queryClient.setQueryData<EnergyEntry[]>(
-      ['energies', projectId],
-      (old) => old?.filter((e) => e.id !== energyId) ?? [],
-    )
-
-    let undone = false
-    let called = false
-    const fire = async () => {
-      if (undone || called) return
-      called = true
-      try {
-        await deleteEnergy(energyId, token)
-        queryClient.invalidateQueries({ queryKey: ['co2-summary', projectId] })
-      } catch (err) {
-        if (snapshot)
-          queryClient.setQueryData(['energies', projectId], snapshot)
-        toast.error(
-          err instanceof Error ? err.message : 'Kunne ikke slette energidata',
-        )
-      }
-    }
-
-    toast.success('Energidata slettet', {
-      action: {
-        label: 'Angre',
-        onClick: () => {
-          undone = true
-          if (snapshot)
-            queryClient.setQueryData(['energies', projectId], snapshot)
-        },
-      },
-      onAutoClose: fire,
-      onDismiss: fire,
-    })
+  return {
+    deleteEnergy: handleDelete,
+    pendingEnergyId: pendingId,
+    undoEnergyDelete: undo,
   }
 }
