@@ -5,11 +5,13 @@ from flask import Blueprint, g, jsonify, request
 
 from app.database import SessionLocal
 from app.errors import ApiError
+from app.middleware.auth import require_auth
 from app.models.material_invoice import MaterialInvoice
 from app.models.project_material import MaterialSourceType, ProjectMaterial
 from app.services.ehf_parser import parse_invoice
 from app.services.invoice_enrichment import enrich_invoice
 from app.services.material_service import upsert_catalog_entry
+from app.utils.db import db_commit
 
 logger = logging.getLogger(__name__)
 
@@ -276,11 +278,9 @@ def upload_invoice_route():
 
 
 @invoice_bp.route("/project/<int:project_id>", methods=["GET"])
+@require_auth
 def list_project_materials(project_id: int):
     """Return all materials for a project, grouped by source invoice."""
-    current_user_id = getattr(g, "current_user_id", None)
-    if not current_user_id:
-        raise ApiError("Ikke autentisert.", code="UNAUTHORIZED", status=401)
 
     session = g.db
     materials = (
@@ -329,15 +329,13 @@ def list_project_materials(project_id: int):
 
 
 @invoice_bp.route("/materials/<int:material_id>", methods=["PATCH"])
+@require_auth
 def update_material(material_id: int):
     """Update a project material's CO₂ value manually.
 
     Accepts JSON: { total_co2_kg: number }
     Sets manual_override=True, confidence_score=90, flagged=False.
     """
-    current_user_id = getattr(g, "current_user_id", None)
-    if not current_user_id:
-        raise ApiError("Ikke autentisert.", code="UNAUTHORIZED", status=401)
 
     body = request.get_json(silent=True) or {}
 
@@ -371,17 +369,8 @@ def update_material(material_id: int):
     pm.confidence_score = 90
     pm.flagged = False
 
-    try:
-        session.commit()
-    except Exception:
-        session.rollback()
-        logger.exception("Failed to update material")
-        raise ApiError(
-            "Kunne ikke oppdatere materialposten.",
-            code="UPDATE_FAILED",
-            status=500,
-            suggestion="Prøv igjen. Kontakt support hvis problemet vedvarer.",
-        )
+    with db_commit(session, "Kunne ikke oppdatere materialposten.", "UPDATE_FAILED"):
+        pass
 
     return jsonify(
         id=pm.id,
@@ -393,11 +382,9 @@ def update_material(material_id: int):
 
 
 @invoice_bp.route("/source/<int:invoice_id>", methods=["DELETE"])
+@require_auth
 def delete_invoice(invoice_id: int):
     """Delete an invoice and all its associated project materials."""
-    current_user_id = getattr(g, "current_user_id", None)
-    if not current_user_id:
-        raise ApiError("Ikke autentisert.", code="UNAUTHORIZED", status=401)
 
     session = g.db
     count = (
@@ -411,16 +398,7 @@ def delete_invoice(invoice_id: int):
     if inv:
         session.delete(inv)
 
-    try:
-        session.commit()
-    except Exception:
-        session.rollback()
-        logger.exception("Failed to delete invoice")
-        raise ApiError(
-            "Kunne ikke slette fakturaen.",
-            code="DELETE_FAILED",
-            status=500,
-            suggestion="Prøv igjen. Kontakt support hvis problemet vedvarer.",
-        )
+    with db_commit(session, "Kunne ikke slette fakturaen.", "DELETE_FAILED"):
+        pass
 
     return jsonify(message="Deleted", items_removed=count), 200

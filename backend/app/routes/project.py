@@ -4,6 +4,7 @@ from flask import Blueprint, g, jsonify, request
 from sqlalchemy.exc import IntegrityError
 
 from app.errors import ApiError
+from app.middleware.auth import require_auth
 from app.models.organization import Organization, OrgType
 from app.models.organization_member import OrganizationMember
 from app.models.project import Project, ProjectStatus
@@ -41,12 +42,9 @@ def _get_user_org_id(session, user_id: int) -> int | None:
 
 
 @project_bp.route("", methods=["POST"])
+@require_auth
 def create_project():
     """Create a new project linked to the authenticated user's organization."""
-    current_user_id = getattr(g, "current_user_id", None)
-    if not current_user_id:
-        raise ApiError("Ikke autentisert.", code="UNAUTHORIZED", status=401)
-
     payload = request.get_json(silent=True) or {}
 
     name = payload.get("name", "").strip()
@@ -59,7 +57,7 @@ def create_project():
 
     session = g.db
 
-    organization_id = _get_user_org_id(session, current_user_id)
+    organization_id = _get_user_org_id(session, g.current_user_id)
     if not organization_id:
         raise ApiError(
             "Brukeren er ikke medlem av noen organisasjon.",
@@ -89,7 +87,7 @@ def create_project():
     project = Project(
         name=name,
         organization_id=organization_id,
-        created_by_user_id=current_user_id,
+        created_by_user_id=g.current_user_id,
         project_number=payload.get("project_number") or None,
         customer_id=customer_id,
         status=ProjectStatus.ACTIVE,
@@ -112,15 +110,13 @@ def create_project():
 
 
 @project_bp.route("", methods=["GET"])
+@require_auth
 def list_projects():
     """Return all projects belonging to the authenticated user's organization."""
-    current_user_id = getattr(g, "current_user_id", None)
-    if not current_user_id:
-        raise ApiError("Ikke autentisert.", code="UNAUTHORIZED", status=401)
 
     session = g.db
 
-    organization_id = _get_user_org_id(session, current_user_id)
+    organization_id = _get_user_org_id(session, g.current_user_id)
     if not organization_id:
         raise ApiError(
             "Brukeren er ikke medlem av noen organisasjon.",
@@ -139,15 +135,13 @@ def list_projects():
 
 
 @project_bp.route("/<int:project_id>", methods=["GET"])
+@require_auth
 def get_project(project_id: int):
     """Return a single project by ID, scoped to the user's organization."""
-    current_user_id = getattr(g, "current_user_id", None)
-    if not current_user_id:
-        raise ApiError("Ikke autentisert.", code="UNAUTHORIZED", status=401)
 
     session = g.db
 
-    organization_id = _get_user_org_id(session, current_user_id)
+    organization_id = _get_user_org_id(session, g.current_user_id)
     if not organization_id:
         raise ApiError(
             "Brukeren er ikke medlem av noen organisasjon.",

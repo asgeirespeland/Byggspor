@@ -4,6 +4,7 @@ from flask import Blueprint, g, jsonify, request
 from sqlalchemy.exc import IntegrityError
 
 from app.errors import ApiError
+from app.middleware.auth import require_auth
 from app.models.organization_member import OrganizationMember
 from app.models.user import User
 
@@ -34,32 +35,26 @@ def _serialize_user(user: User, session) -> dict:
 
 
 @user_bp.route("/me", methods=["GET"])
+@require_auth
 def get_me():
     """Return the currently authenticated user profile."""
-    current_user_id = getattr(g, "current_user_id", None)
-    if not current_user_id:
-        raise ApiError("Ikke autentisert.", code="UNAUTHORIZED", status=401)
-
     session = g.db
-    user = session.get(User, current_user_id)
+    user = session.get(User, g.current_user_id)
     if not user:
         raise ApiError("Brukeren ble ikke funnet.", code="NOT_FOUND", status=404)
     return jsonify(_serialize_user(user, session))
 
 
 @user_bp.route("/<int:user_id>", methods=["PATCH"])
+@require_auth
 def update_user(user_id: int):
     """Update user fields with self-service + system-admin override rules."""
-    current_user_id = getattr(g, "current_user_id", None)
-    if not current_user_id:
-        raise ApiError("Ikke autentisert.", code="UNAUTHORIZED", status=401)
-
     payload = request.get_json(silent=True) or {}
     allowed_self_fields = {"name", "phone"}
     allowed_admin_fields = {"is_system_admin"}
 
     session = g.db
-    current_user = session.get(User, current_user_id)
+    current_user = session.get(User, g.current_user_id)
     if not current_user:
         raise ApiError("Ikke autentisert.", code="UNAUTHORIZED", status=401)
 

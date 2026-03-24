@@ -4,6 +4,7 @@ from flask import Blueprint, g, jsonify, request
 from sqlalchemy.exc import IntegrityError
 
 from app.errors import ApiError
+from app.middleware.auth import require_auth
 from app.middleware.roles import require_org_role
 from app.models.organization import Organization, OrgType
 from app.models.organization_member import OrganizationMember, OrgRole
@@ -79,12 +80,9 @@ def _serialize_member(member: OrganizationMember, user: User) -> dict:
 
 
 @organization_bp.route("", methods=["POST"])
+@require_auth
 def create_organization():
     """Create organization and auto-assign creator as OWNER."""
-    current_user_id = getattr(g, "current_user_id", None)
-    if not current_user_id:
-        raise ApiError("Ikke autentisert.", code="UNAUTHORIZED", status=401)
-
     payload = request.get_json(silent=True) or {}
     name = (payload.get("name") or "").strip()
     org_type = _parse_org_type(payload.get("org_type"))
@@ -99,7 +97,7 @@ def create_organization():
         )
 
     session = g.db
-    user = session.get(User, current_user_id)
+    user = session.get(User, g.current_user_id)
     if not user:
         raise ApiError("Ikke autentisert.", code="UNAUTHORIZED", status=401)
 

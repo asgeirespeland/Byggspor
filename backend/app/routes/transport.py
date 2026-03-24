@@ -8,6 +8,7 @@ from flask import Blueprint, g, jsonify, request
 
 from app.database import SessionLocal
 from app.errors import ApiError
+from app.middleware.auth import require_auth
 from app.models.project_transport import ProjectTransport, TransportSourceType
 from app.models.transport_report import TransportReport
 from app.models.vehicle import Vehicle
@@ -16,6 +17,7 @@ from app.services.transport_service import (
     save_transport_report,
 )
 from app.services.vehicle_lookup import lookup_vehicle
+from app.utils.db import db_commit
 
 logger = logging.getLogger(__name__)
 
@@ -120,28 +122,17 @@ def confirm_trips():
 
     session = SessionLocal()
     try:
-        result = save_transport_report(session, project_id, trips, file_name)
-        session.commit()
+        with db_commit(session, "Kunne ikke lagre turene.", "SAVE_FAILED"):
+            result = save_transport_report(session, project_id, trips, file_name)
         return jsonify(result), 201
-    except Exception:
-        session.rollback()
-        logger.exception("Failed to confirm transport trips")
-        raise ApiError(
-            "Kunne ikke lagre turene.",
-            code="SAVE_FAILED",
-            status=500,
-            suggestion="Prøv igjen. Kontakt support hvis problemet vedvarer.",
-        )
     finally:
         session.close()
 
 
 @transport_bp.route("/project/<int:project_id>", methods=["GET"])
+@require_auth
 def list_project_transports(project_id: int):
     """Return all transport trips for a project, grouped by source report."""
-    current_user_id = getattr(g, "current_user_id", None)
-    if not current_user_id:
-        raise ApiError("Ikke autentisert.", code="UNAUTHORIZED", status=401)
 
     session = g.db
     transports = (
@@ -204,11 +195,9 @@ def list_project_transports(project_id: int):
 
 
 @transport_bp.route("/trips", methods=["POST"])
+@require_auth
 def create_manual_trip():
     """Create a single manual transport trip for a project."""
-    current_user_id = getattr(g, "current_user_id", None)
-    if not current_user_id:
-        raise ApiError("Ikke autentisert.", code="UNAUTHORIZED", status=401)
 
     body = request.get_json(silent=True) or {}
 
@@ -267,18 +256,8 @@ def create_manual_trip():
         confidence_score=confidence,
         flagged=flagged,
     )
-    session.add(pt)
-    try:
-        session.commit()
-    except Exception:
-        session.rollback()
-        logger.exception("Failed to create manual trip")
-        raise ApiError(
-            "Kunne ikke opprette turen.",
-            code="CREATE_FAILED",
-            status=500,
-            suggestion="Prøv igjen. Kontakt support hvis problemet vedvarer.",
-        )
+    with db_commit(session, "Kunne ikke opprette turen.", "CREATE_FAILED"):
+        session.add(pt)
 
     return jsonify(
         id=pt.id,
@@ -289,11 +268,9 @@ def create_manual_trip():
 
 
 @transport_bp.route("/trips/<int:trip_id>", methods=["PATCH"])
+@require_auth
 def update_trip(trip_id: int):
     """Update a transport trip's driver, date, addresses, or distance."""
-    current_user_id = getattr(g, "current_user_id", None)
-    if not current_user_id:
-        raise ApiError("Ikke autentisert.", code="UNAUTHORIZED", status=401)
 
     session = g.db
     trip = session.query(ProjectTransport).get(trip_id)
@@ -331,17 +308,8 @@ def update_trip(trip_id: int):
                 suggestion="Distanse må være et tall (f.eks. 42.5).",
             )
 
-    try:
-        session.commit()
-    except Exception:
-        session.rollback()
-        logger.exception("Failed to update trip")
-        raise ApiError(
-            "Kunne ikke oppdatere turen.",
-            code="UPDATE_FAILED",
-            status=500,
-            suggestion="Prøv igjen. Kontakt support hvis problemet vedvarer.",
-        )
+    with db_commit(session, "Kunne ikke oppdatere turen.", "UPDATE_FAILED"):
+        pass
 
     return jsonify(
         id=trip.id,
@@ -352,11 +320,9 @@ def update_trip(trip_id: int):
 
 
 @transport_bp.route("/report/<int:report_id>", methods=["DELETE"])
+@require_auth
 def delete_transport_report(report_id: int):
     """Delete a transport report and all its associated trips."""
-    current_user_id = getattr(g, "current_user_id", None)
-    if not current_user_id:
-        raise ApiError("Ikke autentisert.", code="UNAUTHORIZED", status=401)
 
     session = g.db
     count = (
@@ -368,17 +334,8 @@ def delete_transport_report(report_id: int):
     if rpt:
         session.delete(rpt)
 
-    try:
-        session.commit()
-    except Exception:
-        session.rollback()
-        logger.exception("Failed to delete transport report")
-        raise ApiError(
-            "Kunne ikke slette rapporten.",
-            code="DELETE_FAILED",
-            status=500,
-            suggestion="Prøv igjen. Kontakt support hvis problemet vedvarer.",
-        )
+    with db_commit(session, "Kunne ikke slette rapporten.", "DELETE_FAILED"):
+        pass
 
     return jsonify(message="Deleted", trips_removed=count), 200
 
@@ -390,18 +347,8 @@ def delete_trip(trip_id: int):
     trip = session.query(ProjectTransport).get(trip_id)
     if not trip:
         raise ApiError("Turen ble ikke funnet.", code="NOT_FOUND", status=404)
-    session.delete(trip)
-    try:
-        session.commit()
-    except Exception:
-        session.rollback()
-        logger.exception("Failed to delete trip")
-        raise ApiError(
-            "Kunne ikke slette turen.",
-            code="DELETE_FAILED",
-            status=500,
-            suggestion="Prøv igjen. Kontakt support hvis problemet vedvarer.",
-        )
+    with db_commit(session, "Kunne ikke slette turen.", "DELETE_FAILED"):
+        session.delete(trip)
     return jsonify(message="Deleted"), 200
 
 
@@ -418,15 +365,6 @@ def update_vehicle(vehicle_id: int):
         if field in body:
             setattr(vehicle, field, body[field])
 
-    try:
-        session.commit()
-    except Exception:
-        session.rollback()
-        logger.exception("Failed to update vehicle")
-        raise ApiError(
-            "Kunne ikke oppdatere kjøretøyet.",
-            code="UPDATE_FAILED",
-            status=500,
-            suggestion="Prøv igjen. Kontakt support hvis problemet vedvarer.",
-        )
+    with db_commit(session, "Kunne ikke oppdatere kjøretøyet.", "UPDATE_FAILED"):
+        pass
     return jsonify(message="Updated"), 200
