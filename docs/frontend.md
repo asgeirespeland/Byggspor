@@ -78,7 +78,7 @@ ClerkProvider               → Authentication
     TooltipProvider           → shadcn tooltip context
       BrowserRouter            → Client-side routing
         AppRoutes               → Route definitions
-      Toaster                  → Toast notifications (bottom-right)
+      Toaster                  → Toast notifications (top-right)
 ```
 
 ## Route Map
@@ -145,7 +145,7 @@ Each feature encapsulates its own components, hooks, API calls, types, and tests
 - `usePriceZones` — Fetches available Norwegian price zones.
 - `useCalculateEnergy` — Mutation to create a new energy entry.
 - `useUpdateEnergy` — Mutation to update an existing entry (recalculates CO₂).
-- `useDeleteEnergy` — Mutation to delete an entry.
+- `useDeleteEnergy` — Optimistic delete with inline undo bar and CO₂ summary cache adjustment.
 
 **Types:**
 - `EnergyEntry`, `EnergyUpdateInput`, `PriceZone`
@@ -164,7 +164,7 @@ Each feature encapsulates its own components, hooks, API calls, types, and tests
 - `useInvoiceParse` — Parses an uploaded EHF file (preview, no persistence).
 - `useProjectMaterials` — Fetches all materials for a project grouped by invoice.
 - `useUploadInvoice` — Mutation to upload and persist an invoice for a project.
-- `useDeleteInvoice` — Mutation to delete an invoice and its materials.
+- `useDeleteInvoice` — Optimistic delete with inline undo bar and CO₂ summary cache adjustment.
 
 **Types:**
 - `ParsedInvoice`, `InvoiceLineItem`, `NobbData`, `EpdData`
@@ -181,9 +181,11 @@ Each feature encapsulates its own components, hooks, API calls, types, and tests
 - `VehicleInfoModal` — Modal showing vehicle details with edit capability.
 
 **Hooks:**
-- `useTransportParse` — Parses an Abax file and persists trips.
+- `useTransportParse` — Parses an Abax file (preview only, no persistence).
 - `useProjectTransports` — Fetches all transport trips for a project grouped by report.
-- `useDeleteTransportReport` — Mutation to delete a report and its trips.
+- `useDeleteTransportReport` — Optimistic delete with inline undo bar and CO₂ summary cache adjustment.
+- `useDeleteTrip` — Optimistic single-trip delete with inline undo bar inside the report card.
+- `useUpdateTrip` — Mutation to update trip fields (driver, date, distance).
 
 **Types:**
 - `TransportParseResult`, `TransportTrip`, `VehicleInfo`
@@ -226,10 +228,12 @@ Each feature encapsulates its own components, hooks, API calls, types, and tests
 
 Two functions for communicating with the backend:
 
-- **`apiRequest<T>(endpoint, options?)`** — Generic JSON request. Adds `Authorization: Bearer <token>` when provided. Parses JSON response and throws on non-OK status.
+- **`apiRequest<T>(endpoint, options?)`** — Generic JSON request. Adds `Authorization: Bearer <token>` when provided. Parses JSON response and throws `ApiError` on non-OK status.
 - **`postFile<T>(endpoint, file, token?)`** — Multipart file upload using `FormData`. Used for invoice and transport XML uploads.
 
 Both use `VITE_API_URL` (defaults to `http://localhost:5000`) as the base URL.
+
+**`ApiError`** extends `Error` with `code` (machine-readable) and `suggestion` (optional user guidance) fields, matching the backend's error response shape. All API functions throw `ApiError` on error responses.
 
 ### Query Client (`shared/api/queryClient.ts`)
 
@@ -246,6 +250,8 @@ TanStack Query configured with:
 | `useDeferredLoading` | Prevents loading spinner flicker on fast responses using `useDeferredValue` |
 | `useFileSelect` | File selection state with validation (accepts/rejects, error message, clear) |
 | `useScrollIndicators` | Detects horizontal scroll overflow for tab bars (shows chevron indicators) |
+| `useInlineUndo` | Manages timed undo state — schedules a deferred action with rollback, auto-confirms on timeout or unmount |
+| `useOptimisticDelete` | Shared hook for optimistic delete + inline undo across all categories. Handles cache snapshot, optimistic list/CO₂ removal, timed API call, and rollback on undo or error |
 
 ### Shared Components
 
@@ -256,6 +262,8 @@ TanStack Query configured with:
 | `SelectedFileBar` | Displays selected file name with upload/clear actions and loading state |
 | `ItemListPanel` | Generic searchable list with add button and empty state. Used for projects and org members. |
 | `CollapsibleGroupCard` | Expandable card for grouped data (invoices, transport reports) |
+| `ErrorMessage` | Inline error display with optional suggestion text (renders `ApiError.suggestion` when present) |
+| `InlineUndoBar` | Inline undo bar with message and "Angre" button, shown in-place after optimistic deletion |
 | `FormDialog` | Generic dialog wrapper for forms |
 
 ### Shared Types

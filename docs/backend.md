@@ -29,6 +29,7 @@ backend/
 ├── alembic.ini
 ├── app/
 │   ├── main.py               # Flask app, middleware, blueprint registration
+│   ├── errors.py             # ApiError exception class and error handlers
 │   ├── database.py           # SQLAlchemy engine and session factory
 │   ├── middleware/
 │   │   ├── auth.py           # Clerk JWT verification, user sync
@@ -45,6 +46,22 @@ backend/
 ├── requirements.txt
 └── ruff.toml
 ```
+
+## Error Handling
+
+All API errors use a consistent JSON shape via the `ApiError` exception class:
+
+```json
+{
+  "error": "Human-readable message (Norwegian)",
+  "code": "MACHINE_READABLE_CODE",
+  "suggestion": "Optional guidance for the user"
+}
+```
+
+Route handlers raise `ApiError(message, code=..., status=..., suggestion=...)` instead of manually building error responses. Error handlers registered on the Flask app catch `ApiError`, 404, 405, and 500 errors and return the standardized JSON format.
+
+**File format validation:** The EHF and Abax parsers validate the XML root element before parsing. Non-EHF XML (missing UBL Invoice root) and non-Abax XML (missing DocumentElement root) raise `ValueError` with a descriptive message, which routes convert to `ApiError` with a suggestion.
 
 ## Request Lifecycle
 
@@ -150,19 +167,23 @@ Returns product info with EPD/GWP data if available. See [nobb-api.md](nobb-api.
 
 | Method | Path | Auth | Description |
 |--------|------|------|-------------|
-| POST | `/transport/parse` | Authenticated | Parse Abax Turrapport XML and persist for a project |
-| POST | `/transport/confirm` | Authenticated | Mark parsed trips as confirmed |
+| POST | `/transport/parse` | Authenticated | Parse Abax Turrapport XML (preview only, no persistence) |
+| POST | `/transport/confirm` | Authenticated | Persist confirmed trips to a project |
 | GET | `/transport/project/<project_id>` | Authenticated | List all trips for a project, grouped by source report |
 | DELETE | `/transport/report/<report_id>` | Authenticated | Delete report and all associated trips |
 | DELETE | `/transport/trips/<trip_id>` | Authenticated | Delete a single trip |
 | PATCH | `/transport/vehicles/<vehicle_id>` | Authenticated | Update vehicle details (make, model, fuel_type) |
 
-**`/transport/parse`** — Upload an Abax Turrapport XML as multipart form data (`file` field, `project_id` form field). For each trip, the system:
+**Two-phase transport flow:**
+
+**`/transport/parse`** — Upload an Abax Turrapport XML as multipart form data (`file` field). Returns enriched trip data without persisting anything to the project. For each trip, the system:
 1. Parses trip data (driver, addresses, distance, expenses)
-2. Looks up/creates vehicle by registration number
+2. Looks up/creates vehicle by registration number (vehicle catalog entries are persisted)
 3. Fetches CO₂/km from Vegvesen API if not cached
 4. Calculates `total_co2_kg = distance_km × co2_per_km`
 5. Flags trips where vehicle emission data is missing (confidence 20)
+
+**`/transport/confirm`** — Accepts a JSON body with `project_id`, `trips` (the full trip objects from parse), and `file_name`. Creates the `TransportReport` and `ProjectTransport` records. This separation allows users to review, remove, and edit trips before committing them to the database.
 
 ### Reports (`/report`)
 
@@ -221,10 +242,10 @@ Stateless parser for Abax Turrapport (driving log) XML exports. Handles encoded 
 
 ### Transport Service (`transport_service.py`)
 
-Orchestrates transport report processing:
-1. Parse Abax XML
-2. Create `TransportReport` source record
-3. For each trip: look up/create vehicle, calculate CO₂, create `ProjectTransport` record
+Provides two functions for the two-phase transport flow:
+
+- **`preview_transport_report(session, xml_content)`** — Parses XML, looks up vehicles, calculates CO₂, and returns enriched trip data. Only vehicle catalog entries are persisted; no project data is written.
+- **`save_transport_report(session, project_id, trips, file_name)`** — Creates `TransportReport` and `ProjectTransport` records from confirmed trip data.
 
 ### Vehicle Lookup (`vehicle_lookup.py`)
 
