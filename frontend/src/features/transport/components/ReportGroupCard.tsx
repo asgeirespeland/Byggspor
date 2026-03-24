@@ -1,7 +1,7 @@
-import { useState } from 'react'
 import { Pencil, Trash2, Check, X } from 'lucide-react'
 import CollapsibleGroupCard from '@/shared/components/CollapsibleGroupCard'
 import InlineUndoBar from '@/shared/components/InlineUndoBar'
+import { useInlineEdit } from '@/shared/hooks/useInlineEdit'
 import type {
   ProjectReportGroup,
   ProjectTripItem,
@@ -26,29 +26,28 @@ interface TripRowProps {
 }
 
 function TripRow({ trip, onDelete, onUpdate, isUpdating }: TripRowProps) {
-  const [editing, setEditing] = useState(false)
-  const [editDriver, setEditDriver] = useState('')
-  const [editDate, setEditDate] = useState('')
-  const [editDistance, setEditDistance] = useState('')
+  const { editing, value, setValue, startEdit, cancelEdit } = useInlineEdit({
+    driver: '',
+    date: '',
+    distance: '',
+  })
 
-  const startEdit = () => {
-    setEditDriver(trip.driver_name ?? '')
-    setEditDate(trip.trip_date ?? '')
-    setEditDistance(String(trip.distance_km ?? ''))
-    setEditing(true)
-  }
-
-  const cancelEdit = () => setEditing(false)
+  const handleStartEdit = () =>
+    startEdit({
+      driver: trip.driver_name ?? '',
+      date: trip.trip_date ?? '',
+      distance: String(trip.distance_km ?? ''),
+    })
 
   const saveEdit = () => {
-    const distance = parseFloat(editDistance)
+    const distance = parseFloat(value.distance)
     if (isNaN(distance) || distance < 0) return
     onUpdate({
-      driver_name: editDriver || undefined,
-      trip_date: editDate || undefined,
+      driver_name: value.driver || undefined,
+      trip_date: value.date || undefined,
       distance_km: distance,
     })
-    setEditing(false)
+    cancelEdit()
   }
 
   if (editing) {
@@ -57,8 +56,10 @@ function TripRow({ trip, onDelete, onUpdate, isUpdating }: TripRowProps) {
         <td className="px-4 py-1.5">
           <input
             type="text"
-            value={editDriver}
-            onChange={(e) => setEditDriver(e.target.value)}
+            value={value.driver}
+            onChange={(e) =>
+              setValue((v) => ({ ...v, driver: e.target.value }))
+            }
             className="w-full rounded border border-gray-300 px-2 py-1 text-sm"
             autoFocus
           />
@@ -66,8 +67,8 @@ function TripRow({ trip, onDelete, onUpdate, isUpdating }: TripRowProps) {
         <td className="px-4 py-1.5">
           <input
             type="date"
-            value={editDate}
-            onChange={(e) => setEditDate(e.target.value)}
+            value={value.date}
+            onChange={(e) => setValue((v) => ({ ...v, date: e.target.value }))}
             className="rounded border border-gray-300 px-2 py-1 text-sm"
           />
         </td>
@@ -79,8 +80,10 @@ function TripRow({ trip, onDelete, onUpdate, isUpdating }: TripRowProps) {
             type="number"
             min="0"
             step="any"
-            value={editDistance}
-            onChange={(e) => setEditDistance(e.target.value)}
+            value={value.distance}
+            onChange={(e) =>
+              setValue((v) => ({ ...v, distance: e.target.value }))
+            }
             className="w-20 rounded border border-gray-300 px-2 py-1 text-sm text-right"
           />
         </td>
@@ -139,7 +142,7 @@ function TripRow({ trip, onDelete, onUpdate, isUpdating }: TripRowProps) {
         <div className="flex items-center gap-1.5">
           <button
             type="button"
-            onClick={startEdit}
+            onClick={handleStartEdit}
             className="text-gray-400 transition-colors hover:text-blue-500 cursor-pointer"
           >
             <Pencil className="h-3.5 w-3.5" />

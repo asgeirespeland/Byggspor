@@ -1,6 +1,6 @@
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
-import { useAuth } from '@clerk/react'
-import { toast } from 'sonner'
+import { useAuthQuery } from '@/shared/hooks/useAuthQuery'
+import { useAuthMutation } from '@/shared/hooks/useAuthMutation'
+import { useOptimisticDelete } from '@/shared/hooks/useOptimisticDelete'
 
 import {
   calculateEnergy,
@@ -14,84 +14,41 @@ import type {
   EnergyEntry,
   EnergyUpdateInput,
 } from '../types/energy'
-import { useOptimisticDelete } from '@/shared/hooks/useOptimisticDelete'
 
 export function useEnergies(projectId: number) {
-  const { getToken } = useAuth()
-
-  return useQuery({
-    queryKey: ['energies', projectId],
-    queryFn: async () => {
-      const token = await getToken()
-      if (!token) throw new Error('Ikke autentisert')
-      return listEnergies(projectId, token)
-    },
-  })
+  return useAuthQuery(['energies', projectId], (token) =>
+    listEnergies(projectId, token),
+  )
 }
 
 export function usePriceZones() {
-  const { getToken } = useAuth()
-
-  return useQuery({
-    queryKey: ['price-zones'],
-    queryFn: async () => {
-      const token = await getToken()
-      if (!token) throw new Error('Ikke autentisert')
-      return listPriceZones(token)
-    },
+  return useAuthQuery(['price-zones'], (token) => listPriceZones(token), {
     staleTime: Infinity,
   })
 }
 
 export function useCalculateEnergy(projectId: number) {
-  const { getToken } = useAuth()
-  const queryClient = useQueryClient()
-
-  return useMutation({
-    mutationFn: async (input: EnergyCalculateInput) => {
-      const token = await getToken()
-      if (!token) throw new Error('Ikke autentisert')
-      return calculateEnergy(input, token)
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['energies', projectId] })
-      queryClient.invalidateQueries({ queryKey: ['co2-summary', projectId] })
-      toast.success('Energidata lagret')
-    },
-    onError: (err) => {
-      toast.error(
-        err instanceof Error ? err.message : 'Kunne ikke lagre energidata',
-      )
-    },
+  return useAuthMutation<EnergyCalculateInput>({
+    mutationFn: (input, token) => calculateEnergy(input, token),
+    invalidateKeys: [
+      ['energies', projectId],
+      ['co2-summary', projectId],
+    ],
+    successMessage: 'Energidata lagret',
+    errorMessage: 'Kunne ikke lagre energidata',
   })
 }
 
 export function useUpdateEnergy(projectId: number) {
-  const { getToken } = useAuth()
-  const queryClient = useQueryClient()
-
-  return useMutation({
-    mutationFn: async ({
-      energyId,
-      data,
-    }: {
-      energyId: number
-      data: EnergyUpdateInput
-    }) => {
-      const token = await getToken()
-      if (!token) throw new Error('Ikke autentisert')
-      return updateEnergy(energyId, data, token)
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['energies', projectId] })
-      queryClient.invalidateQueries({ queryKey: ['co2-summary', projectId] })
-      toast.success('Energidata oppdatert')
-    },
-    onError: (err) => {
-      toast.error(
-        err instanceof Error ? err.message : 'Kunne ikke oppdatere energidata',
-      )
-    },
+  return useAuthMutation<{ energyId: number; data: EnergyUpdateInput }>({
+    mutationFn: ({ energyId, data }, token) =>
+      updateEnergy(energyId, data, token),
+    invalidateKeys: [
+      ['energies', projectId],
+      ['co2-summary', projectId],
+    ],
+    successMessage: 'Energidata oppdatert',
+    errorMessage: 'Kunne ikke oppdatere energidata',
   })
 }
 

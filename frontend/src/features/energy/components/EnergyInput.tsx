@@ -5,6 +5,7 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import InlineUndoBar from '@/shared/components/InlineUndoBar'
 import { useDeferredLoading } from '@/shared/hooks/useDeferredLoading'
+import { useInlineEdit } from '@/shared/hooks/useInlineEdit'
 import {
   useEnergies,
   usePriceZones,
@@ -250,30 +251,29 @@ function EnergyRow({
   isUpdating,
   isDeleting,
 }: EnergyRowProps) {
-  const [editing, setEditing] = useState(false)
-  const [editKwh, setEditKwh] = useState('')
-  const [editZone, setEditZone] = useState('')
-  const [editDate, setEditDate] = useState('')
+  const { editing, value, setValue, startEdit, cancelEdit } = useInlineEdit({
+    kwh: '',
+    zone: '',
+    date: '',
+  })
 
-  const startEdit = () => {
-    setEditKwh(String(entry.kwh_used ?? ''))
-    setEditZone(entry.price_zone ?? '')
-    setEditDate(entry.recorded_date ?? '')
-    setEditing(true)
-  }
-
-  const cancelEdit = () => setEditing(false)
+  const handleStartEdit = () =>
+    startEdit({
+      kwh: String(entry.kwh_used ?? ''),
+      zone: entry.price_zone ?? '',
+      date: entry.recorded_date ?? '',
+    })
 
   const saveEdit = () => {
-    const kwh = parseFloat(editKwh)
+    const kwh = parseFloat(value.kwh)
     if (isNaN(kwh) || kwh < 0) return
 
     onUpdate({
       kwh_used: kwh,
-      price_zone: (editZone as PriceZone) || null,
-      recorded_date: editDate || null,
+      price_zone: (value.zone as PriceZone) || null,
+      recorded_date: value.date || null,
     })
-    setEditing(false)
+    cancelEdit()
   }
 
   if (editing) {
@@ -284,16 +284,16 @@ function EnergyRow({
             type="number"
             min="0"
             step="any"
-            value={editKwh}
-            onChange={(e) => setEditKwh(e.target.value)}
+            value={value.kwh}
+            onChange={(e) => setValue((v) => ({ ...v, kwh: e.target.value }))}
             className="w-24 rounded border border-gray-300 px-2 py-1 text-sm"
             autoFocus
           />
         </td>
         <td className="px-4 py-1.5">
           <select
-            value={editZone}
-            onChange={(e) => setEditZone(e.target.value)}
+            value={value.zone}
+            onChange={(e) => setValue((v) => ({ ...v, zone: e.target.value }))}
             className="w-20 rounded border border-gray-300 px-2 py-1 text-sm"
           >
             <option value="">—</option>
@@ -308,8 +308,8 @@ function EnergyRow({
         <td className="px-4 py-1.5">
           <input
             type="date"
-            value={editDate}
-            onChange={(e) => setEditDate(e.target.value)}
+            value={value.date}
+            onChange={(e) => setValue((v) => ({ ...v, date: e.target.value }))}
             className="rounded border border-gray-300 px-2 py-1 text-sm"
           />
         </td>
@@ -360,7 +360,7 @@ function EnergyRow({
         <div className="flex items-center gap-1.5">
           <button
             type="button"
-            onClick={startEdit}
+            onClick={handleStartEdit}
             className="text-gray-400 transition-colors hover:text-blue-500 cursor-pointer"
           >
             <Pencil className="h-3.5 w-3.5" />

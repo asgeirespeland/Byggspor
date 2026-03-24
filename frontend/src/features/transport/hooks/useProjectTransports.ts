@@ -1,7 +1,8 @@
 import { useState } from 'react'
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
-import { useAuth } from '@clerk/react'
-import { toast } from 'sonner'
+
+import { useAuthQuery } from '@/shared/hooks/useAuthQuery'
+import { useAuthMutation } from '@/shared/hooks/useAuthMutation'
+import { useOptimisticDelete } from '@/shared/hooks/useOptimisticDelete'
 
 import {
   listProjectTransports,
@@ -11,19 +12,11 @@ import {
   type ProjectReportGroup,
   type TripUpdateInput,
 } from '../api/projectTransports'
-import { useOptimisticDelete } from '@/shared/hooks/useOptimisticDelete'
 
 export function useProjectTransports(projectId: number) {
-  const { getToken } = useAuth()
-
-  return useQuery({
-    queryKey: ['project-transports', projectId],
-    queryFn: async () => {
-      const token = await getToken()
-      if (!token) throw new Error('Ikke autentisert')
-      return listProjectTransports(projectId, token)
-    },
-  })
+  return useAuthQuery(['project-transports', projectId], (token) =>
+    listProjectTransports(projectId, token),
+  )
 }
 
 export function useDeleteTransportReport(projectId: number) {
@@ -92,32 +85,13 @@ export function useDeleteTrip(projectId: number) {
 }
 
 export function useUpdateTrip(projectId: number) {
-  const { getToken } = useAuth()
-  const queryClient = useQueryClient()
-
-  return useMutation({
-    mutationFn: async ({
-      tripId,
-      data,
-    }: {
-      tripId: number
-      data: TripUpdateInput
-    }) => {
-      const token = await getToken()
-      if (!token) throw new Error('Ikke autentisert')
-      return updateTrip(tripId, data, token)
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({
-        queryKey: ['project-transports', projectId],
-      })
-      queryClient.invalidateQueries({ queryKey: ['co2-summary', projectId] })
-      toast.success('Tur oppdatert')
-    },
-    onError: (err) => {
-      toast.error(
-        err instanceof Error ? err.message : 'Kunne ikke oppdatere tur',
-      )
-    },
+  return useAuthMutation<{ tripId: number; data: TripUpdateInput }>({
+    mutationFn: ({ tripId, data }, token) => updateTrip(tripId, data, token),
+    invalidateKeys: [
+      ['project-transports', projectId],
+      ['co2-summary', projectId],
+    ],
+    successMessage: 'Tur oppdatert',
+    errorMessage: 'Kunne ikke oppdatere tur',
   })
 }

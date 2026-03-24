@@ -1,6 +1,6 @@
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
-import { useAuth } from '@clerk/react'
-import { toast } from 'sonner'
+import { useAuthQuery } from '@/shared/hooks/useAuthQuery'
+import { useAuthMutation } from '@/shared/hooks/useAuthMutation'
+import { useOptimisticDelete } from '@/shared/hooks/useOptimisticDelete'
 
 import {
   listProjectMaterials,
@@ -8,52 +8,26 @@ import {
   updateMaterial,
   type ProjectInvoiceGroup,
 } from '../api/invoice'
-import { useOptimisticDelete } from '@/shared/hooks/useOptimisticDelete'
 
 export function useProjectMaterials(projectId: number) {
-  const { getToken } = useAuth()
-
-  return useQuery({
-    queryKey: ['project-materials', projectId],
-    queryFn: async () => {
-      const token = await getToken()
-      if (!token) throw new Error('Ikke autentisert')
-      return listProjectMaterials(projectId, token)
-    },
-  })
+  return useAuthQuery(['project-materials', projectId], (token) =>
+    listProjectMaterials(projectId, token),
+  )
 }
 
 export function useUpdateMaterial(projectId: number) {
-  const { getToken } = useAuth()
-  const queryClient = useQueryClient()
-
-  return useMutation({
-    mutationFn: async ({
-      materialId,
-      total_co2_kg,
-    }: {
-      materialId: number
-      total_co2_kg: number
-    }) => {
-      const token = await getToken()
-      if (!token) throw new Error('Ikke autentisert')
-      return updateMaterial(materialId, { total_co2_kg }, token)
+  return useAuthMutation<{ materialId: number; total_co2_kg: number }, unknown>(
+    {
+      mutationFn: ({ materialId, total_co2_kg }, token) =>
+        updateMaterial(materialId, { total_co2_kg }, token),
+      invalidateKeys: [
+        ['project-materials', projectId],
+        ['co2-summary', projectId],
+      ],
+      successMessage: 'CO₂-verdi oppdatert',
+      errorMessage: 'Kunne ikke oppdatere materialposten',
     },
-    onSuccess: () => {
-      queryClient.invalidateQueries({
-        queryKey: ['project-materials', projectId],
-      })
-      queryClient.invalidateQueries({ queryKey: ['co2-summary', projectId] })
-      toast.success('CO₂-verdi oppdatert')
-    },
-    onError: (err) => {
-      toast.error(
-        err instanceof Error
-          ? err.message
-          : 'Kunne ikke oppdatere materialposten',
-      )
-    },
-  })
+  )
 }
 
 export function useDeleteInvoice(projectId: number) {

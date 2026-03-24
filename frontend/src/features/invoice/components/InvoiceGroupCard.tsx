@@ -1,6 +1,6 @@
-import { useState } from 'react'
 import { Check, Loader2, Pencil } from 'lucide-react'
 import CollapsibleGroupCard from '@/shared/components/CollapsibleGroupCard'
+import { useInlineEdit } from '@/shared/hooks/useInlineEdit'
 import type { ProjectInvoiceGroup, ProjectMaterialItem } from '../api/invoice'
 import { useUpdateMaterial } from '../hooks/useProjectMaterials'
 
@@ -76,8 +76,7 @@ function MaterialRow({
   item: ProjectMaterialItem
   projectId: number
 }) {
-  const [editing, setEditing] = useState(false)
-  const [value, setValue] = useState('')
+  const { editing, value, setValue, startEdit, cancelEdit } = useInlineEdit('')
   const updateMutation = useUpdateMaterial(projectId)
 
   const handleSave = () => {
@@ -87,7 +86,7 @@ function MaterialRow({
       { materialId: item.id, total_co2_kg: val },
       {
         onSuccess: () => {
-          setEditing(false)
+          cancelEdit()
           setValue('')
         },
       },
@@ -129,7 +128,7 @@ function MaterialRow({
               onChange={(e) => setValue(e.target.value)}
               onKeyDown={(e) => {
                 if (e.key === 'Enter') handleSave()
-                if (e.key === 'Escape') setEditing(false)
+                if (e.key === 'Escape') cancelEdit()
               }}
               className="h-7 w-20 rounded border border-gray-900 bg-white px-2 text-xs text-right focus:border-black focus:outline-none focus:ring-1 focus:ring-black"
               autoFocus
@@ -146,7 +145,7 @@ function MaterialRow({
               )}
             </button>
             <button
-              onClick={() => setEditing(false)}
+              onClick={cancelEdit}
               className="text-xs text-gray-400 hover:text-gray-600"
             >
               Avbryt
@@ -166,12 +165,11 @@ function MaterialRow({
                 : '—'}
             </span>
             <button
-              onClick={() => {
-                setValue(
+              onClick={() =>
+                startEdit(
                   item.total_co2_kg != null ? String(item.total_co2_kg) : '',
                 )
-                setEditing(true)
-              }}
+              }
               className="invisible text-gray-300 hover:text-gray-600 group-hover:visible"
               title="Korriger CO₂-verdi"
             >

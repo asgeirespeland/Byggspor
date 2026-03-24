@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { AlertTriangle, Package, Truck, Check, Loader2, X } from 'lucide-react'
+import { useInlineEdit } from '@/shared/hooks/useInlineEdit'
 import {
   Tooltip,
   TooltipContent,
@@ -125,20 +126,19 @@ function MaterialRow({
   item: FlaggedMaterial
   projectId: number
 }) {
-  const [editing, setEditing] = useState(false)
-  const [co2Value, setCo2Value] = useState('')
+  const { editing, value, setValue, startEdit, cancelEdit } = useInlineEdit('')
   const updateMutation = useUpdateMaterial(projectId)
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
-    const val = parseFloat(co2Value)
+    const val = parseFloat(value)
     if (isNaN(val)) return
     updateMutation.mutate(
       { materialId: item.id, total_co2_kg: val },
       {
         onSuccess: () => {
-          setEditing(false)
-          setCo2Value('')
+          cancelEdit()
+          setValue('')
         },
       },
     )
@@ -158,14 +158,14 @@ function MaterialRow({
             type="number"
             step="any"
             placeholder="kg CO₂"
-            value={co2Value}
-            onChange={(e) => setCo2Value(e.target.value)}
+            value={value}
+            onChange={(e) => setValue(e.target.value)}
             className="h-7 w-full rounded border border-gray-200 px-2 text-xs focus:border-amber-400 focus:outline-none focus:ring-1 focus:ring-amber-400"
             autoFocus
           />
           <button
             type="submit"
-            disabled={updateMutation.isPending || !co2Value}
+            disabled={updateMutation.isPending || !value}
             className="flex h-7 w-7 shrink-0 items-center justify-center rounded bg-amber-500 text-white transition-colors hover:bg-amber-600 disabled:opacity-50"
           >
             {updateMutation.isPending ? (
@@ -176,7 +176,7 @@ function MaterialRow({
           </button>
           <button
             type="button"
-            onClick={() => setEditing(false)}
+            onClick={cancelEdit}
             className="text-xs text-gray-400 hover:text-gray-600"
           >
             Avbryt
@@ -198,7 +198,7 @@ function MaterialRow({
         </p>
       </div>
       <button
-        onClick={() => setEditing(true)}
+        onClick={() => startEdit('')}
         className="shrink-0 text-[11px] font-medium text-amber-600 hover:text-amber-800"
       >
         Korriger
