@@ -2,7 +2,9 @@
  * Unit tests for useTransportParse hook.
  *
  * No Clerk dependency here — the token is passed in directly by the caller.
- * Mocks: ../api/transport (parseTransportFile)
+ * Mocks:
+ * - ../api/transport (parseTransportFile) — never make real HTTP calls
+ * - sonner (toast) — suppress toast side-effects
  */
 
 import { describe, it, expect, vi, beforeEach } from 'vitest'
@@ -16,6 +18,10 @@ import type { TransportParseResponse } from '@/features/transport/types/transpor
 
 vi.mock('@/features/transport/api/transport', () => ({
   parseTransportFile: vi.fn(),
+}))
+
+vi.mock('sonner', () => ({
+  toast: { success: vi.fn(), error: vi.fn() },
 }))
 
 const mockParseTransportFile = vi.mocked(parseTransportFile)
@@ -53,16 +59,16 @@ describe('useTransportParse — initial state', () => {
 })
 
 describe('useTransportParse — parse() success', () => {
-  it('calls parseTransportFile with the file, projectId, and token', async () => {
+  it('calls parseTransportFile with the file and token', async () => {
     mockParseTransportFile.mockResolvedValueOnce(MOCK_RESPONSE)
     const { result } = renderHook(() => useTransportParse())
     const file = makeFile()
 
     await act(async () => {
-      await result.current.parse(file, 42, 'my-token')
+      await result.current.parse(file, 'my-token')
     })
 
-    expect(mockParseTransportFile).toHaveBeenCalledWith(file, 42, 'my-token')
+    expect(mockParseTransportFile).toHaveBeenCalledWith(file, 'my-token')
   })
 
   it('sets data on success', async () => {
@@ -70,7 +76,7 @@ describe('useTransportParse — parse() success', () => {
     const { result } = renderHook(() => useTransportParse())
 
     await act(async () => {
-      await result.current.parse(makeFile(), 1)
+      await result.current.parse(makeFile())
     })
 
     expect(result.current.data).toEqual(MOCK_RESPONSE)
@@ -81,7 +87,7 @@ describe('useTransportParse — parse() success', () => {
     const { result } = renderHook(() => useTransportParse())
 
     await act(async () => {
-      await result.current.parse(makeFile(), 1)
+      await result.current.parse(makeFile())
     })
 
     expect(result.current.loading).toBe(false)
@@ -100,7 +106,7 @@ describe('useTransportParse — loading state', () => {
     const { result } = renderHook(() => useTransportParse())
 
     act(() => {
-      result.current.parse(makeFile(), 1)
+      result.current.parse(makeFile())
     })
 
     await waitFor(() => expect(result.current.loading).toBe(true))
@@ -113,28 +119,32 @@ describe('useTransportParse — loading state', () => {
 })
 
 describe('useTransportParse — error handling', () => {
-  it('sets error message on failure', async () => {
+  it('sets error on failure', async () => {
     mockParseTransportFile.mockRejectedValueOnce(
       new Error('Invalid transport file'),
     )
     const { result } = renderHook(() => useTransportParse())
 
     await act(async () => {
-      await result.current.parse(makeFile(), 1)
+      await result.current.parse(makeFile())
     })
 
-    expect(result.current.error).toBe('Invalid transport file')
+    expect(result.current.error).toBeInstanceOf(Error)
+    expect(result.current.error?.message).toBe('Invalid transport file')
   })
 
-  it('sets fallback message for non-Error throws', async () => {
+  it('sets fallback error for non-Error throws', async () => {
     mockParseTransportFile.mockRejectedValueOnce('unexpected')
     const { result } = renderHook(() => useTransportParse())
 
     await act(async () => {
-      await result.current.parse(makeFile(), 1)
+      await result.current.parse(makeFile())
     })
 
-    expect(result.current.error).toBe('Kunne ikke analysere transportfil')
+    expect(result.current.error).toBeInstanceOf(Error)
+    expect(result.current.error?.message).toBe(
+      'Kunne ikke analysere transportfil',
+    )
   })
 })
 
@@ -144,7 +154,7 @@ describe('useTransportParse — reset()', () => {
     const { result } = renderHook(() => useTransportParse())
 
     await act(async () => {
-      await result.current.parse(makeFile(), 1)
+      await result.current.parse(makeFile())
     })
     act(() => {
       result.current.reset()

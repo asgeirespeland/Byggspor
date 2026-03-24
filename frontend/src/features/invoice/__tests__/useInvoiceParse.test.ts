@@ -3,30 +3,28 @@
  *
  * Tests async state management: loading, data, error, and reset.
  * Mocks:
- * - @clerk/react (useAuth/getToken) — never call real Clerk in tests
- * - shared/api/client (postFile) — never make real HTTP calls in tests
+ * - ../api/invoice (parseInvoiceFile) — never make real HTTP calls in tests
+ * - sonner (toast) — suppress toast side-effects
  */
 
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { renderHook, act, waitFor } from '@testing-library/react'
 
 import { useInvoiceParse } from '@/features/invoice/hooks/useInvoiceParse'
-import { postFile } from '@/shared/api/client'
+import { parseInvoiceFile } from '@/features/invoice/api/invoice'
 import type { InvoiceResponse } from '@/features/invoice/types/invoice'
 
 // ── Mocks ─────────────────────────────────────────────────────────────────────
 
-vi.mock('@clerk/react', () => ({
-  useAuth: () => ({
-    getToken: vi.fn().mockResolvedValue('mock-token'),
-  }),
+vi.mock('@/features/invoice/api/invoice', () => ({
+  parseInvoiceFile: vi.fn(),
 }))
 
-vi.mock('@/shared/api/client', () => ({
-  postFile: vi.fn(),
+vi.mock('sonner', () => ({
+  toast: { success: vi.fn(), error: vi.fn() },
 }))
 
-const mockPostFile = vi.mocked(postFile)
+const mockParseInvoiceFile = vi.mocked(parseInvoiceFile)
 
 // ── Fixtures ──────────────────────────────────────────────────────────────────
 
@@ -67,24 +65,20 @@ describe('useInvoiceParse — initial state', () => {
 })
 
 describe('useInvoiceParse — parse() success', () => {
-  it('calls postFile with the correct endpoint and file', async () => {
-    mockPostFile.mockResolvedValueOnce(MOCK_RESPONSE)
+  it('calls parseInvoiceFile with the file and token', async () => {
+    mockParseInvoiceFile.mockResolvedValueOnce(MOCK_RESPONSE)
     const { result } = renderHook(() => useInvoiceParse())
     const file = makeFile()
 
     await act(async () => {
-      await result.current.parse(file)
+      await result.current.parse(file, 'mock-token')
     })
 
-    expect(mockPostFile).toHaveBeenCalledWith(
-      '/invoice/parse',
-      file,
-      'mock-token',
-    )
+    expect(mockParseInvoiceFile).toHaveBeenCalledWith(file, 'mock-token')
   })
 
   it('sets data on success', async () => {
-    mockPostFile.mockResolvedValueOnce(MOCK_RESPONSE)
+    mockParseInvoiceFile.mockResolvedValueOnce(MOCK_RESPONSE)
     const { result } = renderHook(() => useInvoiceParse())
 
     await act(async () => {
@@ -96,16 +90,17 @@ describe('useInvoiceParse — parse() success', () => {
 
   it('clears error before a new parse call', async () => {
     // First call fails
-    mockPostFile.mockRejectedValueOnce(new Error('first error'))
+    mockParseInvoiceFile.mockRejectedValueOnce(new Error('first error'))
     const { result } = renderHook(() => useInvoiceParse())
 
     await act(async () => {
       await result.current.parse(makeFile())
     })
-    expect(result.current.error).toBe('first error')
+    expect(result.current.error).toBeInstanceOf(Error)
+    expect(result.current.error?.message).toBe('first error')
 
     // Second call succeeds — error should be cleared
-    mockPostFile.mockResolvedValueOnce(MOCK_RESPONSE)
+    mockParseInvoiceFile.mockResolvedValueOnce(MOCK_RESPONSE)
     await act(async () => {
       await result.current.parse(makeFile())
     })
@@ -114,7 +109,7 @@ describe('useInvoiceParse — parse() success', () => {
   })
 
   it('clears previous data before a new parse call', async () => {
-    mockPostFile.mockResolvedValueOnce(MOCK_RESPONSE)
+    mockParseInvoiceFile.mockResolvedValueOnce(MOCK_RESPONSE)
     const { result } = renderHook(() => useInvoiceParse())
 
     await act(async () => {
@@ -124,7 +119,7 @@ describe('useInvoiceParse — parse() success', () => {
 
     // Second call — data should be null while pending
     let resolveSecond!: (v: InvoiceResponse) => void
-    mockPostFile.mockReturnValueOnce(
+    mockParseInvoiceFile.mockReturnValueOnce(
       new Promise<InvoiceResponse>((res) => {
         resolveSecond = res
       }),
@@ -144,7 +139,7 @@ describe('useInvoiceParse — parse() success', () => {
   })
 
   it('loading is false after success', async () => {
-    mockPostFile.mockResolvedValueOnce(MOCK_RESPONSE)
+    mockParseInvoiceFile.mockResolvedValueOnce(MOCK_RESPONSE)
     const { result } = renderHook(() => useInvoiceParse())
 
     await act(async () => {
@@ -159,7 +154,7 @@ describe('useInvoiceParse — parse() loading state', () => {
   it('sets loading to true while the request is in flight', async () => {
     // Use a manually controlled promise so we can check state while pending
     let resolve!: (v: InvoiceResponse) => void
-    mockPostFile.mockReturnValueOnce(
+    mockParseInvoiceFile.mockReturnValueOnce(
       new Promise<InvoiceResponse>((res) => {
         resolve = res
       }),
@@ -182,30 +177,34 @@ describe('useInvoiceParse — parse() loading state', () => {
 })
 
 describe('useInvoiceParse — parse() error handling', () => {
-  it('sets error message when postFile throws an Error', async () => {
-    mockPostFile.mockRejectedValueOnce(new Error('File must be an XML file.'))
+  it('sets error when parseInvoiceFile throws an Error', async () => {
+    mockParseInvoiceFile.mockRejectedValueOnce(
+      new Error('File must be an XML file.'),
+    )
     const { result } = renderHook(() => useInvoiceParse())
 
     await act(async () => {
       await result.current.parse(makeFile())
     })
 
-    expect(result.current.error).toBe('File must be an XML file.')
+    expect(result.current.error).toBeInstanceOf(Error)
+    expect(result.current.error?.message).toBe('File must be an XML file.')
   })
 
-  it('sets fallback error message for non-Error throws', async () => {
-    mockPostFile.mockRejectedValueOnce('raw string error')
+  it('sets fallback error for non-Error throws', async () => {
+    mockParseInvoiceFile.mockRejectedValueOnce('raw string error')
     const { result } = renderHook(() => useInvoiceParse())
 
     await act(async () => {
       await result.current.parse(makeFile())
     })
 
-    expect(result.current.error).toBe('Unknown error')
+    expect(result.current.error).toBeInstanceOf(Error)
+    expect(result.current.error?.message).toBe('Kunne ikke analysere faktura')
   })
 
   it('data remains null when parse fails', async () => {
-    mockPostFile.mockRejectedValueOnce(new Error('fail'))
+    mockParseInvoiceFile.mockRejectedValueOnce(new Error('fail'))
     const { result } = renderHook(() => useInvoiceParse())
 
     await act(async () => {
@@ -216,7 +215,7 @@ describe('useInvoiceParse — parse() error handling', () => {
   })
 
   it('loading is false after error', async () => {
-    mockPostFile.mockRejectedValueOnce(new Error('fail'))
+    mockParseInvoiceFile.mockRejectedValueOnce(new Error('fail'))
     const { result } = renderHook(() => useInvoiceParse())
 
     await act(async () => {
@@ -229,7 +228,7 @@ describe('useInvoiceParse — parse() error handling', () => {
 
 describe('useInvoiceParse — reset()', () => {
   it('clears data', async () => {
-    mockPostFile.mockResolvedValueOnce(MOCK_RESPONSE)
+    mockParseInvoiceFile.mockResolvedValueOnce(MOCK_RESPONSE)
     const { result } = renderHook(() => useInvoiceParse())
 
     await act(async () => {
@@ -243,7 +242,7 @@ describe('useInvoiceParse — reset()', () => {
   })
 
   it('clears error', async () => {
-    mockPostFile.mockRejectedValueOnce(new Error('oops'))
+    mockParseInvoiceFile.mockRejectedValueOnce(new Error('oops'))
     const { result } = renderHook(() => useInvoiceParse())
 
     await act(async () => {
@@ -257,7 +256,7 @@ describe('useInvoiceParse — reset()', () => {
   })
 
   it('clears loading', async () => {
-    mockPostFile.mockResolvedValueOnce(MOCK_RESPONSE)
+    mockParseInvoiceFile.mockResolvedValueOnce(MOCK_RESPONSE)
     const { result } = renderHook(() => useInvoiceParse())
 
     await act(async () => {
