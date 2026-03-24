@@ -1,6 +1,8 @@
 import { Leaf, FileBarChart2, Hash, Building2, User } from 'lucide-react'
 import type { Project } from '@/features/project/hooks/useProjects'
 import ConfidenceGauge from './ConfidenceGauge'
+import ConfidenceInfo from './ConfidenceInfo'
+import FlaggedItems from './FlaggedItems'
 import {
   Tooltip,
   TooltipContent,
@@ -11,36 +13,29 @@ import {
 export default function ProjectSidebar({
   project,
   confidenceScore,
+  onNavigateToTab,
 }: {
   project: Project
   confidenceScore: number | null
+  onNavigateToTab?: (tab: 'materials' | 'transport') => void
 }) {
   return (
     <div className="flex w-full lg:w-60 shrink-0 flex-col gap-3 self-stretch">
       <div className="grid grid-cols-2 gap-3 lg:grid-cols-1">
         {/* Confidence score */}
         <div className="rounded-xl border border-gray-200 bg-white p-4 shadow-sm">
-          <div className="mb-3 flex items-center gap-1">
-            <p className="text-xs font-semibold uppercase tracking-wide text-gray-400">
-              CO₂ Konfidens
-            </p>
-            <TooltipProvider>
-              <Tooltip>
-                <TooltipTrigger className="text-gray-300 hover:text-gray-400">
-                  <sup className="text-[10px] font-bold">?</sup>
-                </TooltipTrigger>
-                <TooltipContent>
-                  <p>Basert på EPD-dekning og NOBB-kobling</p>
-                </TooltipContent>
-              </Tooltip>
-            </TooltipProvider>
-          </div>
+          <p className="mb-3 text-xs font-semibold uppercase tracking-wide text-gray-400">
+            CO₂ Konfidens
+          </p>
           <div className="flex justify-center">
             {confidenceScore != null ? (
               <ConfidenceGauge score={Math.round(confidenceScore)} />
             ) : (
               <p className="text-sm text-gray-400 py-4">Ingen data ennå</p>
             )}
+          </div>
+          <div className="mt-2 flex justify-center">
+            <ConfidenceInfo />
           </div>
         </div>
 
@@ -83,6 +78,9 @@ export default function ProjectSidebar({
         </div>
       </div>
       {/* end grid */}
+
+      {/* Flagged items needing attention */}
+      <FlaggedItems projectId={project.id} onNavigateToTab={onNavigateToTab} />
 
       {/* Flexible spacer */}
       <div className="flex-1" />

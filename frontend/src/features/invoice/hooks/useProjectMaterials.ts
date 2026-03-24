@@ -4,8 +4,8 @@ import { toast } from 'sonner'
 
 import {
   listProjectMaterials,
-  uploadInvoice,
   deleteInvoice,
+  updateMaterial,
   type ProjectInvoiceGroup,
 } from '../api/invoice'
 import { useOptimisticDelete } from '@/shared/hooks/useOptimisticDelete'
@@ -23,26 +23,34 @@ export function useProjectMaterials(projectId: number) {
   })
 }
 
-export function useUploadInvoice(projectId: number) {
+export function useUpdateMaterial(projectId: number) {
   const { getToken } = useAuth()
   const queryClient = useQueryClient()
 
   return useMutation({
-    mutationFn: async (file: File) => {
+    mutationFn: async ({
+      materialId,
+      total_co2_kg,
+    }: {
+      materialId: number
+      total_co2_kg: number
+    }) => {
       const token = await getToken()
       if (!token) throw new Error('Ikke autentisert')
-      return uploadInvoice(file, projectId, token)
+      return updateMaterial(materialId, { total_co2_kg }, token)
     },
     onSuccess: () => {
       queryClient.invalidateQueries({
         queryKey: ['project-materials', projectId],
       })
       queryClient.invalidateQueries({ queryKey: ['co2-summary', projectId] })
-      toast.success('Faktura lastet opp')
+      toast.success('CO₂-verdi oppdatert')
     },
     onError: (err) => {
       toast.error(
-        err instanceof Error ? err.message : 'Kunne ikke laste opp faktura',
+        err instanceof Error
+          ? err.message
+          : 'Kunne ikke oppdatere materialposten',
       )
     },
   })

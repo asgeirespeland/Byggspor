@@ -3,7 +3,7 @@
   "private": true,
   "scripts": {
     "dev": "docker compose up -d && concurrently -n backend,frontend -c blue,green \"pnpm run dev:backend\" \"pnpm run dev:frontend\"",
-    "dev:backend": "cd backend && ./venv/bin/flask --app app.main run --reload",
+    "dev:backend": "node scripts/dev-backend.js",
     "dev:frontend": "cd frontend && pnpm dev"
   },
   "devDependencies": {

@@ -6,7 +6,7 @@ from flask import Blueprint, g, jsonify, request
 from app.database import SessionLocal
 from app.errors import ApiError
 from app.models.material_invoice import MaterialInvoice
-from app.models.project_material import ProjectMaterial
+from app.models.project_material import MaterialSourceType, ProjectMaterial
 from app.services.ehf_parser import parse_invoice
 from app.services.invoice_enrichment import enrich_invoice
 from app.services.material_service import upsert_catalog_entry
@@ -94,6 +94,104 @@ def parse_invoice_route():
         session.close()
 
     return jsonify(enriched)
+
+
+@invoice_bp.route("/confirm", methods=["POST"])
+def confirm_invoice():
+    """Persist user-reviewed invoice line items to the database.
+
+    Expects JSON with project_id, invoice (with line_items),
+    and optional overrides mapping line index to CO₂ value.
+    """
+    body = request.get_json(silent=True) or {}
+
+    project_id = body.get("project_id")
+    if not project_id:
+        raise ApiError("project_id er påkrevd.", code="MISSING_FIELD")
+    try:
+        project_id = int(project_id)
+    except (ValueError, TypeError):
+        raise ApiError("project_id må være et heltall.", code="INVALID_FIELD")
+
+    invoice_data = body.get("invoice")
+    if not invoice_data or not isinstance(invoice_data.get("line_items"), list):
+        raise ApiError(
+            "Ingen linjer å bekrefte.",
+            code="MISSING_FIELD",
+            suggestion="Fakturaen må inneholde minst én linje.",
+        )
+
+    overrides = body.get("overrides") or {}
+
+    session = SessionLocal()
+    try:
+        # Create source invoice record
+        supplier = invoice_data.get("supplier") or {}
+        invoice_record = MaterialInvoice(
+            supplier_name=supplier.get("name"),
+            invoice_number=invoice_data.get("invoice_number"),
+            invoice_date=invoice_data.get("issue_date"),
+        )
+        session.add(invoice_record)
+        session.flush()
+
+        created = []
+        for idx, item in enumerate(invoice_data["line_items"]):
+            catalog_entry = upsert_catalog_entry(session, item)
+
+            pm = ProjectMaterial(
+                project_id=project_id,
+                material_id=catalog_entry.id if catalog_entry else None,
+                source_id=invoice_record.id,
+                source_type=MaterialSourceType.EHF_INVOICE,
+                line_number=item.get("line_number"),
+                quantity=item.get("quantity"),
+                unit=item.get("unit"),
+                price_per_unit=item.get("price_per_unit"),
+                total_price=item.get("line_total"),
+                flagged=item.get("flagged", False),
+                notes=item.get("name"),
+            )
+
+            # Check for user CO₂ override
+            override = overrides.get(str(idx))
+            if override and override.get("total_co2_kg") is not None:
+                try:
+                    pm.total_co2_kg = float(override["total_co2_kg"])
+                    pm.manual_override = True
+                    pm.confidence_score = 90
+                    pm.flagged = False
+                except (ValueError, TypeError):
+                    pass
+            elif catalog_entry and catalog_entry.gwp_per_unit and pm.quantity:
+                pm.total_co2_kg = float(catalog_entry.gwp_per_unit) * float(pm.quantity)
+                pm.confidence_score = 80
+            else:
+                pm.confidence_score = 20 if pm.flagged else 50
+
+            session.add(pm)
+            created.append(pm)
+
+        session.commit()
+
+        return jsonify(
+            material_invoice_id=invoice_record.id,
+            project_materials_count=len(created),
+        ), 201
+    except ApiError:
+        session.rollback()
+        raise
+    except Exception:
+        session.rollback()
+        logger.exception("Invoice confirm failed")
+        raise ApiError(
+            "Kunne ikke lagre fakturaen.",
+            code="SAVE_FAILED",
+            status=500,
+            suggestion="Prøv igjen. Kontakt support hvis problemet vedvarer.",
+        )
+    finally:
+        session.close()
 
 
 @invoice_bp.route("/upload", methods=["POST"])
@@ -222,11 +320,76 @@ def list_project_materials(project_id: int):
                 "total_co2_kg": float(pm.total_co2_kg) if pm.total_co2_kg else None,
                 "confidence_score": pm.confidence_score,
                 "flagged": pm.flagged,
+                "manual_override": pm.manual_override,
                 "has_epd": pm.material.has_epd if pm.material else False,
             }
         )
 
     return jsonify(list(invoices_map.values()))
+
+
+@invoice_bp.route("/materials/<int:material_id>", methods=["PATCH"])
+def update_material(material_id: int):
+    """Update a project material's CO₂ value manually.
+
+    Accepts JSON: { total_co2_kg: number }
+    Sets manual_override=True, confidence_score=90, flagged=False.
+    """
+    current_user_id = getattr(g, "current_user_id", None)
+    if not current_user_id:
+        raise ApiError("Ikke autentisert.", code="UNAUTHORIZED", status=401)
+
+    body = request.get_json(silent=True) or {}
+
+    if "total_co2_kg" not in body:
+        raise ApiError(
+            "total_co2_kg er påkrevd.",
+            code="MISSING_FIELD",
+            suggestion="Oppgi CO₂-verdi i kg for denne materialposten.",
+        )
+
+    try:
+        total_co2_kg = float(body["total_co2_kg"])
+    except (ValueError, TypeError):
+        raise ApiError(
+            "total_co2_kg må være et tall.",
+            code="INVALID_FIELD",
+            suggestion="Oppgi CO₂-verdi som et tall (f.eks. 12.5 eller -271).",
+        )
+
+    session = g.db
+    pm = session.query(ProjectMaterial).get(material_id)
+    if not pm:
+        raise ApiError(
+            "Materialposten ble ikke funnet.",
+            code="NOT_FOUND",
+            status=404,
+        )
+
+    pm.total_co2_kg = total_co2_kg
+    pm.manual_override = True
+    pm.confidence_score = 90
+    pm.flagged = False
+
+    try:
+        session.commit()
+    except Exception:
+        session.rollback()
+        logger.exception("Failed to update material")
+        raise ApiError(
+            "Kunne ikke oppdatere materialposten.",
+            code="UPDATE_FAILED",
+            status=500,
+            suggestion="Prøv igjen. Kontakt support hvis problemet vedvarer.",
+        )
+
+    return jsonify(
+        id=pm.id,
+        total_co2_kg=float(pm.total_co2_kg) if pm.total_co2_kg else None,
+        confidence_score=pm.confidence_score,
+        flagged=pm.flagged,
+        manual_override=pm.manual_override,
+    ), 200
 
 
 @invoice_bp.route("/source/<int:invoice_id>", methods=["DELETE"])

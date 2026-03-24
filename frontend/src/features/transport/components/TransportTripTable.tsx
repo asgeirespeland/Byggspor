@@ -1,5 +1,12 @@
 import { useState } from 'react'
+import { Maximize2 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog'
 import type { TransportParseResponse } from '../types/transport'
 import VehicleInfoModal from './VehicleInfoModal'
 import Co2Badge from './Co2Badge'
@@ -26,6 +33,7 @@ export default function TransportTripTable({
   const [editVehicle, setEditVehicle] = useState<(typeof data.trips)[0] | null>(
     null,
   )
+  const [fullscreen, setFullscreen] = useState(false)
 
   const toggleTrip = (id: number) => {
     setSelected((prev) => {
@@ -47,7 +55,7 @@ export default function TransportTripTable({
   return (
     <div className="space-y-4">
       {/* Metadata — derived from current trips so it updates on removal */}
-      <div className="flex flex-wrap gap-3">
+      <div className="flex flex-wrap items-center gap-3">
         <span className="rounded-full bg-gray-100 px-3 py-1 text-xs font-medium text-gray-600">
           {data.trips.length} turer
         </span>
@@ -60,6 +68,13 @@ export default function TransportTripTable({
             {data.trips.filter((t) => t.flagged).length} mangler utslippsdata
           </span>
         )}
+        <button
+          onClick={() => setFullscreen(true)}
+          className="ml-auto text-gray-300 hover:text-gray-500 transition-colors"
+          title="Utvid"
+        >
+          <Maximize2 className="h-4 w-4" />
+        </button>
       </div>
 
       {/* Table */}
@@ -178,6 +193,80 @@ export default function TransportTripTable({
           onSaved={onVehicleUpdated}
         />
       )}
+
+      <Dialog open={fullscreen} onOpenChange={setFullscreen}>
+        <DialogContent className="sm:max-w-[80vw] max-h-[85vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle>Transportoversikt</DialogTitle>
+          </DialogHeader>
+          <div className="overflow-x-auto">
+            <table className="w-full text-left text-sm">
+              <thead className="border-b border-gray-200 bg-gray-50">
+                <tr>
+                  <th className="px-4 py-3 text-xs font-semibold uppercase tracking-wide text-gray-400">
+                    Dato
+                  </th>
+                  <th className="px-4 py-3 text-xs font-semibold uppercase tracking-wide text-gray-400">
+                    Sjåfør
+                  </th>
+                  <th className="px-4 py-3 text-xs font-semibold uppercase tracking-wide text-gray-400">
+                    Rute
+                  </th>
+                  <th className="px-4 py-3 text-xs font-semibold uppercase tracking-wide text-gray-400">
+                    Reg.nr
+                  </th>
+                  <th className="px-4 py-3 text-right text-xs font-semibold uppercase tracking-wide text-gray-400">
+                    Km
+                  </th>
+                  <th className="px-4 py-3 text-right text-xs font-semibold uppercase tracking-wide text-gray-400">
+                    CO₂ (kg)
+                  </th>
+                  <th className="px-4 py-3 text-xs font-semibold uppercase tracking-wide text-gray-400">
+                    Status
+                  </th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-gray-100">
+                {data.trips.map((trip) => (
+                  <tr
+                    key={trip.trip_index}
+                    className={trip.flagged ? 'bg-amber-50' : 'bg-white'}
+                  >
+                    <td className="px-4 py-3 text-gray-400">—</td>
+                    <td className="px-4 py-3 text-gray-800">
+                      {trip.driver_name ?? '—'}
+                    </td>
+                    <td className="px-4 py-3 text-gray-600">
+                      {trip.start_address && trip.end_address
+                        ? `${trip.start_address} → ${trip.end_address}`
+                        : trip.start_address || trip.end_address || '—'}
+                    </td>
+                    <td className="px-4 py-3 font-mono text-xs text-gray-600">
+                      {trip.registration_number}
+                    </td>
+                    <td className="px-4 py-3 text-right text-gray-800">
+                      {trip.distance_km != null
+                        ? trip.distance_km.toFixed(1)
+                        : '—'}
+                    </td>
+                    <td className="px-4 py-3 text-right text-gray-800">
+                      {trip.total_co2_kg != null
+                        ? trip.total_co2_kg.toFixed(2)
+                        : '—'}
+                    </td>
+                    <td className="px-4 py-3">
+                      <Co2Badge
+                        trip={trip}
+                        onFix={() => setEditVehicle(trip)}
+                      />
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   )
 }
