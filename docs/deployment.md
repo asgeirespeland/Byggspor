@@ -27,7 +27,7 @@ graph LR
 
     subgraph OCI["OCI VM (Ubuntu 24)"]
         Caddy["Caddy reverse proxy<br/>ports 80/443<br/>auto TLS (Let's Encrypt)"]
-        Flask["Flask dev server<br/>port 5000"]
+        Flask["Gunicorn (gevent)<br/>port 5000"]
         PG["PostgreSQL 16<br/>Docker container<br/>port 5432"]
     end
 
@@ -78,21 +78,39 @@ The backend runs on a personal Oracle Cloud Infrastructure (OCI) VM:
 
 - **OS:** Ubuntu 24.04
 - **Reverse proxy:** Caddy (automatic TLS via Let's Encrypt)
-- **Services:** Flask API + PostgreSQL (Docker)
+- **Services:** Gunicorn (Flask/gevent) + PostgreSQL (Docker)
 - **Code:** Cloned directly from the repository — same codebase as development
 
 ### Current Setup
 
-The backend currently runs using Flask's built-in development server:
+The backend runs behind **Gunicorn** (WSGI server) with gevent async workers, managed as a systemd service:
 
-```bash
-# On the VM
-cd byggspor/backend
-source venv/bin/activate
-flask --app app.main run --debug
+```ini
+# /etc/systemd/system/byggspor.service
+[Unit]
+Description=Byggspor Flask Backend
+After=network.target docker.service
+Requires=docker.service
+
+[Service]
+User=ubuntu
+WorkingDirectory=/home/ubuntu/repos/byggspor/backend
+EnvironmentFile=/home/ubuntu/repos/byggspor/.env
+ExecStart=/home/ubuntu/repos/byggspor/backend/venv/bin/gunicorn --bind 0.0.0.0:5000 --worker-class gevent --workers 2 --timeout 120 app.main:app
+Restart=always
+RestartSec=5
+
+[Install]
+WantedBy=multi-user.target
 ```
 
-PostgreSQL runs via the same `docker-compose.yml` used in development:
+```bash
+sudo systemctl status byggspor      # Check status
+sudo systemctl restart byggspor     # Restart
+sudo journalctl -u byggspor -f      # View logs
+```
+
+PostgreSQL runs via `docker-compose.yml`, bound to localhost only:
 
 ```bash
 # On the VM
@@ -104,7 +122,7 @@ docker compose up -d
 
 [Caddy](https://caddyserver.com/) runs as a systemd service on the VM, configured via `/etc/caddy/Caddyfile`. It provides:
 - **Automatic TLS** — Obtains and renews Let's Encrypt certificates for `api.byggspor.ksterud.dev` automatically via ACME
-- **Reverse proxy** — Forwards HTTPS traffic on ports 80/443 to Flask on `127.0.0.1:5000`
+- **Reverse proxy** — Forwards HTTPS traffic on ports 80/443 to Gunicorn on `127.0.0.1:5000`
 - **HTTP → HTTPS redirect** — Automatic
 
 Caddy is managed via systemd:
@@ -143,46 +161,36 @@ source venv/bin/activate
 alembic upgrade head
 ```
 
-## CI Pipeline
+## CI/CD Pipeline
 
 GitHub Actions runs on every pull request to `main` and `development`. See [Testing](testing.md) for the full pipeline. Both frontend and backend jobs must pass before merging.
 
-There is **no CD pipeline** — deployment is manual (see Deployment Process below).
+### Continuous Deployment
 
-## Deployment Process
+- **Frontend:** Vercel auto-deploys when changes are pushed/merged to `main`. No manual steps required.
+- **Backend:** A systemd timer on the OCI VM polls for changes every 3 minutes. When new commits are detected on `main`, it automatically pulls, installs dependencies (if changed), runs database migrations, restarts the service, and verifies the health check.
 
-### Frontend
-
-Vercel auto-deploys when changes are pushed/merged. No manual steps required.
-
-### Backend
-
-Manual process on the OCI VM:
+The deploy script lives at `~/scripts/deploy-byggspor.sh` on the VM. Logs are tagged `byggspor-deploy` in the system journal:
 
 ```bash
-# SSH into the VM
-ssh <vm-user>@<vm-ip>
+journalctl -t byggspor-deploy        # View deploy history
+journalctl -t byggspor-deploy -f     # Follow live
+sudo systemctl status byggspor-deploy.timer   # Check timer status
+sudo systemctl stop byggspor-deploy.timer     # Pause auto-deploy
+```
 
-# Pull latest code
-cd byggspor
-git pull
+### Manual Deploy
 
-# Update dependencies (if requirements.txt changed)
-cd backend
-source venv/bin/activate
-pip install -r requirements.txt
+If needed, you can trigger a deploy manually:
 
-# Run migrations (if models changed)
-alembic upgrade head
-
-# Restart the Flask server
-# (currently manual — kill the existing process and restart)
-flask --app app.main run --debug
+```bash
+ssh ubuntu@<vm-ip>
+~/scripts/deploy-byggspor.sh
 ```
 
 ### Database
 
-PostgreSQL runs as a Docker container. Data is persisted in a Docker volume (`pgdata`), so the container can be recreated without data loss:
+PostgreSQL runs as a Docker container, bound to `127.0.0.1` (not exposed externally). Data is persisted in a Docker volume (`pgdata`), so the container can be recreated without data loss:
 
 ```bash
 docker compose up -d      # Start/restart
@@ -190,47 +198,26 @@ docker compose down        # Stop (data preserved)
 docker compose down -v     # Stop and DELETE all data
 ```
 
-## Production Readiness Issues
+### Database Backups
 
-The current deployment works for development and demo purposes but has several issues that must be addressed before real production use.
-
-### Flask Development Server
-
-The backend runs Flask's built-in development server, which is [explicitly not designed for production](https://flask.palletsprojects.com/en/stable/deploying/). Issues:
-- Single-threaded — can only handle one request at a time
-- No process management — crashes require manual restart
-- Debug mode exposes detailed tracebacks to clients
-
-**Fix:** Use a WSGI server like Gunicorn:
+Nightly backups run at 03:00 UTC via a systemd timer (`db-backup.timer`). Both PostgreSQL and MongoDB are backed up to `~/backups/` with 7-day retention.
 
 ```bash
-pip install gunicorn
-gunicorn -w 4 -b 0.0.0.0:5000 app.main:app
+journalctl -t db-backup              # View backup logs
+sudo systemctl status db-backup.timer # Check timer
+~/scripts/backup-databases.sh        # Run manually
+ls ~/backups/                        # List backups
 ```
 
-Combined with a systemd service for automatic restart:
+## Production Readiness Issues
 
-```ini
-# /etc/systemd/system/byggspor-api.service
-[Unit]
-Description=Byggspor Flask API
-After=network.target docker.service
+The current deployment has addressed several foundational issues but still has items to resolve before real production use.
 
-[Service]
-User=<vm-user>
-WorkingDirectory=/home/<vm-user>/byggspor/backend
-Environment="PATH=/home/<vm-user>/byggspor/backend/venv/bin"
-EnvironmentFile=/home/<vm-user>/byggspor/.env
-ExecStart=/home/<vm-user>/byggspor/backend/venv/bin/gunicorn -w 4 -b 0.0.0.0:5000 app.main:app
-Restart=always
+### Resolved
 
-[Install]
-WantedBy=multi-user.target
-```
-
-### No Automated Deployment
-
-Backend deploys are fully manual (SSH → git pull → restart). A deployment script or CI/CD pipeline would reduce human error and downtime. At minimum, a shell script that automates the pull-migrate-restart flow.
+- **~~Flask Development Server~~** — Now using Gunicorn with gevent async workers (2 workers) behind a systemd service with automatic restart.
+- **~~No Automated Deployment~~** — Backend auto-deploys via systemd timer (3-minute polling) with health check verification.
+- **~~No Database Backups~~** — Nightly backups of PostgreSQL and MongoDB with 7-day retention.
 
 ### Clerk Development Mode
 

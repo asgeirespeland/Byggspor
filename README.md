@@ -27,7 +27,7 @@ Construction CO₂ footprint calculator for Norwegian building projects. Upload 
 | Auth (client) | Clerk React SDK |
 | Server state | TanStack Query |
 | Routing | React Router 7 |
-| Backend | Python 3.12, Flask, SQLAlchemy 2.0, Alembic |
+| Backend | Python 3.12, Flask, Gunicorn, SQLAlchemy 2.0, Alembic |
 | Auth (server) | PyJWT + Clerk JWKS |
 | Database | PostgreSQL 16 (Docker Compose) |
 | CI | GitHub Actions |
@@ -147,7 +147,7 @@ See [Development](docs/development.md) for full details.
 | Component | Hosting |
 |-----------|---------|
 | Frontend | [Vercel](https://vercel.com/) — auto-deploys on push |
-| Backend | OCI VM (Ubuntu 24) — manual deploy, Caddy reverse proxy with auto TLS |
+| Backend | OCI VM (Ubuntu 24) — auto-deploys on push (systemd timer), Gunicorn + Caddy reverse proxy with auto TLS |
 | Database | PostgreSQL 16 in Docker on the same VM |
 | DNS | Cloudflare |
 
