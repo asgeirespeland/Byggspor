@@ -1,5 +1,11 @@
 import { useState } from 'react'
-import { AlertTriangle, Package, Truck, Check, Loader2 } from 'lucide-react'
+import { AlertTriangle, Package, Truck, Check, Loader2, X } from 'lucide-react'
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from '@/components/ui/tooltip'
 import {
   useProjectMaterials,
   useUpdateMaterial,
@@ -17,7 +23,14 @@ interface Props {
   onNavigateToTab?: (tab: 'materials' | 'transport') => void
 }
 
+const STORAGE_KEY_PREFIX = 'flagged-items-dismissed-'
+
 export default function FlaggedItems({ projectId, onNavigateToTab }: Props) {
+  const storageKey = `${STORAGE_KEY_PREFIX}${projectId}`
+  const [dismissed, setDismissed] = useState(() => {
+    return localStorage.getItem(storageKey) === 'forever'
+  })
+  const [sessionDismissed, setSessionDismissed] = useState(false)
   const { data: invoiceGroups } = useProjectMaterials(projectId)
   const { data: reportGroups } = useProjectTransports(projectId)
 
@@ -37,7 +50,7 @@ export default function FlaggedItems({ projectId, onNavigateToTab }: Props) {
 
   const flagged: FlaggedEntry[] = [...flaggedMaterials, ...flaggedTrips]
 
-  if (flagged.length === 0) return null
+  if (flagged.length === 0 || dismissed || sessionDismissed) return null
 
   return (
     <div className="rounded-xl border border-amber-200 bg-amber-50/50 p-4 shadow-sm">
@@ -46,6 +59,35 @@ export default function FlaggedItems({ projectId, onNavigateToTab }: Props) {
         <p className="text-xs font-semibold uppercase tracking-wide text-amber-700">
           Trenger oppmerksomhet ({flagged.length})
         </p>
+        <TooltipProvider>
+          <span className="ml-auto inline-flex items-center gap-1.5">
+            <Tooltip>
+              <TooltipTrigger
+                className="text-[10px] text-amber-400 hover:text-amber-600 cursor-pointer"
+                onClick={() => setSessionDismissed(true)}
+              >
+                Skjul
+              </TooltipTrigger>
+              <TooltipContent>
+                <p>Skjul for nå</p>
+              </TooltipContent>
+            </Tooltip>
+            <Tooltip>
+              <TooltipTrigger
+                className="text-amber-300 hover:text-amber-500 cursor-pointer"
+                onClick={() => {
+                  localStorage.setItem(storageKey, 'forever')
+                  setDismissed(true)
+                }}
+              >
+                <X className="h-3.5 w-3.5" />
+              </TooltipTrigger>
+              <TooltipContent>
+                <p>Ikke vis igjen</p>
+              </TooltipContent>
+            </Tooltip>
+          </span>
+        </TooltipProvider>
       </div>
 
       <div className="space-y-2">
@@ -90,7 +132,7 @@ function MaterialRow({
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
     const val = parseFloat(co2Value)
-    if (isNaN(val) || val < 0) return
+    if (isNaN(val)) return
     updateMutation.mutate(
       { materialId: item.id, total_co2_kg: val },
       {
@@ -115,7 +157,6 @@ function MaterialRow({
           <input
             type="number"
             step="any"
-            min="0"
             placeholder="kg CO₂"
             value={co2Value}
             onChange={(e) => setCo2Value(e.target.value)}

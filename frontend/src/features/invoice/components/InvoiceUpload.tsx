@@ -139,6 +139,7 @@ export default function InvoiceUpload({ projectId }: Props) {
             <InvoiceGroupCard
               key={group.invoice_id}
               group={group}
+              projectId={projectId}
               onDelete={() => {
                 if (group.invoice_id != null)
                   void deleteInvoice(group.invoice_id)
