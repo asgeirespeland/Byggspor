@@ -1,37 +1,32 @@
-import { useAuth } from '@clerk/react'
 import { useCallback, useState } from 'react'
+import { toast } from 'sonner'
 
-import { postFile } from '../../../shared/api/client'
+import { parseInvoiceFile } from '../api/invoice'
 import type { InvoiceResponse } from '../types/invoice'
 
 export function useInvoiceParse() {
-  const { getToken } = useAuth()
   const [data, setData] = useState<InvoiceResponse | null>(null)
   const [loading, setLoading] = useState(false)
-  const [error, setError] = useState<string | null>(null)
+  const [error, setError] = useState<Error | null>(null)
 
-  const parse = useCallback(
-    async (file: File) => {
-      setLoading(true)
-      setError(null)
-      setData(null)
+  const parse = useCallback(async (file: File, token?: string) => {
+    setLoading(true)
+    setError(null)
+    setData(null)
 
-      try {
-        const token = (await getToken()) ?? undefined
-        const result = await postFile<InvoiceResponse>(
-          '/invoice/parse',
-          file,
-          token,
-        )
-        setData(result)
-      } catch (err) {
-        setError(err instanceof Error ? err.message : 'Unknown error')
-      } finally {
-        setLoading(false)
-      }
-    },
-    [getToken],
-  )
+    try {
+      const result = await parseInvoiceFile(file, token)
+      setData(result)
+      toast.success('Faktura analysert')
+    } catch (err) {
+      const error =
+        err instanceof Error ? err : new Error('Kunne ikke analysere faktura')
+      setError(error)
+      toast.error(error.message)
+    } finally {
+      setLoading(false)
+    }
+  }, [])
 
   const reset = useCallback(() => {
     setData(null)
@@ -39,5 +34,5 @@ export function useInvoiceParse() {
     setLoading(false)
   }, [])
 
-  return { parse, reset, data, loading, error }
+  return { parse, reset, data, setData, loading, error }
 }

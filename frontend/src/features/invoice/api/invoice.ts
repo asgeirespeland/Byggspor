@@ -13,6 +13,7 @@ export interface ProjectMaterialItem {
   total_co2_kg: number | null
   confidence_score: number | null
   flagged: boolean
+  manual_override: boolean
   has_epd: boolean
 }
 
@@ -25,19 +26,17 @@ export interface ProjectInvoiceGroup {
   items: ProjectMaterialItem[]
 }
 
-export async function uploadInvoice(
+export async function parseInvoiceFile(
   file: File,
-  projectId: number,
   token?: string,
-): Promise<Record<string, unknown>> {
+): Promise<import('../types/invoice').InvoiceResponse> {
   const form = new FormData()
   form.append('file', file)
-  form.append('project_id', String(projectId))
 
   const headers: Record<string, string> = {}
   if (token) headers.Authorization = `Bearer ${token}`
 
-  const res = await fetch(`${BASE_URL}/invoice/upload`, {
+  const res = await fetch(`${BASE_URL}/invoice/parse`, {
     method: 'POST',
     headers,
     body: form,
@@ -54,11 +53,42 @@ export async function uploadInvoice(
   return body
 }
 
+export async function confirmInvoice(
+  projectId: number,
+  invoice: import('../types/invoice').InvoiceResponse,
+  overrides: Record<string, { total_co2_kg: number }>,
+  token?: string,
+): Promise<{ material_invoice_id: number; project_materials_count: number }> {
+  return apiRequest('/invoice/confirm', {
+    method: 'POST',
+    body: { project_id: projectId, invoice, overrides },
+    token,
+  })
+}
+
 export async function listProjectMaterials(
   projectId: number,
   token?: string,
 ): Promise<ProjectInvoiceGroup[]> {
   return apiRequest<ProjectInvoiceGroup[]>(`/invoice/project/${projectId}`, {
+    token,
+  })
+}
+
+export async function updateMaterial(
+  materialId: number,
+  data: { total_co2_kg: number },
+  token?: string,
+): Promise<{
+  id: number
+  total_co2_kg: number | null
+  confidence_score: number | null
+  flagged: boolean
+  manual_override: boolean
+}> {
+  return apiRequest(`/invoice/materials/${materialId}`, {
+    method: 'PATCH',
+    body: data,
     token,
   })
 }
