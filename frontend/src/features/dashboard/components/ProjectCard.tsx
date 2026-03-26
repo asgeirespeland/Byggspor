@@ -1,26 +1,12 @@
 import { useState } from 'react'
-import { useNavigate } from 'react-router-dom'
-import {
-  ChevronDown,
-  ChevronUp,
-  Building2,
-  Hash,
-  ArrowRight,
-} from 'lucide-react'
-import { Button } from '@/components/ui/button'
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipTrigger,
-} from '@/components/ui/tooltip'
+import { ChevronDown, ChevronUp, Building2, Hash } from 'lucide-react'
 import { STATUS_CONFIG } from '@/features/project/constants'
 import { useCo2Summary } from '../hooks/useCo2Summary'
-import ConfidenceGauge from './ConfidenceGauge'
+import ProjectCardDrawer from './ProjectCardDrawer'
 import type { Project } from '../../project/hooks/useProjects'
 
 export default function ProjectCard({ project }: { project: Project }) {
   const [expanded, setExpanded] = useState(false)
-  const navigate = useNavigate()
 
   const status = STATUS_CONFIG[project.status] ?? STATUS_CONFIG.active
   const { data: co2 } = useCo2Summary(project.id)
@@ -39,12 +25,10 @@ export default function ProjectCard({ project }: { project: Project }) {
         className="flex items-center gap-4 px-5 py-4 cursor-pointer select-none"
         onClick={() => setExpanded((v) => !v)}
       >
-        {/* Icon */}
         <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-gray-100">
           <Building2 className="h-4 w-4 text-gray-500" />
         </div>
 
-        {/* Name + meta */}
         <div className="min-w-0 flex-1">
           <p className="truncate text-sm font-semibold text-gray-900">
             {project.name}
@@ -60,7 +44,6 @@ export default function ProjectCard({ project }: { project: Project }) {
           </div>
         </div>
 
-        {/* Status badge */}
         <span
           className={`inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-xs font-medium ${status.className}`}
         >
@@ -68,7 +51,6 @@ export default function ProjectCard({ project }: { project: Project }) {
           {status.label}
         </span>
 
-        {/* Chevron indicator */}
         <div className="text-gray-400">
           {expanded ? (
             <ChevronUp className="h-4 w-4" />
@@ -84,66 +66,11 @@ export default function ProjectCard({ project }: { project: Project }) {
           expanded ? 'max-h-96' : 'max-h-0'
         }`}
       >
-        <div className="border-t border-gray-100 bg-gray-50/60 px-5 py-4">
-          <div className="flex flex-wrap items-center gap-6">
-            {/* Left: metadata */}
-            <div className="space-y-2 text-sm">
-              <div className="flex items-center gap-2">
-                <span className="w-20 text-xs text-gray-400">Kunde</span>
-                <span className="text-gray-700">
-                  {project.customer_name ?? '—'}
-                </span>
-              </div>
-              <div className="flex items-center gap-2">
-                <span className="w-20 text-xs text-gray-400">Status</span>
-                <span className="text-gray-700">{status.label}</span>
-              </div>
-              <div className="flex items-center gap-2">
-                <span className="w-20 text-xs text-gray-400">Opprettet</span>
-                <span className="text-gray-700">{createdDate}</span>
-              </div>
-            </div>
-
-            {/* Confidence gauge: full on wider screens, compact with tooltip on smaller */}
-            {confidenceScore != null ? (
-              <>
-                <div className="hidden min-[704px]:flex flex-col items-center">
-                  <p className="mb-1 text-xs font-medium text-gray-500">
-                    CO₂ Konfidens
-                  </p>
-                  <ConfidenceGauge score={Math.round(confidenceScore)} />
-                </div>
-                <div className="min-[704px]:hidden">
-                  <Tooltip>
-                    <TooltipTrigger>
-                      <ConfidenceGauge
-                        score={Math.round(confidenceScore)}
-                        size="compact"
-                      />
-                    </TooltipTrigger>
-                    <TooltipContent>CO₂ Konfidens</TooltipContent>
-                  </Tooltip>
-                </div>
-              </>
-            ) : (
-              <p className="text-xs text-gray-400">Ingen data</p>
-            )}
-
-            {/* Right: open project button */}
-            <Button
-              size="sm"
-              variant="outline"
-              className="gap-1.5 shrink-0 ml-auto cursor-pointer"
-              onClick={(e) => {
-                e.stopPropagation()
-                navigate(`/projects/${project.id}`)
-              }}
-            >
-              Åpne prosjekt
-              <ArrowRight className="h-3.5 w-3.5" />
-            </Button>
-          </div>
-        </div>
+        <ProjectCardDrawer
+          project={project}
+          confidenceScore={confidenceScore}
+          createdDate={createdDate}
+        />
       </div>
     </div>
   )

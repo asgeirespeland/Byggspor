@@ -1,11 +1,8 @@
 import { useState } from 'react'
 import { useQueryClient } from '@tanstack/react-query'
 import { toast } from 'sonner'
-import ErrorMessage from '@/shared/components/ErrorMessage'
 import InlineUndoBar from '@/shared/components/InlineUndoBar'
-import FileDropZone from '@/shared/components/FileDropZone'
-import SelectedFileBar from '@/shared/components/SelectedFileBar'
-import { useFileSelect } from '@/shared/hooks/useFileSelect'
+import FileUploadShell from '@/shared/components/FileUploadShell'
 import { useDeferredLoading } from '@/shared/hooks/useDeferredLoading'
 import { useRequireToken } from '@/shared/hooks/useRequireToken'
 import { confirmTrips } from '../api/transport'
@@ -28,10 +25,6 @@ export default function TransportUpload({ projectId }: Props) {
   const queryClient = useQueryClient()
   const { authReady, requireToken } = useRequireToken()
   const { parse, reset, data, setData, loading, error } = useTransportParse()
-  const { selectedFile, fileError, acceptFile, clear } = useFileSelect({
-    errorMessage: 'Filen må være i XML-format.',
-    onClear: reset,
-  })
   const { data: reportGroups, isLoading: reportsLoading } =
     useProjectTransports(projectId)
   const showReportsLoading = useDeferredLoading(reportsLoading)
@@ -50,12 +43,6 @@ export default function TransportUpload({ projectId }: Props) {
     })
   }
 
-  const handleParse = async () => {
-    if (!selectedFile || !authReady) return
-    const token = await requireToken()
-    await parse(selectedFile, token)
-  }
-
   const handleRemoveTrip = (tripIndex: number) => {
     if (!data) return
     setData({
@@ -65,11 +52,15 @@ export default function TransportUpload({ projectId }: Props) {
     })
   }
 
-  const handleConfirmTrips = async (tripIndices: number[]) => {
+  const handleConfirmTrips = async (
+    tripIndices: number[],
+    clear: () => void,
+    requireTokenFn: () => Promise<string>,
+  ) => {
     if (!data) return
     setConfirming(true)
     try {
-      const token = await requireToken()
+      const token = await requireTokenFn()
       const selectedTrips = data.trips.filter((t) =>
         tripIndices.includes(t.trip_index),
       )
@@ -86,50 +77,31 @@ export default function TransportUpload({ projectId }: Props) {
 
   return (
     <div className="space-y-4">
-      <div>
-        <h3 className="text-base font-semibold text-gray-900">Transportlogg</h3>
-        <p className="mt-0.5 text-sm text-gray-500">
-          Last opp en Abax Turrapport (XML) for å se kjøreturer med CO₂-utslipp,
-          eller legg til turer manuelt.
-        </p>
-      </div>
-
-      {!selectedFile && !data && (
-        <FileDropZone
-          accept=".xml"
-          description="Dra og slipp Abax XML-filen her"
-          onDrop={acceptFile}
-        />
-      )}
-
-      {fileError && (
-        <p className="rounded-md border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-600">
-          {fileError}
-        </p>
-      )}
-
-      {selectedFile && !data && (
-        <SelectedFileBar
-          file={selectedFile}
-          actionLabel="Analyser"
-          loadingLabel="Analyserer…"
-          isLoading={loading}
-          onAction={handleParse}
-          onClear={clear}
-        />
-      )}
-
-      <ErrorMessage
+      <FileUploadShell
+        title="Transportlogg"
+        description="Last opp en Abax Turrapport (XML) for å se kjøreturer med CO₂-utslipp, eller legg til turer manuelt."
+        accept=".xml"
+        dropDescription="Dra og slipp Abax XML-filen her"
+        fileErrorMessage="Filen må være i XML-format."
+        parse={parse}
+        reset={reset}
+        data={data}
+        loading={loading}
         error={error}
-        fallback="Kunne ikke analysere transportfil"
-      />
-
-      {data && (
-        <>
+        errorFallback="Kunne ikke analysere transportfil"
+      >
+        {({
+          data: transportData,
+          clear,
+          requireToken: requireTokenFn,
+          selectedFile,
+        }) => (
           <TransportTripTable
-            data={data}
+            data={transportData}
             onRemoveTrip={handleRemoveTrip}
-            onConfirmTrips={handleConfirmTrips}
+            onConfirmTrips={(tripIds) =>
+              handleConfirmTrips(tripIds, clear, requireTokenFn)
+            }
             onVehicleUpdated={() => {
               void (async () => {
                 if (selectedFile && authReady) {
@@ -140,16 +112,8 @@ export default function TransportUpload({ projectId }: Props) {
             }}
             confirming={confirming}
           />
-          <div className="text-center">
-            <button
-              onClick={clear}
-              className="text-sm text-gray-400 hover:text-gray-600 underline"
-            >
-              Last opp ny fil
-            </button>
-          </div>
-        </>
-      )}
+        )}
+      </FileUploadShell>
 
       <div className="border-t border-gray-100 pt-4">
         <button
