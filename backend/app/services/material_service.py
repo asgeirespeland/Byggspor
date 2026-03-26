@@ -14,6 +14,7 @@ from app.models.material_invoice import MaterialInvoice
 from app.models.project_material import MaterialSourceType, ProjectMaterial
 from app.services.ehf_parser import parse_invoice
 from app.services.invoice_enrichment import enrich_invoice
+from app.utils.confidence import material_confidence
 
 logger = logging.getLogger(__name__)
 
@@ -142,11 +143,14 @@ def process_invoice_for_project(
         )
 
         # Calculate CO2 if we have GWP data
-        if catalog_entry and catalog_entry.gwp_per_unit and pm.quantity:
+        has_gwp = bool(catalog_entry and catalog_entry.gwp_per_unit and pm.quantity)
+        if has_gwp:
             pm.total_co2_kg = float(catalog_entry.gwp_per_unit) * float(pm.quantity)
-            pm.confidence_score = 80
-        else:
-            pm.confidence_score = 20 if pm.flagged else 50
+        pm.confidence_score = material_confidence(
+            has_gwp=has_gwp,
+            flagged=pm.flagged,
+            is_manual_override=False,
+        )
 
         session.add(pm)
         project_materials_created.append(pm)

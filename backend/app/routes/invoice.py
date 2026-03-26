@@ -4,14 +4,17 @@ import xml.etree.ElementTree as ET
 from flask import Blueprint, g, jsonify, request
 
 from app.database import SessionLocal
-from app.errors import ApiError
+from app.errors import DEFAULT_RETRY_SUGGESTION, ApiError
 from app.middleware.auth import require_auth
 from app.models.material_invoice import MaterialInvoice
 from app.models.project_material import MaterialSourceType, ProjectMaterial
 from app.services.ehf_parser import parse_invoice
 from app.services.invoice_enrichment import enrich_invoice
 from app.services.material_service import upsert_catalog_entry
+from app.utils.confidence import material_confidence
 from app.utils.db import db_commit
+from app.utils.file_upload import validate_xml_upload
+from app.utils.parsing import parse_float, require_int
 
 logger = logging.getLogger(__name__)
 
@@ -30,28 +33,7 @@ def parse_invoice_route():
     Uses the material catalog DB as a cache — checks catalog first,
     falls back to NOBB API, then upserts results back into the catalog.
     """
-    if "file" not in request.files:
-        raise ApiError(
-            "Ingen fil ble sendt.",
-            code="NO_FILE",
-            suggestion=EHF_XML_SUGGESTION,
-        )
-
-    file = request.files["file"]
-    if not file.filename or not file.filename.lower().endswith(".xml"):
-        raise ApiError(
-            "Filen må være i XML-format.",
-            code="INVALID_FILE_TYPE",
-            suggestion=EHF_XML_SUGGESTION,
-        )
-
-    xml_content = file.read()
-    if not xml_content:
-        raise ApiError(
-            "Den opplastede filen er tom.",
-            code="EMPTY_FILE",
-            suggestion="Sjekk at filen inneholder data og prøv igjen.",
-        )
+    xml_content = validate_xml_upload(EHF_XML_SUGGESTION)
 
     try:
         parsed = parse_invoice(xml_content)
@@ -106,14 +88,7 @@ def confirm_invoice():
     and optional overrides mapping line index to CO₂ value.
     """
     body = request.get_json(silent=True) or {}
-
-    project_id = body.get("project_id")
-    if not project_id:
-        raise ApiError("project_id er påkrevd.", code="MISSING_FIELD")
-    try:
-        project_id = int(project_id)
-    except (ValueError, TypeError):
-        raise ApiError("project_id må være et heltall.", code="INVALID_FIELD")
+    project_id = require_int(body, "project_id")
 
     invoice_data = body.get("invoice")
     if not invoice_data or not isinstance(invoice_data.get("line_items"), list):
@@ -157,19 +132,25 @@ def confirm_invoice():
 
             # Check for user CO₂ override
             override = overrides.get(str(idx))
+            has_gwp = False
+            is_override = False
             if override and override.get("total_co2_kg") is not None:
                 try:
                     pm.total_co2_kg = float(override["total_co2_kg"])
                     pm.manual_override = True
-                    pm.confidence_score = 90
                     pm.flagged = False
+                    is_override = True
                 except (ValueError, TypeError):
                     pass
             elif catalog_entry and catalog_entry.gwp_per_unit and pm.quantity:
                 pm.total_co2_kg = float(catalog_entry.gwp_per_unit) * float(pm.quantity)
-                pm.confidence_score = 80
-            else:
-                pm.confidence_score = 20 if pm.flagged else 50
+                has_gwp = True
+
+            pm.confidence_score = material_confidence(
+                has_gwp=has_gwp,
+                flagged=pm.flagged,
+                is_manual_override=is_override,
+            )
 
             session.add(pm)
             created.append(pm)
@@ -190,7 +171,7 @@ def confirm_invoice():
             "Kunne ikke lagre fakturaen.",
             code="SAVE_FAILED",
             status=500,
-            suggestion="Prøv igjen. Kontakt support hvis problemet vedvarer.",
+            suggestion=DEFAULT_RETRY_SUGGESTION,
         )
     finally:
         session.close()
@@ -203,43 +184,8 @@ def upload_invoice_route():
     Requires 'project_id' form field and 'file' upload.
     Upserts materials to catalog, creates project_materials with source provenance.
     """
-    project_id = request.form.get("project_id")
-    if not project_id:
-        raise ApiError(
-            "project_id er påkrevd.",
-            code="MISSING_FIELD",
-        )
-
-    try:
-        project_id = int(project_id)
-    except (ValueError, TypeError):
-        raise ApiError(
-            "project_id må være et heltall.",
-            code="INVALID_FIELD",
-        )
-
-    if "file" not in request.files:
-        raise ApiError(
-            "Ingen fil ble sendt.",
-            code="NO_FILE",
-            suggestion=EHF_XML_SUGGESTION,
-        )
-
-    file = request.files["file"]
-    if not file.filename or not file.filename.lower().endswith(".xml"):
-        raise ApiError(
-            "Filen må være i XML-format.",
-            code="INVALID_FILE_TYPE",
-            suggestion=EHF_XML_SUGGESTION,
-        )
-
-    xml_content = file.read()
-    if not xml_content:
-        raise ApiError(
-            "Den opplastede filen er tom.",
-            code="EMPTY_FILE",
-            suggestion="Sjekk at filen inneholder data og prøv igjen.",
-        )
+    project_id = require_int(dict(request.form), "project_id")
+    xml_content = validate_xml_upload(EHF_XML_SUGGESTION)
 
     from app.services.material_service import process_invoice_for_project
 
@@ -271,7 +217,7 @@ def upload_invoice_route():
             "Kunne ikke behandle fakturaen.",
             code="PROCESSING_FAILED",
             status=500,
-            suggestion="Prøv igjen. Kontakt support hvis problemet vedvarer.",
+            suggestion=DEFAULT_RETRY_SUGGESTION,
         )
     finally:
         session.close()
@@ -346,14 +292,11 @@ def update_material(material_id: int):
             suggestion="Oppgi CO₂-verdi i kg for denne materialposten.",
         )
 
-    try:
-        total_co2_kg = float(body["total_co2_kg"])
-    except (ValueError, TypeError):
-        raise ApiError(
-            "total_co2_kg må være et tall.",
-            code="INVALID_FIELD",
-            suggestion="Oppgi CO₂-verdi som et tall (f.eks. 12.5 eller -271).",
-        )
+    total_co2_kg = parse_float(
+        body,
+        "total_co2_kg",
+        suggestion="Oppgi CO\u2082-verdi som et tall (f.eks. 12.5 eller -271).",
+    )
 
     session = g.db
     pm = session.query(ProjectMaterial).get(material_id)
@@ -366,7 +309,11 @@ def update_material(material_id: int):
 
     pm.total_co2_kg = total_co2_kg
     pm.manual_override = True
-    pm.confidence_score = 90
+    pm.confidence_score = material_confidence(
+        has_gwp=False,
+        flagged=False,
+        is_manual_override=True,
+    )
     pm.flagged = False
 
     with db_commit(session, "Kunne ikke oppdatere materialposten.", "UPDATE_FAILED"):

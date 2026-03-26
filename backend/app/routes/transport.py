@@ -7,7 +7,7 @@ from datetime import date
 from flask import Blueprint, g, jsonify, request
 
 from app.database import SessionLocal
-from app.errors import ApiError
+from app.errors import DEFAULT_RETRY_SUGGESTION, ApiError
 from app.middleware.auth import require_auth
 from app.models.project_transport import ProjectTransport, TransportSourceType
 from app.models.transport_report import TransportReport
@@ -17,7 +17,10 @@ from app.services.transport_service import (
     save_transport_report,
 )
 from app.services.vehicle_lookup import lookup_vehicle
+from app.utils.confidence import transport_confidence
 from app.utils.db import db_commit
+from app.utils.file_upload import validate_xml_upload
+from app.utils.parsing import optional_date, parse_float, require_int
 
 logger = logging.getLogger(__name__)
 
@@ -36,28 +39,8 @@ def parse_transport_route():
     Requires 'file' upload (XML). Returns enriched trip data with vehicle info
     and CO₂ calculations for user review before confirmation.
     """
-    if "file" not in request.files:
-        raise ApiError(
-            "Ingen fil ble sendt.",
-            code="NO_FILE",
-            suggestion=ABAX_XML_SUGGESTION,
-        )
-
+    xml_content = validate_xml_upload(ABAX_XML_SUGGESTION)
     file = request.files["file"]
-    if not file.filename or not file.filename.lower().endswith(".xml"):
-        raise ApiError(
-            "Filen må være i XML-format.",
-            code="INVALID_FILE_TYPE",
-            suggestion=ABAX_XML_SUGGESTION,
-        )
-
-    xml_content = file.read()
-    if not xml_content:
-        raise ApiError(
-            "Den opplastede filen er tom.",
-            code="EMPTY_FILE",
-            suggestion="Sjekk at filen inneholder data og prøv igjen.",
-        )
 
     session = SessionLocal()
     try:
@@ -87,7 +70,7 @@ def parse_transport_route():
             "Kunne ikke analysere transportrapporten.",
             code="PROCESSING_FAILED",
             status=500,
-            suggestion="Prøv igjen. Kontakt support hvis problemet vedvarer.",
+            suggestion=DEFAULT_RETRY_SUGGESTION,
         )
     finally:
         session.close()
@@ -101,14 +84,7 @@ def confirm_trips():
     Only the trips included in the request body are saved.
     """
     body = request.get_json(silent=True) or {}
-
-    project_id = body.get("project_id")
-    if not project_id:
-        raise ApiError("project_id er påkrevd.", code="MISSING_FIELD")
-    try:
-        project_id = int(project_id)
-    except (ValueError, TypeError):
-        raise ApiError("project_id må være et heltall.", code="INVALID_FIELD")
+    project_id = require_int(body, "project_id")
 
     trips = body.get("trips")
     if not isinstance(trips, list) or len(trips) == 0:
@@ -234,14 +210,10 @@ def create_manual_trip():
     vehicle = lookup_vehicle(session, body["registration_number"])
 
     co2_per_km = float(vehicle.co2_per_km) if vehicle and vehicle.co2_per_km else None
-    if co2_per_km:
-        total_co2 = distance_km * co2_per_km
-        confidence = 80
-        flagged = False
-    else:
-        total_co2 = None
-        confidence = 20
-        flagged = True
+    has_co2 = co2_per_km is not None
+    total_co2 = distance_km * co2_per_km if has_co2 else None
+    confidence = transport_confidence(has_co2_per_km=has_co2, has_distance=True)
+    flagged = not has_co2
 
     pt = ProjectTransport(
         project_id=project_id,
@@ -284,29 +256,22 @@ def update_trip(trip_id: int):
             setattr(trip, field, body[field])
 
     if "trip_date" in body:
-        try:
-            trip.trip_date = date.fromisoformat(body["trip_date"])
-        except (ValueError, TypeError):
-            raise ApiError(
-                "Ugyldig datoformat.",
-                code="INVALID_FIELD",
-                suggestion="Bruk formatet YYYY-MM-DD (f.eks. 2026-03-24).",
-            )
+        trip.trip_date = optional_date(body, "trip_date")
 
     if "distance_km" in body:
-        try:
-            distance_km = float(body["distance_km"])
-            trip.distance_km = distance_km
-            if trip.vehicle and trip.vehicle.co2_per_km:
-                trip.total_co2_kg = distance_km * float(trip.vehicle.co2_per_km)
-                trip.confidence_score = 80
-                trip.flagged = False
-        except (ValueError, TypeError):
-            raise ApiError(
-                "Ugyldig distanseverdi.",
-                code="INVALID_FIELD",
-                suggestion="Distanse må være et tall (f.eks. 42.5).",
+        distance_km = parse_float(
+            body,
+            "distance_km",
+            suggestion="Distanse m\u00e5 v\u00e6re et tall (f.eks. 42.5).",
+        )
+        trip.distance_km = distance_km
+        if trip.vehicle and trip.vehicle.co2_per_km:
+            trip.total_co2_kg = distance_km * float(trip.vehicle.co2_per_km)
+            trip.confidence_score = transport_confidence(
+                has_co2_per_km=True,
+                has_distance=True,
             )
+            trip.flagged = False
 
     with db_commit(session, "Kunne ikke oppdatere turen.", "UPDATE_FAILED"):
         pass

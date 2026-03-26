@@ -11,14 +11,14 @@ use when regional emission data becomes available.
 
 from __future__ import annotations
 
-from datetime import date
-
 from flask import Blueprint, g, jsonify, request
 
 from app.errors import ApiError
 from app.middleware.auth import require_auth
 from app.models.energy import Energy, EnergySource, PriceZone
+from app.utils.confidence import ENERGY_CONFIDENCE
 from app.utils.db import db_commit
+from app.utils.parsing import optional_date, parse_float, require_float, require_int
 
 energy_bp = Blueprint("energy", __name__, url_prefix="/energy")
 
@@ -41,12 +41,6 @@ def _parse_price_zone(value: str | None) -> PriceZone | None:
         return PriceZone(value)
     except ValueError:
         return None
-
-
-def _parse_date(value: str | None) -> date | None:
-    if not value:
-        return None
-    return date.fromisoformat(value)
 
 
 def _serialize_energy(energy: Energy) -> dict:
@@ -81,36 +75,13 @@ def calculate_energy():
     """
 
     payload = request.get_json(silent=True) or {}
-
-    project_id = payload.get("project_id")
-    if not project_id:
-        raise ApiError("project_id er påkrevd.", code="MISSING_FIELD")
-    try:
-        project_id = int(project_id)
-    except (ValueError, TypeError):
-        raise ApiError("project_id må være et heltall.", code="INVALID_FIELD")
-
-    kwh_used = payload.get("kwh_used")
-    if kwh_used is None:
-        raise ApiError(
-            "kwh_used er påkrevd.",
-            code="MISSING_FIELD",
-            suggestion="Oppgi strømforbruk i kilowattimer (kWh).",
-        )
-    try:
-        kwh_used = float(kwh_used)
-        if kwh_used < 0:
-            raise ApiError(
-                "kwh_used kan ikke være negativt.",
-                code="INVALID_FIELD",
-                suggestion="Oppgi en positiv verdi for strømforbruk.",
-            )
-    except (ValueError, TypeError):
-        raise ApiError(
-            "kwh_used må være et tall.",
-            code="INVALID_FIELD",
-            suggestion="Oppgi strømforbruk som et tall (f.eks. 1500.5).",
-        )
+    project_id = require_int(payload, "project_id")
+    kwh_used = require_float(
+        payload,
+        "kwh_used",
+        allow_negative=False,
+        suggestion="Oppgi str\u00f8mforbruk som et tall (f.eks. 1500.5).",
+    )
 
     price_zone_str = payload.get("price_zone")
     price_zone = _parse_price_zone(price_zone_str)
@@ -122,14 +93,7 @@ def calculate_energy():
             suggestion="Velg en prissone fra NO1 til NO5.",
         )
 
-    try:
-        recorded_date = _parse_date(payload.get("recorded_date"))
-    except ValueError:
-        raise ApiError(
-            "Ugyldig datoformat.",
-            code="INVALID_FIELD",
-            suggestion="Bruk formatet YYYY-MM-DD (f.eks. 2026-03-24).",
-        )
+    recorded_date = optional_date(payload, "recorded_date")
 
     emission_factor = NVE_NATIONAL_EMISSION_FACTOR
     total_co2_kg = round(kwh_used * emission_factor, 4)
@@ -143,7 +107,7 @@ def calculate_energy():
         grid_emission_factor=emission_factor,
         total_co2_kg=total_co2_kg,
         recorded_date=recorded_date,
-        confidence_score=100,
+        confidence_score=ENERGY_CONFIDENCE,
     )
     with db_commit(session, "Kunne ikke lagre energiposten.", "SAVE_FAILED"):
         session.add(energy)
@@ -169,22 +133,19 @@ def update_energy(energy_id: int):
     payload = request.get_json(silent=True) or {}
 
     if "kwh_used" in payload:
-        try:
-            kwh = float(payload["kwh_used"])
-            if kwh < 0:
-                raise ApiError(
-                    "kwh_used kan ikke være negativt.",
-                    code="INVALID_FIELD",
-                    suggestion="Oppgi en positiv verdi for strømforbruk.",
-                )
-            energy.kwh_used = kwh
-            energy.total_co2_kg = round(kwh * NVE_NATIONAL_EMISSION_FACTOR, 4)
-        except (ValueError, TypeError):
+        kwh = parse_float(
+            payload,
+            "kwh_used",
+            suggestion="Oppgi str\u00f8mforbruk som et tall (f.eks. 1500.5).",
+        )
+        if kwh < 0:
             raise ApiError(
-                "kwh_used må være et tall.",
+                "kwh_used kan ikke v\u00e6re negativt.",
                 code="INVALID_FIELD",
-                suggestion="Oppgi strømforbruk som et tall (f.eks. 1500.5).",
+                suggestion="Oppgi en positiv verdi for str\u00f8mforbruk.",
             )
+        energy.kwh_used = kwh
+        energy.total_co2_kg = round(kwh * NVE_NATIONAL_EMISSION_FACTOR, 4)
 
     if "price_zone" in payload:
         pz = _parse_price_zone(payload["price_zone"])
@@ -198,14 +159,7 @@ def update_energy(energy_id: int):
         energy.price_zone = pz
 
     if "recorded_date" in payload:
-        try:
-            energy.recorded_date = _parse_date(payload["recorded_date"])
-        except ValueError:
-            raise ApiError(
-                "Ugyldig datoformat.",
-                code="INVALID_FIELD",
-                suggestion="Bruk formatet YYYY-MM-DD (f.eks. 2026-03-24).",
-            )
+        energy.recorded_date = optional_date(payload, "recorded_date")
 
     with db_commit(session, "Kunne ikke oppdatere energiposten.", "UPDATE_FAILED"):
         pass
