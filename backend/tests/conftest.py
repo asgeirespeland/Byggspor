@@ -90,15 +90,10 @@ def app(db_session):
 
 
 @pytest.fixture
-def client(app, db_session):
-    """Flask test client.
-
-    Also patches SessionLocal in the invoice routes, because those routes
-    create their own sessions directly (not via g.db).
-    """
-    with patch("app.routes.invoice.SessionLocal", return_value=db_session):
-        with app.test_client() as c:
-            yield c
+def client(app):
+    """Flask test client."""
+    with app.test_client() as c:
+        yield c
 
 
 # ── EHF XML sample data ───────────────────────────────────────────────────────

@@ -6,7 +6,6 @@ from datetime import date
 
 from flask import Blueprint, g, jsonify, request
 
-from app.database import SessionLocal
 from app.errors import DEFAULT_RETRY_SUGGESTION, ApiError
 from app.middleware.auth import require_auth
 from app.models.project_transport import ProjectTransport, TransportSourceType
@@ -21,6 +20,7 @@ from app.utils.confidence import transport_confidence
 from app.utils.db import db_commit
 from app.utils.file_upload import validate_xml_upload
 from app.utils.parsing import optional_date, parse_float, require_int
+from app.utils.serialization import group_by_source
 
 logger = logging.getLogger(__name__)
 
@@ -42,7 +42,7 @@ def parse_transport_route():
     xml_content = validate_xml_upload(ABAX_XML_SUGGESTION)
     file = request.files["file"]
 
-    session = SessionLocal()
+    session = g.db
     try:
         result = preview_transport_report(session, xml_content)
         result["file_name"] = file.filename
@@ -72,8 +72,6 @@ def parse_transport_route():
             status=500,
             suggestion=DEFAULT_RETRY_SUGGESTION,
         )
-    finally:
-        session.close()
 
 
 @transport_bp.route("/confirm", methods=["POST"])
@@ -96,13 +94,10 @@ def confirm_trips():
 
     file_name = body.get("file_name")
 
-    session = SessionLocal()
-    try:
-        with db_commit(session, "Kunne ikke lagre turene.", "SAVE_FAILED"):
-            result = save_transport_report(session, project_id, trips, file_name)
-        return jsonify(result), 201
-    finally:
-        session.close()
+    session = g.db
+    with db_commit(session, "Kunne ikke lagre turene.", "SAVE_FAILED"):
+        result = save_transport_report(session, project_id, trips, file_name)
+    return jsonify(result), 201
 
 
 @transport_bp.route("/project/<int:project_id>", methods=["GET"])
@@ -118,56 +113,58 @@ def list_project_transports(project_id: int):
         .all()
     )
 
-    # Group by source report
-    reports_map: dict[int | None, dict] = {}
-    for pt in transports:
-        sid = pt.source_id
-        if sid not in reports_map:
-            rpt = pt.source_report
-            reports_map[sid] = {
-                "report_id": sid,
-                "file_name": rpt.file_name if rpt else None,
-                "report_period_start": (
-                    rpt.report_period_start.isoformat()
-                    if rpt and rpt.report_period_start
-                    else None
-                ),
-                "report_period_end": (
-                    rpt.report_period_end.isoformat()
-                    if rpt and rpt.report_period_end
-                    else None
-                ),
-                "uploaded_at": (
-                    rpt.uploaded_at.isoformat() if rpt and rpt.uploaded_at else None
-                ),
-                "trips": [],
-            }
-        vehicle = pt.vehicle
-        reports_map[sid]["trips"].append(
-            {
-                "id": pt.id,
-                "driver_name": pt.driver_name,
-                "trip_date": pt.trip_date.isoformat() if pt.trip_date else None,
-                "start_address": pt.start_address,
-                "end_address": pt.end_address,
-                "distance_km": float(pt.distance_km) if pt.distance_km else None,
-                "total_co2_kg": float(pt.total_co2_kg) if pt.total_co2_kg else None,
-                "confidence_score": pt.confidence_score,
-                "flagged": pt.flagged,
-                "vehicle": (
-                    {
-                        "registration_number": vehicle.registration_number,
-                        "make": vehicle.make,
-                        "model": vehicle.model,
-                        "fuel_type": vehicle.fuel_type,
-                    }
-                    if vehicle
-                    else None
-                ),
-            }
-        )
+    def _report_group(pt):
+        rpt = pt.source_report
+        return {
+            "report_id": pt.source_id,
+            "file_name": rpt.file_name if rpt else None,
+            "report_period_start": (
+                rpt.report_period_start.isoformat()
+                if rpt and rpt.report_period_start
+                else None
+            ),
+            "report_period_end": (
+                rpt.report_period_end.isoformat()
+                if rpt and rpt.report_period_end
+                else None
+            ),
+            "uploaded_at": (
+                rpt.uploaded_at.isoformat() if rpt and rpt.uploaded_at else None
+            ),
+        }
 
-    return jsonify(list(reports_map.values()))
+    def _trip_item(pt):
+        vehicle = pt.vehicle
+        return {
+            "id": pt.id,
+            "driver_name": pt.driver_name,
+            "trip_date": pt.trip_date.isoformat() if pt.trip_date else None,
+            "start_address": pt.start_address,
+            "end_address": pt.end_address,
+            "distance_km": float(pt.distance_km) if pt.distance_km else None,
+            "total_co2_kg": float(pt.total_co2_kg) if pt.total_co2_kg else None,
+            "confidence_score": pt.confidence_score,
+            "flagged": pt.flagged,
+            "vehicle": (
+                {
+                    "registration_number": vehicle.registration_number,
+                    "make": vehicle.make,
+                    "model": vehicle.model,
+                    "fuel_type": vehicle.fuel_type,
+                }
+                if vehicle
+                else None
+            ),
+        }
+
+    grouped = group_by_source(
+        transports,
+        key_fn=lambda pt: pt.source_id,
+        group_fn=_report_group,
+        item_fn=_trip_item,
+        collection_key="trips",
+    )
+    return jsonify(grouped)
 
 
 @transport_bp.route("/trips", methods=["POST"])

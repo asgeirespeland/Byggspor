@@ -3,7 +3,6 @@ import xml.etree.ElementTree as ET
 
 from flask import Blueprint, g, jsonify, request
 
-from app.database import SessionLocal
 from app.errors import DEFAULT_RETRY_SUGGESTION, ApiError
 from app.middleware.auth import require_auth
 from app.models.material_invoice import MaterialInvoice
@@ -15,6 +14,7 @@ from app.utils.confidence import material_confidence
 from app.utils.db import db_commit
 from app.utils.file_upload import validate_xml_upload
 from app.utils.parsing import parse_float, require_int
+from app.utils.serialization import group_by_source
 
 logger = logging.getLogger(__name__)
 
@@ -52,7 +52,7 @@ def parse_invoice_route():
             suggestion=EHF_XML_SUGGESTION,
         )
 
-    session = SessionLocal()
+    session = g.db
     try:
         enriched = enrich_invoice(parsed, session=session)
 
@@ -74,8 +74,6 @@ def parse_invoice_route():
                 " kan det skyldes at NOBB-tjenesten er utilgjengelig."
             ),
         )
-    finally:
-        session.close()
 
     return jsonify(enriched)
 
@@ -100,7 +98,7 @@ def confirm_invoice():
 
     overrides = body.get("overrides") or {}
 
-    session = SessionLocal()
+    session = g.db
     try:
         # Create source invoice record
         supplier = invoice_data.get("supplier") or {}
@@ -173,8 +171,6 @@ def confirm_invoice():
             status=500,
             suggestion=DEFAULT_RETRY_SUGGESTION,
         )
-    finally:
-        session.close()
 
 
 @invoice_bp.route("/upload", methods=["POST"])
@@ -189,7 +185,7 @@ def upload_invoice_route():
 
     from app.services.material_service import process_invoice_for_project
 
-    session = SessionLocal()
+    session = g.db
     try:
         result = process_invoice_for_project(session, project_id, xml_content)
         session.commit()
@@ -219,8 +215,6 @@ def upload_invoice_route():
             status=500,
             suggestion=DEFAULT_RETRY_SUGGESTION,
         )
-    finally:
-        session.close()
 
 
 @invoice_bp.route("/project/<int:project_id>", methods=["GET"])
@@ -236,42 +230,43 @@ def list_project_materials(project_id: int):
         .all()
     )
 
-    # Group by source invoice
-    invoices_map: dict[int | None, dict] = {}
-    for pm in materials:
-        sid = pm.source_id
-        if sid not in invoices_map:
-            inv = pm.source_invoice
-            invoices_map[sid] = {
-                "invoice_id": sid,
-                "supplier_name": inv.supplier_name if inv else None,
-                "invoice_number": inv.invoice_number if inv else None,
-                "invoice_date": (
-                    inv.invoice_date.isoformat() if inv and inv.invoice_date else None
-                ),
-                "uploaded_at": (
-                    inv.uploaded_at.isoformat() if inv and inv.uploaded_at else None
-                ),
-                "items": [],
-            }
-        invoices_map[sid]["items"].append(
-            {
-                "id": pm.id,
-                "material_name": pm.material.product_name if pm.material else pm.notes,
-                "gtin": pm.material.gtin if pm.material else None,
-                "nobb_number": pm.material.nobb_number if pm.material else None,
-                "quantity": float(pm.quantity) if pm.quantity else None,
-                "unit": pm.unit,
-                "total_price": float(pm.total_price) if pm.total_price else None,
-                "total_co2_kg": float(pm.total_co2_kg) if pm.total_co2_kg else None,
-                "confidence_score": pm.confidence_score,
-                "flagged": pm.flagged,
-                "manual_override": pm.manual_override,
-                "has_epd": pm.material.has_epd if pm.material else False,
-            }
-        )
+    def _invoice_group(pm):
+        inv = pm.source_invoice
+        return {
+            "invoice_id": pm.source_id,
+            "supplier_name": inv.supplier_name if inv else None,
+            "invoice_number": inv.invoice_number if inv else None,
+            "invoice_date": (
+                inv.invoice_date.isoformat() if inv and inv.invoice_date else None
+            ),
+            "uploaded_at": (
+                inv.uploaded_at.isoformat() if inv and inv.uploaded_at else None
+            ),
+        }
 
-    return jsonify(list(invoices_map.values()))
+    def _material_item(pm):
+        return {
+            "id": pm.id,
+            "material_name": pm.material.product_name if pm.material else pm.notes,
+            "gtin": pm.material.gtin if pm.material else None,
+            "nobb_number": pm.material.nobb_number if pm.material else None,
+            "quantity": float(pm.quantity) if pm.quantity else None,
+            "unit": pm.unit,
+            "total_price": float(pm.total_price) if pm.total_price else None,
+            "total_co2_kg": float(pm.total_co2_kg) if pm.total_co2_kg else None,
+            "confidence_score": pm.confidence_score,
+            "flagged": pm.flagged,
+            "manual_override": pm.manual_override,
+            "has_epd": pm.material.has_epd if pm.material else False,
+        }
+
+    grouped = group_by_source(
+        materials,
+        key_fn=lambda pm: pm.source_id,
+        group_fn=_invoice_group,
+        item_fn=_material_item,
+    )
+    return jsonify(grouped)
 
 
 @invoice_bp.route("/materials/<int:material_id>", methods=["PATCH"])
