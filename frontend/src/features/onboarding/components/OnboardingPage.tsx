@@ -1,9 +1,10 @@
 import { useState } from 'react'
-import { useAuth } from '@clerk/react'
+import { useNavigate } from 'react-router-dom'
 import { Building2 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
+import { useAuthMutation } from '@/shared/hooks/useAuthMutation'
 import { apiRequest } from '@/shared/api/client'
 
 type OrgForm = {
@@ -15,9 +16,21 @@ const empty: OrgForm = { name: '', org_number: '' }
 
 export default function OnboardingPage() {
   const [form, setForm] = useState<OrgForm>(empty)
-  const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
-  const { getToken } = useAuth()
+  const navigate = useNavigate()
+
+  const createOrg = useAuthMutation<{
+    name: string
+    org_number?: string
+    org_type: string
+  }>({
+    mutationFn: (input, token) =>
+      apiRequest('/organizations', {
+        method: 'POST',
+        token,
+        body: input,
+      }),
+  })
 
   function handleChange(e: React.ChangeEvent<HTMLInputElement>) {
     setForm((prev) => ({ ...prev, [e.target.name]: e.target.value }))
@@ -25,29 +38,20 @@ export default function OnboardingPage() {
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
-    setLoading(true)
     setError('')
     try {
-      const token = (await getToken()) ?? undefined
-      await apiRequest('/organizations', {
-        method: 'POST',
-        token,
-        body: {
-          name: form.name.trim(),
-          org_number: form.org_number.trim() || undefined,
-          org_type: 'COMPANY',
-        },
+      await createOrg.mutateAsync({
+        name: form.name.trim(),
+        org_number: form.org_number.trim() || undefined,
+        org_type: 'COMPANY',
       })
-      // Navigate to dashboard — ProtectedRoute will re-fetch and see org now exists
-      window.location.href = '/'
+      navigate('/', { replace: true })
     } catch (err) {
       setError(
         err instanceof Error
           ? err.message
           : 'Klarte ikke opprette organisasjon',
       )
-    } finally {
-      setLoading(false)
     }
   }
 
@@ -63,7 +67,8 @@ export default function OnboardingPage() {
             Opprett din organisasjon
           </h1>
           <p className="mt-2 text-sm text-gray-500">
-            Før du kan opprette prosjekter må du registrere en organisasjon.
+            F&oslash;r du kan opprette prosjekter m&aring; du registrere en
+            organisasjon.
           </p>
         </div>
 
@@ -103,9 +108,9 @@ export default function OnboardingPage() {
             <Button
               type="submit"
               className="w-full"
-              disabled={!form.name.trim() || loading}
+              disabled={!form.name.trim() || createOrg.isPending}
             >
-              {loading ? 'Oppretter…' : 'Kom i gang'}
+              {createOrg.isPending ? 'Oppretter…' : 'Kom i gang'}
             </Button>
           </form>
         </div>
