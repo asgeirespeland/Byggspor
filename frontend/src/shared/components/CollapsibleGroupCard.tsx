@@ -1,11 +1,6 @@
 import { useState } from 'react'
 import { ChevronDown, ChevronRight, Maximize2, Trash2 } from 'lucide-react'
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-} from '@/components/ui/dialog'
+import FullscreenDialog from './FullscreenDialog'
 
 interface CollapsibleGroupCardProps {
   title: React.ReactNode
@@ -86,14 +81,13 @@ export default function CollapsibleGroupCard({
         )}
       </div>
 
-      <Dialog open={fullscreen} onOpenChange={setFullscreen}>
-        <DialogContent className="sm:max-w-[80vw] max-h-[85vh] overflow-y-auto">
-          <DialogHeader>
-            <DialogTitle>{title}</DialogTitle>
-          </DialogHeader>
-          <div className="overflow-x-auto">{children}</div>
-        </DialogContent>
-      </Dialog>
+      <FullscreenDialog
+        open={fullscreen}
+        onOpenChange={setFullscreen}
+        title={title}
+      >
+        {children}
+      </FullscreenDialog>
     </>
   )
 }
