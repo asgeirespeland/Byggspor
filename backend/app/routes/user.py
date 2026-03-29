@@ -1,12 +1,12 @@
 from __future__ import annotations
 
 from flask import Blueprint, g, jsonify, request
-from sqlalchemy.exc import IntegrityError
 
 from app.errors import ApiError
 from app.middleware.auth import require_auth
 from app.models.organization_member import OrganizationMember
 from app.models.user import User
+from app.utils.db import db_commit
 
 user_bp = Blueprint("users", __name__, url_prefix="/users")
 
@@ -94,15 +94,13 @@ def update_user(user_id: int):
     if "is_system_admin" in payload:
         target_user.is_system_admin = bool(payload["is_system_admin"])
 
-    try:
-        session.commit()
-    except IntegrityError:
-        session.rollback()
-        raise ApiError(
-            "Duplikat eller ugyldig data.",
-            code="CONFLICT",
-            status=409,
-        )
+    with db_commit(
+        session,
+        "Kunne ikke oppdatere brukeren.",
+        "SAVE_FAILED",
+        integrity_msg="Duplikat eller ugyldig data.",
+    ):
+        pass
 
     session.refresh(target_user)
     return jsonify(_serialize_user(target_user, session))

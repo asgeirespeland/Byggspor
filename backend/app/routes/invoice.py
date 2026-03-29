@@ -3,7 +3,7 @@ import xml.etree.ElementTree as ET
 
 from flask import Blueprint, g, jsonify, request
 
-from app.errors import DEFAULT_RETRY_SUGGESTION, ApiError
+from app.errors import ApiError
 from app.middleware.auth import require_auth
 from app.middleware.roles import require_project_role
 from app.models.material_invoice import MaterialInvoice
@@ -58,13 +58,6 @@ def parse_invoice_route():
     session = g.db
     try:
         enriched = enrich_invoice(parsed, session=session)
-
-        # Upsert enriched items into the material catalog (cache for next time)
-        for item in enriched.get("line_items", []):
-            if item.get("nobb_data") and not item["nobb_data"].get("_from_catalog"):
-                upsert_catalog_entry(session, item)
-
-        session.commit()
     except Exception:
         session.rollback()
         logger.exception("Enrichment/caching failed")
@@ -77,6 +70,11 @@ def parse_invoice_route():
                 " kan det skyldes at NOBB-tjenesten er utilgjengelig."
             ),
         )
+
+    with db_commit(session, "Kunne ikke cache fakturadata.", "SAVE_FAILED"):
+        for item in enriched.get("line_items", []):
+            if item.get("nobb_data") and not item["nobb_data"].get("_from_catalog"):
+                upsert_catalog_entry(session, item)
 
     return jsonify(enriched)
 
@@ -103,7 +101,10 @@ def confirm_invoice():
     overrides = body.get("overrides") or {}
 
     session = g.db
-    try:
+    created = []
+    invoice_record = None
+
+    with db_commit(session, "Kunne ikke lagre fakturaen.", "SAVE_FAILED"):
         # Create source invoice record
         supplier = invoice_data.get("supplier") or {}
         invoice_record = MaterialInvoice(
@@ -114,7 +115,6 @@ def confirm_invoice():
         session.add(invoice_record)
         session.flush()
 
-        created = []
         for idx, item in enumerate(invoice_data["line_items"]):
             catalog_entry = upsert_catalog_entry(session, item)
 
@@ -157,24 +157,10 @@ def confirm_invoice():
             session.add(pm)
             created.append(pm)
 
-        session.commit()
-
-        return jsonify(
-            material_invoice_id=invoice_record.id,
-            project_materials_count=len(created),
-        ), 201
-    except ApiError:
-        session.rollback()
-        raise
-    except Exception:
-        session.rollback()
-        logger.exception("Invoice confirm failed")
-        raise ApiError(
-            "Kunne ikke lagre fakturaen.",
-            code="SAVE_FAILED",
-            status=500,
-            suggestion=DEFAULT_RETRY_SUGGESTION,
-        )
+    return jsonify(
+        material_invoice_id=invoice_record.id,
+        project_materials_count=len(created),
+    ), 201
 
 
 @invoice_bp.route("/upload", methods=["POST"])
@@ -193,8 +179,6 @@ def upload_invoice_route():
     session = g.db
     try:
         result = process_invoice_for_project(session, project_id, xml_content)
-        session.commit()
-        return jsonify(result), 201
     except ET.ParseError:
         session.rollback()
         raise ApiError(
@@ -211,15 +195,11 @@ def upload_invoice_route():
             status=422,
             suggestion=EHF_XML_SUGGESTION,
         )
-    except Exception:
-        session.rollback()
-        logger.exception("Invoice processing failed")
-        raise ApiError(
-            "Kunne ikke behandle fakturaen.",
-            code="PROCESSING_FAILED",
-            status=500,
-            suggestion=DEFAULT_RETRY_SUGGESTION,
-        )
+
+    with db_commit(session, "Kunne ikke behandle fakturaen.", "PROCESSING_FAILED"):
+        pass
+
+    return jsonify(result), 201
 
 
 @invoice_bp.route("/project/<int:project_id>", methods=["GET"])

@@ -1,13 +1,13 @@
 from __future__ import annotations
 
 from flask import Blueprint, g, jsonify, request
-from sqlalchemy.exc import IntegrityError
 
 from app.errors import ApiError
 from app.middleware.auth import require_auth
 from app.models.organization import Organization, OrgType
 from app.models.organization_member import OrganizationMember
 from app.models.project import Project, ProjectStatus
+from app.utils.db import db_commit
 
 project_bp = Blueprint("projects", __name__, url_prefix="/projects")
 
@@ -95,15 +95,13 @@ def create_project():
 
     session.add(project)
 
-    try:
-        session.commit()
-    except IntegrityError:
-        session.rollback()
-        raise ApiError(
-            "Kunne ikke opprette prosjektet — duplikat eller ugyldig data.",
-            code="CONFLICT",
-            status=409,
-        )
+    with db_commit(
+        session,
+        "Kunne ikke opprette prosjektet.",
+        "SAVE_FAILED",
+        integrity_msg="Kunne ikke opprette prosjektet — duplikat eller ugyldig data.",
+    ):
+        pass
 
     session.refresh(project)
     return jsonify(_serialize_project(project)), 201

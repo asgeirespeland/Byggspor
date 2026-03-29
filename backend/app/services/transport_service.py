@@ -85,8 +85,8 @@ def preview_transport_report(session: Session, xml_content: bytes) -> dict:
         if enriched.get("vehicle_id"):
             vehicle_ids.add(enriched["vehicle_id"])
 
-    # Commit vehicle upserts so they survive regardless of confirm
-    session.commit()
+    # Flush vehicle upserts so IDs are available before the caller commits
+    session.flush()
 
     return {
         "project_transports_count": len(enriched_trips),

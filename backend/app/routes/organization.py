@@ -1,7 +1,6 @@
 from __future__ import annotations
 
 from flask import Blueprint, g, jsonify, request
-from sqlalchemy.exc import IntegrityError
 
 from app.errors import ApiError
 from app.middleware.auth import require_auth
@@ -9,6 +8,7 @@ from app.middleware.roles import require_org_role
 from app.models.organization import Organization, OrgType
 from app.models.organization_member import OrganizationMember, OrgRole
 from app.models.user import User
+from app.utils.db import db_commit
 
 organization_bp = Blueprint("organizations", __name__, url_prefix="/organizations")
 
@@ -120,15 +120,13 @@ def create_organization():
     )
     session.add(owner_membership)
 
-    try:
-        session.commit()
-    except IntegrityError:
-        session.rollback()
-        raise ApiError(
-            "Kunne ikke opprette organisasjonen — duplikat eller ugyldig data.",
-            code="CONFLICT",
-            status=409,
-        )
+    with db_commit(
+        session,
+        "Kunne ikke opprette organisasjonen.",
+        "SAVE_FAILED",
+        integrity_msg="Duplikat eller ugyldig organisasjonsdata.",
+    ):
+        pass
 
     session.refresh(org)
     return jsonify(_serialize_org(org)), 201
@@ -182,15 +180,13 @@ def update_organization(organization_id: int):
             )
         org.org_type = parsed_org_type
 
-    try:
-        session.commit()
-    except IntegrityError:
-        session.rollback()
-        raise ApiError(
-            "Kunne ikke oppdatere organisasjonen — duplikat eller ugyldig data.",
-            code="CONFLICT",
-            status=409,
-        )
+    with db_commit(
+        session,
+        "Kunne ikke oppdatere organisasjonen.",
+        "SAVE_FAILED",
+        integrity_msg="Duplikat eller ugyldig organisasjonsdata.",
+    ):
+        pass
 
     session.refresh(org)
     return jsonify(_serialize_org(org))
@@ -258,15 +254,13 @@ def add_organization_member(organization_id: int):
     # If the user is already a member, treat this as a role update.
     if existing:
         existing.role = role
-        try:
-            session.commit()
-        except IntegrityError:
-            session.rollback()
-            raise ApiError(
-                "Duplikat eller ugyldig data.",
-                code="CONFLICT",
-                status=409,
-            )
+        with db_commit(
+            session,
+            "Kunne ikke oppdatere medlemskapet.",
+            "SAVE_FAILED",
+            integrity_msg="Duplikat eller ugyldig data.",
+        ):
+            pass
         session.refresh(existing)
         return jsonify(_serialize_member(existing, user))
 
@@ -277,15 +271,13 @@ def add_organization_member(organization_id: int):
     )
     session.add(member)
 
-    try:
-        session.commit()
-    except IntegrityError:
-        session.rollback()
-        raise ApiError(
-            "Duplikat eller ugyldig data.",
-            code="CONFLICT",
-            status=409,
-        )
+    with db_commit(
+        session,
+        "Kunne ikke legge til medlem.",
+        "SAVE_FAILED",
+        integrity_msg="Duplikat eller ugyldig data.",
+    ):
+        pass
 
     session.refresh(member)
     return jsonify(_serialize_member(member, user)), 201
@@ -311,6 +303,6 @@ def remove_organization_member(organization_id: int, user_id: int):
     if not membership:
         raise ApiError("Medlemskapet ble ikke funnet.", code="NOT_FOUND", status=404)
 
-    session.delete(membership)
-    session.commit()
+    with db_commit(session, "Kunne ikke fjerne medlemskapet.", "DELETE_FAILED"):
+        session.delete(membership)
     return "", 204
