@@ -42,7 +42,7 @@ export default function TransportTripRow({
   if (editing) {
     return (
       <tr className="bg-blue-50/40">
-        <td className="px-4 py-1.5">
+        <td className="px-4 py-2">
           <input
             type="text"
             value={value.driver}
@@ -53,7 +53,7 @@ export default function TransportTripRow({
             autoFocus
           />
         </td>
-        <td className="px-4 py-1.5">
+        <td className="px-4 py-2">
           <input
             type="date"
             value={value.date}
@@ -61,10 +61,10 @@ export default function TransportTripRow({
             className="rounded border border-gray-300 px-2 py-1 text-sm"
           />
         </td>
-        <td className="px-4 py-1.5 text-gray-400 text-xs">
+        <td className="px-4 py-2 text-gray-400 text-xs">
           {trip.vehicle?.registration_number ?? '—'}
         </td>
-        <td className="px-4 py-1.5">
+        <td className="px-4 py-2">
           <input
             type="number"
             min="0"
@@ -76,8 +76,8 @@ export default function TransportTripRow({
             className="w-20 rounded border border-gray-300 px-2 py-1 text-sm text-right"
           />
         </td>
-        <td className="px-4 py-1.5 text-gray-400 text-xs text-right">auto</td>
-        <td className="px-4 py-1.5">
+        <td className="px-4 py-2 text-gray-400 text-xs text-right">auto</td>
+        <td className="px-4 py-2">
           <div className="flex items-center gap-1">
             <button
               type="button"
