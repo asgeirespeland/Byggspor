@@ -11,26 +11,17 @@ from app.utils.db import db_commit
 user_bp = Blueprint("users", __name__, url_prefix="/users")
 
 
-def _serialize_user(user: User, session) -> dict:
-    """Convert ORM user object to a JSON-friendly API shape."""
-
+def _user_response(user: User, session) -> dict:
+    """Build user API response, merging org membership into the user dict."""
     membership = (
         session.query(OrganizationMember)
         .filter(OrganizationMember.user_id == user.id)
         .first()
     )
-
     return {
-        "id": user.id,
-        "clerk_id": user.clerk_id,
-        "email": user.email,
-        "name": user.name,
-        "phone": user.phone,
-        "is_system_admin": user.is_system_admin,
+        **user.to_dict(),
         "organization_id": membership.organization_id if membership else None,
         "org_role": membership.role.value if membership else None,
-        "created_at": user.created_at.isoformat() if user.created_at else None,
-        "updated_at": user.updated_at.isoformat() if user.updated_at else None,
     }
 
 
@@ -42,7 +33,7 @@ def get_me():
     user = session.get(User, g.current_user_id)
     if not user:
         raise ApiError("Brukeren ble ikke funnet.", code="NOT_FOUND", status=404)
-    return jsonify(_serialize_user(user, session))
+    return jsonify(_user_response(user, session))
 
 
 @user_bp.route("/<int:user_id>", methods=["PATCH"])
@@ -103,4 +94,4 @@ def update_user(user_id: int):
         pass
 
     session.refresh(target_user)
-    return jsonify(_serialize_user(target_user, session))
+    return jsonify(_user_response(target_user, session))

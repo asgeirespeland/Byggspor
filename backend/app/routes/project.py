@@ -12,25 +12,6 @@ from app.utils.db import db_commit
 project_bp = Blueprint("projects", __name__, url_prefix="/projects")
 
 
-def _serialize_project(project: Project) -> dict:
-    """Convert ORM project object to a JSON-friendly API shape."""
-    return {
-        "id": project.id,
-        "name": project.name,
-        "project_number": project.project_number,
-        "status": project.status.value,
-        "organization_id": project.organization_id,
-        "created_by_user_id": project.created_by_user_id,
-        "customer_id": project.customer_id,
-        "customer_name": project.customer.name if project.customer else None,
-        "created_at": project.created_at.isoformat() if project.created_at else None,
-        "updated_at": project.updated_at.isoformat() if project.updated_at else None,
-        "completed_at": project.completed_at.isoformat()
-        if project.completed_at
-        else None,
-    }
-
-
 def _get_user_org_id(session, user_id: int) -> int | None:
     """Return the organization_id for the user's first active membership."""
     membership = (
@@ -104,7 +85,7 @@ def create_project():
         pass
 
     session.refresh(project)
-    return jsonify(_serialize_project(project)), 201
+    return jsonify(project.to_dict()), 201
 
 
 @project_bp.route("", methods=["GET"])
@@ -129,7 +110,7 @@ def list_projects():
         .all()
     )
 
-    return jsonify([_serialize_project(p) for p in projects])
+    return jsonify([p.to_dict() for p in projects])
 
 
 @project_bp.route("/<int:project_id>", methods=["GET"])
@@ -158,4 +139,4 @@ def get_project(project_id: int):
     if not project:
         raise ApiError("Prosjektet ble ikke funnet.", code="NOT_FOUND", status=404)
 
-    return jsonify(_serialize_project(project))
+    return jsonify(project.to_dict())

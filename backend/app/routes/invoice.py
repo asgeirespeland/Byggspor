@@ -280,7 +280,7 @@ def update_material(material_id: int):
     )
 
     session = g.db
-    pm = session.query(ProjectMaterial).get(material_id)
+    pm = session.get(ProjectMaterial, material_id)
     if not pm:
         raise ApiError(
             "Materialposten ble ikke funnet.",
@@ -320,9 +320,7 @@ def delete_invoice(invoice_id: int):
         .filter(ProjectMaterial.source_id == invoice_id)
         .delete()
     )
-    inv = (
-        session.query(MaterialInvoice).filter(MaterialInvoice.id == invoice_id).first()
-    )
+    inv = session.get(MaterialInvoice, invoice_id)
     if inv:
         session.delete(inv)
 

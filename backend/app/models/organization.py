@@ -39,3 +39,16 @@ class Organization(Base):
         back_populates="organization",
         foreign_keys="Project.organization_id",
     )
+
+    def to_dict(self) -> dict:
+        return {
+            "id": self.id,
+            "name": self.name,
+            "org_number": self.org_number,
+            "address": self.address,
+            "phone": self.phone,
+            "email": self.email,
+            "org_type": self.org_type.name if self.org_type else None,
+            "created_at": self.created_at.isoformat() if self.created_at else None,
+            "updated_at": self.updated_at.isoformat() if self.updated_at else None,
+        }

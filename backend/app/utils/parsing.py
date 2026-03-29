@@ -3,8 +3,28 @@
 from __future__ import annotations
 
 from datetime import date
+from typing import TypeVar
 
 from app.errors import ApiError
+
+E = TypeVar("E")
+
+
+def parse_enum(value: str | None, enum_cls: type[E]) -> E | None:
+    """Look up an enum member by name (case-insensitive) or by value.
+
+    Returns None if *value* is empty or does not match any member.
+    """
+    if not value:
+        return None
+    normalized = value.strip().upper()
+    if normalized in enum_cls.__members__:
+        return enum_cls[normalized]
+    lowered = value.strip().lower()
+    for member in enum_cls:
+        if member.value == lowered:
+            return member
+    return None
 
 
 def require_int(data: dict, field: str) -> int:

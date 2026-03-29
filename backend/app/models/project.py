@@ -68,6 +68,23 @@ class Project(Base):
         cascade="all, delete-orphan",
     )
 
+    def to_dict(self) -> dict:
+        return {
+            "id": self.id,
+            "name": self.name,
+            "project_number": self.project_number,
+            "status": self.status.value,
+            "organization_id": self.organization_id,
+            "created_by_user_id": self.created_by_user_id,
+            "customer_id": self.customer_id,
+            "customer_name": self.customer.name if self.customer else None,
+            "created_at": self.created_at.isoformat() if self.created_at else None,
+            "updated_at": self.updated_at.isoformat() if self.updated_at else None,
+            "completed_at": (
+                self.completed_at.isoformat() if self.completed_at else None
+            ),
+        }
+
 
 @event.listens_for(Project, "after_insert")
 def _add_creator_to_project_members(mapper, connection, target: Project):

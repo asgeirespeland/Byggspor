@@ -20,7 +20,13 @@ from app.models.energy import Energy, EnergySource, PriceZone
 from app.models.project_member import ProjectRole
 from app.utils.confidence import ENERGY_CONFIDENCE
 from app.utils.db import db_commit
-from app.utils.parsing import optional_date, parse_float, require_float, require_int
+from app.utils.parsing import (
+    optional_date,
+    parse_enum,
+    parse_float,
+    require_float,
+    require_int,
+)
 
 energy_bp = Blueprint("energy", __name__, url_prefix="/energy")
 
@@ -34,38 +40,6 @@ PRICE_ZONE_LABELS = {
     "NO4": "Nord-Norge (Nordland, Troms)",
     "NO5": "Vestlandet (Vestland)",
 }
-
-
-def _parse_price_zone(value: str | None) -> PriceZone | None:
-    if not value:
-        return None
-    try:
-        return PriceZone(value)
-    except ValueError:
-        return None
-
-
-def _serialize_energy(energy: Energy) -> dict:
-    return {
-        "id": energy.id,
-        "project_id": energy.project_id,
-        "source": energy.source.value if energy.source else None,
-        "price_zone": energy.price_zone.value if energy.price_zone else None,
-        "kwh_used": float(energy.kwh_used) if energy.kwh_used is not None else None,
-        "grid_emission_factor": (
-            float(energy.grid_emission_factor)
-            if energy.grid_emission_factor is not None
-            else None
-        ),
-        "total_co2_kg": (
-            float(energy.total_co2_kg) if energy.total_co2_kg is not None else None
-        ),
-        "confidence_score": energy.confidence_score,
-        "recorded_date": (
-            energy.recorded_date.isoformat() if energy.recorded_date else None
-        ),
-        "created_at": (energy.created_at.isoformat() if energy.created_at else None),
-    }
 
 
 @energy_bp.route("/calculate", methods=["POST"])
@@ -86,7 +60,7 @@ def calculate_energy():
     )
 
     price_zone_str = payload.get("price_zone")
-    price_zone = _parse_price_zone(price_zone_str)
+    price_zone = parse_enum(price_zone_str, PriceZone)
     if price_zone_str and not price_zone:
         valid = [z.value for z in PriceZone]
         raise ApiError(
@@ -115,7 +89,7 @@ def calculate_energy():
         session.add(energy)
 
     session.refresh(energy)
-    return jsonify(_serialize_energy(energy)), 201
+    return jsonify(energy.to_dict()), 201
 
 
 @energy_bp.route("/entry/<int:energy_id>", methods=["PATCH"])
@@ -128,7 +102,7 @@ def update_energy(energy_id: int):
     """
 
     session = g.db
-    energy = session.query(Energy).filter(Energy.id == energy_id).first()
+    energy = session.get(Energy, energy_id)
     if not energy:
         raise ApiError("Energiposten ble ikke funnet.", code="NOT_FOUND", status=404)
 
@@ -150,7 +124,7 @@ def update_energy(energy_id: int):
         energy.total_co2_kg = round(kwh * NVE_NATIONAL_EMISSION_FACTOR, 4)
 
     if "price_zone" in payload:
-        pz = _parse_price_zone(payload["price_zone"])
+        pz = parse_enum(payload["price_zone"], PriceZone)
         if payload["price_zone"] and not pz:
             valid = [z.value for z in PriceZone]
             raise ApiError(
@@ -167,7 +141,7 @@ def update_energy(energy_id: int):
         pass
 
     session.refresh(energy)
-    return jsonify(_serialize_energy(energy)), 200
+    return jsonify(energy.to_dict()), 200
 
 
 @energy_bp.route("/<int:project_id>", methods=["GET"])
@@ -184,7 +158,7 @@ def list_energies(project_id: int):
         .all()
     )
 
-    return jsonify([_serialize_energy(e) for e in entries])
+    return jsonify([e.to_dict() for e in entries])
 
 
 @energy_bp.route("/entry/<int:energy_id>", methods=["DELETE"])
@@ -193,7 +167,7 @@ def delete_energy(energy_id: int):
     """Delete a single energy entry."""
 
     session = g.db
-    energy = session.query(Energy).filter(Energy.id == energy_id).first()
+    energy = session.get(Energy, energy_id)
     if not energy:
         raise ApiError("Energiposten ble ikke funnet.", code="NOT_FOUND", status=404)
 

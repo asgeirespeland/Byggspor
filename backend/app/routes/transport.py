@@ -247,7 +247,7 @@ def update_trip(trip_id: int):
     """Update a transport trip's driver, date, addresses, or distance."""
 
     session = g.db
-    trip = session.query(ProjectTransport).get(trip_id)
+    trip = session.get(ProjectTransport, trip_id)
     if not trip:
         raise ApiError("Turen ble ikke funnet.", code="NOT_FOUND", status=404)
 
@@ -297,7 +297,7 @@ def delete_transport_report(report_id: int):
         .filter(ProjectTransport.source_id == report_id)
         .delete()
     )
-    rpt = session.query(TransportReport).filter(TransportReport.id == report_id).first()
+    rpt = session.get(TransportReport, report_id)
     if rpt:
         session.delete(rpt)
 
@@ -312,7 +312,7 @@ def delete_transport_report(report_id: int):
 def delete_trip(trip_id: int):
     """Delete a single transport trip."""
     session = g.db
-    trip = session.query(ProjectTransport).get(trip_id)
+    trip = session.get(ProjectTransport, trip_id)
     if not trip:
         raise ApiError("Turen ble ikke funnet.", code="NOT_FOUND", status=404)
     with db_commit(session, "Kunne ikke slette turen.", "DELETE_FAILED"):
@@ -325,7 +325,7 @@ def delete_trip(trip_id: int):
 def update_vehicle(vehicle_id: int):
     """Update vehicle details (make, model, fuel_type)."""
     session = g.db
-    vehicle = session.query(Vehicle).get(vehicle_id)
+    vehicle = session.get(Vehicle, vehicle_id)
     if not vehicle:
         raise ApiError("Kjøretøyet ble ikke funnet.", code="NOT_FOUND", status=404)
 

@@ -35,3 +35,15 @@ class User(Base):
         cascade="all, delete-orphan",
     )
     projects: Mapped[list["Project"]] = relationship(back_populates="created_by_user")
+
+    def to_dict(self) -> dict:
+        return {
+            "id": self.id,
+            "clerk_id": self.clerk_id,
+            "email": self.email,
+            "name": self.name,
+            "phone": self.phone,
+            "is_system_admin": self.is_system_admin,
+            "created_at": self.created_at.isoformat() if self.created_at else None,
+            "updated_at": self.updated_at.isoformat() if self.updated_at else None,
+        }
