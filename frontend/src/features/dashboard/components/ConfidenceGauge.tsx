@@ -1,20 +1,46 @@
+const CONFIDENCE_HIGH = 75
+const CONFIDENCE_MEDIUM = 50
+
+const FULL_GAUGE = {
+  radius: 54,
+  cx: 70,
+  cy: 72,
+  width: 140,
+  height: 84,
+  strokeWidth: 10,
+}
+const COMPACT_GAUGE = {
+  radius: 30,
+  cx: 36,
+  cy: 36,
+  width: 72,
+  height: 44,
+  strokeWidth: 6,
+}
+
 type Props = {
   score: number
   size?: 'full' | 'compact'
 }
 
 function scoreColor(score: number) {
-  return score >= 75 ? '#10b981' : score >= 50 ? '#f59e0b' : '#ef4444'
+  return score >= CONFIDENCE_HIGH
+    ? '#10b981'
+    : score >= CONFIDENCE_MEDIUM
+      ? '#f59e0b'
+      : '#ef4444'
 }
 
 function scoreLabel(score: number) {
-  return score >= 75 ? 'Høy' : score >= 50 ? 'Middels' : 'Lav'
+  return score >= CONFIDENCE_HIGH
+    ? 'Høy'
+    : score >= CONFIDENCE_MEDIUM
+      ? 'Middels'
+      : 'Lav'
 }
 
 function FullGauge({ score }: { score: number }) {
-  const radius = 54
-  const cx = 70
-  const cy = 72
+  const { radius, cx, cy } = FULL_GAUGE
   const circumference = Math.PI * radius
   const progress = (score / 100) * circumference
   const color = scoreColor(score)
@@ -22,19 +48,23 @@ function FullGauge({ score }: { score: number }) {
 
   return (
     <div className="flex flex-col items-center">
-      <svg width="140" height="84" viewBox="0 0 140 84">
+      <svg
+        width={FULL_GAUGE.width}
+        height={FULL_GAUGE.height}
+        viewBox={`0 0 ${FULL_GAUGE.width} ${FULL_GAUGE.height}`}
+      >
         <path
           d={`M ${cx - radius} ${cy} A ${radius} ${radius} 0 0 1 ${cx + radius} ${cy}`}
           fill="none"
           stroke="#e5e7eb"
-          strokeWidth="10"
+          strokeWidth={FULL_GAUGE.strokeWidth}
           strokeLinecap="round"
         />
         <path
           d={`M ${cx - radius} ${cy} A ${radius} ${radius} 0 0 1 ${cx + radius} ${cy}`}
           fill="none"
           stroke={color}
-          strokeWidth="10"
+          strokeWidth={FULL_GAUGE.strokeWidth}
           strokeLinecap="round"
           strokeDasharray={`${progress} ${circumference}`}
           style={{ transition: 'stroke-dasharray 0.6s ease' }}
@@ -70,28 +100,30 @@ function FullGauge({ score }: { score: number }) {
 }
 
 function CompactGauge({ score }: { score: number }) {
-  const radius = 30
-  const cx = 36
-  const cy = 36
+  const { radius, cx, cy } = COMPACT_GAUGE
   const circumference = Math.PI * radius
   const progress = (score / 100) * circumference
   const color = scoreColor(score)
 
   return (
     <div className="flex items-center gap-2">
-      <svg width="72" height="44" viewBox="0 0 72 44">
+      <svg
+        width={COMPACT_GAUGE.width}
+        height={COMPACT_GAUGE.height}
+        viewBox={`0 0 ${COMPACT_GAUGE.width} ${COMPACT_GAUGE.height}`}
+      >
         <path
           d={`M ${cx - radius} ${cy} A ${radius} ${radius} 0 0 1 ${cx + radius} ${cy}`}
           fill="none"
           stroke="#e5e7eb"
-          strokeWidth="6"
+          strokeWidth={COMPACT_GAUGE.strokeWidth}
           strokeLinecap="round"
         />
         <path
           d={`M ${cx - radius} ${cy} A ${radius} ${radius} 0 0 1 ${cx + radius} ${cy}`}
           fill="none"
           stroke={color}
-          strokeWidth="6"
+          strokeWidth={COMPACT_GAUGE.strokeWidth}
           strokeLinecap="round"
           strokeDasharray={`${progress} ${circumference}`}
           style={{ transition: 'stroke-dasharray 0.6s ease' }}

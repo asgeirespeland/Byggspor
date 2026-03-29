@@ -1,4 +1,4 @@
-import { AlertTriangle, Truck, X } from 'lucide-react'
+import { AlertTriangle, X } from 'lucide-react'
 import {
   Tooltip,
   TooltipContent,
@@ -11,6 +11,7 @@ import { useDismiss } from '@/shared/hooks/useDismiss'
 import type { ProjectMaterialItem } from '@/features/invoice/api/invoice'
 import type { ProjectTripItem } from '@/features/transport/api/projectTransports'
 import FlaggedMaterialRow from './FlaggedMaterialRow'
+import FlaggedTripRow from './FlaggedTripRow'
 
 type FlaggedMaterial = ProjectMaterialItem & { kind: 'material' }
 type FlaggedTrip = ProjectTripItem & { kind: 'transport' }
@@ -94,7 +95,7 @@ export default function FlaggedItems({ projectId, onNavigateToTab }: Props) {
                 projectId={projectId}
               />
             ) : (
-              <TripRow
+              <FlaggedTripRow
                 key={`t-${entry.id}`}
                 trip={entry}
                 onNavigate={() => onNavigateToTab?.('transport')}
@@ -107,32 +108,6 @@ export default function FlaggedItems({ projectId, onNavigateToTab }: Props) {
           </p>
         )}
       </div>
-    </div>
-  )
-}
-
-function TripRow({
-  trip,
-  onNavigate,
-}: {
-  trip: FlaggedTrip
-  onNavigate: () => void
-}) {
-  return (
-    <div className="flex items-start gap-2">
-      <Truck className="mt-0.5 h-3.5 w-3.5 shrink-0 text-amber-400" />
-      <div className="min-w-0 flex-1">
-        <p className="truncate text-xs font-medium text-gray-700">
-          {trip.start_address ?? '?'} &rarr; {trip.end_address ?? '?'}
-        </p>
-        <p className="text-[11px] text-amber-600">Mangler utslippsdata</p>
-      </div>
-      <button
-        onClick={onNavigate}
-        className="shrink-0 text-[11px] font-medium text-amber-600 hover:text-amber-800"
-      >
-        Se tur
-      </button>
     </div>
   )
 }
