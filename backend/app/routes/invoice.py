@@ -5,8 +5,10 @@ from flask import Blueprint, g, jsonify, request
 
 from app.errors import DEFAULT_RETRY_SUGGESTION, ApiError
 from app.middleware.auth import require_auth
+from app.middleware.roles import require_project_role
 from app.models.material_invoice import MaterialInvoice
 from app.models.project_material import MaterialSourceType, ProjectMaterial
+from app.models.project_member import ProjectRole
 from app.services.ehf_parser import parse_invoice
 from app.services.invoice_enrichment import enrich_invoice
 from app.services.material_service import upsert_catalog_entry
@@ -27,6 +29,7 @@ EHF_XML_SUGGESTION = (
 
 
 @invoice_bp.route("/parse", methods=["POST"])
+@require_auth
 def parse_invoice_route():
     """Parse and enrich an EHF invoice.
 
@@ -79,6 +82,7 @@ def parse_invoice_route():
 
 
 @invoice_bp.route("/confirm", methods=["POST"])
+@require_auth
 def confirm_invoice():
     """Persist user-reviewed invoice line items to the database.
 
@@ -174,6 +178,7 @@ def confirm_invoice():
 
 
 @invoice_bp.route("/upload", methods=["POST"])
+@require_auth
 def upload_invoice_route():
     """Parse, enrich, and persist an EHF invoice for a project.
 
@@ -219,6 +224,7 @@ def upload_invoice_route():
 
 @invoice_bp.route("/project/<int:project_id>", methods=["GET"])
 @require_auth
+@require_project_role((ProjectRole.OWNER, ProjectRole.EDITOR, ProjectRole.VIEWER))
 def list_project_materials(project_id: int):
     """Return all materials for a project, grouped by source invoice."""
 

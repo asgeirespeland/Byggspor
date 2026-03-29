@@ -8,6 +8,8 @@ from flask import Blueprint, g, jsonify, request
 
 from app.errors import DEFAULT_RETRY_SUGGESTION, ApiError
 from app.middleware.auth import require_auth
+from app.middleware.roles import require_project_role
+from app.models.project_member import ProjectRole
 from app.models.project_transport import ProjectTransport, TransportSourceType
 from app.models.transport_report import TransportReport
 from app.models.vehicle import Vehicle
@@ -33,6 +35,7 @@ ABAX_XML_SUGGESTION = (
 
 
 @transport_bp.route("/parse", methods=["POST"])
+@require_auth
 def parse_transport_route():
     """Parse and enrich an Abax Turrapport XML (preview only — nothing persisted).
 
@@ -75,6 +78,7 @@ def parse_transport_route():
 
 
 @transport_bp.route("/confirm", methods=["POST"])
+@require_auth
 def confirm_trips():
     """Persist user-confirmed trips to the database.
 
@@ -102,6 +106,7 @@ def confirm_trips():
 
 @transport_bp.route("/project/<int:project_id>", methods=["GET"])
 @require_auth
+@require_project_role((ProjectRole.OWNER, ProjectRole.EDITOR, ProjectRole.VIEWER))
 def list_project_transports(project_id: int):
     """Return all transport trips for a project, grouped by source report."""
 
@@ -303,6 +308,7 @@ def delete_transport_report(report_id: int):
 
 
 @transport_bp.route("/trips/<int:trip_id>", methods=["DELETE"])
+@require_auth
 def delete_trip(trip_id: int):
     """Delete a single transport trip."""
     session = g.db
@@ -315,6 +321,7 @@ def delete_trip(trip_id: int):
 
 
 @transport_bp.route("/vehicles/<int:vehicle_id>", methods=["PATCH"])
+@require_auth
 def update_vehicle(vehicle_id: int):
     """Update vehicle details (make, model, fuel_type)."""
     session = g.db

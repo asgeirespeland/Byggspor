@@ -15,7 +15,9 @@ from flask import Blueprint, g, jsonify, request
 
 from app.errors import ApiError
 from app.middleware.auth import require_auth
+from app.middleware.roles import require_project_role
 from app.models.energy import Energy, EnergySource, PriceZone
+from app.models.project_member import ProjectRole
 from app.utils.confidence import ENERGY_CONFIDENCE
 from app.utils.db import db_commit
 from app.utils.parsing import optional_date, parse_float, require_float, require_int
@@ -170,6 +172,7 @@ def update_energy(energy_id: int):
 
 @energy_bp.route("/<int:project_id>", methods=["GET"])
 @require_auth
+@require_project_role((ProjectRole.OWNER, ProjectRole.EDITOR, ProjectRole.VIEWER))
 def list_energies(project_id: int):
     """List all energy entries for a project."""
 
