@@ -17,7 +17,7 @@ os.environ.setdefault("NOBB_API_PASSWORD", "test_pass")
 os.environ.setdefault("SECRET_KEY", "test-secret")
 
 # ── Standard imports ──────────────────────────────────────────────────────────
-from unittest.mock import patch
+from unittest.mock import MagicMock, patch
 
 import pytest
 from sqlalchemy import create_engine
@@ -82,8 +82,16 @@ def app(db_session):
 
     flask_app.config["TESTING"] = True
 
+    def _fake_authenticate():
+        from flask import g
+
+        g.current_user_id = 1
+        g.current_user = MagicMock(id=1, is_system_admin=False)
+        g.clerk_claims = {}
+        return None
+
     with (
-        patch("app.main.authenticate_request", return_value=None),
+        patch("app.main.authenticate_request", side_effect=_fake_authenticate),
         patch("app.main.SessionLocal", return_value=db_session),
     ):
         yield flask_app
