@@ -1,3 +1,4 @@
+import Co2TotalBadge from '@/shared/components/Co2TotalBadge'
 import type { Trip } from '../types/transport'
 
 export default function TransportTotalCo2({
@@ -16,10 +17,5 @@ export default function TransportTotalCo2({
       count++
     }
   }
-  if (count === 0) return null
-  return (
-    <span className="rounded-full bg-emerald-100 px-3 py-1 text-xs font-medium text-emerald-700">
-      CO₂: {total.toFixed(2)} kg ({count} turer)
-    </span>
-  )
+  return <Co2TotalBadge total={total} count={count} label="turer" />
 }

@@ -12,6 +12,8 @@ every error response follows a consistent JSON shape:
 
 from flask import jsonify
 
+DEFAULT_RETRY_SUGGESTION = "Prøv igjen. Kontakt support hvis problemet vedvarer."
+
 
 class ApiError(Exception):
     """Raise from any route to return a structured error response.
@@ -65,7 +67,7 @@ def register_error_handlers(app):
             jsonify(
                 error="An internal error occurred",
                 code="INTERNAL_ERROR",
-                suggestion="Prøv igjen. Kontakt support hvis problemet vedvarer.",
+                suggestion=DEFAULT_RETRY_SUGGESTION,
             ),
             500,
         )

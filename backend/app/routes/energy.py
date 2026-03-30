@@ -11,15 +11,22 @@ use when regional emission data becomes available.
 
 from __future__ import annotations
 
-import logging
-from datetime import date
-
 from flask import Blueprint, g, jsonify, request
 
 from app.errors import ApiError
+from app.middleware.auth import require_auth
+from app.middleware.roles import require_project_role
 from app.models.energy import Energy, EnergySource, PriceZone
-
-logger = logging.getLogger(__name__)
+from app.models.project_member import ProjectRole
+from app.utils.confidence import ENERGY_CONFIDENCE
+from app.utils.db import db_commit
+from app.utils.parsing import (
+    optional_date,
+    parse_enum,
+    parse_float,
+    require_float,
+    require_int,
+)
 
 energy_bp = Blueprint("energy", __name__, url_prefix="/energy")
 
@@ -35,88 +42,25 @@ PRICE_ZONE_LABELS = {
 }
 
 
-def _parse_price_zone(value: str | None) -> PriceZone | None:
-    if not value:
-        return None
-    try:
-        return PriceZone(value)
-    except ValueError:
-        return None
-
-
-def _parse_date(value: str | None) -> date | None:
-    if not value:
-        return None
-    return date.fromisoformat(value)
-
-
-def _serialize_energy(energy: Energy) -> dict:
-    return {
-        "id": energy.id,
-        "project_id": energy.project_id,
-        "source": energy.source.value if energy.source else None,
-        "price_zone": energy.price_zone.value if energy.price_zone else None,
-        "kwh_used": float(energy.kwh_used) if energy.kwh_used is not None else None,
-        "grid_emission_factor": (
-            float(energy.grid_emission_factor)
-            if energy.grid_emission_factor is not None
-            else None
-        ),
-        "total_co2_kg": (
-            float(energy.total_co2_kg) if energy.total_co2_kg is not None else None
-        ),
-        "confidence_score": energy.confidence_score,
-        "recorded_date": (
-            energy.recorded_date.isoformat() if energy.recorded_date else None
-        ),
-        "created_at": (energy.created_at.isoformat() if energy.created_at else None),
-    }
-
-
 @energy_bp.route("/calculate", methods=["POST"])
+@require_auth
 def calculate_energy():
     """Calculate CO₂ from manual kWh input and persist to database.
 
     Expects JSON: { project_id, kwh_used, price_zone?, recorded_date? }
     """
-    current_user_id = getattr(g, "current_user_id", None)
-    if not current_user_id:
-        raise ApiError("Ikke autentisert.", code="UNAUTHORIZED", status=401)
 
     payload = request.get_json(silent=True) or {}
-
-    project_id = payload.get("project_id")
-    if not project_id:
-        raise ApiError("project_id er påkrevd.", code="MISSING_FIELD")
-    try:
-        project_id = int(project_id)
-    except (ValueError, TypeError):
-        raise ApiError("project_id må være et heltall.", code="INVALID_FIELD")
-
-    kwh_used = payload.get("kwh_used")
-    if kwh_used is None:
-        raise ApiError(
-            "kwh_used er påkrevd.",
-            code="MISSING_FIELD",
-            suggestion="Oppgi strømforbruk i kilowattimer (kWh).",
-        )
-    try:
-        kwh_used = float(kwh_used)
-        if kwh_used < 0:
-            raise ApiError(
-                "kwh_used kan ikke være negativt.",
-                code="INVALID_FIELD",
-                suggestion="Oppgi en positiv verdi for strømforbruk.",
-            )
-    except (ValueError, TypeError):
-        raise ApiError(
-            "kwh_used må være et tall.",
-            code="INVALID_FIELD",
-            suggestion="Oppgi strømforbruk som et tall (f.eks. 1500.5).",
-        )
+    project_id = require_int(payload, "project_id")
+    kwh_used = require_float(
+        payload,
+        "kwh_used",
+        allow_negative=False,
+        suggestion="Oppgi str\u00f8mforbruk som et tall (f.eks. 1500.5).",
+    )
 
     price_zone_str = payload.get("price_zone")
-    price_zone = _parse_price_zone(price_zone_str)
+    price_zone = parse_enum(price_zone_str, PriceZone)
     if price_zone_str and not price_zone:
         valid = [z.value for z in PriceZone]
         raise ApiError(
@@ -125,14 +69,7 @@ def calculate_energy():
             suggestion="Velg en prissone fra NO1 til NO5.",
         )
 
-    try:
-        recorded_date = _parse_date(payload.get("recorded_date"))
-    except ValueError:
-        raise ApiError(
-            "Ugyldig datoformat.",
-            code="INVALID_FIELD",
-            suggestion="Bruk formatet YYYY-MM-DD (f.eks. 2026-03-24).",
-        )
+    recorded_date = optional_date(payload, "recorded_date")
 
     emission_factor = NVE_NATIONAL_EMISSION_FACTOR
     total_co2_kg = round(kwh_used * emission_factor, 4)
@@ -146,64 +83,48 @@ def calculate_energy():
         grid_emission_factor=emission_factor,
         total_co2_kg=total_co2_kg,
         recorded_date=recorded_date,
-        confidence_score=100,
+        confidence_score=ENERGY_CONFIDENCE,
     )
-    session.add(energy)
+    with db_commit(session, "Kunne ikke lagre energiposten.", "SAVE_FAILED"):
+        session.add(energy)
 
-    try:
-        session.commit()
-        session.refresh(energy)
-    except Exception:
-        session.rollback()
-        logger.exception("Failed to save energy entry")
-        raise ApiError(
-            "Kunne ikke lagre energiposten.",
-            code="SAVE_FAILED",
-            status=500,
-            suggestion="Prøv igjen. Kontakt support hvis problemet vedvarer.",
-        )
-
-    return jsonify(_serialize_energy(energy)), 201
+    session.refresh(energy)
+    return jsonify(energy.to_dict()), 201
 
 
 @energy_bp.route("/entry/<int:energy_id>", methods=["PATCH"])
+@require_auth
 def update_energy(energy_id: int):
     """Update an existing energy entry.
 
     Accepts JSON with any of: { kwh_used, price_zone, recorded_date }
     Recalculates CO₂ if kwh_used changes.
     """
-    current_user_id = getattr(g, "current_user_id", None)
-    if not current_user_id:
-        raise ApiError("Ikke autentisert.", code="UNAUTHORIZED", status=401)
 
     session = g.db
-    energy = session.query(Energy).filter(Energy.id == energy_id).first()
+    energy = session.get(Energy, energy_id)
     if not energy:
         raise ApiError("Energiposten ble ikke funnet.", code="NOT_FOUND", status=404)
 
     payload = request.get_json(silent=True) or {}
 
     if "kwh_used" in payload:
-        try:
-            kwh = float(payload["kwh_used"])
-            if kwh < 0:
-                raise ApiError(
-                    "kwh_used kan ikke være negativt.",
-                    code="INVALID_FIELD",
-                    suggestion="Oppgi en positiv verdi for strømforbruk.",
-                )
-            energy.kwh_used = kwh
-            energy.total_co2_kg = round(kwh * NVE_NATIONAL_EMISSION_FACTOR, 4)
-        except (ValueError, TypeError):
+        kwh = parse_float(
+            payload,
+            "kwh_used",
+            suggestion="Oppgi str\u00f8mforbruk som et tall (f.eks. 1500.5).",
+        )
+        if kwh < 0:
             raise ApiError(
-                "kwh_used må være et tall.",
+                "kwh_used kan ikke v\u00e6re negativt.",
                 code="INVALID_FIELD",
-                suggestion="Oppgi strømforbruk som et tall (f.eks. 1500.5).",
+                suggestion="Oppgi en positiv verdi for str\u00f8mforbruk.",
             )
+        energy.kwh_used = kwh
+        energy.total_co2_kg = round(kwh * NVE_NATIONAL_EMISSION_FACTOR, 4)
 
     if "price_zone" in payload:
-        pz = _parse_price_zone(payload["price_zone"])
+        pz = parse_enum(payload["price_zone"], PriceZone)
         if payload["price_zone"] and not pz:
             valid = [z.value for z in PriceZone]
             raise ApiError(
@@ -214,37 +135,20 @@ def update_energy(energy_id: int):
         energy.price_zone = pz
 
     if "recorded_date" in payload:
-        try:
-            energy.recorded_date = _parse_date(payload["recorded_date"])
-        except ValueError:
-            raise ApiError(
-                "Ugyldig datoformat.",
-                code="INVALID_FIELD",
-                suggestion="Bruk formatet YYYY-MM-DD (f.eks. 2026-03-24).",
-            )
+        energy.recorded_date = optional_date(payload, "recorded_date")
 
-    try:
-        session.commit()
-        session.refresh(energy)
-    except Exception:
-        session.rollback()
-        logger.exception("Failed to update energy entry")
-        raise ApiError(
-            "Kunne ikke oppdatere energiposten.",
-            code="UPDATE_FAILED",
-            status=500,
-            suggestion="Prøv igjen. Kontakt support hvis problemet vedvarer.",
-        )
+    with db_commit(session, "Kunne ikke oppdatere energiposten.", "UPDATE_FAILED"):
+        pass
 
-    return jsonify(_serialize_energy(energy)), 200
+    session.refresh(energy)
+    return jsonify(energy.to_dict()), 200
 
 
 @energy_bp.route("/<int:project_id>", methods=["GET"])
+@require_auth
+@require_project_role((ProjectRole.OWNER, ProjectRole.EDITOR, ProjectRole.VIEWER))
 def list_energies(project_id: int):
     """List all energy entries for a project."""
-    current_user_id = getattr(g, "current_user_id", None)
-    if not current_user_id:
-        raise ApiError("Ikke autentisert.", code="UNAUTHORIZED", status=401)
 
     session = g.db
     entries = (
@@ -254,34 +158,21 @@ def list_energies(project_id: int):
         .all()
     )
 
-    return jsonify([_serialize_energy(e) for e in entries])
+    return jsonify([e.to_dict() for e in entries])
 
 
 @energy_bp.route("/entry/<int:energy_id>", methods=["DELETE"])
+@require_auth
 def delete_energy(energy_id: int):
     """Delete a single energy entry."""
-    current_user_id = getattr(g, "current_user_id", None)
-    if not current_user_id:
-        raise ApiError("Ikke autentisert.", code="UNAUTHORIZED", status=401)
 
     session = g.db
-    energy = session.query(Energy).filter(Energy.id == energy_id).first()
+    energy = session.get(Energy, energy_id)
     if not energy:
         raise ApiError("Energiposten ble ikke funnet.", code="NOT_FOUND", status=404)
 
-    session.delete(energy)
-
-    try:
-        session.commit()
-    except Exception:
-        session.rollback()
-        logger.exception("Failed to delete energy entry")
-        raise ApiError(
-            "Kunne ikke slette energiposten.",
-            code="DELETE_FAILED",
-            status=500,
-            suggestion="Prøv igjen. Kontakt support hvis problemet vedvarer.",
-        )
+    with db_commit(session, "Kunne ikke slette energiposten.", "DELETE_FAILED"):
+        session.delete(energy)
 
     return jsonify(message="Deleted"), 200
 

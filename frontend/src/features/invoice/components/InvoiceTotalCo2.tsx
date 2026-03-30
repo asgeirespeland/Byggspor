@@ -1,3 +1,4 @@
+import Co2TotalBadge from '@/shared/components/Co2TotalBadge'
 import type { LineItem } from '../types/invoice'
 import { getGwpA1A3 } from '../utils'
 
@@ -11,10 +12,11 @@ export default function InvoiceTotalCo2({ items }: { items: LineItem[] }) {
       count++
     }
   }
-  if (count === 0) return null
   return (
-    <span className="rounded bg-green-100 px-3 py-1 text-green-800">
-      CO₂: {total.toFixed(2)} kg ({count}/{items.length} linjer)
-    </span>
+    <Co2TotalBadge
+      total={total}
+      count={count}
+      label={`${count}/${items.length} linjer`}
+    />
   )
 }

@@ -1,6 +1,6 @@
 import { useState } from 'react'
-import { useAuth } from '@clerk/react'
 
+import { useRequireToken } from '@/shared/hooks/useRequireToken'
 import { updateVehicle } from '../api/transport'
 import type { Vehicle } from '../types/transport'
 
@@ -17,22 +17,12 @@ export default function VehicleInfoModal({
   onClose,
   onSaved,
 }: VehicleInfoModalProps) {
-  const { isLoaded, isSignedIn, getToken } = useAuth()
+  const { authReady, requireToken } = useRequireToken()
   const [make, setMake] = useState(vehicle.make ?? '')
   const [model, setModel] = useState(vehicle.model ?? '')
   const [fuelType, setFuelType] = useState(vehicle.fuel_type ?? '')
   const [saving, setSaving] = useState(false)
   const [error, setError] = useState<string | null>(null)
-
-  const authReady = isLoaded && isSignedIn
-
-  async function requireToken(): Promise<string> {
-    const token = await getToken()
-    if (!token) {
-      throw new Error('Ikke autentisert')
-    }
-    return token
-  }
 
   const handleSave = async () => {
     if (!make || !model || !fuelType) {

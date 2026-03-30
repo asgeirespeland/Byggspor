@@ -9,12 +9,10 @@ import {
   Trash2,
   Zap,
   Leaf,
-  ChevronLeft,
-  ChevronRight,
 } from 'lucide-react'
 import { useProject } from '@/features/project/hooks/useProject'
 import { STATUS_CONFIG } from '@/features/project/constants'
-import { useScrollIndicators } from '@/shared/hooks/useScrollIndicators'
+import TabBar, { type TabDef } from '@/shared/components/TabBar'
 import InvoiceUpload from '@/features/invoice/components/InvoiceUpload'
 import { TransportUpload } from '@/features/transport'
 import { useCo2Summary } from '../hooks/useCo2Summary'
@@ -30,7 +28,7 @@ function formatKg(value: number | undefined): string {
 
 type Tab = 'materials' | 'transport' | 'waste' | 'energy'
 
-const TABS: { id: Tab; label: string; icon: React.ReactNode }[] = [
+const TABS: TabDef<Tab>[] = [
   {
     id: 'materials',
     label: 'Materialer',
@@ -41,6 +39,48 @@ const TABS: { id: Tab; label: string; icon: React.ReactNode }[] = [
   { id: 'energy', label: 'Energi', icon: <Zap className="h-4 w-4" /> },
 ]
 
+const KPI_CONFIG = [
+  {
+    label: 'Totalt CO₂',
+    key: 'total' as const,
+    icon: <Leaf className="h-3.5 w-3.5 text-emerald-600" />,
+    accent: 'bg-emerald-50',
+  },
+  {
+    label: 'Materialer',
+    key: 'materials' as const,
+    icon: <Package className="h-3.5 w-3.5 text-blue-600" />,
+    accent: 'bg-blue-50',
+  },
+  {
+    label: 'Transport',
+    key: 'transport' as const,
+    icon: <Truck className="h-3.5 w-3.5 text-orange-600" />,
+    accent: 'bg-orange-50',
+  },
+  {
+    label: 'Avfall',
+    key: 'waste' as const,
+    icon: <Trash2 className="h-3.5 w-3.5 text-red-500" />,
+    accent: 'bg-red-50',
+  },
+  {
+    label: 'Energi',
+    key: 'energy' as const,
+    icon: <Zap className="h-3.5 w-3.5 text-yellow-600" />,
+    accent: 'bg-yellow-50',
+  },
+]
+
+function getKpiValue(
+  co2: ReturnType<typeof useCo2Summary>['data'],
+  key: (typeof KPI_CONFIG)[number]['key'],
+): string {
+  if (!co2) return '—'
+  if (key === 'total') return formatKg(co2.total_co2_kg)
+  return formatKg(co2.categories[key]?.total_co2_kg)
+}
+
 export default function ProjectDashboard() {
   const { projectId } = useParams<{ projectId: string }>()
   const navigate = useNavigate()
@@ -48,11 +88,6 @@ export default function ProjectDashboard() {
   const { data: project, isLoading, error } = useProject(Number(projectId))
   const { data: co2 } = useCo2Summary(Number(projectId))
   const showLoading = useDeferredLoading(isLoading)
-  const {
-    ref: tabsRef,
-    canScrollLeft,
-    canScrollRight,
-  } = useScrollIndicators([isLoading])
 
   if (showLoading) {
     return (
@@ -114,77 +149,26 @@ export default function ProjectDashboard() {
         <div className="flex min-w-0 flex-1 flex-col gap-4 w-full">
           {/* KPI row */}
           <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3">
-            <KpiCard
-              label="Totalt CO₂"
-              value={formatKg(co2?.total_co2_kg)}
-              unit="kg CO₂e"
-              icon={<Leaf className="h-3.5 w-3.5 text-emerald-600" />}
-              accent="bg-emerald-50"
-            />
-            <KpiCard
-              label="Materialer"
-              value={formatKg(co2?.categories.materials.total_co2_kg)}
-              unit="kg CO₂e"
-              icon={<Package className="h-3.5 w-3.5 text-blue-600" />}
-              accent="bg-blue-50"
-            />
-            <KpiCard
-              label="Transport"
-              value={formatKg(co2?.categories.transport.total_co2_kg)}
-              unit="kg CO₂e"
-              icon={<Truck className="h-3.5 w-3.5 text-orange-600" />}
-              accent="bg-orange-50"
-            />
-            <KpiCard
-              label="Avfall"
-              value={formatKg(co2?.categories.waste.total_co2_kg)}
-              unit="kg CO₂e"
-              icon={<Trash2 className="h-3.5 w-3.5 text-red-500" />}
-              accent="bg-red-50"
-            />
-            <KpiCard
-              label="Energi"
-              value={formatKg(co2?.categories.energy.total_co2_kg)}
-              unit="kg CO₂e"
-              icon={<Zap className="h-3.5 w-3.5 text-yellow-600" />}
-              accent="bg-yellow-50"
-            />
+            {KPI_CONFIG.map((kpi) => (
+              <KpiCard
+                key={kpi.key}
+                label={kpi.label}
+                value={getKpiValue(co2, kpi.key)}
+                unit="kg CO₂e"
+                icon={kpi.icon}
+                accent={kpi.accent}
+              />
+            ))}
           </div>
 
           {/* Tabbed panel */}
           <div className="rounded-xl border border-gray-200 bg-white shadow-sm overflow-hidden">
-            <div className="relative border-b border-gray-200">
-              {canScrollLeft && (
-                <div className="pointer-events-none absolute left-0 top-0 z-10 flex h-full w-10 items-center justify-start bg-gradient-to-r from-white via-white/80 to-transparent pl-1">
-                  <ChevronLeft className="h-4 w-4 text-gray-400" />
-                </div>
-              )}
-              <div
-                ref={tabsRef}
-                className="flex overflow-x-auto overflow-y-hidden scrollbar-hide"
-              >
-                {TABS.map((tab) => (
-                  <button
-                    key={tab.id}
-                    type="button"
-                    onClick={() => setActiveTab(tab.id)}
-                    className={`flex shrink-0 items-center gap-2 px-5 py-3.5 text-sm font-medium transition-colors border-b-2 -mb-px ${
-                      activeTab === tab.id
-                        ? 'border-gray-900 text-gray-900'
-                        : 'border-transparent text-gray-400 hover:text-gray-600 hover:border-gray-300'
-                    }`}
-                  >
-                    {tab.icon}
-                    {tab.label}
-                  </button>
-                ))}
-              </div>
-              {canScrollRight && (
-                <div className="pointer-events-none absolute right-0 top-0 z-10 flex h-full w-10 items-center justify-end bg-gradient-to-l from-white via-white/80 to-transparent pr-1">
-                  <ChevronRight className="h-4 w-4 text-gray-400" />
-                </div>
-              )}
-            </div>
+            <TabBar
+              tabs={TABS}
+              activeTab={activeTab}
+              onTabChange={setActiveTab}
+              scrollDeps={[isLoading]}
+            />
             <div className="p-6">
               {activeTab === 'materials' && (
                 <InvoiceUpload projectId={project.id} />
@@ -198,7 +182,7 @@ export default function ProjectDashboard() {
           </div>
         </div>
 
-        {/* Right sidebar — first on mobile, right column on large screens */}
+        {/* Right sidebar */}
         <div className="order-first lg:order-last w-full lg:w-auto">
           <ProjectSidebar
             project={project}

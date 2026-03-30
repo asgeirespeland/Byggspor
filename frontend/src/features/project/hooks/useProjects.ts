@@ -1,5 +1,4 @@
-import { useQuery } from '@tanstack/react-query'
-import { useAuth } from '@clerk/react'
+import { useAuthQuery } from '@/shared/hooks/useAuthQuery'
 import { apiRequest } from '@/shared/api/client'
 
 export type Project = {
@@ -17,14 +16,7 @@ export type Project = {
 }
 
 export function useProjects() {
-  const { getToken } = useAuth()
-
-  return useQuery({
-    queryKey: ['projects'],
-    queryFn: async () => {
-      const token = await getToken()
-      if (!token) throw new Error('Ikke autentisert')
-      return apiRequest<Project[]>('/projects', { token })
-    },
-  })
+  return useAuthQuery(['projects'], (token) =>
+    apiRequest<Project[]>('/projects', { token }),
+  )
 }

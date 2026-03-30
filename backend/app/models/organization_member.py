@@ -49,3 +49,18 @@ class OrganizationMember(Base):
     organization: Mapped["Organization"] = relationship(
         back_populates="organization_memberships"
     )
+
+    def to_dict(self) -> dict:
+        return {
+            "id": self.id,
+            "organization_id": self.organization_id,
+            "user_id": self.user_id,
+            "role": self.role.name,
+            "joined_at": self.joined_at.isoformat() if self.joined_at else None,
+            "user": {
+                "id": self.user.id,
+                "email": self.user.email,
+                "name": self.user.name,
+                "phone": self.user.phone,
+            },
+        }

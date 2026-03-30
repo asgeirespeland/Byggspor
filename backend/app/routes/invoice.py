@@ -3,13 +3,20 @@ import xml.etree.ElementTree as ET
 
 from flask import Blueprint, g, jsonify, request
 
-from app.database import SessionLocal
 from app.errors import ApiError
+from app.middleware.auth import require_auth
+from app.middleware.roles import require_project_role
 from app.models.material_invoice import MaterialInvoice
 from app.models.project_material import MaterialSourceType, ProjectMaterial
+from app.models.project_member import ProjectRole
 from app.services.ehf_parser import parse_invoice
 from app.services.invoice_enrichment import enrich_invoice
 from app.services.material_service import upsert_catalog_entry
+from app.utils.confidence import material_confidence
+from app.utils.db import db_commit
+from app.utils.file_upload import validate_xml_upload
+from app.utils.parsing import parse_float, require_int
+from app.utils.serialization import group_by_source
 
 logger = logging.getLogger(__name__)
 
@@ -22,34 +29,14 @@ EHF_XML_SUGGESTION = (
 
 
 @invoice_bp.route("/parse", methods=["POST"])
+@require_auth
 def parse_invoice_route():
     """Parse and enrich an EHF invoice.
 
     Uses the material catalog DB as a cache — checks catalog first,
     falls back to NOBB API, then upserts results back into the catalog.
     """
-    if "file" not in request.files:
-        raise ApiError(
-            "Ingen fil ble sendt.",
-            code="NO_FILE",
-            suggestion=EHF_XML_SUGGESTION,
-        )
-
-    file = request.files["file"]
-    if not file.filename or not file.filename.lower().endswith(".xml"):
-        raise ApiError(
-            "Filen må være i XML-format.",
-            code="INVALID_FILE_TYPE",
-            suggestion=EHF_XML_SUGGESTION,
-        )
-
-    xml_content = file.read()
-    if not xml_content:
-        raise ApiError(
-            "Den opplastede filen er tom.",
-            code="EMPTY_FILE",
-            suggestion="Sjekk at filen inneholder data og prøv igjen.",
-        )
+    xml_content = validate_xml_upload(EHF_XML_SUGGESTION)
 
     try:
         parsed = parse_invoice(xml_content)
@@ -68,16 +55,9 @@ def parse_invoice_route():
             suggestion=EHF_XML_SUGGESTION,
         )
 
-    session = SessionLocal()
+    session = g.db
     try:
         enriched = enrich_invoice(parsed, session=session)
-
-        # Upsert enriched items into the material catalog (cache for next time)
-        for item in enriched.get("line_items", []):
-            if item.get("nobb_data") and not item["nobb_data"].get("_from_catalog"):
-                upsert_catalog_entry(session, item)
-
-        session.commit()
     except Exception:
         session.rollback()
         logger.exception("Enrichment/caching failed")
@@ -90,13 +70,17 @@ def parse_invoice_route():
                 " kan det skyldes at NOBB-tjenesten er utilgjengelig."
             ),
         )
-    finally:
-        session.close()
+
+    with db_commit(session, "Kunne ikke cache fakturadata.", "SAVE_FAILED"):
+        for item in enriched.get("line_items", []):
+            if item.get("nobb_data") and not item["nobb_data"].get("_from_catalog"):
+                upsert_catalog_entry(session, item)
 
     return jsonify(enriched)
 
 
 @invoice_bp.route("/confirm", methods=["POST"])
+@require_auth
 def confirm_invoice():
     """Persist user-reviewed invoice line items to the database.
 
@@ -104,14 +88,7 @@ def confirm_invoice():
     and optional overrides mapping line index to CO₂ value.
     """
     body = request.get_json(silent=True) or {}
-
-    project_id = body.get("project_id")
-    if not project_id:
-        raise ApiError("project_id er påkrevd.", code="MISSING_FIELD")
-    try:
-        project_id = int(project_id)
-    except (ValueError, TypeError):
-        raise ApiError("project_id må være et heltall.", code="INVALID_FIELD")
+    project_id = require_int(body, "project_id")
 
     invoice_data = body.get("invoice")
     if not invoice_data or not isinstance(invoice_data.get("line_items"), list):
@@ -123,8 +100,11 @@ def confirm_invoice():
 
     overrides = body.get("overrides") or {}
 
-    session = SessionLocal()
-    try:
+    session = g.db
+    created = []
+    invoice_record = None
+
+    with db_commit(session, "Kunne ikke lagre fakturaen.", "SAVE_FAILED"):
         # Create source invoice record
         supplier = invoice_data.get("supplier") or {}
         invoice_record = MaterialInvoice(
@@ -135,7 +115,6 @@ def confirm_invoice():
         session.add(invoice_record)
         session.flush()
 
-        created = []
         for idx, item in enumerate(invoice_data["line_items"]):
             catalog_entry = upsert_catalog_entry(session, item)
 
@@ -155,97 +134,51 @@ def confirm_invoice():
 
             # Check for user CO₂ override
             override = overrides.get(str(idx))
+            has_gwp = False
+            is_override = False
             if override and override.get("total_co2_kg") is not None:
                 try:
                     pm.total_co2_kg = float(override["total_co2_kg"])
                     pm.manual_override = True
-                    pm.confidence_score = 90
                     pm.flagged = False
+                    is_override = True
                 except (ValueError, TypeError):
                     pass
             elif catalog_entry and catalog_entry.gwp_per_unit and pm.quantity:
                 pm.total_co2_kg = float(catalog_entry.gwp_per_unit) * float(pm.quantity)
-                pm.confidence_score = 80
-            else:
-                pm.confidence_score = 20 if pm.flagged else 50
+                has_gwp = True
+
+            pm.confidence_score = material_confidence(
+                has_gwp=has_gwp,
+                flagged=pm.flagged,
+                is_manual_override=is_override,
+            )
 
             session.add(pm)
             created.append(pm)
 
-        session.commit()
-
-        return jsonify(
-            material_invoice_id=invoice_record.id,
-            project_materials_count=len(created),
-        ), 201
-    except ApiError:
-        session.rollback()
-        raise
-    except Exception:
-        session.rollback()
-        logger.exception("Invoice confirm failed")
-        raise ApiError(
-            "Kunne ikke lagre fakturaen.",
-            code="SAVE_FAILED",
-            status=500,
-            suggestion="Prøv igjen. Kontakt support hvis problemet vedvarer.",
-        )
-    finally:
-        session.close()
+    return jsonify(
+        material_invoice_id=invoice_record.id,
+        project_materials_count=len(created),
+    ), 201
 
 
 @invoice_bp.route("/upload", methods=["POST"])
+@require_auth
 def upload_invoice_route():
     """Parse, enrich, and persist an EHF invoice for a project.
 
     Requires 'project_id' form field and 'file' upload.
     Upserts materials to catalog, creates project_materials with source provenance.
     """
-    project_id = request.form.get("project_id")
-    if not project_id:
-        raise ApiError(
-            "project_id er påkrevd.",
-            code="MISSING_FIELD",
-        )
-
-    try:
-        project_id = int(project_id)
-    except (ValueError, TypeError):
-        raise ApiError(
-            "project_id må være et heltall.",
-            code="INVALID_FIELD",
-        )
-
-    if "file" not in request.files:
-        raise ApiError(
-            "Ingen fil ble sendt.",
-            code="NO_FILE",
-            suggestion=EHF_XML_SUGGESTION,
-        )
-
-    file = request.files["file"]
-    if not file.filename or not file.filename.lower().endswith(".xml"):
-        raise ApiError(
-            "Filen må være i XML-format.",
-            code="INVALID_FILE_TYPE",
-            suggestion=EHF_XML_SUGGESTION,
-        )
-
-    xml_content = file.read()
-    if not xml_content:
-        raise ApiError(
-            "Den opplastede filen er tom.",
-            code="EMPTY_FILE",
-            suggestion="Sjekk at filen inneholder data og prøv igjen.",
-        )
+    project_id = require_int(dict(request.form), "project_id")
+    xml_content = validate_xml_upload(EHF_XML_SUGGESTION)
 
     from app.services.material_service import process_invoice_for_project
 
-    session = SessionLocal()
+    session = g.db
     try:
         result = process_invoice_for_project(session, project_id, xml_content)
-        session.commit()
-        return jsonify(result), 201
     except ET.ParseError:
         session.rollback()
         raise ApiError(
@@ -262,25 +195,18 @@ def upload_invoice_route():
             status=422,
             suggestion=EHF_XML_SUGGESTION,
         )
-    except Exception:
-        session.rollback()
-        logger.exception("Invoice processing failed")
-        raise ApiError(
-            "Kunne ikke behandle fakturaen.",
-            code="PROCESSING_FAILED",
-            status=500,
-            suggestion="Prøv igjen. Kontakt support hvis problemet vedvarer.",
-        )
-    finally:
-        session.close()
+
+    with db_commit(session, "Kunne ikke behandle fakturaen.", "PROCESSING_FAILED"):
+        pass
+
+    return jsonify(result), 201
 
 
 @invoice_bp.route("/project/<int:project_id>", methods=["GET"])
+@require_auth
+@require_project_role((ProjectRole.OWNER, ProjectRole.EDITOR, ProjectRole.VIEWER))
 def list_project_materials(project_id: int):
     """Return all materials for a project, grouped by source invoice."""
-    current_user_id = getattr(g, "current_user_id", None)
-    if not current_user_id:
-        raise ApiError("Ikke autentisert.", code="UNAUTHORIZED", status=401)
 
     session = g.db
     materials = (
@@ -290,54 +216,53 @@ def list_project_materials(project_id: int):
         .all()
     )
 
-    # Group by source invoice
-    invoices_map: dict[int | None, dict] = {}
-    for pm in materials:
-        sid = pm.source_id
-        if sid not in invoices_map:
-            inv = pm.source_invoice
-            invoices_map[sid] = {
-                "invoice_id": sid,
-                "supplier_name": inv.supplier_name if inv else None,
-                "invoice_number": inv.invoice_number if inv else None,
-                "invoice_date": (
-                    inv.invoice_date.isoformat() if inv and inv.invoice_date else None
-                ),
-                "uploaded_at": (
-                    inv.uploaded_at.isoformat() if inv and inv.uploaded_at else None
-                ),
-                "items": [],
-            }
-        invoices_map[sid]["items"].append(
-            {
-                "id": pm.id,
-                "material_name": pm.material.product_name if pm.material else pm.notes,
-                "gtin": pm.material.gtin if pm.material else None,
-                "nobb_number": pm.material.nobb_number if pm.material else None,
-                "quantity": float(pm.quantity) if pm.quantity else None,
-                "unit": pm.unit,
-                "total_price": float(pm.total_price) if pm.total_price else None,
-                "total_co2_kg": float(pm.total_co2_kg) if pm.total_co2_kg else None,
-                "confidence_score": pm.confidence_score,
-                "flagged": pm.flagged,
-                "manual_override": pm.manual_override,
-                "has_epd": pm.material.has_epd if pm.material else False,
-            }
-        )
+    def _invoice_group(pm):
+        inv = pm.source_invoice
+        return {
+            "invoice_id": pm.source_id,
+            "supplier_name": inv.supplier_name if inv else None,
+            "invoice_number": inv.invoice_number if inv else None,
+            "invoice_date": (
+                inv.invoice_date.isoformat() if inv and inv.invoice_date else None
+            ),
+            "uploaded_at": (
+                inv.uploaded_at.isoformat() if inv and inv.uploaded_at else None
+            ),
+        }
 
-    return jsonify(list(invoices_map.values()))
+    def _material_item(pm):
+        return {
+            "id": pm.id,
+            "material_name": pm.material.product_name if pm.material else pm.notes,
+            "gtin": pm.material.gtin if pm.material else None,
+            "nobb_number": pm.material.nobb_number if pm.material else None,
+            "quantity": float(pm.quantity) if pm.quantity else None,
+            "unit": pm.unit,
+            "total_price": float(pm.total_price) if pm.total_price else None,
+            "total_co2_kg": float(pm.total_co2_kg) if pm.total_co2_kg else None,
+            "confidence_score": pm.confidence_score,
+            "flagged": pm.flagged,
+            "manual_override": pm.manual_override,
+            "has_epd": pm.material.has_epd if pm.material else False,
+        }
+
+    grouped = group_by_source(
+        materials,
+        key_fn=lambda pm: pm.source_id,
+        group_fn=_invoice_group,
+        item_fn=_material_item,
+    )
+    return jsonify(grouped)
 
 
 @invoice_bp.route("/materials/<int:material_id>", methods=["PATCH"])
+@require_auth
 def update_material(material_id: int):
     """Update a project material's CO₂ value manually.
 
     Accepts JSON: { total_co2_kg: number }
     Sets manual_override=True, confidence_score=90, flagged=False.
     """
-    current_user_id = getattr(g, "current_user_id", None)
-    if not current_user_id:
-        raise ApiError("Ikke autentisert.", code="UNAUTHORIZED", status=401)
 
     body = request.get_json(silent=True) or {}
 
@@ -348,17 +273,14 @@ def update_material(material_id: int):
             suggestion="Oppgi CO₂-verdi i kg for denne materialposten.",
         )
 
-    try:
-        total_co2_kg = float(body["total_co2_kg"])
-    except (ValueError, TypeError):
-        raise ApiError(
-            "total_co2_kg må være et tall.",
-            code="INVALID_FIELD",
-            suggestion="Oppgi CO₂-verdi som et tall (f.eks. 12.5 eller -271).",
-        )
+    total_co2_kg = parse_float(
+        body,
+        "total_co2_kg",
+        suggestion="Oppgi CO\u2082-verdi som et tall (f.eks. 12.5 eller -271).",
+    )
 
     session = g.db
-    pm = session.query(ProjectMaterial).get(material_id)
+    pm = session.get(ProjectMaterial, material_id)
     if not pm:
         raise ApiError(
             "Materialposten ble ikke funnet.",
@@ -368,20 +290,15 @@ def update_material(material_id: int):
 
     pm.total_co2_kg = total_co2_kg
     pm.manual_override = True
-    pm.confidence_score = 90
+    pm.confidence_score = material_confidence(
+        has_gwp=False,
+        flagged=False,
+        is_manual_override=True,
+    )
     pm.flagged = False
 
-    try:
-        session.commit()
-    except Exception:
-        session.rollback()
-        logger.exception("Failed to update material")
-        raise ApiError(
-            "Kunne ikke oppdatere materialposten.",
-            code="UPDATE_FAILED",
-            status=500,
-            suggestion="Prøv igjen. Kontakt support hvis problemet vedvarer.",
-        )
+    with db_commit(session, "Kunne ikke oppdatere materialposten.", "UPDATE_FAILED"):
+        pass
 
     return jsonify(
         id=pm.id,
@@ -393,11 +310,9 @@ def update_material(material_id: int):
 
 
 @invoice_bp.route("/source/<int:invoice_id>", methods=["DELETE"])
+@require_auth
 def delete_invoice(invoice_id: int):
     """Delete an invoice and all its associated project materials."""
-    current_user_id = getattr(g, "current_user_id", None)
-    if not current_user_id:
-        raise ApiError("Ikke autentisert.", code="UNAUTHORIZED", status=401)
 
     session = g.db
     count = (
@@ -405,22 +320,11 @@ def delete_invoice(invoice_id: int):
         .filter(ProjectMaterial.source_id == invoice_id)
         .delete()
     )
-    inv = (
-        session.query(MaterialInvoice).filter(MaterialInvoice.id == invoice_id).first()
-    )
+    inv = session.get(MaterialInvoice, invoice_id)
     if inv:
         session.delete(inv)
 
-    try:
-        session.commit()
-    except Exception:
-        session.rollback()
-        logger.exception("Failed to delete invoice")
-        raise ApiError(
-            "Kunne ikke slette fakturaen.",
-            code="DELETE_FAILED",
-            status=500,
-            suggestion="Prøv igjen. Kontakt support hvis problemet vedvarer.",
-        )
+    with db_commit(session, "Kunne ikke slette fakturaen.", "DELETE_FAILED"):
+        pass
 
     return jsonify(message="Deleted", items_removed=count), 200

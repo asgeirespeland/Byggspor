@@ -1,12 +1,10 @@
-import { useState } from 'react'
-import { Pencil, Trash2, Check, X } from 'lucide-react'
 import CollapsibleGroupCard from '@/shared/components/CollapsibleGroupCard'
 import InlineUndoBar from '@/shared/components/InlineUndoBar'
 import type {
   ProjectReportGroup,
-  ProjectTripItem,
   TripUpdateInput,
 } from '../api/projectTransports'
+import TransportTripRow from './TransportTripRow'
 
 interface Props {
   group: ProjectReportGroup
@@ -16,145 +14,6 @@ interface Props {
   updatingTripId: number | null
   pendingTripId: number | null
   onUndoTripDelete: () => void
-}
-
-interface TripRowProps {
-  trip: ProjectTripItem
-  onDelete: () => void
-  onUpdate: (data: TripUpdateInput) => void
-  isUpdating: boolean
-}
-
-function TripRow({ trip, onDelete, onUpdate, isUpdating }: TripRowProps) {
-  const [editing, setEditing] = useState(false)
-  const [editDriver, setEditDriver] = useState('')
-  const [editDate, setEditDate] = useState('')
-  const [editDistance, setEditDistance] = useState('')
-
-  const startEdit = () => {
-    setEditDriver(trip.driver_name ?? '')
-    setEditDate(trip.trip_date ?? '')
-    setEditDistance(String(trip.distance_km ?? ''))
-    setEditing(true)
-  }
-
-  const cancelEdit = () => setEditing(false)
-
-  const saveEdit = () => {
-    const distance = parseFloat(editDistance)
-    if (isNaN(distance) || distance < 0) return
-    onUpdate({
-      driver_name: editDriver || undefined,
-      trip_date: editDate || undefined,
-      distance_km: distance,
-    })
-    setEditing(false)
-  }
-
-  if (editing) {
-    return (
-      <tr className="bg-blue-50/40">
-        <td className="px-4 py-1.5">
-          <input
-            type="text"
-            value={editDriver}
-            onChange={(e) => setEditDriver(e.target.value)}
-            className="w-full rounded border border-gray-300 px-2 py-1 text-sm"
-            autoFocus
-          />
-        </td>
-        <td className="px-4 py-1.5">
-          <input
-            type="date"
-            value={editDate}
-            onChange={(e) => setEditDate(e.target.value)}
-            className="rounded border border-gray-300 px-2 py-1 text-sm"
-          />
-        </td>
-        <td className="px-4 py-1.5 text-gray-400 text-xs">
-          {trip.vehicle?.registration_number ?? '—'}
-        </td>
-        <td className="px-4 py-1.5">
-          <input
-            type="number"
-            min="0"
-            step="any"
-            value={editDistance}
-            onChange={(e) => setEditDistance(e.target.value)}
-            className="w-20 rounded border border-gray-300 px-2 py-1 text-sm text-right"
-          />
-        </td>
-        <td className="px-4 py-1.5 text-gray-400 text-xs text-right">auto</td>
-        <td className="px-4 py-1.5">
-          <div className="flex items-center gap-1">
-            <button
-              type="button"
-              onClick={saveEdit}
-              disabled={isUpdating}
-              className="text-emerald-600 hover:text-emerald-800 disabled:opacity-40"
-            >
-              <Check className="h-3.5 w-3.5" />
-            </button>
-            <button
-              type="button"
-              onClick={cancelEdit}
-              className="text-gray-400 hover:text-gray-600"
-            >
-              <X className="h-3.5 w-3.5" />
-            </button>
-          </div>
-        </td>
-      </tr>
-    )
-  }
-
-  return (
-    <tr
-      className={
-        trip.flagged ? 'bg-amber-50/50 hover:bg-amber-50' : 'hover:bg-gray-50'
-      }
-    >
-      <td className="px-4 py-2 text-gray-800">{trip.driver_name ?? '—'}</td>
-      <td className="px-4 py-2 text-gray-500 text-xs">
-        {trip.trip_date
-          ? new Date(trip.trip_date + 'T00:00:00').toLocaleDateString('nb-NO')
-          : '—'}
-      </td>
-      <td className="px-4 py-2 text-gray-500 text-xs">
-        {trip.vehicle
-          ? `${trip.vehicle.registration_number}${trip.vehicle.make ? ` (${trip.vehicle.make})` : ''}`
-          : '—'}
-      </td>
-      <td className="px-4 py-2 text-right text-gray-800">
-        {trip.distance_km?.toLocaleString('nb-NO', {
-          maximumFractionDigits: 1,
-        }) ?? '—'}
-      </td>
-      <td className="px-4 py-2 text-right text-gray-800">
-        {trip.total_co2_kg?.toLocaleString('nb-NO', {
-          maximumFractionDigits: 2,
-        }) ?? '—'}
-      </td>
-      <td className="px-4 py-2">
-        <div className="flex items-center gap-1.5">
-          <button
-            type="button"
-            onClick={startEdit}
-            className="text-gray-400 transition-colors hover:text-blue-500 cursor-pointer"
-          >
-            <Pencil className="h-3.5 w-3.5" />
-          </button>
-          <button
-            type="button"
-            onClick={onDelete}
-            className="text-gray-400 transition-colors hover:text-red-500 cursor-pointer"
-          >
-            <Trash2 className="h-3.5 w-3.5" />
-          </button>
-        </div>
-      </td>
-    </tr>
-  )
 }
 
 export default function ReportGroupCard({
@@ -205,7 +64,7 @@ export default function ReportGroupCard({
         </thead>
         <tbody className="divide-y divide-gray-50">
           {group.trips.map((trip) => (
-            <TripRow
+            <TransportTripRow
               key={trip.id}
               trip={trip}
               onDelete={() => onDeleteTrip(trip.id)}

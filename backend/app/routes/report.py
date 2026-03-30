@@ -1,8 +1,11 @@
 from flask import Blueprint, g, jsonify
 from sqlalchemy import func
 
+from app.middleware.auth import require_auth
+from app.middleware.roles import require_project_role
 from app.models.energy import Energy
 from app.models.project_material import ProjectMaterial
+from app.models.project_member import ProjectRole
 from app.models.project_transport import ProjectTransport
 from app.models.project_waste_item import ProjectWasteItem
 
@@ -27,6 +30,8 @@ def _category_stats(session, model, project_id):
 
 
 @report_bp.route("/project/<int:project_id>/co2-summary")
+@require_auth
+@require_project_role((ProjectRole.OWNER, ProjectRole.EDITOR, ProjectRole.VIEWER))
 def co2_summary(project_id):
     session = g.db
 

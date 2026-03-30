@@ -17,6 +17,7 @@ from app.models.project_transport import ProjectTransport, TransportSourceType
 from app.models.transport_report import TransportReport
 from app.services.transport_parser import parse_turrapport
 from app.services.vehicle_lookup import lookup_vehicle
+from app.utils.confidence import transport_confidence
 
 logger = logging.getLogger(__name__)
 
@@ -31,14 +32,13 @@ def _enrich_trip(session: Session, trip: dict) -> dict:
     total_co2 = None
     flagged = False
 
-    if distance_km and co2_per_km:
+    has_distance = bool(distance_km)
+    has_co2 = bool(co2_per_km)
+    if has_distance and has_co2:
         total_co2 = distance_km * co2_per_km
-        confidence = 80
-    elif distance_km and not co2_per_km:
+    elif has_distance and not has_co2:
         flagged = True
-        confidence = 20
-    else:
-        confidence = 50
+    confidence = transport_confidence(has_co2_per_km=has_co2, has_distance=has_distance)
 
     vehicle_data = None
     if vehicle:
@@ -85,8 +85,8 @@ def preview_transport_report(session: Session, xml_content: bytes) -> dict:
         if enriched.get("vehicle_id"):
             vehicle_ids.add(enriched["vehicle_id"])
 
-    # Commit vehicle upserts so they survive regardless of confirm
-    session.commit()
+    # Flush vehicle upserts so IDs are available before the caller commits
+    session.flush()
 
     return {
         "project_transports_count": len(enriched_trips),

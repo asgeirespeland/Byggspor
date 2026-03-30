@@ -1,13 +1,27 @@
 from __future__ import annotations
 
 import os
-from functools import lru_cache
+from functools import lru_cache, wraps
 
 import jwt
 from flask import current_app, g, jsonify, request
 from jwt import ExpiredSignatureError, InvalidTokenError, PyJWKClient
 
+from app.errors import ApiError
 from app.services.user_sync import upsert_user_from_clerk
+
+
+def require_auth(f):
+    """Decorator that ensures g.current_user_id is set, or raises 401."""
+
+    @wraps(f)
+    def wrapper(*args, **kwargs):
+        if not getattr(g, "current_user_id", None):
+            raise ApiError("Ikke autentisert.", code="UNAUTHORIZED", status=401)
+        return f(*args, **kwargs)
+
+    return wrapper
+
 
 # Explicitly public — everything else requires a valid Clerk JWT
 PUBLIC_PATHS = {
@@ -67,8 +81,6 @@ def _verify_clerk_jwt(token: str) -> dict:
 
 def authenticate_request():
     """Authenticate all routes except explicitly public ones using Clerk JWT."""
-    print("PATH:", request.path)
-    print("AUTH HEADER:", request.headers.get("Authorization", "MISSING"))
     g.current_user_id = None
     g.current_user = None
     g.clerk_claims = None

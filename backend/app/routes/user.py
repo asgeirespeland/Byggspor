@@ -1,65 +1,51 @@
 from __future__ import annotations
 
 from flask import Blueprint, g, jsonify, request
-from sqlalchemy.exc import IntegrityError
 
 from app.errors import ApiError
+from app.middleware.auth import require_auth
 from app.models.organization_member import OrganizationMember
 from app.models.user import User
+from app.utils.db import db_commit
 
 user_bp = Blueprint("users", __name__, url_prefix="/users")
 
 
-def _serialize_user(user: User, session) -> dict:
-    """Convert ORM user object to a JSON-friendly API shape."""
-
+def _user_response(user: User, session) -> dict:
+    """Build user API response, merging org membership into the user dict."""
     membership = (
         session.query(OrganizationMember)
         .filter(OrganizationMember.user_id == user.id)
         .first()
     )
-
     return {
-        "id": user.id,
-        "clerk_id": user.clerk_id,
-        "email": user.email,
-        "name": user.name,
-        "phone": user.phone,
-        "is_system_admin": user.is_system_admin,
+        **user.to_dict(),
         "organization_id": membership.organization_id if membership else None,
         "org_role": membership.role.value if membership else None,
-        "created_at": user.created_at.isoformat() if user.created_at else None,
-        "updated_at": user.updated_at.isoformat() if user.updated_at else None,
     }
 
 
 @user_bp.route("/me", methods=["GET"])
+@require_auth
 def get_me():
     """Return the currently authenticated user profile."""
-    current_user_id = getattr(g, "current_user_id", None)
-    if not current_user_id:
-        raise ApiError("Ikke autentisert.", code="UNAUTHORIZED", status=401)
-
     session = g.db
-    user = session.get(User, current_user_id)
+    user = session.get(User, g.current_user_id)
     if not user:
         raise ApiError("Brukeren ble ikke funnet.", code="NOT_FOUND", status=404)
-    return jsonify(_serialize_user(user, session))
+    return jsonify(_user_response(user, session))
 
 
 @user_bp.route("/<int:user_id>", methods=["PATCH"])
+@require_auth
 def update_user(user_id: int):
     """Update user fields with self-service + system-admin override rules."""
-    current_user_id = getattr(g, "current_user_id", None)
-    if not current_user_id:
-        raise ApiError("Ikke autentisert.", code="UNAUTHORIZED", status=401)
-
     payload = request.get_json(silent=True) or {}
     allowed_self_fields = {"name", "phone"}
     allowed_admin_fields = {"is_system_admin"}
 
     session = g.db
-    current_user = session.get(User, current_user_id)
+    current_user = session.get(User, g.current_user_id)
     if not current_user:
         raise ApiError("Ikke autentisert.", code="UNAUTHORIZED", status=401)
 
@@ -99,15 +85,13 @@ def update_user(user_id: int):
     if "is_system_admin" in payload:
         target_user.is_system_admin = bool(payload["is_system_admin"])
 
-    try:
-        session.commit()
-    except IntegrityError:
-        session.rollback()
-        raise ApiError(
-            "Duplikat eller ugyldig data.",
-            code="CONFLICT",
-            status=409,
-        )
+    with db_commit(
+        session,
+        "Kunne ikke oppdatere brukeren.",
+        "SAVE_FAILED",
+        integrity_msg="Duplikat eller ugyldig data.",
+    ):
+        pass
 
     session.refresh(target_user)
-    return jsonify(_serialize_user(target_user, session))
+    return jsonify(_user_response(target_user, session))

@@ -1,8 +1,8 @@
 import { useState } from 'react'
-import { useAuth } from '@clerk/react'
 import { Label } from '@/components/ui/label'
 import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
+import { useRequireToken } from '@/shared/hooks/useRequireToken'
 import { createManualTrip } from '../api/transport'
 
 interface TransportManualInputProps {
@@ -14,7 +14,7 @@ export default function TransportManualInput({
   projectId,
   onTripCreated,
 }: TransportManualInputProps) {
-  const { isLoaded, isSignedIn, getToken } = useAuth()
+  const { authReady, requireToken } = useRequireToken()
   const [driverName, setDriverName] = useState('')
   const [regNr, setRegNr] = useState('')
   const [startAddress, setStartAddress] = useState('')
@@ -24,16 +24,6 @@ export default function TransportManualInput({
   const [saving, setSaving] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [success, setSuccess] = useState(false)
-
-  const authReady = isLoaded && isSignedIn
-
-  async function requireToken(): Promise<string> {
-    const token = await getToken()
-    if (!token) {
-      throw new Error('Ikke autentisert')
-    }
-    return token
-  }
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()

@@ -1,93 +1,26 @@
 from __future__ import annotations
 
 from flask import Blueprint, g, jsonify, request
-from sqlalchemy.exc import IntegrityError
 
 from app.errors import ApiError
+from app.middleware.auth import require_auth
 from app.middleware.roles import require_org_role
 from app.models.organization import Organization, OrgType
 from app.models.organization_member import OrganizationMember, OrgRole
 from app.models.user import User
+from app.utils.db import db_commit
+from app.utils.parsing import parse_enum
 
 organization_bp = Blueprint("organizations", __name__, url_prefix="/organizations")
 
 
-def _parse_org_type(value: str | None) -> OrgType | None:
-    """Accept both enum names (COMPANY) and enum values (company)."""
-    if not value:
-        return None
-
-    normalized = value.strip().upper()
-    if normalized in OrgType.__members__:
-        return OrgType[normalized]
-
-    lowered = value.strip().lower()
-    for org_type in OrgType:
-        if org_type.value == lowered:
-            return org_type
-
-    return None
-
-
-def _parse_org_role(value: str | None) -> OrgRole | None:
-    """Accept both enum names (OWNER) and enum values (owner)."""
-    if not value:
-        return None
-
-    normalized = value.strip().upper()
-    if normalized in OrgRole.__members__:
-        return OrgRole[normalized]
-
-    lowered = value.strip().lower()
-    for role in OrgRole:
-        if role.value == lowered:
-            return role
-
-    return None
-
-
-def _serialize_org(org: Organization) -> dict:
-    """Serialize organization object for API responses."""
-    return {
-        "id": org.id,
-        "name": org.name,
-        "org_number": org.org_number,
-        "address": org.address,
-        "phone": org.phone,
-        "email": org.email,
-        "org_type": org.org_type.name if org.org_type else None,
-        "created_at": org.created_at.isoformat() if org.created_at else None,
-        "updated_at": org.updated_at.isoformat() if org.updated_at else None,
-    }
-
-
-def _serialize_member(member: OrganizationMember, user: User) -> dict:
-    """Serialize member row together with basic user info."""
-    return {
-        "id": member.id,
-        "organization_id": member.organization_id,
-        "user_id": member.user_id,
-        "role": member.role.name,
-        "joined_at": member.joined_at.isoformat() if member.joined_at else None,
-        "user": {
-            "id": user.id,
-            "email": user.email,
-            "name": user.name,
-            "phone": user.phone,
-        },
-    }
-
-
 @organization_bp.route("", methods=["POST"])
+@require_auth
 def create_organization():
     """Create organization and auto-assign creator as OWNER."""
-    current_user_id = getattr(g, "current_user_id", None)
-    if not current_user_id:
-        raise ApiError("Ikke autentisert.", code="UNAUTHORIZED", status=401)
-
     payload = request.get_json(silent=True) or {}
     name = (payload.get("name") or "").strip()
-    org_type = _parse_org_type(payload.get("org_type"))
+    org_type = parse_enum(payload.get("org_type"), OrgType)
 
     if not name:
         raise ApiError("Organisasjonsnavn er påkrevd.", code="MISSING_FIELD")
@@ -99,7 +32,7 @@ def create_organization():
         )
 
     session = g.db
-    user = session.get(User, current_user_id)
+    user = session.get(User, g.current_user_id)
     if not user:
         raise ApiError("Ikke autentisert.", code="UNAUTHORIZED", status=401)
 
@@ -122,18 +55,16 @@ def create_organization():
     )
     session.add(owner_membership)
 
-    try:
-        session.commit()
-    except IntegrityError:
-        session.rollback()
-        raise ApiError(
-            "Kunne ikke opprette organisasjonen — duplikat eller ugyldig data.",
-            code="CONFLICT",
-            status=409,
-        )
+    with db_commit(
+        session,
+        "Kunne ikke opprette organisasjonen.",
+        "SAVE_FAILED",
+        integrity_msg="Duplikat eller ugyldig organisasjonsdata.",
+    ):
+        pass
 
     session.refresh(org)
-    return jsonify(_serialize_org(org)), 201
+    return jsonify(org.to_dict()), 201
 
 
 @organization_bp.route("/<int:organization_id>", methods=["GET"])
@@ -144,7 +75,7 @@ def get_organization(organization_id: int):
     org = session.get(Organization, organization_id)
     if not org:
         raise ApiError("Organisasjonen ble ikke funnet.", code="NOT_FOUND", status=404)
-    return jsonify(_serialize_org(org))
+    return jsonify(org.to_dict())
 
 
 @organization_bp.route("/<int:organization_id>", methods=["PATCH"])
@@ -176,7 +107,7 @@ def update_organization(organization_id: int):
         org.email = payload.get("email")
 
     if "org_type" in payload:
-        parsed_org_type = _parse_org_type(payload.get("org_type"))
+        parsed_org_type = parse_enum(payload.get("org_type"), OrgType)
         if not parsed_org_type:
             raise ApiError(
                 "org_type må være COMPANY eller CUSTOMER.",
@@ -184,18 +115,16 @@ def update_organization(organization_id: int):
             )
         org.org_type = parsed_org_type
 
-    try:
-        session.commit()
-    except IntegrityError:
-        session.rollback()
-        raise ApiError(
-            "Kunne ikke oppdatere organisasjonen — duplikat eller ugyldig data.",
-            code="CONFLICT",
-            status=409,
-        )
+    with db_commit(
+        session,
+        "Kunne ikke oppdatere organisasjonen.",
+        "SAVE_FAILED",
+        integrity_msg="Duplikat eller ugyldig organisasjonsdata.",
+    ):
+        pass
 
     session.refresh(org)
-    return jsonify(_serialize_org(org))
+    return jsonify(org.to_dict())
 
 
 @organization_bp.route("/<int:organization_id>/members", methods=["GET"])
@@ -208,13 +137,12 @@ def get_organization_members(organization_id: int):
         raise ApiError("Organisasjonen ble ikke funnet.", code="NOT_FOUND", status=404)
 
     members = (
-        session.query(OrganizationMember, User)
-        .join(User, User.id == OrganizationMember.user_id)
+        session.query(OrganizationMember)
         .filter(OrganizationMember.organization_id == organization_id)
         .all()
     )
 
-    return jsonify([_serialize_member(member, user) for member, user in members])
+    return jsonify([m.to_dict() for m in members])
 
 
 @organization_bp.route("/<int:organization_id>/members", methods=["POST"])
@@ -232,7 +160,7 @@ def add_organization_member(organization_id: int):
     if user_id is None:
         raise ApiError("user_id er påkrevd.", code="MISSING_FIELD")
 
-    role = _parse_org_role(payload.get("role"))
+    role = parse_enum(payload.get("role"), OrgRole)
     if not role:
         raise ApiError(
             "role må være en av OWNER, ADMIN, MEMBER, VIEWER.",
@@ -260,17 +188,15 @@ def add_organization_member(organization_id: int):
     # If the user is already a member, treat this as a role update.
     if existing:
         existing.role = role
-        try:
-            session.commit()
-        except IntegrityError:
-            session.rollback()
-            raise ApiError(
-                "Duplikat eller ugyldig data.",
-                code="CONFLICT",
-                status=409,
-            )
+        with db_commit(
+            session,
+            "Kunne ikke oppdatere medlemskapet.",
+            "SAVE_FAILED",
+            integrity_msg="Duplikat eller ugyldig data.",
+        ):
+            pass
         session.refresh(existing)
-        return jsonify(_serialize_member(existing, user))
+        return jsonify(existing.to_dict())
 
     member = OrganizationMember(
         organization_id=organization_id,
@@ -279,18 +205,16 @@ def add_organization_member(organization_id: int):
     )
     session.add(member)
 
-    try:
-        session.commit()
-    except IntegrityError:
-        session.rollback()
-        raise ApiError(
-            "Duplikat eller ugyldig data.",
-            code="CONFLICT",
-            status=409,
-        )
+    with db_commit(
+        session,
+        "Kunne ikke legge til medlem.",
+        "SAVE_FAILED",
+        integrity_msg="Duplikat eller ugyldig data.",
+    ):
+        pass
 
     session.refresh(member)
-    return jsonify(_serialize_member(member, user)), 201
+    return jsonify(member.to_dict()), 201
 
 
 @organization_bp.route(
@@ -313,6 +237,6 @@ def remove_organization_member(organization_id: int, user_id: int):
     if not membership:
         raise ApiError("Medlemskapet ble ikke funnet.", code="NOT_FOUND", status=404)
 
-    session.delete(membership)
-    session.commit()
+    with db_commit(session, "Kunne ikke fjerne medlemskapet.", "DELETE_FAILED"):
+        session.delete(membership)
     return "", 204

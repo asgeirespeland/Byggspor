@@ -6,8 +6,10 @@ from datetime import date
 
 from flask import Blueprint, g, jsonify, request
 
-from app.database import SessionLocal
-from app.errors import ApiError
+from app.errors import DEFAULT_RETRY_SUGGESTION, ApiError
+from app.middleware.auth import require_auth
+from app.middleware.roles import require_project_role
+from app.models.project_member import ProjectRole
 from app.models.project_transport import ProjectTransport, TransportSourceType
 from app.models.transport_report import TransportReport
 from app.models.vehicle import Vehicle
@@ -16,6 +18,11 @@ from app.services.transport_service import (
     save_transport_report,
 )
 from app.services.vehicle_lookup import lookup_vehicle
+from app.utils.confidence import transport_confidence
+from app.utils.db import db_commit
+from app.utils.file_upload import validate_xml_upload
+from app.utils.parsing import optional_date, parse_float, require_int
+from app.utils.serialization import group_by_source
 
 logger = logging.getLogger(__name__)
 
@@ -28,36 +35,17 @@ ABAX_XML_SUGGESTION = (
 
 
 @transport_bp.route("/parse", methods=["POST"])
+@require_auth
 def parse_transport_route():
     """Parse and enrich an Abax Turrapport XML (preview only — nothing persisted).
 
     Requires 'file' upload (XML). Returns enriched trip data with vehicle info
     and CO₂ calculations for user review before confirmation.
     """
-    if "file" not in request.files:
-        raise ApiError(
-            "Ingen fil ble sendt.",
-            code="NO_FILE",
-            suggestion=ABAX_XML_SUGGESTION,
-        )
-
+    xml_content = validate_xml_upload(ABAX_XML_SUGGESTION)
     file = request.files["file"]
-    if not file.filename or not file.filename.lower().endswith(".xml"):
-        raise ApiError(
-            "Filen må være i XML-format.",
-            code="INVALID_FILE_TYPE",
-            suggestion=ABAX_XML_SUGGESTION,
-        )
 
-    xml_content = file.read()
-    if not xml_content:
-        raise ApiError(
-            "Den opplastede filen er tom.",
-            code="EMPTY_FILE",
-            suggestion="Sjekk at filen inneholder data og prøv igjen.",
-        )
-
-    session = SessionLocal()
+    session = g.db
     try:
         result = preview_transport_report(session, xml_content)
         result["file_name"] = file.filename
@@ -85,13 +73,12 @@ def parse_transport_route():
             "Kunne ikke analysere transportrapporten.",
             code="PROCESSING_FAILED",
             status=500,
-            suggestion="Prøv igjen. Kontakt support hvis problemet vedvarer.",
+            suggestion=DEFAULT_RETRY_SUGGESTION,
         )
-    finally:
-        session.close()
 
 
 @transport_bp.route("/confirm", methods=["POST"])
+@require_auth
 def confirm_trips():
     """Persist user-confirmed trips to the database.
 
@@ -99,14 +86,7 @@ def confirm_trips():
     Only the trips included in the request body are saved.
     """
     body = request.get_json(silent=True) or {}
-
-    project_id = body.get("project_id")
-    if not project_id:
-        raise ApiError("project_id er påkrevd.", code="MISSING_FIELD")
-    try:
-        project_id = int(project_id)
-    except (ValueError, TypeError):
-        raise ApiError("project_id må være et heltall.", code="INVALID_FIELD")
+    project_id = require_int(body, "project_id")
 
     trips = body.get("trips")
     if not isinstance(trips, list) or len(trips) == 0:
@@ -118,30 +98,17 @@ def confirm_trips():
 
     file_name = body.get("file_name")
 
-    session = SessionLocal()
-    try:
+    session = g.db
+    with db_commit(session, "Kunne ikke lagre turene.", "SAVE_FAILED"):
         result = save_transport_report(session, project_id, trips, file_name)
-        session.commit()
-        return jsonify(result), 201
-    except Exception:
-        session.rollback()
-        logger.exception("Failed to confirm transport trips")
-        raise ApiError(
-            "Kunne ikke lagre turene.",
-            code="SAVE_FAILED",
-            status=500,
-            suggestion="Prøv igjen. Kontakt support hvis problemet vedvarer.",
-        )
-    finally:
-        session.close()
+    return jsonify(result), 201
 
 
 @transport_bp.route("/project/<int:project_id>", methods=["GET"])
+@require_auth
+@require_project_role((ProjectRole.OWNER, ProjectRole.EDITOR, ProjectRole.VIEWER))
 def list_project_transports(project_id: int):
     """Return all transport trips for a project, grouped by source report."""
-    current_user_id = getattr(g, "current_user_id", None)
-    if not current_user_id:
-        raise ApiError("Ikke autentisert.", code="UNAUTHORIZED", status=401)
 
     session = g.db
     transports = (
@@ -151,64 +118,64 @@ def list_project_transports(project_id: int):
         .all()
     )
 
-    # Group by source report
-    reports_map: dict[int | None, dict] = {}
-    for pt in transports:
-        sid = pt.source_id
-        if sid not in reports_map:
-            rpt = pt.source_report
-            reports_map[sid] = {
-                "report_id": sid,
-                "file_name": rpt.file_name if rpt else None,
-                "report_period_start": (
-                    rpt.report_period_start.isoformat()
-                    if rpt and rpt.report_period_start
-                    else None
-                ),
-                "report_period_end": (
-                    rpt.report_period_end.isoformat()
-                    if rpt and rpt.report_period_end
-                    else None
-                ),
-                "uploaded_at": (
-                    rpt.uploaded_at.isoformat() if rpt and rpt.uploaded_at else None
-                ),
-                "trips": [],
-            }
-        vehicle = pt.vehicle
-        reports_map[sid]["trips"].append(
-            {
-                "id": pt.id,
-                "driver_name": pt.driver_name,
-                "trip_date": pt.trip_date.isoformat() if pt.trip_date else None,
-                "start_address": pt.start_address,
-                "end_address": pt.end_address,
-                "distance_km": float(pt.distance_km) if pt.distance_km else None,
-                "total_co2_kg": float(pt.total_co2_kg) if pt.total_co2_kg else None,
-                "confidence_score": pt.confidence_score,
-                "flagged": pt.flagged,
-                "vehicle": (
-                    {
-                        "registration_number": vehicle.registration_number,
-                        "make": vehicle.make,
-                        "model": vehicle.model,
-                        "fuel_type": vehicle.fuel_type,
-                    }
-                    if vehicle
-                    else None
-                ),
-            }
-        )
+    def _report_group(pt):
+        rpt = pt.source_report
+        return {
+            "report_id": pt.source_id,
+            "file_name": rpt.file_name if rpt else None,
+            "report_period_start": (
+                rpt.report_period_start.isoformat()
+                if rpt and rpt.report_period_start
+                else None
+            ),
+            "report_period_end": (
+                rpt.report_period_end.isoformat()
+                if rpt and rpt.report_period_end
+                else None
+            ),
+            "uploaded_at": (
+                rpt.uploaded_at.isoformat() if rpt and rpt.uploaded_at else None
+            ),
+        }
 
-    return jsonify(list(reports_map.values()))
+    def _trip_item(pt):
+        vehicle = pt.vehicle
+        return {
+            "id": pt.id,
+            "driver_name": pt.driver_name,
+            "trip_date": pt.trip_date.isoformat() if pt.trip_date else None,
+            "start_address": pt.start_address,
+            "end_address": pt.end_address,
+            "distance_km": float(pt.distance_km) if pt.distance_km else None,
+            "total_co2_kg": float(pt.total_co2_kg) if pt.total_co2_kg else None,
+            "confidence_score": pt.confidence_score,
+            "flagged": pt.flagged,
+            "vehicle": (
+                {
+                    "registration_number": vehicle.registration_number,
+                    "make": vehicle.make,
+                    "model": vehicle.model,
+                    "fuel_type": vehicle.fuel_type,
+                }
+                if vehicle
+                else None
+            ),
+        }
+
+    grouped = group_by_source(
+        transports,
+        key_fn=lambda pt: pt.source_id,
+        group_fn=_report_group,
+        item_fn=_trip_item,
+        collection_key="trips",
+    )
+    return jsonify(grouped)
 
 
 @transport_bp.route("/trips", methods=["POST"])
+@require_auth
 def create_manual_trip():
     """Create a single manual transport trip for a project."""
-    current_user_id = getattr(g, "current_user_id", None)
-    if not current_user_id:
-        raise ApiError("Ikke autentisert.", code="UNAUTHORIZED", status=401)
 
     body = request.get_json(silent=True) or {}
 
@@ -245,14 +212,10 @@ def create_manual_trip():
     vehicle = lookup_vehicle(session, body["registration_number"])
 
     co2_per_km = float(vehicle.co2_per_km) if vehicle and vehicle.co2_per_km else None
-    if co2_per_km:
-        total_co2 = distance_km * co2_per_km
-        confidence = 80
-        flagged = False
-    else:
-        total_co2 = None
-        confidence = 20
-        flagged = True
+    has_co2 = co2_per_km is not None
+    total_co2 = distance_km * co2_per_km if has_co2 else None
+    confidence = transport_confidence(has_co2_per_km=has_co2, has_distance=True)
+    flagged = not has_co2
 
     pt = ProjectTransport(
         project_id=project_id,
@@ -267,18 +230,8 @@ def create_manual_trip():
         confidence_score=confidence,
         flagged=flagged,
     )
-    session.add(pt)
-    try:
-        session.commit()
-    except Exception:
-        session.rollback()
-        logger.exception("Failed to create manual trip")
-        raise ApiError(
-            "Kunne ikke opprette turen.",
-            code="CREATE_FAILED",
-            status=500,
-            suggestion="Prøv igjen. Kontakt support hvis problemet vedvarer.",
-        )
+    with db_commit(session, "Kunne ikke opprette turen.", "CREATE_FAILED"):
+        session.add(pt)
 
     return jsonify(
         id=pt.id,
@@ -289,14 +242,12 @@ def create_manual_trip():
 
 
 @transport_bp.route("/trips/<int:trip_id>", methods=["PATCH"])
+@require_auth
 def update_trip(trip_id: int):
     """Update a transport trip's driver, date, addresses, or distance."""
-    current_user_id = getattr(g, "current_user_id", None)
-    if not current_user_id:
-        raise ApiError("Ikke autentisert.", code="UNAUTHORIZED", status=401)
 
     session = g.db
-    trip = session.query(ProjectTransport).get(trip_id)
+    trip = session.get(ProjectTransport, trip_id)
     if not trip:
         raise ApiError("Turen ble ikke funnet.", code="NOT_FOUND", status=404)
 
@@ -307,41 +258,25 @@ def update_trip(trip_id: int):
             setattr(trip, field, body[field])
 
     if "trip_date" in body:
-        try:
-            trip.trip_date = date.fromisoformat(body["trip_date"])
-        except (ValueError, TypeError):
-            raise ApiError(
-                "Ugyldig datoformat.",
-                code="INVALID_FIELD",
-                suggestion="Bruk formatet YYYY-MM-DD (f.eks. 2026-03-24).",
-            )
+        trip.trip_date = optional_date(body, "trip_date")
 
     if "distance_km" in body:
-        try:
-            distance_km = float(body["distance_km"])
-            trip.distance_km = distance_km
-            if trip.vehicle and trip.vehicle.co2_per_km:
-                trip.total_co2_kg = distance_km * float(trip.vehicle.co2_per_km)
-                trip.confidence_score = 80
-                trip.flagged = False
-        except (ValueError, TypeError):
-            raise ApiError(
-                "Ugyldig distanseverdi.",
-                code="INVALID_FIELD",
-                suggestion="Distanse må være et tall (f.eks. 42.5).",
-            )
-
-    try:
-        session.commit()
-    except Exception:
-        session.rollback()
-        logger.exception("Failed to update trip")
-        raise ApiError(
-            "Kunne ikke oppdatere turen.",
-            code="UPDATE_FAILED",
-            status=500,
-            suggestion="Prøv igjen. Kontakt support hvis problemet vedvarer.",
+        distance_km = parse_float(
+            body,
+            "distance_km",
+            suggestion="Distanse m\u00e5 v\u00e6re et tall (f.eks. 42.5).",
         )
+        trip.distance_km = distance_km
+        if trip.vehicle and trip.vehicle.co2_per_km:
+            trip.total_co2_kg = distance_km * float(trip.vehicle.co2_per_km)
+            trip.confidence_score = transport_confidence(
+                has_co2_per_km=True,
+                has_distance=True,
+            )
+            trip.flagged = False
+
+    with db_commit(session, "Kunne ikke oppdatere turen.", "UPDATE_FAILED"):
+        pass
 
     return jsonify(
         id=trip.id,
@@ -352,11 +287,9 @@ def update_trip(trip_id: int):
 
 
 @transport_bp.route("/report/<int:report_id>", methods=["DELETE"])
+@require_auth
 def delete_transport_report(report_id: int):
     """Delete a transport report and all its associated trips."""
-    current_user_id = getattr(g, "current_user_id", None)
-    if not current_user_id:
-        raise ApiError("Ikke autentisert.", code="UNAUTHORIZED", status=401)
 
     session = g.db
     count = (
@@ -364,52 +297,35 @@ def delete_transport_report(report_id: int):
         .filter(ProjectTransport.source_id == report_id)
         .delete()
     )
-    rpt = session.query(TransportReport).filter(TransportReport.id == report_id).first()
+    rpt = session.get(TransportReport, report_id)
     if rpt:
         session.delete(rpt)
 
-    try:
-        session.commit()
-    except Exception:
-        session.rollback()
-        logger.exception("Failed to delete transport report")
-        raise ApiError(
-            "Kunne ikke slette rapporten.",
-            code="DELETE_FAILED",
-            status=500,
-            suggestion="Prøv igjen. Kontakt support hvis problemet vedvarer.",
-        )
+    with db_commit(session, "Kunne ikke slette rapporten.", "DELETE_FAILED"):
+        pass
 
     return jsonify(message="Deleted", trips_removed=count), 200
 
 
 @transport_bp.route("/trips/<int:trip_id>", methods=["DELETE"])
+@require_auth
 def delete_trip(trip_id: int):
     """Delete a single transport trip."""
     session = g.db
-    trip = session.query(ProjectTransport).get(trip_id)
+    trip = session.get(ProjectTransport, trip_id)
     if not trip:
         raise ApiError("Turen ble ikke funnet.", code="NOT_FOUND", status=404)
-    session.delete(trip)
-    try:
-        session.commit()
-    except Exception:
-        session.rollback()
-        logger.exception("Failed to delete trip")
-        raise ApiError(
-            "Kunne ikke slette turen.",
-            code="DELETE_FAILED",
-            status=500,
-            suggestion="Prøv igjen. Kontakt support hvis problemet vedvarer.",
-        )
+    with db_commit(session, "Kunne ikke slette turen.", "DELETE_FAILED"):
+        session.delete(trip)
     return jsonify(message="Deleted"), 200
 
 
 @transport_bp.route("/vehicles/<int:vehicle_id>", methods=["PATCH"])
+@require_auth
 def update_vehicle(vehicle_id: int):
     """Update vehicle details (make, model, fuel_type)."""
     session = g.db
-    vehicle = session.query(Vehicle).get(vehicle_id)
+    vehicle = session.get(Vehicle, vehicle_id)
     if not vehicle:
         raise ApiError("Kjøretøyet ble ikke funnet.", code="NOT_FOUND", status=404)
 
@@ -418,15 +334,6 @@ def update_vehicle(vehicle_id: int):
         if field in body:
             setattr(vehicle, field, body[field])
 
-    try:
-        session.commit()
-    except Exception:
-        session.rollback()
-        logger.exception("Failed to update vehicle")
-        raise ApiError(
-            "Kunne ikke oppdatere kjøretøyet.",
-            code="UPDATE_FAILED",
-            status=500,
-            suggestion="Prøv igjen. Kontakt support hvis problemet vedvarer.",
-        )
+    with db_commit(session, "Kunne ikke oppdatere kjøretøyet.", "UPDATE_FAILED"):
+        pass
     return jsonify(message="Updated"), 200

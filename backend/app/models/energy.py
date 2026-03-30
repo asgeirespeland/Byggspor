@@ -44,3 +44,25 @@ class Energy(Base):
     )
 
     project: Mapped["Project"] = relationship(back_populates="energies")
+
+    def to_dict(self) -> dict:
+        return {
+            "id": self.id,
+            "project_id": self.project_id,
+            "source": self.source.value if self.source else None,
+            "price_zone": self.price_zone.value if self.price_zone else None,
+            "kwh_used": float(self.kwh_used) if self.kwh_used is not None else None,
+            "grid_emission_factor": (
+                float(self.grid_emission_factor)
+                if self.grid_emission_factor is not None
+                else None
+            ),
+            "total_co2_kg": (
+                float(self.total_co2_kg) if self.total_co2_kg is not None else None
+            ),
+            "confidence_score": self.confidence_score,
+            "recorded_date": (
+                self.recorded_date.isoformat() if self.recorded_date else None
+            ),
+            "created_at": self.created_at.isoformat() if self.created_at else None,
+        }
