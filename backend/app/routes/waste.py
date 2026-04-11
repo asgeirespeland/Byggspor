@@ -84,9 +84,7 @@ def create_manual_waste():
                 "confidence_score": waste_item.confidence_score,
                 "notes": waste_item.notes,
                 "created_at": (
-                    waste_item.created_at.isoformat()
-                    if waste_item.created_at
-                    else None
+                    waste_item.created_at.isoformat() if waste_item.created_at else None
                 ),
             }
         ),
@@ -167,7 +165,9 @@ def parse_waste_report():
                     ),
                     "confidence_score": item.confidence_score,
                     "notes": item.notes,
-                    "created_at": item.created_at.isoformat() if item.created_at else None,
+                    "created_at": (
+                        item.created_at.isoformat() if item.created_at else None
+                    ),
                 }
                 for item in created_items
             ]
@@ -199,7 +199,9 @@ def list_project_waste(project_id: int):
                 "source_type": item.source_type.value if item.source_type else None,
                 "waste_type": item.waste_type,
                 "quantity_tons": (
-                    float(item.quantity_tons) if item.quantity_tons is not None else None
+                    float(item.quantity_tons)
+                    if item.quantity_tons is not None
+                    else None
                 ),
                 "co2_from_report_kg": (
                     float(item.co2_from_report_kg)
@@ -221,4 +223,3 @@ def list_project_waste(project_id: int):
             for item in items
         ]
     )
-
