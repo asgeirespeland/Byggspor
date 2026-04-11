@@ -38,9 +38,7 @@ export default function WasteManualInput({ projectId }: Props) {
         onClick={() => setIsOpen((prev) => !prev)}
         className="text-sm font-medium text-gray-500 hover:text-gray-700"
       >
-        {isOpen
-          ? '↑ Skjul manuell registrering'
-          : '+ Registrer avfall manuelt'}
+        {isOpen ? '↑ Skjul manuell registrering' : '+ Registrer avfall manuelt'}
       </button>
 
       {/* Skjema */}
