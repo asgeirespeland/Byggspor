@@ -221,3 +221,4 @@ def list_project_waste(project_id: int):
             for item in items
         ]
     )
+

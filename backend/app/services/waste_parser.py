@@ -140,3 +140,4 @@ def parse_waste_csv(file_content: str | bytes) -> list[dict]:
         )
 
     return items
+
