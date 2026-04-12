@@ -64,10 +64,12 @@ export function useDeleteTrip(projectId: number) {
       )
       return {
         updatedList:
-          snapshot?.map((g) => ({
-            ...g,
-            trips: g.trips.filter((t) => t.id !== tripId),
-          })) ?? [],
+          snapshot
+            ?.map((g) => ({
+              ...g,
+              trips: g.trips.filter((t) => t.id !== tripId),
+            }))
+            .filter((g) => g.trips.length > 0) ?? [],
         co2Delta: trip?.total_co2_kg ?? 0,
         entryCountDelta: 1,
       }

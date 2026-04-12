@@ -7,7 +7,7 @@ import { useRequireToken } from '@/shared/hooks/useRequireToken'
 interface FileUploadShellProps<TData> {
   title: string
   description: string
-  accept: string
+  accept: string | string[]
   dropDescription: string
   fileErrorMessage: string
   analyzeLabel?: string
@@ -43,7 +43,12 @@ export default function FileUploadShell<TData>({
   children,
 }: FileUploadShellProps<TData>) {
   const { authReady, requireToken } = useRequireToken()
+
+  const normalizedAccept = Array.isArray(accept) ? accept : [accept]
+  const acceptAttr = normalizedAccept.join(',')
+
   const { selectedFile, fileError, acceptFile, clear } = useFileSelect({
+    accept: normalizedAccept,
     errorMessage: fileErrorMessage,
     onClear: reset,
   })
@@ -63,7 +68,7 @@ export default function FileUploadShell<TData>({
 
       {!selectedFile && !data && (
         <FileDropZone
-          accept={accept}
+          accept={acceptAttr}
           description={dropDescription}
           onDrop={acceptFile}
         />
@@ -93,8 +98,9 @@ export default function FileUploadShell<TData>({
           {children({ data, clear, requireToken, selectedFile })}
           <div className="text-center">
             <button
+              type="button"
               onClick={clear}
-              className="text-sm text-gray-400 hover:text-gray-600 underline"
+              className="text-sm text-gray-400 underline hover:text-gray-600"
             >
               Last opp ny fil
             </button>

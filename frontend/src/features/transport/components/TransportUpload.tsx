@@ -4,7 +4,6 @@ import { toast } from 'sonner'
 import InlineUndoBar from '@/shared/components/InlineUndoBar'
 import FileUploadShell from '@/shared/components/FileUploadShell'
 import { useDeferredLoading } from '@/shared/hooks/useDeferredLoading'
-import { useRequireToken } from '@/shared/hooks/useRequireToken'
 import { confirmTrips } from '../api/transport'
 import { useTransportParse } from '../hooks/useTransportParse'
 import {
@@ -14,8 +13,9 @@ import {
   useUpdateTrip,
 } from '../hooks/useProjectTransports'
 import TransportManualInput from './TransportManualInput'
-import TransportTripTable from './TransportTripTable'
-import ReportGroupCard from './ReportGroupCard'
+import TransportPreview from './TransportPreview'
+import TransportGroupCard from './TransportGroupCard'
+import type { TransportParseResponse } from '../types/transport'
 
 type Props = {
   projectId: number
@@ -23,7 +23,6 @@ type Props = {
 
 export default function TransportUpload({ projectId }: Props) {
   const queryClient = useQueryClient()
-  const { authReady, requireToken } = useRequireToken()
   const { parse, reset, data, setData, loading, error } = useTransportParse()
   const { data: reportGroups, isLoading: reportsLoading } =
     useProjectTransports(projectId)
@@ -43,33 +42,25 @@ export default function TransportUpload({ projectId }: Props) {
     })
   }
 
-  const handleRemoveTrip = (tripIndex: number) => {
-    if (!data) return
-    setData({
-      ...data,
-      trips: data.trips.filter((t) => t.trip_index !== tripIndex),
-      project_transports_count: data.project_transports_count - 1,
-    })
-  }
-
-  const handleConfirmTrips = async (
-    tripIndices: number[],
+  const handleConfirm = async (
+    transportData: TransportParseResponse,
     clear: () => void,
     requireTokenFn: () => Promise<string>,
   ) => {
-    if (!data) return
     setConfirming(true)
     try {
       const token = await requireTokenFn()
-      const selectedTrips = data.trips.filter((t) =>
-        tripIndices.includes(t.trip_index),
+      await confirmTrips(
+        projectId,
+        transportData.trips,
+        transportData.file_name,
+        token,
       )
-      await confirmTrips(projectId, selectedTrips, data.file_name, token)
       invalidateTransportData()
       clear()
-      toast.success('Turer bekreftet')
+      toast.success('Transportlogg bekreftet og lagret')
     } catch {
-      toast.error('Kunne ikke bekrefte turer')
+      toast.error('Kunne ikke lagre transportloggen')
     } finally {
       setConfirming(false)
     }
@@ -90,27 +81,15 @@ export default function TransportUpload({ projectId }: Props) {
         error={error}
         errorFallback="Kunne ikke analysere transportfil"
       >
-        {({
-          data: transportData,
-          clear,
-          requireToken: requireTokenFn,
-          selectedFile,
-        }) => (
-          <TransportTripTable
+        {({ data: transportData, clear, requireToken: requireTokenFn }) => (
+          <TransportPreview
             data={transportData}
-            onRemoveTrip={handleRemoveTrip}
-            onConfirmTrips={(tripIds) =>
-              handleConfirmTrips(tripIds, clear, requireTokenFn)
+            setData={setData}
+            onConfirm={() =>
+              handleConfirm(transportData, clear, requireTokenFn)
             }
-            onVehicleUpdated={() => {
-              void (async () => {
-                if (selectedFile && authReady) {
-                  const token = await requireToken()
-                  parse(selectedFile, token)
-                }
-              })()
-            }}
             confirming={confirming}
+            onCancel={clear}
           />
         )}
       </FileUploadShell>
@@ -127,7 +106,7 @@ export default function TransportUpload({ projectId }: Props) {
         {showManual && (
           <TransportManualInput
             projectId={projectId}
-            onTripCreated={() => {}}
+            onTripCreated={invalidateTransportData}
           />
         )}
       </div>
@@ -146,7 +125,7 @@ export default function TransportUpload({ projectId }: Props) {
             </p>
           )}
           {reportGroups?.map((group) => (
-            <ReportGroupCard
+            <TransportGroupCard
               key={group.report_id ?? 'manual'}
               group={group}
               onDelete={() => {

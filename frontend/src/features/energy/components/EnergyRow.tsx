@@ -1,5 +1,4 @@
-import { Pencil, Trash2, Check, X } from 'lucide-react'
-import { useInlineEdit } from '@/shared/hooks/useInlineEdit'
+import EditableRow, { type GroupColumn } from '@/shared/components/EditableRow'
 import type { EnergyEntry, EnergyUpdateInput, PriceZone } from '../types/energy'
 
 interface EnergyRowProps {
@@ -8,7 +7,84 @@ interface EnergyRowProps {
   onUpdate: (data: EnergyUpdateInput) => void
   onDelete: () => void
   isUpdating: boolean
-  isDeleting: boolean
+}
+
+const INPUT = 'w-full rounded border border-gray-300 px-2 py-1 text-sm'
+
+function getColumns(
+  zones: { value: string; label: string }[] | undefined,
+): GroupColumn<EnergyEntry>[] {
+  return [
+    {
+      header: 'kWh',
+      render: (e) => (
+        <span className="font-medium text-gray-900">
+          {e.kwh_used?.toLocaleString('nb-NO', { maximumFractionDigits: 1 })}
+        </span>
+      ),
+      editRender: (value, onChange) => (
+        <input
+          type="number"
+          min="0"
+          step="any"
+          value={value}
+          onChange={(e) => onChange(e.target.value)}
+          className={`${INPUT} w-24`}
+          autoFocus
+        />
+      ),
+    },
+    {
+      header: 'Prisområde',
+      render: (e) => (
+        <span className="text-gray-600">{e.price_zone ?? '—'}</span>
+      ),
+      editRender: (value, onChange) => (
+        <select
+          value={value}
+          onChange={(e) => onChange(e.target.value)}
+          className={`${INPUT} w-20`}
+        >
+          <option value="">—</option>
+          {zones?.map((z) => (
+            <option key={z.value} value={z.value}>
+              {z.value}
+            </option>
+          ))}
+        </select>
+      ),
+    },
+    {
+      header: 'CO₂ (kg)',
+      render: (e) => (
+        <span className="text-gray-600">
+          {e.total_co2_kg?.toLocaleString('nb-NO', {
+            maximumFractionDigits: 2,
+          })}
+        </span>
+      ),
+    },
+    {
+      header: 'Dato',
+      render: (e) => (
+        <span className="text-gray-500">
+          {e.recorded_date
+            ? new Date(e.recorded_date + 'T00:00:00').toLocaleDateString(
+                'nb-NO',
+              )
+            : '—'}
+        </span>
+      ),
+      editRender: (value, onChange) => (
+        <input
+          type="date"
+          value={value}
+          onChange={(e) => onChange(e.target.value)}
+          className={INPUT}
+        />
+      ),
+    },
+  ]
 }
 
 export default function EnergyRow({
@@ -17,132 +93,29 @@ export default function EnergyRow({
   onUpdate,
   onDelete,
   isUpdating,
-  isDeleting,
 }: EnergyRowProps) {
-  const { editing, value, setValue, startEdit, cancelEdit } = useInlineEdit({
-    kwh: '',
-    zone: '',
-    date: '',
-  })
-
-  const handleStartEdit = () =>
-    startEdit({
-      kwh: String(entry.kwh_used ?? ''),
-      zone: entry.price_zone ?? '',
-      date: entry.recorded_date ?? '',
-    })
-
-  const saveEdit = () => {
-    const kwh = parseFloat(value.kwh)
-    if (isNaN(kwh) || kwh < 0) return
-
-    onUpdate({
-      kwh_used: kwh,
-      price_zone: (value.zone as PriceZone) || null,
-      recorded_date: value.date || null,
-    })
-    cancelEdit()
-  }
-
-  if (editing) {
-    return (
-      <tr className="bg-blue-50/40">
-        <td className="px-4 py-1.5">
-          <input
-            type="number"
-            min="0"
-            step="any"
-            value={value.kwh}
-            onChange={(e) => setValue((v) => ({ ...v, kwh: e.target.value }))}
-            className="w-24 rounded border border-gray-300 px-2 py-1 text-sm"
-            autoFocus
-          />
-        </td>
-        <td className="px-4 py-1.5">
-          <select
-            value={value.zone}
-            onChange={(e) => setValue((v) => ({ ...v, zone: e.target.value }))}
-            className="w-20 rounded border border-gray-300 px-2 py-1 text-sm"
-          >
-            <option value="">—</option>
-            {zones?.map((z) => (
-              <option key={z.value} value={z.value}>
-                {z.value}
-              </option>
-            ))}
-          </select>
-        </td>
-        <td className="px-4 py-1.5 text-gray-400 text-xs">auto</td>
-        <td className="px-4 py-1.5">
-          <input
-            type="date"
-            value={value.date}
-            onChange={(e) => setValue((v) => ({ ...v, date: e.target.value }))}
-            className="rounded border border-gray-300 px-2 py-1 text-sm"
-          />
-        </td>
-        <td className="px-4 py-1.5">
-          <div className="flex items-center gap-1">
-            <button
-              type="button"
-              onClick={saveEdit}
-              disabled={isUpdating}
-              className="text-emerald-600 hover:text-emerald-800"
-            >
-              <Check className="h-3.5 w-3.5" />
-            </button>
-            <button
-              type="button"
-              onClick={cancelEdit}
-              className="text-gray-400 hover:text-gray-600"
-            >
-              <X className="h-3.5 w-3.5" />
-            </button>
-          </div>
-        </td>
-      </tr>
-    )
-  }
+  const columns = getColumns(zones)
 
   return (
-    <tr className="hover:bg-gray-50">
-      <td className="px-4 py-2.5 font-medium text-gray-900">
-        {entry.kwh_used?.toLocaleString('nb-NO', {
-          maximumFractionDigits: 1,
-        })}
-      </td>
-      <td className="px-4 py-2.5 text-gray-600">{entry.price_zone ?? '—'}</td>
-      <td className="px-4 py-2.5 text-gray-600">
-        {entry.total_co2_kg?.toLocaleString('nb-NO', {
-          maximumFractionDigits: 2,
-        })}
-      </td>
-      <td className="px-4 py-2.5 text-gray-500">
-        {entry.recorded_date
-          ? new Date(entry.recorded_date + 'T00:00:00').toLocaleDateString(
-              'nb-NO',
-            )
-          : '—'}
-      </td>
-      <td className="px-4 py-2.5">
-        <div className="flex items-center gap-1.5">
-          <button
-            type="button"
-            onClick={handleStartEdit}
-            className="text-gray-400 transition-colors hover:text-blue-500 cursor-pointer"
-          >
-            <Pencil className="h-3.5 w-3.5" />
-          </button>
-          <button
-            type="button"
-            onClick={onDelete}
-            disabled={isDeleting}
-            className="text-gray-400 transition-colors hover:text-red-500 cursor-pointer"
-          >
-            <Trash2 className="h-3.5 w-3.5" />
-          </button>
-        </div>
-      </td>
-    </tr>
+    <EditableRow
+      row={entry}
+      columns={columns}
+      getEditValues={(e) => ({
+        0: String(e.kwh_used ?? ''),
+        1: e.price_zone ?? '',
+        3: e.recorded_date ?? '',
+      })}
+      onSave={(values) => {
+        const kwh = parseFloat(values[0])
+        if (isNaN(kwh) || kwh < 0) return
+        onUpdate({
+          kwh_used: kwh,
+          price_zone: (values[1] as PriceZone) || null,
+          recorded_date: values[3] || null,
+        })
+      }}
+      onDelete={onDelete}
+      isSaving={isUpdating}
+    />
   )
 }

@@ -10,7 +10,7 @@ import {
   useProjectMaterials,
   useDeleteInvoice,
 } from '../hooks/useProjectMaterials'
-import InvoicePreviewTable from './InvoicePreviewTable'
+import InvoicePreview from './InvoicePreview'
 import InvoiceGroupCard from './InvoiceGroupCard'
 
 interface Props {
@@ -19,7 +19,7 @@ interface Props {
 
 export default function InvoiceUpload({ projectId }: Props) {
   const queryClient = useQueryClient()
-  const { parse, reset, data, loading, error } = useInvoiceParse()
+  const { parse, reset, data, setData, loading, error } = useInvoiceParse()
   const { data: invoiceGroups, isLoading } = useProjectMaterials(projectId)
   const showLoading = useDeferredLoading(isLoading)
   const { deleteInvoice, pendingInvoiceId, undoInvoiceDelete } =
@@ -42,13 +42,14 @@ export default function InvoiceUpload({ projectId }: Props) {
         errorFallback="Kunne ikke analysere faktura"
       >
         {({ data: invoiceData, clear, requireToken }) => (
-          <InvoicePreviewTable
+          <InvoicePreview
             data={invoiceData}
-            onConfirm={async (overrides) => {
+            setData={setData}
+            onConfirm={async () => {
               setConfirming(true)
               try {
                 const token = await requireToken()
-                await confirmInvoice(projectId, invoiceData, overrides, token)
+                await confirmInvoice(projectId, invoiceData, {}, token)
                 queryClient.invalidateQueries({
                   queryKey: ['project-materials', projectId],
                 })

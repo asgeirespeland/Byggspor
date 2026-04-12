@@ -176,7 +176,7 @@ export default function ProjectDashboard() {
               {activeTab === 'transport' && (
                 <TransportUpload projectId={project.id} />
               )}
-              {activeTab === 'waste' && <WasteTab />}
+              {activeTab === 'waste' && <WasteTab projectId={project.id} />}
               {activeTab === 'energy' && <EnergyTab projectId={project.id} />}
             </div>
           </div>

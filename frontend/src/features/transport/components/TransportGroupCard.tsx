@@ -1,10 +1,15 @@
 import CollapsibleGroupCard from '@/shared/components/CollapsibleGroupCard'
+import {
+  GROUP_TH,
+  GROUP_THEAD,
+  GROUP_TBODY,
+} from '@/shared/components/ParsePreviewShell'
 import InlineUndoBar from '@/shared/components/InlineUndoBar'
 import type {
   ProjectReportGroup,
   TripUpdateInput,
 } from '../api/projectTransports'
-import TransportTripRow from './TransportTripRow'
+import TransportRow from './TransportRow'
 
 interface Props {
   group: ProjectReportGroup
@@ -16,7 +21,7 @@ interface Props {
   onUndoTripDelete: () => void
 }
 
-export default function ReportGroupCard({
+export default function TransportGroupCard({
   group,
   onDelete,
   onDeleteTrip,
@@ -52,19 +57,19 @@ export default function ReportGroupCard({
       isDeleting={false}
     >
       <table className="w-full text-sm">
-        <thead className="bg-gray-50 text-left text-xs font-medium text-gray-500">
+        <thead className={GROUP_THEAD}>
           <tr>
-            <th className="px-4 py-2">Sjåfør</th>
-            <th className="px-4 py-2">Dato</th>
-            <th className="px-4 py-2">Kjøretøy</th>
-            <th className="px-4 py-2 text-right">Km</th>
-            <th className="px-4 py-2 text-right">CO₂ (kg)</th>
-            <th className="px-4 py-2" />
+            <th className={GROUP_TH}>Sjåfør</th>
+            <th className={GROUP_TH}>Dato</th>
+            <th className={GROUP_TH}>Kjøretøy</th>
+            <th className={`${GROUP_TH} text-right`}>Km</th>
+            <th className={`${GROUP_TH} text-right`}>CO₂ (kg)</th>
+            <th className={GROUP_TH} />
           </tr>
         </thead>
-        <tbody className="divide-y divide-gray-50">
+        <tbody className={GROUP_TBODY}>
           {group.trips.map((trip) => (
-            <TransportTripRow
+            <TransportRow
               key={trip.id}
               trip={trip}
               onDelete={() => onDeleteTrip(trip.id)}

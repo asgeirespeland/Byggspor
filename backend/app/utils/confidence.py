@@ -29,4 +29,11 @@ def transport_confidence(*, has_co2_per_km: bool, has_distance: bool) -> int:
     return 50
 
 
+def waste_confidence(*, has_emission_factor: bool) -> int:
+    """Return confidence score for a waste entry."""
+    if has_emission_factor:
+        return 80
+    return 50
+
+
 ENERGY_CONFIDENCE = 100
