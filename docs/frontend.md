@@ -53,6 +53,7 @@ frontend/src/
 │   ├── project/
 │   ├── settings/
 │   ├── transport/
+│   ├── waste/
 │   └── user/
 │
 ├── shared/                       # Cross-cutting concerns
@@ -135,12 +136,12 @@ Each feature encapsulates its own components, hooks, API calls, types, and tests
 **Tabs:**
 - `EnergyTab` — Renders the `EnergyInput` component.
 - `TransportTab` — Renders the `TransportUpload` component.
-- `WasteTab` — Placeholder ("Avfallsregistrering kommer snart").
+- `WasteTab` — Renders the `WasteUpload` component.
 
 ### energy
 
 **Components:**
-- `EnergyInput` — Form for manual kWh entry with price zone and date selection. Displays a scrollable table of existing entries with inline editing (edit, delete). Shows summary cards for total kWh and total CO₂.
+- `EnergyInput` — Form for manual kWh entry with price zone and date selection. Displays a scrollable table of existing entries using shared `EditableRow` for inline editing and deletion. Shows summary cards for total kWh and total CO₂.
 
 **Hooks:**
 - `useEnergies` — Fetches energy entries for a project.
@@ -156,8 +157,8 @@ Each feature encapsulates its own components, hooks, API calls, types, and tests
 
 **Components:**
 - `InvoiceUpload` — Two-phase invoice flow: file drop zone for EHF XML → parse/preview → user review → confirm. After confirmation, displays uploaded invoices grouped by source with material line items.
-- `InvoicePreviewTable` — Review table shown after parsing. Displays enriched line items with flags ("Mangler ID", "Mangler EPD"), inline CO₂ input for flagged items, hover pencil edit for items with CO₂, override tracking, and summary badges. Supports fullscreen expand (80vw dialog). Negative CO₂ values allowed (biogenic carbon).
-- `InvoiceGroupCard` — Collapsible card showing a confirmed invoice's supplier, date, and material line items. Each row has inline CO₂ editing via hover pencil with "Korrigert" badge for overridden values.
+- `InvoicePreview` — Review table shown after parsing. Displays enriched line items with flags ("Mangler ID", "Mangler EPD"), inline CO₂ input for flagged items, inline editing, override tracking, and summary badges. Supports fullscreen expand. Negative CO₂ values allowed (biogenic carbon).
+- `InvoiceGroupCard` — Collapsible card showing a confirmed invoice's supplier, date, and material line items. Uses shared `EditableRow` for inline editing and deletion of individual materials.
 - `InvoiceTable` — Table displaying material line items with product name, GTIN, quantity, price, CO₂, and EPD badge.
 - `InvoiceTotalCo2` — Summary bar showing total CO₂ for an invoice group.
 - `EpdBadge` — Badge indicating EPD status (has EPD / no EPD / flagged).
@@ -167,6 +168,7 @@ Each feature encapsulates its own components, hooks, API calls, types, and tests
 - `useInvoiceParse` — Parses an uploaded EHF file (preview, no persistence).
 - `useProjectMaterials` — Fetches all materials for a project grouped by invoice.
 - `useUpdateMaterial` — Mutation to update a material's CO₂ value (calls `PATCH /invoice/materials/:id`).
+- `useDeleteMaterial` — Optimistic single-material delete with inline undo bar. Filters empty groups after last material deleted.
 - `useDeleteInvoice` — Optimistic delete with inline undo bar and CO₂ summary cache adjustment.
 
 **Types:**
@@ -175,10 +177,11 @@ Each feature encapsulates its own components, hooks, API calls, types, and tests
 ### transport
 
 **Components:**
-- `TransportUpload` — File drop zone for Abax XML upload plus manual trip entry toggle. After parsing, shows trip table with confirm/remove actions. Below, displays previously uploaded reports.
-- `TransportTripTable` — Table of parsed trips with vehicle info, distance, CO₂, and confidence. Supports per-trip removal, bulk confirm, and fullscreen expand (80vw dialog).
+- `TransportUpload` — File drop zone for Abax XML upload plus manual trip entry toggle. After parsing, shows preview with confirm/remove actions. Below, displays previously uploaded reports.
+- `TransportPreview` — Preview table of parsed trips with vehicle info, distance, CO₂, and confidence. Supports per-trip removal, inline editing, bulk confirm, and fullscreen expand.
 - `TransportManualInput` — Manual trip entry form.
-- `ReportGroupCard` — Collapsible card for an uploaded transport report with its trips.
+- `TransportGroupCard` — Collapsible card for an uploaded transport report with its trips. Uses `TransportRow` for inline editing and deletion of individual trips.
+- `TransportRow` — Editable row for a confirmed trip, built on shared `EditableRow`. Columns: driver, date, vehicle, distance (km), CO₂ (kg).
 - `TransportTotalCo2` — Summary bar for transport CO₂.
 - `Co2Badge` — CO₂ value badge with confidence coloring.
 - `VehicleInfoModal` — Modal showing vehicle details with edit capability.
@@ -187,11 +190,31 @@ Each feature encapsulates its own components, hooks, API calls, types, and tests
 - `useTransportParse` — Parses an Abax file (preview only, no persistence).
 - `useProjectTransports` — Fetches all transport trips for a project grouped by report.
 - `useDeleteTransportReport` — Optimistic delete with inline undo bar and CO₂ summary cache adjustment.
-- `useDeleteTrip` — Optimistic single-trip delete with inline undo bar inside the report card.
+- `useDeleteTrip` — Optimistic single-trip delete with inline undo bar inside the report card. Filters empty groups after last trip deleted.
 - `useUpdateTrip` — Mutation to update trip fields (driver, date, distance).
 
 **Types:**
 - `TransportParseResult`, `TransportTrip`, `VehicleInfo`
+
+### waste
+
+**Components:**
+- `WasteUpload` — File drop zone for waste report XML upload plus manual waste entry. After parsing, shows preview with confirm/cancel actions. Below, displays previously registered waste data.
+- `WastePreview` — Preview table of parsed waste items with material name, fraction code, tonnage, CO₂, and source (EPD or generic). Supports inline editing and row deletion. Supports fullscreen expand.
+- `WasteGroupCard` — Collapsible card for a waste report or manual group with its items. Uses shared `EditableRow` for inline editing and deletion. Supports group-level deletion (report delete or individual item delete for manual entries).
+- `WasteManualInput` — Manual waste entry form with waste type, quantity (tons), and optional notes.
+- `WasteInput` — Container component that renders `WasteUpload` and the list of existing waste groups.
+
+**Hooks:**
+- `useWasteParse` — Parses an uploaded waste report XML (preview only, no persistence).
+- `useProjectWaste` — Fetches all waste items for a project grouped by source.
+- `useCreateManualWaste` — Mutation to create a manual waste entry.
+- `useUpdateWasteItem` — Mutation to update a waste item's type, quantity, or CO₂.
+- `useDeleteWasteItem` — Optimistic single-item delete with inline undo bar. Filters empty groups after last item deleted.
+- `useDeleteWasteReport` — Optimistic report delete with inline undo bar and CO₂ summary cache adjustment.
+
+**Types:**
+- `WasteItem`, `WasteGroup`, `WasteLineItem`, `WasteParseResponse`, `CreateManualWastePayload`, `WasteSourceType`
 
 ### onboarding
 
@@ -250,6 +273,8 @@ TanStack Query configured with:
 |------|---------|
 | `useAppContext` | Access current `organizationId` and `organization` from `AppContext` |
 | `useRequireToken` | Get Clerk auth token with error throw on missing auth |
+| `useAuthQuery` | Wrapper around `useQuery` that injects Clerk auth token automatically |
+| `useAuthMutation` | Wrapper around `useMutation` with auto token injection, query invalidation, and toast notifications |
 | `useDeferredLoading` | Prevents loading spinner flicker on fast responses using `useDeferredValue` |
 | `useFileSelect` | File selection state with validation (accepts/rejects, error message, clear) |
 | `useScrollIndicators` | Detects horizontal scroll overflow for tab bars (shows chevron indicators) |
@@ -261,10 +286,17 @@ TanStack Query configured with:
 | Component | Purpose |
 |-----------|---------|
 | `Sidebar` | Collapsible navigation sidebar with logo, nav links, and Clerk `UserButton`. Collapsed on mobile, expands on hover. |
+| `FileUploadShell` | Generic two-phase upload shell: file selection → parse → preview → confirm. Used by transport, invoice, and waste upload components. |
 | `FileDropZone` | Drag-and-drop file upload area with visual feedback |
 | `SelectedFileBar` | Displays selected file name with upload/clear actions and loading state |
+| `ParsePreviewShell` | Column-based preview table for parsed file data. Supports inline editing, row deletion, fullscreen expand, metadata display, and confirm/cancel actions. |
+| `EditableRow` | Shared editable row component for registered/confirmed items in group cards. Column-based API with `GroupColumn<T>` interface. Manages edit state internally with save/cancel. Shows `RowActions` (pencil/trash) in view mode. |
+| `RowActions` | Icon button pair (pencil + trash) for inline row actions with hover reveal |
+| `CollapsibleGroupCard` | Expandable card for grouped data (invoices, transport reports, waste) with fullscreen expand option |
+| `FullscreenDialog` | 80vw dialog used by `CollapsibleGroupCard` and `ParsePreviewShell` for fullscreen table views |
+| `Co2TotalBadge` | Summary badge showing total CO₂ and count of items with CO₂ data |
+| `TabBar` | Horizontal tab bar with scroll indicators for overflow |
 | `ItemListPanel` | Generic searchable list with add button and empty state. Used for projects and org members. |
-| `CollapsibleGroupCard` | Expandable card for grouped data (invoices, transport reports) with fullscreen expand option (80vw dialog) |
 | `ErrorMessage` | Inline error display with optional suggestion text (renders `ApiError.suggestion` when present) |
 | `InlineUndoBar` | Inline undo bar with message and "Angre" button, shown in-place after optimistic deletion |
 | `FormDialog` | Generic dialog wrapper for forms |

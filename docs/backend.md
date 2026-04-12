@@ -35,7 +35,7 @@ backend/
 │   │   ├── auth.py           # Clerk JWT verification, user sync
 │   │   └── roles.py          # @require_org_role / @require_project_role decorators
 │   ├── models/               # SQLAlchemy ORM models (16 models)
-│   ├── routes/               # Flask blueprints (8 route modules)
+│   ├── routes/               # Flask blueprints (9 route modules)
 │   └── services/             # Business logic and external API clients
 ├── tests/
 │   ├── conftest.py           # Fixtures (in-memory SQLite, auth bypass)
@@ -125,6 +125,7 @@ When creating a project, you can pass `customer_name` to auto-create a `CUSTOMER
 | POST | `/invoice/upload` | Authenticated | Parse, enrich, and persist invoice for a project (single-step) |
 | GET | `/invoice/project/<project_id>` | Authenticated | List all materials for a project, grouped by source invoice |
 | PATCH | `/invoice/materials/<material_id>` | Authenticated | Update a project material's CO₂ value manually |
+| DELETE | `/invoice/materials/<material_id>` | Authenticated | Delete a single project material |
 | DELETE | `/invoice/source/<invoice_id>` | Authenticated | Delete invoice and all associated project materials |
 
 **Two-phase invoice flow:**
@@ -179,7 +180,9 @@ Returns product info with EPD/GWP data if available. See [nobb-api.md](nobb-api.
 | POST | `/transport/confirm` | Authenticated | Persist confirmed trips to a project |
 | GET | `/transport/project/<project_id>` | Authenticated | List all trips for a project, grouped by source report |
 | DELETE | `/transport/report/<report_id>` | Authenticated | Delete report and all associated trips |
+| PATCH | `/transport/trips/<trip_id>` | Authenticated | Update trip fields (driver, date, distance; recalculates CO₂) |
 | DELETE | `/transport/trips/<trip_id>` | Authenticated | Delete a single trip |
+| POST | `/transport/manual` | Authenticated | Create a single manual trip entry |
 | PATCH | `/transport/vehicles/<vehicle_id>` | Authenticated | Update vehicle details (make, model, fuel_type) |
 
 **Two-phase transport flow:**
@@ -192,6 +195,28 @@ Returns product info with EPD/GWP data if available. See [nobb-api.md](nobb-api.
 5. Flags trips where vehicle emission data is missing (confidence 20)
 
 **`/transport/confirm`** — Accepts a JSON body with `project_id`, `trips` (the full trip objects from parse), and `file_name`. Creates the `TransportReport` and `ProjectTransport` records. This separation allows users to review, remove, and edit trips before committing them to the database.
+
+### Waste (`/waste`)
+
+| Method | Path | Auth | Description |
+|--------|------|------|-------------|
+| POST | `/waste/parse` | Authenticated | Parse and enrich a waste report XML (preview, no persistence) |
+| POST | `/waste/confirm` | Authenticated | Persist user-confirmed waste items to a project |
+| POST | `/waste/manual` | Authenticated | Create a single manual waste entry |
+| GET | `/waste/project/<project_id>` | Project role | List all waste items for a project, grouped by source |
+| PATCH | `/waste/items/<item_id>` | Authenticated | Update a waste item (type, quantity, CO₂) |
+| DELETE | `/waste/items/<item_id>` | Authenticated | Delete a single waste item |
+| DELETE | `/waste/source/<waste_invoice_id>` | Authenticated | Delete a waste report and all associated items |
+
+**Two-phase waste flow:**
+
+**`/waste/parse`** — Upload a waste report XML as multipart form data (`file` field). The parser validates the XML root element (`WasteReport`), extracts receiver party info, and parses line items with product identifiers (GTIN, NOBB number) or NS 9431 waste fraction codes. Items are then enriched with CO₂ data from the NOBB API (C3/C4 GWP stages) or generic fraction-level emission factors. Returns enriched line items for user review.
+
+**`/waste/confirm`** — Accepts a JSON body with `project_id`, `items` (enriched line items from parse), and optional `file_name`. Creates a `WasteInvoice` source record and `ProjectWasteItem` records for each confirmed item.
+
+**`/waste/manual`** — Accepts a JSON body with `project_id`, `waste_type`, `quantity_tons`, and optional `notes`. Validates waste type against supported types (metall, treverk, betong), calculates CO₂ using generic emission factors, and creates a `ProjectWasteItem` with `source_type=MANUAL`.
+
+**`PATCH /waste/items/<item_id>`** — Update a waste item's `waste_type`, `quantity_tons`, and/or `total_co2_kg`. Each field is optional.
 
 ### Reports (`/report`)
 
@@ -280,6 +305,36 @@ Calls the NOBB Export API to look up construction materials. Flow:
 - Simple: single combined value per stage
 
 Lifecycle stages extracted: `A1-A3`, `A4`, `A5`, `C1-C4`, `D`
+
+### Waste Report Parser (`waste_report_parser.py`)
+
+Stateless parser for waste report XML documents. The format mirrors EHF/UBL structure but is scoped to waste-relevant fields. Extracts:
+- Report metadata (ID, issue date)
+- Receiver party info (waste handler name)
+- Line items identified by one of three methods (checked in order):
+  1. GTIN from `StandardItemIdentification` (schemeID `GTIN` or `0160`)
+  2. NOBB number from `AdditionalItemProperty`
+  3. NS 9431 waste fraction code from `WasteFraction`
+
+Quantities are normalized to tonnes (handles both `TON` and `KG` unit codes). Items with no identifier are flagged for manual review.
+
+### Waste Enrichment (`waste_enrichment.py`)
+
+Enriches parsed waste report line items with CO₂ data from two sources:
+
+1. **Product-level (GTIN/NOBB)** — Checks the material catalog first (same caching as invoice enrichment), then falls back to the NOBB API. Extracts C3 (waste processing) + C4 (disposal) GWP stages from the EPD to calculate end-of-life CO₂ per product.
+
+2. **Fraction-level (NS 9431)** — Uses generic emission factors (kg CO₂e per tonne) mapped to NS 9431 waste fraction codes. Covers common construction waste types: wood, paper, glass, metal, EE waste, concrete/minerals, plastic, and roofing materials.
+
+Each line item gets `enriched`, `flagged`, `co2_kg`, `co2_source` ("epd_c3c4" or "fraction_factor"), and `confidence` fields added.
+
+### Waste Parser (`waste_parser.py`)
+
+Provides manual waste entry logic:
+- `normalize_waste_type` — Validates waste type against supported types (metall, treverk, betong)
+- `calculate_waste_co2` — Calculates CO₂ using placeholder emission factors (kg CO₂e per tonne)
+- `build_waste_item_data` — Builds a complete waste item payload for persistence with calculated CO₂ and confidence scores
+- `parse_waste_csv` — Parses CSV files with `waste_type` and `quantity_tons` columns
 
 ### User Sync (`user_sync.py`)
 

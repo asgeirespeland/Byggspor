@@ -71,7 +71,7 @@ byggspor/
 │   │   ├── database.py            # SQLAlchemy engine and session
 │   │   ├── middleware/             # Auth (Clerk JWT) and role-checking decorators
 │   │   ├── models/                # SQLAlchemy ORM models (16 models)
-│   │   ├── routes/                # Flask blueprints (8 route modules)
+│   │   ├── routes/                # Flask blueprints (9 route modules)
 │   │   └── services/              # Business logic and external API clients
 │   ├── alembic/                   # Database migration files
 │   └── tests/                     # pytest test suite
@@ -100,6 +100,7 @@ features/
 ├── project/        # Project CRUD, project hooks
 ├── settings/       # App settings page
 ├── transport/      # Transport report upload (Abax XML), manual input, trip table
+├── waste/          # Waste report upload (XML), manual input, waste tracking
 └── user/           # User profile
 ```
 
@@ -136,7 +137,7 @@ Every request passes through this pipeline:
 
 ### Blueprint Organization
 
-The API is split into 8 Flask blueprints:
+The API is split into 9 Flask blueprints:
 
 | Blueprint | Prefix | Responsibility |
 |-----------|--------|---------------|
@@ -147,6 +148,7 @@ The API is split into 8 Flask blueprints:
 | `nobb_bp` | `/nobb` | NOBB product lookup |
 | `energy_bp` | `/energy` | Energy consumption entries |
 | `transport_bp` | `/transport` | Transport report upload and trips |
+| `waste_bp` | `/waste` | Waste report upload, manual entry, waste items |
 | `report_bp` | `/report` | CO₂ summary and report generation |
 
 ### Services Layer
@@ -162,6 +164,9 @@ Business logic is separated from route handlers into service modules:
 | `material_service.py` | Material enrichment — NOBB lookup, CO₂ calculation, caching |
 | `transport_service.py` | Transport enrichment — vehicle lookup, emission calculation |
 | `invoice_enrichment.py` | Enriches parsed invoice data with CO₂ values from NOBB/EPD lookups |
+| `waste_report_parser.py` | Parses waste report XML — extracts items with GTIN/NOBB or NS 9431 fraction codes |
+| `waste_enrichment.py` | Enriches waste items with CO₂ via NOBB C3/C4 stages or generic fraction factors |
+| `waste_parser.py` | Manual waste entry logic — type validation, CO₂ calculation, CSV parsing |
 | `vehicle_lookup.py` | Vehicle data lookup and caching logic |
 | `user_sync.py` | Syncs Clerk user claims to local User model on first login |
 
@@ -217,7 +222,7 @@ Each project tracks emissions across four categories:
 | **Materials** | EHF invoices (XML) | NOBB lookup → EPD → GWP per unit × quantity |
 | **Transport** | Abax trip reports (XML) or manual entry | Vehicle CO₂/km (Vegvesen API) × distance |
 | **Energy** | Manual entry | kWh × national grid emission factor (single value for all of Norway; price zone stored for future use) |
-| **Waste** | Waste reports or manual entry | Report-provided or calculated from waste type × quantity |
+| **Waste** | Waste report XML or manual entry | NOBB EPD C3/C4 GWP stages per product, or NS 9431 generic emission factors per waste fraction × tonnage |
 
 ### Confidence Scores
 
