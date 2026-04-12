@@ -13,21 +13,25 @@ export default function WasteManualInput({ projectId }: Props) {
 
   const createWasteMutation = useCreateManualWaste(projectId)
 
-  async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
+  function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault()
 
-    await createWasteMutation.mutateAsync({
-      project_id: projectId,
-      waste_type: wasteType,
-      quantity_tons: Number(quantityTons),
-      notes,
-    })
-
-    // reset
-    setWasteType('metall')
-    setQuantityTons('')
-    setNotes('')
-    setIsOpen(false)
+    createWasteMutation.mutate(
+      {
+        project_id: projectId,
+        waste_type: wasteType,
+        quantity_tons: Number(quantityTons),
+        notes,
+      },
+      {
+        onSuccess: () => {
+          setWasteType('metall')
+          setQuantityTons('')
+          setNotes('')
+          setIsOpen(false)
+        },
+      },
+    )
   }
 
   return (
@@ -67,6 +71,7 @@ export default function WasteManualInput({ projectId }: Props) {
               <input
                 type="number"
                 step="0.01"
+                required
                 value={quantityTons}
                 onChange={(e) => setQuantityTons(e.target.value)}
                 className="w-full rounded-md border px-3 py-2"
