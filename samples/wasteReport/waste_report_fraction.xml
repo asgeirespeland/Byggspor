@@ -1,0 +1,79 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  Sample waste report: FRACTION-LEVEL identification (NS 9431 codes).
+  Used when waste is reported by category (e.g. from waste company receipts)
+  without specific product identifiers.
+  The backend uses generic emission factors per fraction code.
+-->
+<WasteReport xmlns="urn:byggspor:waste:report:1.0"
+             xmlns:cbc="urn:byggspor:waste:CommonBasic:1.0"
+             xmlns:cac="urn:byggspor:waste:CommonAggregate:1.0">
+  <cbc:ID>WR-2024-002</cbc:ID>
+  <cbc:IssueDate>2024-07-20</cbc:IssueDate>
+
+  <cac:WasteReceiverParty>
+    <cac:Party>
+      <cac:PartyName><cbc:Name>Franzefoss Gjenvinning AS</cbc:Name></cac:PartyName>
+    </cac:Party>
+  </cac:WasteReceiverParty>
+
+  <!-- Betong uten armeringsjern (NS 9431: 1611) -->
+  <cac:WasteLine>
+    <cbc:ID>1</cbc:ID>
+    <cbc:Quantity unitCode="TON">8.5</cbc:Quantity>
+    <cac:Item>
+      <cbc:Name>Betong uten armeringsjern</cbc:Name>
+      <cac:WasteFraction>
+        <cbc:ID schemeID="NS9431">1611</cbc:ID>
+      </cac:WasteFraction>
+    </cac:Item>
+  </cac:WasteLine>
+
+  <!-- Rent trevirke (NS 9431: 1141) -->
+  <cac:WasteLine>
+    <cbc:ID>2</cbc:ID>
+    <cbc:Quantity unitCode="TON">2.4</cbc:Quantity>
+    <cac:Item>
+      <cbc:Name>Rent trevirke</cbc:Name>
+      <cac:WasteFraction>
+        <cbc:ID schemeID="NS9431">1141</cbc:ID>
+      </cac:WasteFraction>
+    </cac:Item>
+  </cac:WasteLine>
+
+  <!-- Metall, blandet (NS 9431: 1452) -->
+  <cac:WasteLine>
+    <cbc:ID>3</cbc:ID>
+    <cbc:Quantity unitCode="KG">650.0</cbc:Quantity>
+    <cac:Item>
+      <cbc:Name>Metall, blandet</cbc:Name>
+      <cac:WasteFraction>
+        <cbc:ID schemeID="NS9431">1452</cbc:ID>
+      </cac:WasteFraction>
+    </cac:Item>
+  </cac:WasteLine>
+
+  <!-- Gipsbaserte materialer (NS 9431: 1615) -->
+  <cac:WasteLine>
+    <cbc:ID>4</cbc:ID>
+    <cbc:Quantity unitCode="KG">1200.0</cbc:Quantity>
+    <cac:Item>
+      <cbc:Name>Gipsbaserte materialer</cbc:Name>
+      <cac:WasteFraction>
+        <cbc:ID schemeID="NS9431">1615</cbc:ID>
+      </cac:WasteFraction>
+    </cac:Item>
+  </cac:WasteLine>
+
+  <!-- Blandet plast (NS 9431: 1799) -->
+  <cac:WasteLine>
+    <cbc:ID>5</cbc:ID>
+    <cbc:Quantity unitCode="KG">180.0</cbc:Quantity>
+    <cac:Item>
+      <cbc:Name>Blandet plast</cbc:Name>
+      <cac:WasteFraction>
+        <cbc:ID schemeID="NS9431">1799</cbc:ID>
+      </cac:WasteFraction>
+    </cac:Item>
+  </cac:WasteLine>
+</WasteReport>

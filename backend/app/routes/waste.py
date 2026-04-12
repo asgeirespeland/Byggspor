@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+import xml.etree.ElementTree as ET
+
 from flask import Blueprint, g, jsonify, request
 
 from app.errors import ApiError
@@ -8,8 +10,11 @@ from app.middleware.roles import require_project_role
 from app.models.project_member import ProjectRole
 from app.models.project_waste_item import ProjectWasteItem, WasteSourceType
 from app.models.waste_invoice import WasteInvoice
-from app.services.waste_parser import build_waste_item_data, parse_waste_csv
+from app.services.waste_enrichment import enrich_waste_report
+from app.services.waste_parser import build_waste_item_data
+from app.services.waste_report_parser import parse_waste_report
 from app.utils.db import db_commit
+from app.utils.file_upload import validate_xml_upload
 from app.utils.parsing import require_int
 from app.utils.serialization import group_by_source
 
@@ -98,28 +103,28 @@ def create_manual_waste():
 
 @waste_bp.route("/parse", methods=["POST"])
 @require_auth
-def parse_waste_report():
-    """Parse uploaded waste CSV and return preview (no save)."""
+def parse_waste():
+    """Parse uploaded waste report XML, enrich with NOBB C3/C4 data."""
 
-    uploaded_file = request.files.get("file")
-
-    if uploaded_file is None:
-        raise ApiError(
-            "Fil mangler.",
-            code="MISSING_FILE",
-            suggestion="Last opp en CSV-fil med waste_type og quantity_tons.",
-        )
-
-    file_content = uploaded_file.read()
-    items_data = parse_waste_csv(file_content)
-
-    return jsonify(
-        {
-            "file_name": uploaded_file.filename,
-            "items_count": len(items_data),
-            "items": items_data,
-        }
+    xml_content = validate_xml_upload(
+        suggestion="Last opp en avfallsrapport i XML-format."
     )
+
+    try:
+        parsed = parse_waste_report(xml_content)
+    except ET.ParseError:
+        raise ApiError(
+            "Kunne ikke lese XML-filen.",
+            code="INVALID_XML",
+            suggestion="Sjekk at filen er gyldig XML.",
+        )
+    except ValueError as exc:
+        raise ApiError(str(exc), code="INVALID_FILE_FORMAT")
+
+    session = g.db
+    enriched = enrich_waste_report(parsed, session=session)
+
+    return jsonify(enriched)
 
 
 @waste_bp.route("/confirm", methods=["POST"])
@@ -127,7 +132,7 @@ def parse_waste_report():
 def confirm_waste():
     """Persist user-confirmed waste items to the database.
 
-    Expects JSON: { project_id, file_name?, items: [...parsed item dicts] }
+    Expects JSON: { project_id, file_name?, items: [...enriched line items] }
     """
     body = request.get_json(silent=True) or {}
     project_id = require_int(body, "project_id")
@@ -151,17 +156,18 @@ def confirm_waste():
         session.flush()
 
         for item_data in items:
+            co2_kg = item_data.get("co2_kg")
             waste_item = ProjectWasteItem(
                 project_id=project_id,
                 source_id=source.id,
                 source_type=WasteSourceType.WASTE_REPORT,
-                waste_type=item_data.get("waste_type"),
+                waste_type=item_data.get("name") or item_data.get("waste_type"),
                 quantity_tons=item_data.get("quantity_tons"),
-                co2_from_report_kg=item_data.get("co2_from_report_kg"),
-                calculated_co2_kg=item_data.get("calculated_co2_kg"),
-                total_co2_kg=item_data.get("total_co2_kg"),
-                confidence_score=item_data.get("confidence_score"),
-                notes=item_data.get("notes"),
+                co2_from_report_kg=None,
+                calculated_co2_kg=co2_kg,
+                total_co2_kg=co2_kg,
+                confidence_score=item_data.get("confidence"),
+                notes=item_data.get("co2_source"),
             )
             session.add(waste_item)
             created_items.append(waste_item)
