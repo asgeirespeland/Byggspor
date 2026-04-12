@@ -328,3 +328,21 @@ def delete_invoice(invoice_id: int):
         pass
 
     return jsonify(message="Deleted", items_removed=count), 200
+
+
+@invoice_bp.route("/materials/<int:material_id>", methods=["DELETE"])
+@require_auth
+def delete_material(material_id: int):
+    """Delete a single project material."""
+
+    session = g.db
+    pm = session.get(ProjectMaterial, material_id)
+    if not pm:
+        raise ApiError(
+            "Materialposten ble ikke funnet.",
+            code="NOT_FOUND",
+            status=404,
+        )
+    with db_commit(session, "Kunne ikke slette materialposten.", "DELETE_FAILED"):
+        session.delete(pm)
+    return jsonify(message="Deleted"), 200

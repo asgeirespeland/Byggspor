@@ -15,7 +15,7 @@ from app.services.waste_parser import build_waste_item_data
 from app.services.waste_report_parser import parse_waste_report
 from app.utils.db import db_commit
 from app.utils.file_upload import validate_xml_upload
-from app.utils.parsing import require_int
+from app.utils.parsing import parse_float, require_int
 from app.utils.serialization import group_by_source
 
 waste_bp = Blueprint("waste", __name__, url_prefix="/waste")
@@ -219,3 +219,81 @@ def list_project_waste(project_id: int):
             item_fn=_serialize_waste_item,
         )
     )
+
+
+@waste_bp.route("/items/<int:item_id>", methods=["PATCH"])
+@require_auth
+def update_waste_item(item_id: int):
+    """Update a single waste item's quantity and/or CO₂ value."""
+
+    session = g.db
+    item = session.get(ProjectWasteItem, item_id)
+    if not item:
+        raise ApiError(
+            "Avfallsposten ble ikke funnet.",
+            code="NOT_FOUND",
+            status=404,
+        )
+
+    body = request.get_json(silent=True) or {}
+
+    if "waste_type" in body:
+        item.waste_type = body["waste_type"] or None
+
+    if "quantity_tons" in body:
+        item.quantity_tons = parse_float(
+            body,
+            "quantity_tons",
+            suggestion="Oppgi mengde i tonn som et tall.",
+        )
+
+    if "total_co2_kg" in body:
+        item.total_co2_kg = parse_float(
+            body,
+            "total_co2_kg",
+            suggestion="Oppgi CO₂-verdi som et tall.",
+        )
+
+    with db_commit(session, "Kunne ikke oppdatere avfallsposten.", "UPDATE_FAILED"):
+        pass
+
+    return jsonify(_serialize_waste_item(item)), 200
+
+
+@waste_bp.route("/items/<int:item_id>", methods=["DELETE"])
+@require_auth
+def delete_waste_item(item_id: int):
+    """Delete a single waste item."""
+
+    session = g.db
+    item = session.get(ProjectWasteItem, item_id)
+    if not item:
+        raise ApiError(
+            "Avfallsposten ble ikke funnet.",
+            code="NOT_FOUND",
+            status=404,
+        )
+    with db_commit(session, "Kunne ikke slette avfallsposten.", "DELETE_FAILED"):
+        session.delete(item)
+    return jsonify(message="Deleted"), 200
+
+
+@waste_bp.route("/source/<int:waste_invoice_id>", methods=["DELETE"])
+@require_auth
+def delete_waste_report(waste_invoice_id: int):
+    """Delete a waste report and all its associated waste items."""
+
+    session = g.db
+    count = (
+        session.query(ProjectWasteItem)
+        .filter(ProjectWasteItem.source_id == waste_invoice_id)
+        .delete()
+    )
+    inv = session.get(WasteInvoice, waste_invoice_id)
+    if inv:
+        session.delete(inv)
+
+    with db_commit(session, "Kunne ikke slette avfallsrapporten.", "DELETE_FAILED"):
+        pass
+
+    return jsonify(message="Deleted", items_removed=count), 200
