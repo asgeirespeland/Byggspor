@@ -1,4 +1,5 @@
-import { Pencil, Trash2, Check, X } from 'lucide-react'
+import { Check, X } from 'lucide-react'
+import RowActions from '@/shared/components/RowActions'
 import { useInlineEdit } from '@/shared/hooks/useInlineEdit'
 import type { ProjectTripItem, TripUpdateInput } from '../api/projectTransports'
 
@@ -128,22 +129,7 @@ export default function TransportTripRow({
         }) ?? '—'}
       </td>
       <td className="px-4 py-2">
-        <div className="flex items-center gap-1.5">
-          <button
-            type="button"
-            onClick={handleStartEdit}
-            className="text-gray-400 transition-colors hover:text-blue-500 cursor-pointer"
-          >
-            <Pencil className="h-3.5 w-3.5" />
-          </button>
-          <button
-            type="button"
-            onClick={onDelete}
-            className="text-gray-400 transition-colors hover:text-red-500 cursor-pointer"
-          >
-            <Trash2 className="h-3.5 w-3.5" />
-          </button>
-        </div>
+        <RowActions onEdit={handleStartEdit} onDelete={onDelete} />
       </td>
     </tr>
   )

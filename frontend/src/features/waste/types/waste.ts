@@ -22,20 +22,28 @@ export interface CreateManualWastePayload {
   notes?: string
 }
 
-export interface WasteItemPreview {
-  waste_type: string
-  quantity_tons: number
-  co2_from_report_kg: number | null
-  calculated_co2_kg: number
-  total_co2_kg: number
-  confidence_score: number
-  notes: string | null
+export interface WasteLineItem {
+  line_number: string | null
+  name: string | null
+  gtin: string | null
+  nobb_number: string | null
+  fraction_code: string | null
+  quantity: number | null
+  unit: string | null
+  quantity_tons: number | null
+  flagged: boolean
+  enriched: boolean
+  co2_kg: number | null
+  co2_source: string | null
+  confidence: number
+  nobb_data: Record<string, unknown> | null
 }
 
 export interface WasteParseResponse {
-  file_name: string
-  items_count: number
-  items: WasteItemPreview[]
+  report_id: string | null
+  issue_date: string | null
+  receiver: { name: string | null } | null
+  line_items: WasteLineItem[]
 }
 
 export interface WasteGroup {

@@ -1,5 +1,11 @@
-import { Check, Loader2, Pencil } from 'lucide-react'
+import { Check, Loader2 } from 'lucide-react'
 import CollapsibleGroupCard from '@/shared/components/CollapsibleGroupCard'
+import {
+  GROUP_TH,
+  GROUP_THEAD,
+  GROUP_TBODY,
+} from '@/shared/components/ParsePreviewShell'
+import RowActions from '@/shared/components/RowActions'
 import { useInlineEdit } from '@/shared/hooks/useInlineEdit'
 import type { ProjectInvoiceGroup, ProjectMaterialItem } from '../api/invoice'
 import { useUpdateMaterial } from '../hooks/useProjectMaterials'
@@ -50,16 +56,17 @@ export default function InvoiceGroupCard({
       isDeleting={isDeleting}
     >
       <table className="w-full text-sm">
-        <thead className="bg-gray-50 text-left text-xs font-medium text-gray-500">
+        <thead className={GROUP_THEAD}>
           <tr>
-            <th className="px-4 py-2">Materiale</th>
-            <th className="px-4 py-2">NOBB</th>
-            <th className="px-4 py-2 text-right">Antall</th>
-            <th className="px-4 py-2 text-right">CO₂ (kg)</th>
-            <th className="px-4 py-2">EPD</th>
+            <th className={GROUP_TH}>Materiale</th>
+            <th className={GROUP_TH}>NOBB</th>
+            <th className={`${GROUP_TH} text-right`}>Antall</th>
+            <th className={`${GROUP_TH} text-right`}>CO₂ (kg)</th>
+            <th className={GROUP_TH}>EPD</th>
+            <th className={GROUP_TH} />
           </tr>
         </thead>
-        <tbody className="divide-y divide-gray-50">
+        <tbody className={GROUP_TBODY}>
           {group.items.map((item) => (
             <MaterialRow key={item.id} item={item} projectId={projectId} />
           ))}
@@ -100,7 +107,7 @@ function MaterialRow({
           ? 'bg-blue-50/50'
           : item.flagged
             ? 'bg-amber-50/50'
-            : ''
+            : 'hover:bg-gray-50'
       }
     >
       <td className="px-4 py-2 text-gray-800 truncate max-w-48">
@@ -152,29 +159,16 @@ function MaterialRow({
             </button>
           </div>
         ) : (
-          <span className="group inline-flex items-center justify-end gap-1">
-            <span
-              className={
-                item.total_co2_kg == null ? 'text-gray-400' : 'text-gray-800'
-              }
-            >
-              {item.total_co2_kg != null
-                ? item.total_co2_kg.toLocaleString('nb-NO', {
-                    maximumFractionDigits: 2,
-                  })
-                : '—'}
-            </span>
-            <button
-              onClick={() =>
-                startEdit(
-                  item.total_co2_kg != null ? String(item.total_co2_kg) : '',
-                )
-              }
-              className="invisible text-gray-300 hover:text-gray-600 group-hover:visible"
-              title="Korriger CO₂-verdi"
-            >
-              <Pencil className="h-3 w-3" />
-            </button>
+          <span
+            className={
+              item.total_co2_kg == null ? 'text-gray-400' : 'text-gray-800'
+            }
+          >
+            {item.total_co2_kg != null
+              ? item.total_co2_kg.toLocaleString('nb-NO', {
+                  maximumFractionDigits: 2,
+                })
+              : '—'}
           </span>
         )}
       </td>
@@ -188,6 +182,15 @@ function MaterialRow({
         >
           {item.has_epd ? 'Ja' : 'Nei'}
         </span>
+      </td>
+      <td className="px-4 py-2">
+        <RowActions
+          onEdit={() =>
+            startEdit(
+              item.total_co2_kg != null ? String(item.total_co2_kg) : '',
+            )
+          }
+        />
       </td>
     </tr>
   )

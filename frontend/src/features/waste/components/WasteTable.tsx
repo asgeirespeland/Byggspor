@@ -1,4 +1,11 @@
 import { useDeferredLoading } from '@/shared/hooks/useDeferredLoading'
+import CollapsibleGroupCard from '@/shared/components/CollapsibleGroupCard'
+import {
+  GROUP_TH,
+  GROUP_THEAD,
+  GROUP_TBODY,
+} from '@/shared/components/ParsePreviewShell'
+import RowActions from '@/shared/components/RowActions'
 import { useProjectWaste } from '../hooks/useWaste'
 import type { WasteGroup } from '../types/waste'
 
@@ -8,39 +15,85 @@ type Props = {
 
 function WasteGroupCard({ group }: { group: WasteGroup }) {
   const label =
-    group.source_type === 'waste_report'
-      ? (group.file_name ?? 'CSV-rapport')
+    group.source_type === 'WASTE_REPORT'
+      ? (group.file_name ?? 'Avfallsrapport')
       : 'Manuell registrering'
 
+  const totalCo2 = group.items.reduce(
+    (sum, item) => sum + (item.total_co2_kg ?? 0),
+    0,
+  )
+
+  const totalTons = group.items.reduce(
+    (sum, item) => sum + (item.quantity_tons ?? 0),
+    0,
+  )
+
   return (
-    <div className="rounded-2xl border p-4">
-      <div className="mb-3 flex items-center justify-between">
-        <p className="text-sm font-medium text-gray-700">{label}</p>
-        {group.uploaded_at && (
-          <p className="text-xs text-gray-400">
-            {new Date(group.uploaded_at).toLocaleDateString('nb-NO')}
-          </p>
-        )}
-      </div>
-      <table className="w-full text-left text-sm">
-        <thead>
-          <tr className="border-b">
-            <th className="py-2">Type</th>
-            <th className="py-2">Tonn</th>
-            <th className="py-2">CO₂ (kg)</th>
+    <CollapsibleGroupCard
+      title={label}
+      summary={
+        <>
+          <span>{group.items.length} poster</span>
+          {totalTons > 0 && (
+            <span>
+              {totalTons.toLocaleString('nb-NO', { maximumFractionDigits: 2 })}{' '}
+              tonn
+            </span>
+          )}
+          {totalCo2 > 0 && (
+            <span>
+              {totalCo2.toLocaleString('nb-NO', { maximumFractionDigits: 1 })}{' '}
+              kg CO₂
+            </span>
+          )}
+          {group.uploaded_at && (
+            <span>
+              {new Date(group.uploaded_at).toLocaleDateString('nb-NO')}
+            </span>
+          )}
+        </>
+      }
+      onDelete={() => {
+        // TODO: wire up delete endpoint
+      }}
+      isDeleting={false}
+    >
+      <table className="w-full text-sm">
+        <thead className={GROUP_THEAD}>
+          <tr>
+            <th className={GROUP_TH}>Type</th>
+            <th className={`${GROUP_TH} text-right`}>Tonn</th>
+            <th className={`${GROUP_TH} text-right`}>CO₂ (kg)</th>
+            <th className={GROUP_TH} />
           </tr>
         </thead>
-        <tbody>
+        <tbody className={GROUP_TBODY}>
           {group.items.map((item) => (
-            <tr key={item.id} className="border-b last:border-b-0">
-              <td className="py-2">{item.waste_type}</td>
-              <td className="py-2">{item.quantity_tons}</td>
-              <td className="py-2">{item.total_co2_kg}</td>
+            <tr key={item.id} className="hover:bg-gray-50">
+              <td className="px-4 py-2 text-gray-800">{item.waste_type}</td>
+              <td className="px-4 py-2 text-right text-gray-800">
+                {item.quantity_tons != null
+                  ? item.quantity_tons.toLocaleString('nb-NO', {
+                      maximumFractionDigits: 3,
+                    })
+                  : '—'}
+              </td>
+              <td className="px-4 py-2 text-right text-gray-800">
+                {item.total_co2_kg != null
+                  ? item.total_co2_kg.toLocaleString('nb-NO', {
+                      maximumFractionDigits: 2,
+                    })
+                  : '—'}
+              </td>
+              <td className="px-4 py-2">
+                <RowActions />
+              </td>
             </tr>
           ))}
         </tbody>
       </table>
-    </div>
+    </CollapsibleGroupCard>
   )
 }
 

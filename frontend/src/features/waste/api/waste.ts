@@ -3,7 +3,7 @@ import type {
   CreateManualWastePayload,
   WasteGroup,
   WasteItem,
-  WasteItemPreview,
+  WasteLineItem,
   WasteParseResponse,
 } from '../types/waste'
 
@@ -16,7 +16,7 @@ export async function parseWasteFile(
 
 export async function confirmWaste(
   projectId: number,
-  items: WasteItemPreview[],
+  items: WasteLineItem[],
   fileName: string | null,
   token?: string,
 ): Promise<{ waste_invoice_id: number; project_waste_count: number }> {
