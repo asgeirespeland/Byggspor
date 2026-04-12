@@ -6,17 +6,34 @@ import {
   GROUP_TBODY,
 } from '@/shared/components/ParsePreviewShell'
 import EditableRow, { type GroupColumn } from '@/shared/components/EditableRow'
-import { useProjectWaste } from '../hooks/useWaste'
+import InlineUndoBar from '@/shared/components/InlineUndoBar'
+import {
+  useProjectWaste,
+  useUpdateWasteItem,
+  useDeleteWasteItem,
+  useDeleteWasteReport,
+} from '../hooks/useWaste'
 import type { WasteGroup, WasteItem } from '../types/waste'
 
 type Props = {
   projectId: number
 }
 
+const INPUT = 'w-full rounded border border-gray-300 px-2 py-1 text-sm'
+
 const columns: GroupColumn<WasteItem>[] = [
   {
     header: 'Type',
     render: (item) => <span className="text-gray-800">{item.waste_type}</span>,
+    editRender: (value, onChange) => (
+      <input
+        type="text"
+        value={value}
+        onChange={(e) => onChange(e.target.value)}
+        className={INPUT}
+        autoFocus
+      />
+    ),
   },
   {
     header: 'Tonn',
@@ -29,6 +46,16 @@ const columns: GroupColumn<WasteItem>[] = [
             })
           : '—'}
       </span>
+    ),
+    editRender: (value, onChange) => (
+      <input
+        type="number"
+        min="0"
+        step="any"
+        value={value}
+        onChange={(e) => onChange(e.target.value)}
+        className={`${INPUT} w-24 text-right`}
+      />
     ),
   },
   {
@@ -43,10 +70,31 @@ const columns: GroupColumn<WasteItem>[] = [
           : '—'}
       </span>
     ),
+    editRender: (value, onChange) => (
+      <input
+        type="number"
+        min="0"
+        step="any"
+        value={value}
+        onChange={(e) => onChange(e.target.value)}
+        className={`${INPUT} w-24 text-right`}
+      />
+    ),
   },
 ]
 
-function WasteGroupCard({ group }: { group: WasteGroup }) {
+function WasteCard({
+  group,
+  projectId,
+}: {
+  group: WasteGroup
+  projectId: number
+}) {
+  const updateMutation = useUpdateWasteItem(projectId)
+  const { deleteWasteItem, pendingWasteItemId, undoWasteItemDelete } =
+    useDeleteWasteItem(projectId)
+  const { deleteWasteReport } = useDeleteWasteReport(projectId)
+
   const label =
     group.source_type === 'WASTE_REPORT'
       ? (group.file_name ?? 'Avfallsrapport')
@@ -88,23 +136,20 @@ function WasteGroupCard({ group }: { group: WasteGroup }) {
         </>
       }
       onDelete={() => {
-        // TODO: wire up delete endpoint
+        if (group.source_id != null) {
+          void deleteWasteReport(group.source_id)
+        } else {
+          group.items.forEach((item) => void deleteWasteItem(item.id))
+        }
       }}
       isDeleting={false}
     >
       <table className="w-full text-sm">
         <thead className={GROUP_THEAD}>
           <tr>
-            {columns.map((col, i) => (
-              <th
-                key={i}
-                className={
-                  col.align === 'right' ? `${GROUP_TH} text-right` : GROUP_TH
-                }
-              >
-                {col.header}
-              </th>
-            ))}
+            <th className={GROUP_TH}>Type</th>
+            <th className={`${GROUP_TH} text-right`}>Tonn</th>
+            <th className={`${GROUP_TH} text-right`}>CO₂ (kg)</th>
             <th className={GROUP_TH} />
           </tr>
         </thead>
@@ -114,14 +159,38 @@ function WasteGroupCard({ group }: { group: WasteGroup }) {
               key={item.id}
               row={item}
               columns={columns}
-              getEditValues={() => ({})}
-              onSave={() => {
-                // TODO: wire up update endpoint
+              getEditValues={(it) => ({
+                0: it.waste_type ?? '',
+                1: it.quantity_tons != null ? String(it.quantity_tons) : '',
+                2: it.total_co2_kg != null ? String(it.total_co2_kg) : '',
+              })}
+              onSave={(values) => {
+                updateMutation.mutate({
+                  itemId: item.id,
+                  data: {
+                    waste_type: values[0] || undefined,
+                    quantity_tons: values[1]
+                      ? parseFloat(values[1])
+                      : undefined,
+                    total_co2_kg: values[2] ? parseFloat(values[2]) : undefined,
+                  },
+                })
               }}
+              onDelete={() => void deleteWasteItem(item.id)}
+              isSaving={
+                updateMutation.isPending &&
+                updateMutation.variables?.itemId === item.id
+              }
             />
           ))}
         </tbody>
       </table>
+      {pendingWasteItemId != null && (
+        <InlineUndoBar
+          message="Avfallspost slettet"
+          onUndo={undoWasteItemDelete}
+        />
+      )}
     </CollapsibleGroupCard>
   )
 }
@@ -129,6 +198,8 @@ function WasteGroupCard({ group }: { group: WasteGroup }) {
 export default function WasteList({ projectId }: Props) {
   const wasteQuery = useProjectWaste(projectId)
   const showLoading = useDeferredLoading(wasteQuery.isLoading)
+  const { pendingWasteReportId, undoWasteReportDelete } =
+    useDeleteWasteReport(projectId)
 
   return (
     <div className="space-y-3">
@@ -148,9 +219,20 @@ export default function WasteList({ projectId }: Props) {
             Registrert avfall ({wasteQuery.data.length})
           </p>
           {wasteQuery.data.map((group) => (
-            <WasteGroupCard key={group.source_id ?? 'manual'} group={group} />
+            <WasteCard
+              key={group.source_id ?? 'manual'}
+              group={group}
+              projectId={projectId}
+            />
           ))}
         </>
+      )}
+
+      {pendingWasteReportId != null && (
+        <InlineUndoBar
+          message="Avfallsrapport slettet"
+          onUndo={undoWasteReportDelete}
+        />
       )}
     </div>
   )

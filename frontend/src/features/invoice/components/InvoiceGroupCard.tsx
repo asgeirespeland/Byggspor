@@ -6,7 +6,11 @@ import {
 } from '@/shared/components/ParsePreviewShell'
 import EditableRow, { type GroupColumn } from '@/shared/components/EditableRow'
 import type { ProjectInvoiceGroup, ProjectMaterialItem } from '../api/invoice'
-import { useUpdateMaterial } from '../hooks/useProjectMaterials'
+import {
+  useUpdateMaterial,
+  useDeleteMaterial,
+} from '../hooks/useProjectMaterials'
+import InlineUndoBar from '@/shared/components/InlineUndoBar'
 
 interface Props {
   group: ProjectInvoiceGroup
@@ -99,6 +103,8 @@ export default function InvoiceGroupCard({
   isDeleting,
 }: Props) {
   const updateMutation = useUpdateMaterial(projectId)
+  const { deleteMaterial, pendingMaterialId, undoMaterialDelete } =
+    useDeleteMaterial(projectId)
   const totalCo2 = group.items.reduce(
     (sum, item) => sum + (item.total_co2_kg ?? 0),
     0,
@@ -171,6 +177,7 @@ export default function InvoiceGroupCard({
                   total_co2_kg: val,
                 })
               }}
+              onDelete={() => void deleteMaterial(item.id)}
               isSaving={
                 updateMutation.isPending &&
                 updateMutation.variables?.materialId === item.id
@@ -179,6 +186,12 @@ export default function InvoiceGroupCard({
           ))}
         </tbody>
       </table>
+      {pendingMaterialId != null && (
+        <InlineUndoBar
+          message="Materialpost slettet"
+          onUndo={undoMaterialDelete}
+        />
+      )}
     </CollapsibleGroupCard>
   )
 }

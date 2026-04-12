@@ -71,6 +71,16 @@ export async function updateMaterial(
   })
 }
 
+export async function deleteMaterial(
+  materialId: number,
+  token?: string,
+): Promise<void> {
+  await apiRequest(`/invoice/materials/${materialId}`, {
+    method: 'DELETE',
+    token,
+  })
+}
+
 export async function deleteInvoice(
   invoiceId: number,
   token?: string,

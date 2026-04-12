@@ -34,6 +34,38 @@ export async function getProjectWaste(
   return apiRequest<WasteGroup[]>(`/waste/project/${projectId}`, { token })
 }
 
+export async function updateWasteItem(
+  itemId: number,
+  data: { waste_type?: string; quantity_tons?: number; total_co2_kg?: number },
+  token?: string,
+): Promise<WasteItem> {
+  return apiRequest(`/waste/items/${itemId}`, {
+    method: 'PATCH',
+    body: data,
+    token,
+  })
+}
+
+export async function deleteWasteItem(
+  itemId: number,
+  token?: string,
+): Promise<void> {
+  await apiRequest(`/waste/items/${itemId}`, {
+    method: 'DELETE',
+    token,
+  })
+}
+
+export async function deleteWasteReport(
+  wasteInvoiceId: number,
+  token?: string,
+): Promise<void> {
+  await apiRequest(`/waste/source/${wasteInvoiceId}`, {
+    method: 'DELETE',
+    token,
+  })
+}
+
 export async function createManualWaste(
   payload: CreateManualWastePayload,
   token?: string,

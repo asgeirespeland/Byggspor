@@ -4,6 +4,7 @@ import { useOptimisticDelete } from '@/shared/hooks/useOptimisticDelete'
 
 import {
   listProjectMaterials,
+  deleteMaterial,
   deleteInvoice,
   updateMaterial,
   type ProjectInvoiceGroup,
@@ -57,5 +58,37 @@ export function useDeleteInvoice(projectId: number) {
     deleteInvoice: handleDelete,
     pendingInvoiceId: pendingId,
     undoInvoiceDelete: undo,
+  }
+}
+
+export function useDeleteMaterial(projectId: number) {
+  const { handleDelete, pendingId, undo } = useOptimisticDelete<
+    ProjectInvoiceGroup[]
+  >({
+    projectId,
+    listQueryKey: ['project-materials', projectId],
+    co2Category: 'materials',
+    prepare: (snapshot, materialId) => {
+      const item = snapshot
+        ?.flatMap((g) => g.items)
+        .find((i) => i.id === materialId)
+      return {
+        updatedList:
+          snapshot?.map((g) => ({
+            ...g,
+            items: g.items.filter((i) => i.id !== materialId),
+          })) ?? [],
+        co2Delta: item?.total_co2_kg ?? 0,
+        entryCountDelta: 1,
+      }
+    },
+    deleteFn: deleteMaterial,
+    errorMessage: 'Kunne ikke slette materialposten',
+  })
+
+  return {
+    deleteMaterial: handleDelete,
+    pendingMaterialId: pendingId,
+    undoMaterialDelete: undo,
   }
 }
