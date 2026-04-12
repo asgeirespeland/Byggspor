@@ -67,10 +67,10 @@ Route handlers raise `ApiError(message, code=..., status=..., suggestion=...)` i
 
 Every request passes through this pipeline in order:
 
-1. **`open_session`** — Creates a request-scoped SQLAlchemy session stored on `g.db`
-2. **`run_authentication`** — Extracts Bearer token, verifies against Clerk JWKS, syncs user to local DB. Sets `g.current_user`, `g.current_user_id`, and `g.clerk_claims`. Public paths (`/health`) and CORS preflight (`OPTIONS`) skip verification.
-3. **Route handler** — The matching blueprint handles business logic
-4. **`close_session`** — Closes the DB session. Rolls back on error.
+1. **`open_session`**: Creates a request-scoped SQLAlchemy session stored on `g.db`
+2. **`run_authentication`**: Extracts Bearer token, verifies against Clerk JWKS, syncs user to local DB. Sets `g.current_user`, `g.current_user_id`, and `g.clerk_claims`. Public paths (`/health`) and CORS preflight (`OPTIONS`) skip verification.
+3. **Route handler**: The matching blueprint handles business logic
+4. **`close_session`**: Closes the DB session. Rolls back on error.
 
 ## API Endpoints
 
@@ -130,16 +130,16 @@ When creating a project, you can pass `customer_name` to auto-create a `CUSTOMER
 
 **Two-phase invoice flow:**
 
-**`/invoice/parse`** — Upload an EHF XML file as multipart form data (`file` field). Returns enriched line items with NOBB product data and CO₂ values. Uses the material catalog as a cache. Items missing EPD/GWP data are flagged for manual review.
+**`/invoice/parse`**: Upload an EHF XML file as multipart form data (`file` field). Returns enriched line items with NOBB product data and CO₂ values. Uses the material catalog as a cache. Items missing EPD/GWP data are flagged for manual review.
 
-**`/invoice/confirm`** — Accepts a JSON body with `project_id`, `invoice` (the full enriched data from parse), and optional `overrides` mapping line index to `{ total_co2_kg }`. Creates `MaterialInvoice`, upserts `Material` catalog entries, and creates `ProjectMaterial` records. Overridden items get `manual_override=True`, `confidence_score=90`, `flagged=False`.
+**`/invoice/confirm`**: Accepts a JSON body with `project_id`, `invoice` (the full enriched data from parse), and optional `overrides` mapping line index to `{ total_co2_kg }`. Creates `MaterialInvoice`, upserts `Material` catalog entries, and creates `ProjectMaterial` records. Overridden items get `manual_override=True`, `confidence_score=90`, `flagged=False`.
 
-**`/invoice/upload`** — Single-step alternative: parse, enrich, and persist in one call. Requires `project_id` as a form field. Creates:
+**`/invoice/upload`**: Single-step alternative: parse, enrich, and persist in one call. Requires `project_id` as a form field. Creates:
 - `MaterialInvoice` (source record)
 - `Material` catalog entries (upserted)
 - `ProjectMaterial` records linking materials to the project
 
-**`PATCH /invoice/materials/<material_id>`** — Update a material's CO₂ value post-confirmation. Accepts `{ total_co2_kg }` (negative values allowed for biogenic carbon). Sets `manual_override=True`, `confidence_score=90`, `flagged=False`.
+**`PATCH /invoice/materials/<material_id>`**: Update a material's CO₂ value post-confirmation. Accepts `{ total_co2_kg }` (negative values allowed for biogenic carbon). Sets `manual_override=True`, `confidence_score=90`, `flagged=False`.
 
 ### NOBB Lookup (`/nobb`)
 
@@ -187,14 +187,14 @@ Returns product info with EPD/GWP data if available. See [nobb-api.md](nobb-api.
 
 **Two-phase transport flow:**
 
-**`/transport/parse`** — Upload an Abax Turrapport XML as multipart form data (`file` field). Returns enriched trip data without persisting anything to the project. For each trip, the system:
+**`/transport/parse`**: Upload an Abax Turrapport XML as multipart form data (`file` field). Returns enriched trip data without persisting anything to the project. For each trip, the system:
 1. Parses trip data (driver, addresses, distance, expenses)
 2. Looks up/creates vehicle by registration number (vehicle catalog entries are persisted)
 3. Fetches CO₂/km from Vegvesen API if not cached
 4. Calculates `total_co2_kg = distance_km × co2_per_km`
 5. Flags trips where vehicle emission data is missing (confidence 20)
 
-**`/transport/confirm`** — Accepts a JSON body with `project_id`, `trips` (the full trip objects from parse), and `file_name`. Creates the `TransportReport` and `ProjectTransport` records. This separation allows users to review, remove, and edit trips before committing them to the database.
+**`/transport/confirm`**: Accepts a JSON body with `project_id`, `trips` (the full trip objects from parse), and `file_name`. Creates the `TransportReport` and `ProjectTransport` records. This separation allows users to review, remove, and edit trips before committing them to the database.
 
 ### Waste (`/waste`)
 
@@ -210,13 +210,13 @@ Returns product info with EPD/GWP data if available. See [nobb-api.md](nobb-api.
 
 **Two-phase waste flow:**
 
-**`/waste/parse`** — Upload a waste report XML as multipart form data (`file` field). The parser validates the XML root element (`WasteReport`), extracts receiver party info, and parses line items with product identifiers (GTIN, NOBB number) or NS 9431 waste fraction codes. Items are then enriched with CO₂ data from the NOBB API (C3/C4 GWP stages) or generic fraction-level emission factors. Returns enriched line items for user review.
+**`/waste/parse`**: Upload a waste report XML as multipart form data (`file` field). The parser validates the XML root element (`WasteReport`), extracts receiver party info, and parses line items with product identifiers (GTIN, NOBB number) or NS 9431 waste fraction codes. Items are then enriched with CO₂ data from the NOBB API (C3/C4 GWP stages) or generic fraction-level emission factors. Returns enriched line items for user review.
 
-**`/waste/confirm`** — Accepts a JSON body with `project_id`, `items` (enriched line items from parse), and optional `file_name`. Creates a `WasteInvoice` source record and `ProjectWasteItem` records for each confirmed item.
+**`/waste/confirm`**: Accepts a JSON body with `project_id`, `items` (enriched line items from parse), and optional `file_name`. Creates a `WasteInvoice` source record and `ProjectWasteItem` records for each confirmed item.
 
-**`/waste/manual`** — Accepts a JSON body with `project_id`, `waste_type`, `quantity_tons`, and optional `notes`. Validates waste type against supported types (metall, treverk, betong), calculates CO₂ using generic emission factors, and creates a `ProjectWasteItem` with `source_type=MANUAL`.
+**`/waste/manual`**: Accepts a JSON body with `project_id`, `waste_type`, `quantity_tons`, and optional `notes`. Validates waste type against supported types (metall, treverk, betong), calculates CO₂ using generic emission factors, and creates a `ProjectWasteItem` with `source_type=MANUAL`.
 
-**`PATCH /waste/items/<item_id>`** — Update a waste item's `waste_type`, `quantity_tons`, and/or `total_co2_kg`. Each field is optional.
+**`PATCH /waste/items/<item_id>`**: Update a waste item's `waste_type`, `quantity_tons`, and/or `total_co2_kg`. Each field is optional.
 
 ### Reports (`/report`)
 
@@ -278,8 +278,8 @@ Stateless parser for Abax Turrapport (driving log) XML exports. Handles encoded 
 
 Provides two functions for the two-phase transport flow:
 
-- **`preview_transport_report(session, xml_content)`** — Parses XML, looks up vehicles, calculates CO₂, and returns enriched trip data. Only vehicle catalog entries are persisted; no project data is written.
-- **`save_transport_report(session, project_id, trips, file_name)`** — Creates `TransportReport` and `ProjectTransport` records from confirmed trip data.
+- **`preview_transport_report(session, xml_content)`**: Parses XML, looks up vehicles, calculates CO₂, and returns enriched trip data. Only vehicle catalog entries are persisted; no project data is written.
+- **`save_transport_report(session, project_id, trips, file_name)`**: Creates `TransportReport` and `ProjectTransport` records from confirmed trip data.
 
 ### Vehicle Lookup (`vehicle_lookup.py`)
 
@@ -322,19 +322,19 @@ Quantities are normalized to tonnes (handles both `TON` and `KG` unit codes). It
 
 Enriches parsed waste report line items with CO₂ data from two sources:
 
-1. **Product-level (GTIN/NOBB)** — Checks the material catalog first (same caching as invoice enrichment), then falls back to the NOBB API. Extracts C3 (waste processing) + C4 (disposal) GWP stages from the EPD to calculate end-of-life CO₂ per product.
+1. **Product-level (GTIN/NOBB)**: Checks the material catalog first (same caching as invoice enrichment), then falls back to the NOBB API. Extracts C3 (waste processing) + C4 (disposal) GWP stages from the EPD to calculate end-of-life CO₂ per product.
 
-2. **Fraction-level (NS 9431)** — Uses generic emission factors (kg CO₂e per tonne) mapped to NS 9431 waste fraction codes. Covers common construction waste types: wood, paper, glass, metal, EE waste, concrete/minerals, plastic, and roofing materials.
+2. **Fraction-level (NS 9431)**: Uses generic emission factors (kg CO₂e per tonne) mapped to NS 9431 waste fraction codes. Covers common construction waste types: wood, paper, glass, metal, EE waste, concrete/minerals, plastic, and roofing materials.
 
 Each line item gets `enriched`, `flagged`, `co2_kg`, `co2_source` ("epd_c3c4" or "fraction_factor"), and `confidence` fields added.
 
 ### Waste Parser (`waste_parser.py`)
 
 Provides manual waste entry logic:
-- `normalize_waste_type` — Validates waste type against supported types (metall, treverk, betong)
-- `calculate_waste_co2` — Calculates CO₂ using placeholder emission factors (kg CO₂e per tonne)
-- `build_waste_item_data` — Builds a complete waste item payload for persistence with calculated CO₂ and confidence scores
-- `parse_waste_csv` — Parses CSV files with `waste_type` and `quantity_tons` columns
+- `normalize_waste_type`: Validates waste type against supported types (metall, treverk, betong)
+- `calculate_waste_co2`: Calculates CO₂ using placeholder emission factors (kg CO₂e per tonne)
+- `build_waste_item_data`: Builds a complete waste item payload for persistence with calculated CO₂ and confidence scores
+- `parse_waste_csv`: Parses CSV files with `waste_type` and `quantity_tons` columns
 
 ### User Sync (`user_sync.py`)
 
@@ -364,7 +364,7 @@ Project creators are automatically added as `OWNER` via an `after_insert` SQLAlc
 
 ### Shared Catalogs (caches)
 
-These are not owned by any project — they cache data from external APIs:
+These are not owned by any project. They cache data from external APIs:
 
 | Model | Table | Source | Key Fields |
 |-------|-------|--------|------------|

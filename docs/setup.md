@@ -262,7 +262,7 @@ docker compose up -d    # restart if needed
 
 - Verify `CLERK_ISSUER` is set correctly in `.env`
 - Make sure you're signed in on the frontend (the Bearer token is sent automatically)
-- `/health` is the only public route — all others require authentication
+- `/health` is the only public route; all others require authentication
 
 ### Frontend shows blank page or Clerk error
 
@@ -272,7 +272,7 @@ docker compose up -d    # restart if needed
 ### Pre-commit hooks fail
 
 - Run `pre-commit run --all-files` to see what fails
-- Most formatting issues are auto-fixed — just `git add` the changes and commit again
+- Most formatting issues are auto-fixed. Just `git add` the changes and commit again
 - If hooks aren't running at all, re-run `pre-commit install`
 
 ---

@@ -26,28 +26,28 @@ pytest tests/test_ehf_parser.py    # run a specific file
 pytest -k "test_extracts_gtin"     # run tests matching a pattern
 ```
 
-No PostgreSQL or external API credentials are needed — tests use an in-memory SQLite database and mock all external services.
+No PostgreSQL or external API credentials are needed. Tests use an in-memory SQLite database and mock all external services.
 
 ### Test Infrastructure (`conftest.py`)
 
 The shared fixtures provide a fully isolated test environment:
 
 **Database fixtures:**
-- `engine` (session-scoped) — Creates an in-memory SQLite engine and builds all tables from SQLAlchemy models. Shared across all tests for speed.
-- `db_session` (per-test) — Wraps each test in a transaction that rolls back after the test. Every test starts with a clean database.
+- `engine` (session-scoped): Creates an in-memory SQLite engine and builds all tables from SQLAlchemy models. Shared across all tests for speed.
+- `db_session` (per-test): Wraps each test in a transaction that rolls back after the test. Every test starts with a clean database.
 
 **Flask fixtures:**
-- `app` — Flask app with two patches applied:
+- `app`: Flask app with two patches applied:
   - `authenticate_request` → returns `None` (auth bypassed, requests proceed as authenticated)
   - `SessionLocal` → returns the test `db_session` (routes use SQLite instead of PostgreSQL)
-- `client` — Flask test client. Also patches `SessionLocal` in the invoice routes, which create their own sessions directly.
+- `client`: Flask test client. Also patches `SessionLocal` in the invoice routes, which create their own sessions directly.
 
 **Sample data fixtures:**
-- `minimal_ehf_xml` — Valid EHF invoice with one line item containing a GTIN
-- `ehf_xml_with_nobb` — EHF invoice with a NOBB number in `AdditionalItemProperty`
-- `ehf_xml_no_identifiers` — EHF invoice with a line item that has no GTIN or NOBB number (flagged)
-- `mock_nobb_item` — Detailed EPD format NOBB API response
-- `mock_nobb_search_response` — NOBB search result
+- `minimal_ehf_xml`: Valid EHF invoice with one line item containing a GTIN
+- `ehf_xml_with_nobb`: EHF invoice with a NOBB number in `AdditionalItemProperty`
+- `ehf_xml_no_identifiers`: EHF invoice with a line item that has no GTIN or NOBB number (flagged)
+- `mock_nobb_item`: Detailed EPD format NOBB API response
+- `mock_nobb_search_response`: NOBB search result
 
 ### Test Suites
 
@@ -120,8 +120,8 @@ pnpm test:watch        # watch mode (re-runs on file changes)
 Tests the `useInvoiceParse` hook's async state management using `renderHook` from React Testing Library.
 
 **Mocks:**
-- `@clerk/react` — `useAuth`/`getToken` returns a mock token
-- `@/shared/api/client` — `postFile` mocked to control responses
+- `@clerk/react`: `useAuth`/`getToken` returns a mock token
+- `@/shared/api/client`: `postFile` mocked to control responses
 
 | Test Group | What it tests |
 |-----------|---------------|
@@ -133,7 +133,7 @@ Tests the `useInvoiceParse` hook's async state management using `renderHook` fro
 
 #### Invoice Utils (`features/invoice/__tests__/utils.test.ts`)
 
-Pure function tests for `getGwpA1A3()` — no React, no mocks.
+Pure function tests for `getGwpA1A3()`: no React, no mocks.
 
 | Test | What it tests |
 |------|---------------|
@@ -149,7 +149,7 @@ Pure function tests for `getGwpA1A3()` — no React, no mocks.
 Tests the `useTransportParse` hook. Same pattern as invoice parse tests.
 
 **Mocks:**
-- `@/features/transport/api/transport` — `parseTransportFile` mocked
+- `@/features/transport/api/transport`: `parseTransportFile` mocked
 
 | Test Group | What it tests |
 |-----------|---------------|
