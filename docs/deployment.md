@@ -79,7 +79,7 @@ The backend runs on a personal Oracle Cloud Infrastructure (OCI) VM:
 - **OS:** Ubuntu 24.04
 - **Reverse proxy:** Caddy (automatic TLS via Let's Encrypt)
 - **Services:** Gunicorn (Flask/gevent) + PostgreSQL (Docker)
-- **Code:** Cloned directly from the repository — same codebase as development
+- **Code:** Cloned directly from the repository, same codebase as development
 
 ### Current Setup
 
@@ -121,9 +121,9 @@ docker compose up -d
 ### Reverse Proxy (Caddy)
 
 [Caddy](https://caddyserver.com/) runs as a systemd service on the VM, configured via `/etc/caddy/Caddyfile`. It provides:
-- **Automatic TLS** — Obtains and renews Let's Encrypt certificates for `api.byggspor.ksterud.dev` automatically via ACME
-- **Reverse proxy** — Forwards HTTPS traffic on ports 80/443 to Gunicorn on `127.0.0.1:5000`
-- **HTTP → HTTPS redirect** — Automatic
+- **Automatic TLS**: Obtains and renews Let's Encrypt certificates for `api.byggspor.ksterud.dev` automatically via ACME
+- **Reverse proxy**: Forwards HTTPS traffic on ports 80/443 to Gunicorn on `127.0.0.1:5000`
+- **HTTP → HTTPS redirect**: Automatic
 
 Caddy is managed via systemd:
 
@@ -135,7 +135,7 @@ sudo journalctl -u caddy -f     # View logs
 
 ### DNS
 
-`api.byggspor.ksterud.dev` is an **A** record in Cloudflare pointing to the OCI VM's public IP. Cloudflare proxy is **OFF** (DNS-only mode) — this is correct because Caddy handles TLS termination directly on the VM. Turning on Cloudflare proxy would cause a double-proxy setup and potentially interfere with Caddy's ACME certificate renewal.
+`api.byggspor.ksterud.dev` is an **A** record in Cloudflare pointing to the OCI VM's public IP. Cloudflare proxy is **OFF** (DNS-only mode). This is correct because Caddy handles TLS termination directly on the VM. Turning on Cloudflare proxy would cause a double-proxy setup and potentially interfere with Caddy's ACME certificate renewal.
 
 ### Environment Variables
 
@@ -215,9 +215,9 @@ The current deployment has addressed several foundational issues but still has i
 
 ### Resolved
 
-- **~~Flask Development Server~~** — Now using Gunicorn with gevent async workers (2 workers) behind a systemd service with automatic restart.
-- **~~No Automated Deployment~~** — Backend auto-deploys via systemd timer (3-minute polling) with health check verification.
-- **~~No Database Backups~~** — Nightly backups of PostgreSQL and MongoDB with 7-day retention.
+- **~~Flask Development Server~~**: Now using Gunicorn with gevent async workers (2 workers) behind a systemd service with automatic restart.
+- **~~No Automated Deployment~~**: Backend auto-deploys via systemd timer (3-minute polling) with health check verification.
+- **~~No Database Backups~~**: Nightly backups of PostgreSQL and MongoDB with 7-day retention.
 
 ### Clerk Development Mode
 

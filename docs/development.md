@@ -17,7 +17,7 @@ The repository uses a **feature branch** workflow with `main` as the production 
 | `ui/<name>` | UI-focused changes | `ui/cohesion` |
 | `<issue-number>-<description>` | Issue-linked branches | `15-user-and-organization-management-with-roles-mh3-sh2` |
 
-There is no `development` or `staging` branch. This is a deliberate choice — with GitHub free-tier private repos, branch protection rules are not available. A `development` branch without protection creates a risk of accidentally branching off or merging into the wrong branch, leading to diverged histories and painful merges. Keeping `main` as the single target branch keeps the workflow simple and avoids this class of problems.
+There is no `development` or `staging` branch. This is a deliberate choice. With GitHub free-tier private repos, branch protection rules are not available. A `development` branch without protection creates a risk of accidentally branching off or merging into the wrong branch, leading to diverged histories and painful merges. Keeping `main` as the single target branch keeps the workflow simple and avoids this class of problems.
 
 ### Branch Protection (Pre-commit Workaround)
 
@@ -37,10 +37,10 @@ The team follows these conventions (within the constraints of a GitHub free-tier
 1. **Create a feature branch** from `main`
 2. **Push and open a PR** against `main`
 3. **One team member must approve** before merging
-4. **CI must pass** — GitHub Actions runs lint, format check, tests, and build for both frontend and backend
+4. **CI must pass**: GitHub Actions runs lint, format check, tests, and build for both frontend and backend
 5. **Author merges their own PR** after approval and CI pass
 
-PRs are merged (not squashed or rebased) — the git history shows merge commits on `main`:
+PRs are merged (not squashed or rebased). The git history shows merge commits on `main`:
 
 ```
 f712df8 Merge pull request #43 from Naerverk/feature/energy-input
@@ -54,7 +54,7 @@ The team is not strict on commit message format but aims to prefix messages with
 
 Some commits use full conventional commit style with scope (`feat(frontend): ...`), others use just the prefix. Both are acceptable. Examples from the history:
 
-**Good — category prefix + descriptive:**
+**Good, category prefix + descriptive:**
 
 ```
 feat(frontend): add toast notifications and deferred loading states (#21)
@@ -62,7 +62,7 @@ feat(backend): add CO₂ summary endpoint and missing transport routes (#19)
 fix: correct price_zone type in EnergyRow onUpdate callback
 ```
 
-**Not great — missing category prefix, vague:**
+**Not great, missing category prefix, vague:**
 
 ```
 Redesigned the material Invoice
@@ -85,7 +85,7 @@ Backend and frontend changes should be committed separately when possible.
 | Target | Python 3.12 |
 | Quote style | Double quotes |
 | Rules | `E` (pycodestyle), `F` (pyflakes), `I` (isort), `W` (warnings) |
-| Ignored | `F821` (undefined names — needed for SQLAlchemy string forward references) |
+| Ignored | `F821` (undefined names, needed for SQLAlchemy string forward references) |
 | Excluded | `alembic/versions/` |
 
 ```bash
@@ -144,7 +144,7 @@ pre-commit install
 | 7 | `frontend-lint` | `frontend/src/**/*.{ts,tsx}` | ESLint |
 | 8 | `frontend-prettier` | `frontend/src/**/*.{ts,tsx,css,json}` | Prettier formatting with auto-fix |
 
-If a hook fails, the commit is blocked. Hooks 5, 6, and 8 auto-fix issues — stage the fixes (`git add`) and commit again.
+If a hook fails, the commit is blocked. Hooks 5, 6, and 8 auto-fix issues. Stage the fixes (`git add`) and commit again.
 
 To run all hooks manually:
 
@@ -184,10 +184,10 @@ GitHub Actions runs on every pull request to `main` and `development`. Both jobs
 
 The repository is a private repo on GitHub's free tier. The main limitation is that **all repository rules are unavailable**:
 
-- **No required status checks** — CI pass is enforced by team convention, not branch protection rules
-- **No required reviewers** — The one-approval requirement is enforced by team agreement
-- **No branch protection** — Handled via pre-commit hooks as a local workaround (see above)
-- **No CODEOWNERS** — Review routing is informal
+- **No required status checks**: CI pass is enforced by team convention, not branch protection rules
+- **No required reviewers**: The one-approval requirement is enforced by team agreement
+- **No branch protection**: Handled via pre-commit hooks as a local workaround (see above)
+- **No CODEOWNERS**: Review routing is informal
 
 Many of the pre-commit hooks (lint, format, branch protection) would ideally be repository rules enforced server-side, but the free tier does not support this. The hooks serve as a best-effort local substitute.
 
@@ -218,7 +218,7 @@ Actions minutes are sufficient for the current pipeline, and E2E tests are plann
 
 ### Backend
 
-No `package.json` — Python commands run directly:
+No `package.json`. Python commands run directly:
 
 | Command | Description |
 |---------|-------------|
@@ -234,19 +234,19 @@ No `package.json` — Python commands run directly:
 
 ### Backend
 
-1. **Model** — Add/modify SQLAlchemy model in `backend/app/models/`. Update `__init__.py` if adding a new model.
-2. **Migration** — Run `alembic revision --autogenerate -m "description"` and review the generated migration.
-3. **Service** — Add business logic in `backend/app/services/`. Keep route handlers thin.
-4. **Route** — Add a new blueprint in `backend/app/routes/` or extend an existing one. Register new blueprints in `main.py`.
-5. **Tests** — Add tests in `backend/tests/`. Use the `client` fixture for route tests, direct function calls for service tests.
+1. **Model**: Add/modify SQLAlchemy model in `backend/app/models/`. Update `__init__.py` if adding a new model.
+2. **Migration**: Run `alembic revision --autogenerate -m "description"` and review the generated migration.
+3. **Service**: Add business logic in `backend/app/services/`. Keep route handlers thin.
+4. **Route**: Add a new blueprint in `backend/app/routes/` or extend an existing one. Register new blueprints in `main.py`.
+5. **Tests**: Add tests in `backend/tests/`. Use the `client` fixture for route tests, direct function calls for service tests.
 
 ### Frontend
 
-1. **Feature module** — Create a new directory under `frontend/src/features/<name>/` with `components/`, `hooks/`, `types/`, and `index.ts`.
-2. **API hooks** — Use TanStack Query (`useQuery`/`useMutation`) in feature hook files. Use `useRequireToken()` for auth.
-3. **Route** — Add the route in `frontend/src/app/routes.tsx`. Wrap in `ProtectedRoute` if authenticated.
-4. **UI components** — Use shadcn/ui primitives from `components/ui/`. Add new primitives with `pnpm dlx shadcn@latest add <component>`.
-5. **Tests** — Co-locate tests in `__tests__/` directories within the feature module.
+1. **Feature module**: Create a new directory under `frontend/src/features/<name>/` with `components/`, `hooks/`, `types/`, and `index.ts`.
+2. **API hooks**: Use TanStack Query (`useQuery`/`useMutation`) in feature hook files. Use `useRequireToken()` for auth.
+3. **Route**: Add the route in `frontend/src/app/routes.tsx`. Wrap in `ProtectedRoute` if authenticated.
+4. **UI components**: Use shadcn/ui primitives from `components/ui/`. Add new primitives with `pnpm dlx shadcn@latest add <component>`.
+5. **Tests**: Co-locate tests in `__tests__/` directories within the feature module.
 
 ---
 

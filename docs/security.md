@@ -8,9 +8,9 @@
 
 Byggspor delegates identity management to [Clerk](https://clerk.com/) and layers its own role-based access control on top. The security model has three parts:
 
-1. **Authentication** — Clerk issues JWTs on the frontend; the backend verifies them against Clerk's JWKS endpoint on every request
-2. **Authorization** — Two tiers of RBAC (organization roles and project roles) enforced via middleware decorators
-3. **Secrets management** — All credentials live in environment variables, never in source control
+1. **Authentication**: Clerk issues JWTs on the frontend; the backend verifies them against Clerk's JWKS endpoint on every request
+2. **Authorization**: Two tiers of RBAC (organization roles and project roles) enforced via middleware decorators
+3. **Secrets management**: All credentials live in environment variables, never in source control
 
 ## Authentication Flow
 
@@ -44,7 +44,7 @@ The frontend uses Clerk's React SDK for all identity operations:
   3. Calls `/users/me` to sync the user profile and get the `organization_id`
   4. Fetches organization data and provides it via `AppContext`
   5. Redirects users without an organization to `/onboarding`
-- **`useRequireToken()`** is a shared hook that wraps `getToken()` with an error throw if auth is missing — used by feature hooks before making API calls
+- **`useRequireToken()`** is a shared hook that wraps `getToken()` with an error throw if auth is missing. Used by feature hooks before making API calls
 - **`apiRequest()` and `postFile()`** automatically attach `Authorization: Bearer <token>` headers when a token is provided
 
 ### Backend (JWT Verification)
@@ -53,16 +53,16 @@ Every request passes through the `authenticate_request` middleware registered as
 
 **Pipeline:**
 
-1. **Skip check** — CORS preflight (`OPTIONS`) and explicitly public paths (`/health`) pass through without a token
-2. **Extract token** — Reads the `Authorization: Bearer <token>` header
-3. **Verify JWT** — Validates the token using Clerk's JWKS public keys:
+1. **Skip check**: CORS preflight (`OPTIONS`) and explicitly public paths (`/health`) pass through without a token
+2. **Extract token**: Reads the `Authorization: Bearer <token>` header
+3. **Verify JWT**: Validates the token using Clerk's JWKS public keys:
    - Algorithm: `RS256`
    - Issuer: must match `CLERK_ISSUER`
    - Audience: verified only if `CLERK_JWT_AUDIENCE` is set
    - Expiry: checked with 60-second leeway
    - Subject (`sub`): must be present
-4. **Sync user** — Calls `upsert_user_from_clerk()` to create or update the local `User` record from the JWT claims
-5. **Set request context** — Populates `g.current_user`, `g.current_user_id`, and `g.clerk_claims`
+4. **Sync user**: Calls `upsert_user_from_clerk()` to create or update the local `User` record from the JWT claims
+5. **Set request context**: Populates `g.current_user`, `g.current_user_id`, and `g.clerk_claims`
 
 **Error responses:**
 
@@ -80,10 +80,10 @@ Every request passes through the `authenticate_request` middleware registered as
 
 On every authenticated request, the backend ensures the Clerk identity is linked to a local `User` record:
 
-1. **Lookup by `clerk_id`** — Finds the existing user linked to this Clerk account
-2. **Legacy link by email** — If no `clerk_id` match, looks for a user with the same email and no `clerk_id` (pre-Clerk accounts)
-3. **Update** — Keeps `clerk_id` and `email` in sync with Clerk; preserves locally-set profile name
-4. **Create** — Seeds a new user record from Clerk claims (`sub`, `email`, `name`/`given_name`+`family_name`)
+1. **Lookup by `clerk_id`**: Finds the existing user linked to this Clerk account
+2. **Legacy link by email**: If no `clerk_id` match, looks for a user with the same email and no `clerk_id` (pre-Clerk accounts)
+3. **Update**: Keeps `clerk_id` and `email` in sync with Clerk; preserves locally-set profile name
+4. **Create**: Seeds a new user record from Clerk claims (`sub`, `email`, `name`/`given_name`+`family_name`)
 
 New users are created with `is_system_admin = False`. System admin status can only be set by an existing system admin via `PATCH /users/<id>`.
 
@@ -93,8 +93,8 @@ New users are created with `is_system_admin = False`. System admin status can on
 
 | Path | Access |
 |------|--------|
-| `/health` | Public — no token required |
-| `OPTIONS` (any path) | Public — CORS preflight always passes |
+| `/health` | Public, no token required |
+| `OPTIONS` (any path) | Public, CORS preflight always passes |
 | Everything else | Requires valid Clerk JWT |
 
 There are no anonymous-access endpoints beyond `/health`.
@@ -114,11 +114,11 @@ Enforced by the `@require_org_role()` decorator on organization routes. The deco
 3. Returns 403 if the user's role is not in the allowed list
 
 **Currently applied to:**
-- `GET /organizations/<id>` — any org role
-- `PATCH /organizations/<id>` — OWNER, ADMIN
-- `GET /organizations/<id>/members` — OWNER, ADMIN
-- `POST /organizations/<id>/members` — OWNER, ADMIN
-- `DELETE /organizations/<id>/members/<user_id>` — OWNER, ADMIN
+- `GET /organizations/<id>`: any org role
+- `PATCH /organizations/<id>`: OWNER, ADMIN
+- `GET /organizations/<id>/members`: OWNER, ADMIN
+- `POST /organizations/<id>/members`: OWNER, ADMIN
+- `DELETE /organizations/<id>/members/<user_id>`: OWNER, ADMIN
 
 ### Project Roles
 
@@ -128,7 +128,7 @@ Enforced by the `@require_org_role()` decorator on organization routes. The deco
 | `EDITOR` | Read and write project data |
 | `VIEWER` | Read-only project access |
 
-Enforced by the `@require_project_role()` decorator. Same pattern as org roles — extracts `project_id` from route parameters and checks membership.
+Enforced by the `@require_project_role()` decorator. Same pattern as org roles: extracts `project_id` from route parameters and checks membership.
 
 Project creators are automatically assigned the `OWNER` role via a SQLAlchemy `after_insert` event on the `Project` model.
 
@@ -147,12 +147,12 @@ This allows system admins to access any organization or project regardless of me
 
 Several routes currently rely only on authentication (valid JWT) without checking organization or project membership:
 
-- **Invoice routes** (`/invoice/*`) — No org/project role checks
-- **Transport routes** (`/transport/*`) — No org/project role checks
-- **Energy routes** (`/energy/*`) — No org/project role checks
-- **Report routes** (`/report/*`) — No org/project role checks
-- **NOBB routes** (`/nobb/*`) — No org/project role checks
-- **Project routes** (`/projects/*`) — Scoped to user's org via query filter, but no role decorator
+- **Invoice routes** (`/invoice/*`): No org/project role checks
+- **Transport routes** (`/transport/*`): No org/project role checks
+- **Energy routes** (`/energy/*`): No org/project role checks
+- **Report routes** (`/report/*`): No org/project role checks
+- **NOBB routes** (`/nobb/*`): No org/project role checks
+- **Project routes** (`/projects/*`): Scoped to user's org via query filter, but no role decorator
 
 These routes are protected by authentication (you must be signed in), but any authenticated user could theoretically access any project's data if they know the project ID. The org-scoping in project routes provides partial protection via query filtering, but the data routes (invoice, transport, energy) don't have equivalent scoping.
 
@@ -186,15 +186,15 @@ Only `.env.example` (with placeholder values and the shared dev Clerk instance) 
 
 ### Credential Handling in External API Clients
 
-- **NOBB client** — Reads `NOBB_API_USERNAME` and `NOBB_API_PASSWORD` from environment on each session creation. Uses HTTP Basic Auth. Raises `RuntimeError` if credentials are missing.
-- **Vegvesen client** — Reads `SVV_API_KEY` from environment. Sends as `SVV-Authorization: Apikey <key>` header. Raises `RuntimeError` if missing.
-- **Clerk** — Backend reads `CLERK_ISSUER` from environment. Raises `RuntimeError` if missing. The JWKS URL is derived from the issuer unless overridden.
+- **NOBB client**: Reads `NOBB_API_USERNAME` and `NOBB_API_PASSWORD` from environment on each session creation. Uses HTTP Basic Auth. Raises `RuntimeError` if credentials are missing.
+- **Vegvesen client**: Reads `SVV_API_KEY` from environment. Sends as `SVV-Authorization: Apikey <key>` header. Raises `RuntimeError` if missing.
+- **Clerk**: Backend reads `CLERK_ISSUER` from environment. Raises `RuntimeError` if missing. The JWKS URL is derived from the issuer unless overridden.
 
 Both external API clients use `requests.Session` with retry logic (3 retries with backoff on 429/5xx status codes).
 
 ### Frontend Secrets
 
-The only frontend credential is `VITE_CLERK_PUBLISHABLE_KEY`. This is a **publishable** key by design — it identifies the Clerk application but cannot be used to perform authenticated actions. Clerk's security model assumes publishable keys are visible in client-side code.
+The only frontend credential is `VITE_CLERK_PUBLISHABLE_KEY`. This is a **publishable** key by design: it identifies the Clerk application but cannot be used to perform authenticated actions. Clerk's security model assumes publishable keys are visible in client-side code.
 
 No other secrets are exposed to the frontend. The `VITE_API_URL` defaults to `http://localhost:5000` and is not a secret.
 
@@ -225,21 +225,21 @@ All changes to `main` and `development` must go through pull requests. GitHub Ac
 
 ### Current Strengths
 
-- **Delegated auth** — Clerk handles password storage, session management, and MFA. No password handling in application code.
-- **JWT verification** — RS256 signature verification against JWKS with issuer and expiry checks. No shared secrets for token signing.
-- **Secret isolation** — All credentials in environment variables, excluded from git.
-- **User sync** — Local user records are derived from Clerk, not independently managed. No separate user registration.
-- **Pre-commit hooks** — Automated linting, formatting, and branch protection on every commit.
+- **Delegated auth**: Clerk handles password storage, session management, and MFA. No password handling in application code.
+- **JWT verification**: RS256 signature verification against JWKS with issuer and expiry checks. No shared secrets for token signing.
+- **Secret isolation**: All credentials in environment variables, excluded from git.
+- **User sync**: Local user records are derived from Clerk, not independently managed. No separate user registration.
+- **Pre-commit hooks**: Automated linting, formatting, and branch protection on every commit.
 
 ### Known Limitations
 
-- **CORS is wide open** — `CORS(app)` with no origin restrictions. Should be locked to the frontend origin in production.
-- **Authorization gaps** — Most data routes lack org/project role enforcement (see Authorization Gaps above).
-- **No rate limiting** — No rate limiting on any endpoint. The external API clients have retry logic but the backend itself has no request throttling.
-- **No CSRF protection** — Relies on JWT Bearer tokens (not cookies) so traditional CSRF is not applicable, but there are no additional CSRF headers.
-- **Debug logging** — `authenticate_request` prints the authorization header to stdout (`print("AUTH HEADER:", ...)`). This should be removed in production.
-- **No input validation framework** — Request body validation is done ad-hoc in route handlers rather than through a schema validation library (e.g., Marshmallow, Pydantic).
-- **Clerk development instance** — All environments (local and deployed) use a Clerk dev instance. Dev instances have relaxed security and are not suitable for production. See [Deployment](deployment.md) for details.
+- **CORS is wide open**: `CORS(app)` with no origin restrictions. Should be locked to the frontend origin in production.
+- **Authorization gaps**: Most data routes lack org/project role enforcement (see Authorization Gaps above).
+- **No rate limiting**: No rate limiting on any endpoint. The external API clients have retry logic but the backend itself has no request throttling.
+- **No CSRF protection**: Relies on JWT Bearer tokens (not cookies) so traditional CSRF is not applicable, but there are no additional CSRF headers.
+- **Debug logging**: `authenticate_request` prints the authorization header to stdout (`print("AUTH HEADER:", ...)`). This should be removed in production.
+- **No input validation framework**: Request body validation is done ad-hoc in route handlers rather than through a schema validation library (e.g., Marshmallow, Pydantic).
+- **Clerk development instance**: All environments (local and deployed) use a Clerk dev instance. Dev instances have relaxed security and are not suitable for production. See [Deployment](deployment.md) for details.
 
 ---
 

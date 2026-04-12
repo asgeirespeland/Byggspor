@@ -130,10 +130,10 @@ features/
 
 Every request passes through this pipeline:
 
-1. **`open_session`** — Creates a request-scoped SQLAlchemy database session (`g.db`)
-2. **`run_authentication`** — Verifies the Clerk JWT, syncs the user to the local DB, sets `g.current_user` and `g.current_user_id`. Public paths (`/health`) skip this.
-3. **Route handler** — The matching blueprint handles the request
-4. **`close_session`** — Closes the DB session, rolling back on error
+1. **`open_session`**: Creates a request-scoped SQLAlchemy database session (`g.db`)
+2. **`run_authentication`**: Verifies the Clerk JWT, syncs the user to the local DB, sets `g.current_user` and `g.current_user_id`. Public paths (`/health`) skip this.
+3. **Route handler**: The matching blueprint handles the request
+4. **`close_session`**: Closes the DB session, rolling back on error
 
 ### Blueprint Organization
 
@@ -157,16 +157,16 @@ Business logic is separated from route handlers into service modules:
 
 | Service | Purpose |
 |---------|---------|
-| `nobb_client.py` | NOBB Export API client — product search, detail fetch, EPD/GWP extraction |
-| `vegvesen_client.py` | Statens vegvesen API — vehicle lookup by registration number, CO₂/km extraction |
+| `nobb_client.py` | NOBB Export API client: product search, detail fetch, EPD/GWP extraction |
+| `vegvesen_client.py` | Statens vegvesen API: vehicle lookup by registration number, CO₂/km extraction |
 | `ehf_parser.py` | Parses EHF (Electronic Handelsformat) XML invoices into structured line items |
 | `transport_parser.py` | Parses Abax Turrapport XML into individual transport trips |
-| `material_service.py` | Material enrichment — NOBB lookup, CO₂ calculation, caching |
-| `transport_service.py` | Transport enrichment — vehicle lookup, emission calculation |
+| `material_service.py` | Material enrichment: NOBB lookup, CO₂ calculation, caching |
+| `transport_service.py` | Transport enrichment: vehicle lookup, emission calculation |
 | `invoice_enrichment.py` | Enriches parsed invoice data with CO₂ values from NOBB/EPD lookups |
-| `waste_report_parser.py` | Parses waste report XML — extracts items with GTIN/NOBB or NS 9431 fraction codes |
+| `waste_report_parser.py` | Parses waste report XML, extracts items with GTIN/NOBB or NS 9431 fraction codes |
 | `waste_enrichment.py` | Enriches waste items with CO₂ via NOBB C3/C4 stages or generic fraction factors |
-| `waste_parser.py` | Manual waste entry logic — type validation, CO₂ calculation, CSV parsing |
+| `waste_parser.py` | Manual waste entry logic: type validation, CO₂ calculation, CSV parsing |
 | `vehicle_lookup.py` | Vehicle data lookup and caching logic |
 | `user_sync.py` | Syncs Clerk user claims to local User model on first login |
 
@@ -189,22 +189,22 @@ Two levels of RBAC enforced via middleware decorators:
 
 The data model has three layers:
 
-**1. Identity & Access** — Users, Organizations, and their memberships
+**1. Identity & Access**: Users, Organizations, and their memberships
 ```
 User ──┬── OrganizationMember ──── Organization
        └── ProjectMember ────────── Project
 ```
 
-**2. Shared Catalogs** — Cached data from external APIs (not owned by any project)
+**2. Shared Catalogs**: Cached data from external APIs (not owned by any project)
 ```
-Material        (NOBB product cache — one record per GTIN/NOBB number)
-Vehicle         (Vegvesen vehicle cache — one record per registration number)
+Material        (NOBB product cache, one record per GTIN/NOBB number)
+Vehicle         (Vegvesen vehicle cache, one record per registration number)
 MaterialInvoice (source metadata for uploaded EHF files)
 TransportReport (source metadata for uploaded Abax XML files)
 WasteInvoice    (source metadata for uploaded waste reports)
 ```
 
-**3. Project Data** — Per-project records linking to catalogs and sources
+**3. Project Data**: Per-project records linking to catalogs and sources
 ```
 Project ──┬── ProjectMaterial   → Material + MaterialInvoice
           ├── ProjectTransport  → Vehicle + TransportReport

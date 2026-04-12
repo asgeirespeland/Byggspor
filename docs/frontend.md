@@ -110,45 +110,45 @@ Each feature encapsulates its own components, hooks, API calls, types, and tests
 ### auth
 
 **Components:**
-- `AuthLayout` — Split-screen layout with branding panel (left) and Clerk sign-in/sign-up form (right). Responsive: branding panel hidden on mobile.
-- `ProtectedRoute` — Auth gate that syncs user profile and provides `AppContext`.
+- `AuthLayout`: Split-screen layout with branding panel (left) and Clerk sign-in/sign-up form (right). Responsive: branding panel hidden on mobile.
+- `ProtectedRoute`: Auth gate that syncs user profile and provides `AppContext`.
 
 ### dashboard
 
 **Components:**
-- `GlobalDashboard` — Organization-level overview showing stat cards (project count, transport, invoices, CO₂ estimate) and a searchable project list with create dialog.
-- `ProjectDashboard` — Single project view with:
+- `GlobalDashboard`: Organization-level overview showing stat cards (project count, transport, invoices, CO₂ estimate) and a searchable project list with create dialog.
+- `ProjectDashboard`: Single project view with:
   - Breadcrumb navigation with project status badge
   - KPI row showing CO₂ totals per category (materials, transport, waste, energy) with icons
   - Tabbed content panel for data entry (Materials, Transport, Waste, Energy)
   - Project sidebar with details and confidence gauge
-- `KpiCard` — Stat card displaying a label, value, unit, and icon with accent background.
-- `ProjectCard` — Clickable project card showing name, status, customer, and project number.
-- `ProjectSidebar` — Right-side panel showing project metadata, overall confidence score, flagged items widget, and confidence info link.
-- `ConfidenceGauge` — Visual confidence indicator.
-- `ConfidenceInfo` — Dialog explaining the confidence score scale (0–49 Lav, 50–79 Middels, 80–100 Høy) with tips on how to improve the score.
-- `FlaggedItems` — Sidebar widget listing flagged materials and transports that need attention. Supports inline CO₂ correction for materials and navigation to transport tab. Dismissable per-session ("Skjul") or permanently per-project (X button, stored in localStorage).
-- `CreateProjectDialog` — Form dialog for creating new projects with name, project number, and customer.
+- `KpiCard`: Stat card displaying a label, value, unit, and icon with accent background.
+- `ProjectCard`: Clickable project card showing name, status, customer, and project number.
+- `ProjectSidebar`: Right-side panel showing project metadata, overall confidence score, flagged items widget, and confidence info link.
+- `ConfidenceGauge`: Visual confidence indicator.
+- `ConfidenceInfo`: Dialog explaining the confidence score scale (0–49 Lav, 50–79 Middels, 80–100 Høy) with tips on how to improve the score.
+- `FlaggedItems`: Sidebar widget listing flagged materials and transports that need attention. Supports inline CO₂ correction for materials and navigation to transport tab. Dismissable per-session ("Skjul") or permanently per-project (X button, stored in localStorage).
+- `CreateProjectDialog`: Form dialog for creating new projects with name, project number, and customer.
 
 **Hooks:**
-- `useCo2Summary` — Fetches the CO₂ summary from `/report/project/:id/co2-summary`.
+- `useCo2Summary`: Fetches the CO₂ summary from `/report/project/:id/co2-summary`.
 
 **Tabs:**
-- `EnergyTab` — Renders the `EnergyInput` component.
-- `TransportTab` — Renders the `TransportUpload` component.
-- `WasteTab` — Renders the `WasteUpload` component.
+- `EnergyTab`: Renders the `EnergyInput` component.
+- `TransportTab`: Renders the `TransportUpload` component.
+- `WasteTab`: Renders the `WasteUpload` component.
 
 ### energy
 
 **Components:**
-- `EnergyInput` — Form for manual kWh entry with price zone and date selection. Displays a scrollable table of existing entries using shared `EditableRow` for inline editing and deletion. Shows summary cards for total kWh and total CO₂.
+- `EnergyInput`: Form for manual kWh entry with price zone and date selection. Displays a scrollable table of existing entries using shared `EditableRow` for inline editing and deletion. Shows summary cards for total kWh and total CO₂.
 
 **Hooks:**
-- `useEnergies` — Fetches energy entries for a project.
-- `usePriceZones` — Fetches available Norwegian price zones.
-- `useCalculateEnergy` — Mutation to create a new energy entry.
-- `useUpdateEnergy` — Mutation to update an existing entry (recalculates CO₂).
-- `useDeleteEnergy` — Optimistic delete with inline undo bar and CO₂ summary cache adjustment.
+- `useEnergies`: Fetches energy entries for a project.
+- `usePriceZones`: Fetches available Norwegian price zones.
+- `useCalculateEnergy`: Mutation to create a new energy entry.
+- `useUpdateEnergy`: Mutation to update an existing entry (recalculates CO₂).
+- `useDeleteEnergy`: Optimistic delete with inline undo bar and CO₂ summary cache adjustment.
 
 **Types:**
 - `EnergyEntry`, `EnergyUpdateInput`, `PriceZone`
@@ -156,20 +156,20 @@ Each feature encapsulates its own components, hooks, API calls, types, and tests
 ### invoice
 
 **Components:**
-- `InvoiceUpload` — Two-phase invoice flow: file drop zone for EHF XML → parse/preview → user review → confirm. After confirmation, displays uploaded invoices grouped by source with material line items.
-- `InvoicePreview` — Review table shown after parsing. Displays enriched line items with flags ("Mangler ID", "Mangler EPD"), inline CO₂ input for flagged items, inline editing, override tracking, and summary badges. Supports fullscreen expand. Negative CO₂ values allowed (biogenic carbon).
-- `InvoiceGroupCard` — Collapsible card showing a confirmed invoice's supplier, date, and material line items. Uses shared `EditableRow` for inline editing and deletion of individual materials.
-- `InvoiceTable` — Table displaying material line items with product name, GTIN, quantity, price, CO₂, and EPD badge.
-- `InvoiceTotalCo2` — Summary bar showing total CO₂ for an invoice group.
-- `EpdBadge` — Badge indicating EPD status (has EPD / no EPD / flagged).
-- `Co2Value` — Formatted CO₂ value display with unit.
+- `InvoiceUpload`: Two-phase invoice flow: file drop zone for EHF XML → parse/preview → user review → confirm. After confirmation, displays uploaded invoices grouped by source with material line items.
+- `InvoicePreview`: Review table shown after parsing. Displays enriched line items with flags ("Mangler ID", "Mangler EPD"), inline CO₂ input for flagged items, inline editing, override tracking, and summary badges. Supports fullscreen expand. Negative CO₂ values allowed (biogenic carbon).
+- `InvoiceGroupCard`: Collapsible card showing a confirmed invoice's supplier, date, and material line items. Uses shared `EditableRow` for inline editing and deletion of individual materials.
+- `InvoiceTable`: Table displaying material line items with product name, GTIN, quantity, price, CO₂, and EPD badge.
+- `InvoiceTotalCo2`: Summary bar showing total CO₂ for an invoice group.
+- `EpdBadge`: Badge indicating EPD status (has EPD / no EPD / flagged).
+- `Co2Value`: Formatted CO₂ value display with unit.
 
 **Hooks:**
-- `useInvoiceParse` — Parses an uploaded EHF file (preview, no persistence).
-- `useProjectMaterials` — Fetches all materials for a project grouped by invoice.
-- `useUpdateMaterial` — Mutation to update a material's CO₂ value (calls `PATCH /invoice/materials/:id`).
-- `useDeleteMaterial` — Optimistic single-material delete with inline undo bar. Filters empty groups after last material deleted.
-- `useDeleteInvoice` — Optimistic delete with inline undo bar and CO₂ summary cache adjustment.
+- `useInvoiceParse`: Parses an uploaded EHF file (preview, no persistence).
+- `useProjectMaterials`: Fetches all materials for a project grouped by invoice.
+- `useUpdateMaterial`: Mutation to update a material's CO₂ value (calls `PATCH /invoice/materials/:id`).
+- `useDeleteMaterial`: Optimistic single-material delete with inline undo bar. Filters empty groups after last material deleted.
+- `useDeleteInvoice`: Optimistic delete with inline undo bar and CO₂ summary cache adjustment.
 
 **Types:**
 - `InvoiceResponse`, `LineItem`, `NobbData`, `EpdData`, `ProjectInvoiceGroup`, `ProjectMaterialItem`
@@ -177,21 +177,21 @@ Each feature encapsulates its own components, hooks, API calls, types, and tests
 ### transport
 
 **Components:**
-- `TransportUpload` — File drop zone for Abax XML upload plus manual trip entry toggle. After parsing, shows preview with confirm/remove actions. Below, displays previously uploaded reports.
-- `TransportPreview` — Preview table of parsed trips with vehicle info, distance, CO₂, and confidence. Supports per-trip removal, inline editing, bulk confirm, and fullscreen expand.
-- `TransportManualInput` — Manual trip entry form.
-- `TransportGroupCard` — Collapsible card for an uploaded transport report with its trips. Uses `TransportRow` for inline editing and deletion of individual trips.
-- `TransportRow` — Editable row for a confirmed trip, built on shared `EditableRow`. Columns: driver, date, vehicle, distance (km), CO₂ (kg).
-- `TransportTotalCo2` — Summary bar for transport CO₂.
-- `Co2Badge` — CO₂ value badge with confidence coloring.
-- `VehicleInfoModal` — Modal showing vehicle details with edit capability.
+- `TransportUpload`: File drop zone for Abax XML upload plus manual trip entry toggle. After parsing, shows preview with confirm/remove actions. Below, displays previously uploaded reports.
+- `TransportPreview`: Preview table of parsed trips with vehicle info, distance, CO₂, and confidence. Supports per-trip removal, inline editing, bulk confirm, and fullscreen expand.
+- `TransportManualInput`: Manual trip entry form.
+- `TransportGroupCard`: Collapsible card for an uploaded transport report with its trips. Uses `TransportRow` for inline editing and deletion of individual trips.
+- `TransportRow`: Editable row for a confirmed trip, built on shared `EditableRow`. Columns: driver, date, vehicle, distance (km), CO₂ (kg).
+- `TransportTotalCo2`: Summary bar for transport CO₂.
+- `Co2Badge`: CO₂ value badge with confidence coloring.
+- `VehicleInfoModal`: Modal showing vehicle details with edit capability.
 
 **Hooks:**
-- `useTransportParse` — Parses an Abax file (preview only, no persistence).
-- `useProjectTransports` — Fetches all transport trips for a project grouped by report.
-- `useDeleteTransportReport` — Optimistic delete with inline undo bar and CO₂ summary cache adjustment.
-- `useDeleteTrip` — Optimistic single-trip delete with inline undo bar inside the report card. Filters empty groups after last trip deleted.
-- `useUpdateTrip` — Mutation to update trip fields (driver, date, distance).
+- `useTransportParse`: Parses an Abax file (preview only, no persistence).
+- `useProjectTransports`: Fetches all transport trips for a project grouped by report.
+- `useDeleteTransportReport`: Optimistic delete with inline undo bar and CO₂ summary cache adjustment.
+- `useDeleteTrip`: Optimistic single-trip delete with inline undo bar inside the report card. Filters empty groups after last trip deleted.
+- `useUpdateTrip`: Mutation to update trip fields (driver, date, distance).
 
 **Types:**
 - `TransportParseResult`, `TransportTrip`, `VehicleInfo`
@@ -199,19 +199,19 @@ Each feature encapsulates its own components, hooks, API calls, types, and tests
 ### waste
 
 **Components:**
-- `WasteUpload` — File drop zone for waste report XML upload plus manual waste entry. After parsing, shows preview with confirm/cancel actions. Below, displays previously registered waste data.
-- `WastePreview` — Preview table of parsed waste items with material name, fraction code, tonnage, CO₂, and source (EPD or generic). Supports inline editing and row deletion. Supports fullscreen expand.
-- `WasteGroupCard` — Collapsible card for a waste report or manual group with its items. Uses shared `EditableRow` for inline editing and deletion. Supports group-level deletion (report delete or individual item delete for manual entries).
-- `WasteManualInput` — Manual waste entry form with waste type, quantity (tons), and optional notes.
-- `WasteInput` — Container component that renders `WasteUpload` and the list of existing waste groups.
+- `WasteUpload`: File drop zone for waste report XML upload plus manual waste entry. After parsing, shows preview with confirm/cancel actions. Below, displays previously registered waste data.
+- `WastePreview`: Preview table of parsed waste items with material name, fraction code, tonnage, CO₂, and source (EPD or generic). Supports inline editing and row deletion. Supports fullscreen expand.
+- `WasteGroupCard`: Collapsible card for a waste report or manual group with its items. Uses shared `EditableRow` for inline editing and deletion. Supports group-level deletion (report delete or individual item delete for manual entries).
+- `WasteManualInput`: Manual waste entry form with waste type, quantity (tons), and optional notes.
+- `WasteInput`: Container component that renders `WasteUpload` and the list of existing waste groups.
 
 **Hooks:**
-- `useWasteParse` — Parses an uploaded waste report XML (preview only, no persistence).
-- `useProjectWaste` — Fetches all waste items for a project grouped by source.
-- `useCreateManualWaste` — Mutation to create a manual waste entry.
-- `useUpdateWasteItem` — Mutation to update a waste item's type, quantity, or CO₂.
-- `useDeleteWasteItem` — Optimistic single-item delete with inline undo bar. Filters empty groups after last item deleted.
-- `useDeleteWasteReport` — Optimistic report delete with inline undo bar and CO₂ summary cache adjustment.
+- `useWasteParse`: Parses an uploaded waste report XML (preview only, no persistence).
+- `useProjectWaste`: Fetches all waste items for a project grouped by source.
+- `useCreateManualWaste`: Mutation to create a manual waste entry.
+- `useUpdateWasteItem`: Mutation to update a waste item's type, quantity, or CO₂.
+- `useDeleteWasteItem`: Optimistic single-item delete with inline undo bar. Filters empty groups after last item deleted.
+- `useDeleteWasteReport`: Optimistic report delete with inline undo bar and CO₂ summary cache adjustment.
 
 **Types:**
 - `WasteItem`, `WasteGroup`, `WasteLineItem`, `WasteParseResponse`, `CreateManualWastePayload`, `WasteSourceType`
@@ -219,34 +219,34 @@ Each feature encapsulates its own components, hooks, API calls, types, and tests
 ### onboarding
 
 **Components:**
-- `OnboardingPage` — Organization creation form (name, org number). Required on first login before accessing the dashboard. Creates a `COMPANY` type organization and assigns the user as `OWNER`.
+- `OnboardingPage`: Organization creation form (name, org number). Required on first login before accessing the dashboard. Creates a `COMPANY` type organization and assigns the user as `OWNER`.
 
 ### organization
 
 **Components:**
-- `OrgSettings` — Organization member list with search and add dialog.
-- `MemberCard` — Displays a member's name, email, and role.
-- `AddMemberDialog` — Dialog for adding members by user ID with role selection.
+- `OrgSettings`: Organization member list with search and add dialog.
+- `MemberCard`: Displays a member's name, email, and role.
+- `AddMemberDialog`: Dialog for adding members by user ID with role selection.
 
 ### project
 
 **Hooks:**
-- `useProjects` — Fetches all projects for the user's organization.
-- `useProject` — Fetches a single project by ID.
-- `useCreateProject` — Mutation to create a new project.
+- `useProjects`: Fetches all projects for the user's organization.
+- `useProject`: Fetches a single project by ID.
+- `useCreateProject`: Mutation to create a new project.
 
 **Constants:**
-- `STATUS_CONFIG` — Visual config for project statuses (active/completed/archived) including labels, colors, and dot styles.
+- `STATUS_CONFIG`: Visual config for project statuses (active/completed/archived) including labels, colors, and dot styles.
 
 ### settings
 
 **Components:**
-- `SettingsPage` — Placeholder page ("Kommer snart").
+- `SettingsPage`: Placeholder page ("Kommer snart").
 
 ### user
 
 **Components:**
-- `UserProfile` — User profile page.
+- `UserProfile`: User profile page.
 
 ## Shared Module
 
@@ -254,8 +254,8 @@ Each feature encapsulates its own components, hooks, API calls, types, and tests
 
 Two functions for communicating with the backend:
 
-- **`apiRequest<T>(endpoint, options?)`** — Generic JSON request. Adds `Authorization: Bearer <token>` when provided. Parses JSON response and throws `ApiError` on non-OK status.
-- **`postFile<T>(endpoint, file, token?)`** — Multipart file upload using `FormData`. Used for invoice and transport XML uploads.
+- **`apiRequest<T>(endpoint, options?)`**: Generic JSON request. Adds `Authorization: Bearer <token>` when provided. Parses JSON response and throws `ApiError` on non-OK status.
+- **`postFile<T>(endpoint, file, token?)`**: Multipart file upload using `FormData`. Used for invoice and transport XML uploads.
 
 Both use `VITE_API_URL` (defaults to `http://localhost:5000`) as the base URL.
 
@@ -278,7 +278,7 @@ TanStack Query configured with:
 | `useDeferredLoading` | Prevents loading spinner flicker on fast responses using `useDeferredValue` |
 | `useFileSelect` | File selection state with validation (accepts/rejects, error message, clear) |
 | `useScrollIndicators` | Detects horizontal scroll overflow for tab bars (shows chevron indicators) |
-| `useInlineUndo` | Manages timed undo state — schedules a deferred action with rollback, auto-confirms on timeout or unmount |
+| `useInlineUndo` | Manages timed undo state. Schedules a deferred action with rollback, auto-confirms on timeout or unmount |
 | `useOptimisticDelete` | Shared hook for optimistic delete + inline undo across all categories. Handles cache snapshot, optimistic list/CO₂ removal, timed API call, and rollback on undo or error |
 
 ### Shared Components
@@ -313,7 +313,7 @@ OrgMemberDto   { id, user_id, role, user: { name, email } }
 
 ### Tailwind CSS 4
 
-Utility-first CSS framework. Imports are in `index.css`. No custom Tailwind config file — uses CSS-based configuration (Tailwind 4 default).
+Utility-first CSS framework. Imports are in `index.css`. No custom Tailwind config file; uses CSS-based configuration (Tailwind 4 default).
 
 ### shadcn/ui
 
