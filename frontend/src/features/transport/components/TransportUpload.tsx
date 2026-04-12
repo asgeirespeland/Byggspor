@@ -106,7 +106,7 @@ export default function TransportUpload({ projectId }: Props) {
         {showManual && (
           <TransportManualInput
             projectId={projectId}
-            onTripCreated={() => {}}
+            onTripCreated={invalidateTransportData}
           />
         )}
       </div>

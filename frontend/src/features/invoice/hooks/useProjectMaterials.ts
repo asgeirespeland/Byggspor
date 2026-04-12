@@ -74,10 +74,12 @@ export function useDeleteMaterial(projectId: number) {
         .find((i) => i.id === materialId)
       return {
         updatedList:
-          snapshot?.map((g) => ({
-            ...g,
-            items: g.items.filter((i) => i.id !== materialId),
-          })) ?? [],
+          snapshot
+            ?.map((g) => ({
+              ...g,
+              items: g.items.filter((i) => i.id !== materialId),
+            }))
+            .filter((g) => g.items.length > 0) ?? [],
         co2Delta: item?.total_co2_kg ?? 0,
         entryCountDelta: 1,
       }
