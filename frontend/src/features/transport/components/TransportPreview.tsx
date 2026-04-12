@@ -92,7 +92,7 @@ const columns: Column<Trip>[] = [
   },
 ]
 
-export default function TransportTripTable({
+export default function TransportPreview({
   data,
   setData,
   onConfirm,

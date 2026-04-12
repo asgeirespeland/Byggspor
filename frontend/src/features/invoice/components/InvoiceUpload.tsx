@@ -10,7 +10,7 @@ import {
   useProjectMaterials,
   useDeleteInvoice,
 } from '../hooks/useProjectMaterials'
-import InvoicePreviewTable from './InvoicePreviewTable'
+import InvoicePreview from './InvoicePreview'
 import InvoiceGroupCard from './InvoiceGroupCard'
 
 interface Props {
@@ -42,7 +42,7 @@ export default function InvoiceUpload({ projectId }: Props) {
         errorFallback="Kunne ikke analysere faktura"
       >
         {({ data: invoiceData, clear, requireToken }) => (
-          <InvoicePreviewTable
+          <InvoicePreview
             data={invoiceData}
             setData={setData}
             onConfirm={async () => {

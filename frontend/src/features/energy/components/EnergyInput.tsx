@@ -100,7 +100,6 @@ export default function EnergyInput({ projectId }: EnergyInputProps) {
                     }
                     onDelete={() => void deleteEnergy(entry.id)}
                     isUpdating={updateMutation.isPending}
-                    isDeleting={false}
                   />
                 ))}
               </tbody>

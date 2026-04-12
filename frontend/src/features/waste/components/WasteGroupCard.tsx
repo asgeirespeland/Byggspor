@@ -5,13 +5,46 @@ import {
   GROUP_THEAD,
   GROUP_TBODY,
 } from '@/shared/components/ParsePreviewShell'
-import RowActions from '@/shared/components/RowActions'
+import EditableRow, { type GroupColumn } from '@/shared/components/EditableRow'
 import { useProjectWaste } from '../hooks/useWaste'
-import type { WasteGroup } from '../types/waste'
+import type { WasteGroup, WasteItem } from '../types/waste'
 
 type Props = {
   projectId: number
 }
+
+const columns: GroupColumn<WasteItem>[] = [
+  {
+    header: 'Type',
+    render: (item) => <span className="text-gray-800">{item.waste_type}</span>,
+  },
+  {
+    header: 'Tonn',
+    align: 'right',
+    render: (item) => (
+      <span className="text-gray-800">
+        {item.quantity_tons != null
+          ? item.quantity_tons.toLocaleString('nb-NO', {
+              maximumFractionDigits: 3,
+            })
+          : '—'}
+      </span>
+    ),
+  },
+  {
+    header: 'CO₂ (kg)',
+    align: 'right',
+    render: (item) => (
+      <span className="text-gray-800">
+        {item.total_co2_kg != null
+          ? item.total_co2_kg.toLocaleString('nb-NO', {
+              maximumFractionDigits: 2,
+            })
+          : '—'}
+      </span>
+    ),
+  },
+]
 
 function WasteGroupCard({ group }: { group: WasteGroup }) {
   const label =
@@ -62,34 +95,30 @@ function WasteGroupCard({ group }: { group: WasteGroup }) {
       <table className="w-full text-sm">
         <thead className={GROUP_THEAD}>
           <tr>
-            <th className={GROUP_TH}>Type</th>
-            <th className={`${GROUP_TH} text-right`}>Tonn</th>
-            <th className={`${GROUP_TH} text-right`}>CO₂ (kg)</th>
+            {columns.map((col, i) => (
+              <th
+                key={i}
+                className={
+                  col.align === 'right' ? `${GROUP_TH} text-right` : GROUP_TH
+                }
+              >
+                {col.header}
+              </th>
+            ))}
             <th className={GROUP_TH} />
           </tr>
         </thead>
         <tbody className={GROUP_TBODY}>
           {group.items.map((item) => (
-            <tr key={item.id} className="hover:bg-gray-50">
-              <td className="px-4 py-2 text-gray-800">{item.waste_type}</td>
-              <td className="px-4 py-2 text-right text-gray-800">
-                {item.quantity_tons != null
-                  ? item.quantity_tons.toLocaleString('nb-NO', {
-                      maximumFractionDigits: 3,
-                    })
-                  : '—'}
-              </td>
-              <td className="px-4 py-2 text-right text-gray-800">
-                {item.total_co2_kg != null
-                  ? item.total_co2_kg.toLocaleString('nb-NO', {
-                      maximumFractionDigits: 2,
-                    })
-                  : '—'}
-              </td>
-              <td className="px-4 py-2">
-                <RowActions />
-              </td>
-            </tr>
+            <EditableRow
+              key={item.id}
+              row={item}
+              columns={columns}
+              getEditValues={() => ({})}
+              onSave={() => {
+                // TODO: wire up update endpoint
+              }}
+            />
           ))}
         </tbody>
       </table>
@@ -97,7 +126,7 @@ function WasteGroupCard({ group }: { group: WasteGroup }) {
   )
 }
 
-export default function WasteTable({ projectId }: Props) {
+export default function WasteList({ projectId }: Props) {
   const wasteQuery = useProjectWaste(projectId)
   const showLoading = useDeferredLoading(wasteQuery.isLoading)
 

@@ -5,7 +5,7 @@ import FileUploadShell from '@/shared/components/FileUploadShell'
 import { confirmWaste } from '../api/waste'
 import { useWasteParse } from '../hooks/useWasteParse'
 import type { WasteParseResponse } from '../types/waste'
-import WastePreviewTable from './WastePreviewTable'
+import WastePreview from './WastePreview'
 
 type Props = {
   projectId: number
@@ -62,7 +62,7 @@ export default function WasteUpload({ projectId }: Props) {
       errorFallback="Kunne ikke analysere avfallsrapport"
     >
       {({ data: wasteData, clear, requireToken }) => (
-        <WastePreviewTable
+        <WastePreview
           data={wasteData}
           setData={setData}
           onConfirm={() => handleConfirm(wasteData, clear, requireToken)}

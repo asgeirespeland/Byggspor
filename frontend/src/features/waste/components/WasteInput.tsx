@@ -1,5 +1,5 @@
 import WasteManualInput from './WasteManualInput'
-import WasteTable from './WasteTable'
+import WasteList from './WasteGroupCard'
 import WasteUpload from './WasteUpload'
 
 type Props = {
@@ -11,7 +11,7 @@ export default function WasteInput({ projectId }: Props) {
     <div className="space-y-6">
       <WasteUpload projectId={projectId} />
       <WasteManualInput projectId={projectId} />
-      <WasteTable projectId={projectId} />
+      <WasteList projectId={projectId} />
     </div>
   )
 }

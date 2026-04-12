@@ -13,8 +13,8 @@ import {
   useUpdateTrip,
 } from '../hooks/useProjectTransports'
 import TransportManualInput from './TransportManualInput'
-import TransportTripTable from './TransportTripTable'
-import ReportGroupCard from './ReportGroupCard'
+import TransportPreview from './TransportPreview'
+import TransportGroupCard from './TransportGroupCard'
 import type { TransportParseResponse } from '../types/transport'
 
 type Props = {
@@ -82,7 +82,7 @@ export default function TransportUpload({ projectId }: Props) {
         errorFallback="Kunne ikke analysere transportfil"
       >
         {({ data: transportData, clear, requireToken: requireTokenFn }) => (
-          <TransportTripTable
+          <TransportPreview
             data={transportData}
             setData={setData}
             onConfirm={() =>
@@ -125,7 +125,7 @@ export default function TransportUpload({ projectId }: Props) {
             </p>
           )}
           {reportGroups?.map((group) => (
-            <ReportGroupCard
+            <TransportGroupCard
               key={group.report_id ?? 'manual'}
               group={group}
               onDelete={() => {

@@ -9,7 +9,7 @@ import type {
   ProjectReportGroup,
   TripUpdateInput,
 } from '../api/projectTransports'
-import TransportTripRow from './TransportTripRow'
+import TransportRow from './TransportRow'
 
 interface Props {
   group: ProjectReportGroup
@@ -21,7 +21,7 @@ interface Props {
   onUndoTripDelete: () => void
 }
 
-export default function ReportGroupCard({
+export default function TransportGroupCard({
   group,
   onDelete,
   onDeleteTrip,
@@ -69,7 +69,7 @@ export default function ReportGroupCard({
         </thead>
         <tbody className={GROUP_TBODY}>
           {group.trips.map((trip) => (
-            <TransportTripRow
+            <TransportRow
               key={trip.id}
               trip={trip}
               onDelete={() => onDeleteTrip(trip.id)}
