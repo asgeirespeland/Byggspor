@@ -4,9 +4,10 @@ import csv
 import io
 
 from app.errors import ApiError
+from app.utils.confidence import waste_confidence
 
-# Mock factors in kg CO2e per ton.
-# Replace these when the team agrees on final emission factors.
+# Placeholder factors in kg CO2e per ton.
+# TODO: replace when the team agrees on final emission factors.
 WASTE_EMISSION_FACTORS = {
     "metall": 50.0,
     "treverk": 30.0,
@@ -79,6 +80,7 @@ def build_waste_item_data(
     """Build normalized waste item payload for persistence."""
     normalized_type = normalize_waste_type(waste_type)
     parsed_quantity = parse_quantity_tons(quantity_tons)
+    has_factor = normalized_type in WASTE_EMISSION_FACTORS
     calculated_co2_kg = calculate_waste_co2(normalized_type, parsed_quantity)
 
     return {
@@ -87,7 +89,7 @@ def build_waste_item_data(
         "co2_from_report_kg": None,
         "calculated_co2_kg": calculated_co2_kg,
         "total_co2_kg": calculated_co2_kg,
-        "confidence_score": 50,
+        "confidence_score": waste_confidence(has_emission_factor=has_factor),
         "notes": notes,
     }
 

@@ -1,5 +1,5 @@
 from dotenv import load_dotenv
-from flask import Flask, g, jsonify, request
+from flask import Flask, g, jsonify
 from flask_cors import CORS
 
 from app.database import SessionLocal
@@ -9,13 +9,7 @@ from app.middleware.auth import authenticate_request
 load_dotenv()
 
 app = Flask(__name__)
-CORS(
-    app,
-    resources={r"/*": {"origins": ["http://localhost:5173", "http://127.0.0.1:5173"]}},
-    allow_headers=["Content-Type", "Authorization"],
-    methods=["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
-    supports_credentials=True,
-)
+CORS(app)
 register_error_handlers(app)
 
 
@@ -28,8 +22,6 @@ def open_session():
 @app.before_request
 def run_authentication():
     """Authenticate request and populate g.current_user / g.current_user_id."""
-    if request.method == "OPTIONS":
-        return "", 200
     return authenticate_request()
 
 

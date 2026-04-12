@@ -7,11 +7,53 @@ from app.middleware.auth import require_auth
 from app.middleware.roles import require_project_role
 from app.models.project_member import ProjectRole
 from app.models.project_waste_item import ProjectWasteItem, WasteSourceType
+from app.models.waste_invoice import WasteInvoice
 from app.services.waste_parser import build_waste_item_data, parse_waste_csv
 from app.utils.db import db_commit
 from app.utils.parsing import require_int
+from app.utils.serialization import group_by_source
 
 waste_bp = Blueprint("waste", __name__, url_prefix="/waste")
+
+
+# ---------------------------------------------------------------------------
+# Serialization
+# ---------------------------------------------------------------------------
+
+
+def _serialize_waste_item(item: ProjectWasteItem) -> dict:
+    """Serialize a single waste item to a JSON-safe dict."""
+    return {
+        "id": item.id,
+        "project_id": item.project_id,
+        "source_id": item.source_id,
+        "source_type": item.source_type.value if item.source_type else None,
+        "waste_type": item.waste_type,
+        "quantity_tons": (
+            float(item.quantity_tons) if item.quantity_tons is not None else None
+        ),
+        "co2_from_report_kg": (
+            float(item.co2_from_report_kg)
+            if item.co2_from_report_kg is not None
+            else None
+        ),
+        "calculated_co2_kg": (
+            float(item.calculated_co2_kg)
+            if item.calculated_co2_kg is not None
+            else None
+        ),
+        "total_co2_kg": (
+            float(item.total_co2_kg) if item.total_co2_kg is not None else None
+        ),
+        "confidence_score": item.confidence_score,
+        "notes": item.notes,
+        "created_at": item.created_at.isoformat() if item.created_at else None,
+    }
+
+
+# ---------------------------------------------------------------------------
+# Routes
+# ---------------------------------------------------------------------------
 
 
 @waste_bp.route("/manual", methods=["POST"])
@@ -51,55 +93,14 @@ def create_manual_waste():
 
     session.refresh(waste_item)
 
-    return (
-        jsonify(
-            {
-                "id": waste_item.id,
-                "project_id": waste_item.project_id,
-                "source_id": waste_item.source_id,
-                "source_type": (
-                    waste_item.source_type.value if waste_item.source_type else None
-                ),
-                "waste_type": waste_item.waste_type,
-                "quantity_tons": (
-                    float(waste_item.quantity_tons)
-                    if waste_item.quantity_tons is not None
-                    else None
-                ),
-                "co2_from_report_kg": (
-                    float(waste_item.co2_from_report_kg)
-                    if waste_item.co2_from_report_kg is not None
-                    else None
-                ),
-                "calculated_co2_kg": (
-                    float(waste_item.calculated_co2_kg)
-                    if waste_item.calculated_co2_kg is not None
-                    else None
-                ),
-                "total_co2_kg": (
-                    float(waste_item.total_co2_kg)
-                    if waste_item.total_co2_kg is not None
-                    else None
-                ),
-                "confidence_score": waste_item.confidence_score,
-                "notes": waste_item.notes,
-                "created_at": (
-                    waste_item.created_at.isoformat() if waste_item.created_at else None
-                ),
-            }
-        ),
-        201,
-    )
+    return jsonify(_serialize_waste_item(waste_item)), 201
 
 
 @waste_bp.route("/parse", methods=["POST"])
 @require_auth
 def parse_waste_report():
-    """Parse uploaded waste CSV and save items for a project."""
+    """Parse uploaded waste CSV and return preview (no save)."""
 
-    session = g.db
-
-    project_id = require_int(request.form, "project_id")
     uploaded_file = request.files.get("file")
 
     if uploaded_file is None:
@@ -112,21 +113,55 @@ def parse_waste_report():
     file_content = uploaded_file.read()
     items_data = parse_waste_csv(file_content)
 
-    created_items = []
+    return jsonify(
+        {
+            "file_name": uploaded_file.filename,
+            "items_count": len(items_data),
+            "items": items_data,
+        }
+    )
+
+
+@waste_bp.route("/confirm", methods=["POST"])
+@require_auth
+def confirm_waste():
+    """Persist user-confirmed waste items to the database.
+
+    Expects JSON: { project_id, file_name?, items: [...parsed item dicts] }
+    """
+    body = request.get_json(silent=True) or {}
+    project_id = require_int(body, "project_id")
+
+    items = body.get("items")
+    if not isinstance(items, list) or len(items) == 0:
+        raise ApiError(
+            "Ingen avfallsposter å bekrefte.",
+            code="MISSING_FIELD",
+            suggestion="Velg minst én avfallspost før du bekrefter.",
+        )
+
+    file_name = body.get("file_name")
+    session = g.db
+
+    created_items: list[ProjectWasteItem] = []
 
     with db_commit(session, "Kunne ikke lagre avfallsrapport.", "SAVE_FAILED"):
-        for item_data in items_data:
+        source = WasteInvoice(file_path=file_name)
+        session.add(source)
+        session.flush()
+
+        for item_data in items:
             waste_item = ProjectWasteItem(
                 project_id=project_id,
-                source_id=None,
+                source_id=source.id,
                 source_type=WasteSourceType.WASTE_REPORT,
-                waste_type=item_data["waste_type"],
-                quantity_tons=item_data["quantity_tons"],
-                co2_from_report_kg=item_data["co2_from_report_kg"],
-                calculated_co2_kg=item_data["calculated_co2_kg"],
-                total_co2_kg=item_data["total_co2_kg"],
-                confidence_score=item_data["confidence_score"],
-                notes=item_data["notes"],
+                waste_type=item_data.get("waste_type"),
+                quantity_tons=item_data.get("quantity_tons"),
+                co2_from_report_kg=item_data.get("co2_from_report_kg"),
+                calculated_co2_kg=item_data.get("calculated_co2_kg"),
+                total_co2_kg=item_data.get("total_co2_kg"),
+                confidence_score=item_data.get("confidence_score"),
+                notes=item_data.get("notes"),
             )
             session.add(waste_item)
             created_items.append(waste_item)
@@ -136,41 +171,10 @@ def parse_waste_report():
 
     return (
         jsonify(
-            [
-                {
-                    "id": item.id,
-                    "project_id": item.project_id,
-                    "source_id": item.source_id,
-                    "source_type": item.source_type.value if item.source_type else None,
-                    "waste_type": item.waste_type,
-                    "quantity_tons": (
-                        float(item.quantity_tons)
-                        if item.quantity_tons is not None
-                        else None
-                    ),
-                    "co2_from_report_kg": (
-                        float(item.co2_from_report_kg)
-                        if item.co2_from_report_kg is not None
-                        else None
-                    ),
-                    "calculated_co2_kg": (
-                        float(item.calculated_co2_kg)
-                        if item.calculated_co2_kg is not None
-                        else None
-                    ),
-                    "total_co2_kg": (
-                        float(item.total_co2_kg)
-                        if item.total_co2_kg is not None
-                        else None
-                    ),
-                    "confidence_score": item.confidence_score,
-                    "notes": item.notes,
-                    "created_at": (
-                        item.created_at.isoformat() if item.created_at else None
-                    ),
-                }
-                for item in created_items
-            ]
+            {
+                "waste_invoice_id": source.id,
+                "project_waste_count": len(created_items),
+            }
         ),
         201,
     )
@@ -180,7 +184,7 @@ def parse_waste_report():
 @require_auth
 @require_project_role((ProjectRole.OWNER, ProjectRole.EDITOR, ProjectRole.VIEWER))
 def list_project_waste(project_id: int):
-    """List all waste entries for a project."""
+    """List all waste entries for a project, grouped by source."""
 
     session = g.db
     items = (
@@ -190,36 +194,22 @@ def list_project_waste(project_id: int):
         .all()
     )
 
+    def _waste_group(item: ProjectWasteItem) -> dict:
+        inv = item.source_invoice
+        return {
+            "source_id": item.source_id,
+            "source_type": item.source_type.value if item.source_type else None,
+            "file_name": inv.file_path if inv else None,
+            "uploaded_at": (
+                inv.uploaded_at.isoformat() if inv and inv.uploaded_at else None
+            ),
+        }
+
     return jsonify(
-        [
-            {
-                "id": item.id,
-                "project_id": item.project_id,
-                "source_id": item.source_id,
-                "source_type": item.source_type.value if item.source_type else None,
-                "waste_type": item.waste_type,
-                "quantity_tons": (
-                    float(item.quantity_tons)
-                    if item.quantity_tons is not None
-                    else None
-                ),
-                "co2_from_report_kg": (
-                    float(item.co2_from_report_kg)
-                    if item.co2_from_report_kg is not None
-                    else None
-                ),
-                "calculated_co2_kg": (
-                    float(item.calculated_co2_kg)
-                    if item.calculated_co2_kg is not None
-                    else None
-                ),
-                "total_co2_kg": (
-                    float(item.total_co2_kg) if item.total_co2_kg is not None else None
-                ),
-                "confidence_score": item.confidence_score,
-                "notes": item.notes,
-                "created_at": item.created_at.isoformat() if item.created_at else None,
-            }
-            for item in items
-        ]
+        group_by_source(
+            items,
+            key_fn=lambda i: i.source_id,
+            group_fn=_waste_group,
+            item_fn=_serialize_waste_item,
+        )
     )
