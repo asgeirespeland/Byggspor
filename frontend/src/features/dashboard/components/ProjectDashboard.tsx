@@ -20,6 +20,8 @@ import WasteTab from './tabs/WasteTab'
 import EnergyTab from './tabs/EnergyTab'
 import KpiCard from './KpiCard'
 import ProjectSidebar from './ProjectSidebar'
+import ClimateTabTour from '@/features/onboarding/components/ClimateTabTour'
+import { useClimateTabTour } from '@/features/onboarding/hooks/useClimateTabTour'
 
 function formatKg(value: number | undefined): string {
   if (value == null || value === 0) return '—'
@@ -88,6 +90,7 @@ export default function ProjectDashboard() {
   const { data: project, isLoading, error } = useProject(Number(projectId))
   const { data: co2 } = useCo2Summary(Number(projectId))
   const showLoading = useDeferredLoading(isLoading)
+  const tour = useClimateTabTour()
 
   if (showLoading) {
     return (
@@ -191,6 +194,14 @@ export default function ProjectDashboard() {
           />
         </div>
       </div>
+
+      <ClimateTabTour
+        open={tour.open}
+        step={tour.step}
+        onNext={tour.next}
+        onPrev={tour.prev}
+        onClose={tour.close}
+      />
     </div>
   )
 }
