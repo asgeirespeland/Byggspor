@@ -12,6 +12,20 @@ export function fmt(value: number | null | undefined, decimals = 1): string {
   return value.toLocaleString('nb-NO', { maximumFractionDigits: decimals })
 }
 
+export function co2Label(value: number | null | undefined) {
+  if (value == null || value === 0)
+    return <span className="text-gray-400">—</span>
+  if (value < 0) {
+    return (
+      <span className="text-emerald-600 font-medium">
+        {fmt(Math.abs(value))} kg{' '}
+        <span className="text-xs font-normal">(karbonbinding)</span>
+      </span>
+    )
+  }
+  return <span className="font-medium">{fmt(value)} kg</span>
+}
+
 export function sourceLabel(type: string | null): string {
   return (type && SOURCE_LABELS[type]) ?? type ?? '—'
 }

@@ -9,6 +9,8 @@ import type { Column } from './DataTable'
 import DataTable from './DataTable'
 import Section from './Section'
 import MaterialsSection from './MaterialsSection'
+import CategoryDonut from './CategoryDonut'
+import TopEmitters from './TopEmitters'
 import { fmt, sourceLabel, confidenceBadge } from '../utils'
 
 const TRANSPORT_COLUMNS: Column<TransportLineItem>[] = [
@@ -78,6 +80,33 @@ const ENERGY_COLUMNS: Column<EnergyLineItem>[] = [
   },
 ]
 
+const CATEGORIES = [
+  {
+    key: 'materials' as const,
+    label: 'Materialer',
+    icon: Package,
+    iconColor: 'text-blue-600',
+  },
+  {
+    key: 'transport' as const,
+    label: 'Transport',
+    icon: Truck,
+    iconColor: 'text-orange-600',
+  },
+  {
+    key: 'waste' as const,
+    label: 'Avfall',
+    icon: Trash2,
+    iconColor: 'text-red-500',
+  },
+  {
+    key: 'energy' as const,
+    label: 'Energi',
+    icon: Zap,
+    iconColor: 'text-yellow-600',
+  },
+]
+
 export default function ReportView({ projectId }: { projectId: number }) {
   const { data: report, isLoading, error } = useDetailedReport(projectId)
 
@@ -100,68 +129,88 @@ export default function ReportView({ projectId }: { projectId: number }) {
 
   const { categories } = report
 
+  const allCo2 = [
+    ...categories.materials.items,
+    ...categories.transport.items,
+    ...categories.waste.items,
+    ...categories.energy.items,
+  ].map((i) => i.total_co2_kg ?? 0)
+
+  const gross = allCo2.filter((v) => v > 0).reduce((s, v) => s + v, 0)
+  const sequestration = allCo2.filter((v) => v < 0).reduce((s, v) => s + v, 0)
+
   return (
-    <div className="space-y-3">
-      <Section
-        title="Materialer"
-        icon={<Package className="h-4 w-4 text-blue-600" />}
-        totalCo2={categories.materials.total_co2_kg}
-        entryCount={categories.materials.entry_count}
-        avgConfidence={categories.materials.avg_confidence}
-        defaultOpen
-      >
-        <MaterialsSection items={categories.materials.items} />
-      </Section>
-
-      <Section
-        title="Transport"
-        icon={<Truck className="h-4 w-4 text-orange-600" />}
-        totalCo2={categories.transport.total_co2_kg}
-        entryCount={categories.transport.entry_count}
-        avgConfidence={categories.transport.avg_confidence}
-      >
-        <DataTable
-          items={categories.transport.items}
-          columns={TRANSPORT_COLUMNS}
-          emptyMessage="Ingen transport registrert."
+    <div className="space-y-4">
+      {/* Summary panel */}
+      <div className="flex flex-col sm:flex-row items-start gap-6 rounded-lg border border-gray-200 bg-white p-5">
+        <CategoryDonut
+          categories={CATEGORIES.map((c) => ({
+            key: c.key,
+            label: c.label,
+            co2: categories[c.key].total_co2_kg,
+          }))}
+          total={report.total_co2_kg}
         />
-      </Section>
+        <div className="flex-1 min-w-0">
+          <TopEmitters report={report} />
+        </div>
+      </div>
 
-      <Section
-        title="Avfall"
-        icon={<Trash2 className="h-4 w-4 text-red-500" />}
-        totalCo2={categories.waste.total_co2_kg}
-        entryCount={categories.waste.entry_count}
-        avgConfidence={categories.waste.avg_confidence}
-      >
-        <DataTable
-          items={categories.waste.items}
-          columns={WASTE_COLUMNS}
-          emptyMessage="Ingen avfall registrert."
-        />
-      </Section>
+      {/* Category sections */}
+      {CATEGORIES.map(({ key, label, icon: Icon, iconColor }, idx) => (
+        <Section
+          key={key}
+          title={label}
+          icon={<Icon className={`h-4 w-4 ${iconColor}`} />}
+          totalCo2={categories[key].total_co2_kg}
+          entryCount={categories[key].entry_count}
+          avgConfidence={categories[key].avg_confidence}
+          defaultOpen={idx === 0}
+        >
+          {key === 'materials' ? (
+            <MaterialsSection items={categories.materials.items} />
+          ) : key === 'transport' ? (
+            <DataTable
+              items={categories.transport.items}
+              columns={TRANSPORT_COLUMNS}
+              emptyMessage="Ingen transport registrert."
+            />
+          ) : key === 'waste' ? (
+            <DataTable
+              items={categories.waste.items}
+              columns={WASTE_COLUMNS}
+              emptyMessage="Ingen avfall registrert."
+            />
+          ) : (
+            <DataTable
+              items={categories.energy.items}
+              columns={ENERGY_COLUMNS}
+              emptyMessage="Ingen energidata registrert."
+            />
+          )}
+        </Section>
+      ))}
 
-      <Section
-        title="Energi"
-        icon={<Zap className="h-4 w-4 text-yellow-600" />}
-        totalCo2={categories.energy.total_co2_kg}
-        entryCount={categories.energy.entry_count}
-        avgConfidence={categories.energy.avg_confidence}
-      >
-        <DataTable
-          items={categories.energy.items}
-          columns={ENERGY_COLUMNS}
-          emptyMessage="Ingen energidata registrert."
-        />
-      </Section>
-
-      <div className="flex items-center justify-between rounded-lg border border-gray-200 bg-gray-50 px-4 py-3">
-        <span className="text-sm font-medium text-gray-700">
-          Totalt prosjekt
-        </span>
-        <span className="text-sm font-semibold text-gray-900">
-          {fmt(report.total_co2_kg)} kg CO₂e
-        </span>
+      {/* Grand total */}
+      <div className="rounded-lg border border-gray-200 bg-gray-50 px-4 py-3 space-y-1">
+        <div className="flex items-center justify-between">
+          <span className="text-sm font-medium text-gray-700">
+            Netto prosjekt
+          </span>
+          <span className="text-sm font-semibold text-gray-900">
+            {fmt(report.total_co2_kg)} kg CO₂e
+          </span>
+        </div>
+        {sequestration < 0 && (
+          <div className="flex items-center justify-between text-xs text-gray-500">
+            <span>
+              Brutto {fmt(gross)} kg · Karbonbinding{' '}
+              <span className="text-emerald-600">
+                −{fmt(Math.abs(sequestration))} kg
+              </span>
+            </span>
+          </div>
+        )}
       </div>
     </div>
   )

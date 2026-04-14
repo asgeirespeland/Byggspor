@@ -3,7 +3,7 @@ import { ChevronDown, ChevronRight } from 'lucide-react'
 import type { MaterialLineItem } from '../types/report'
 import type { Column } from './DataTable'
 import DataTable from './DataTable'
-import { fmt, sourceLabel, confidenceBadge } from '../utils'
+import { fmt, co2Label, sourceLabel, confidenceBadge } from '../utils'
 
 const COLUMNS: Column<MaterialLineItem>[] = [
   { header: 'Produkt', render: (i) => i.product_name ?? '—' },
@@ -21,7 +21,7 @@ const COLUMNS: Column<MaterialLineItem>[] = [
   {
     header: 'CO₂ (kg)',
     align: 'right',
-    render: (i) => <span className="font-medium">{fmt(i.total_co2_kg)}</span>,
+    render: (i) => co2Label(i.total_co2_kg),
   },
   {
     header: 'EPD',

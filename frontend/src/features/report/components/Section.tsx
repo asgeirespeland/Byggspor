@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { ChevronDown, ChevronRight } from 'lucide-react'
+import { ChevronDown, ChevronRight, ShieldCheck } from 'lucide-react'
 import { fmt } from '../utils'
 
 export default function Section({
@@ -34,7 +34,15 @@ export default function Section({
         <span className="text-sm font-medium text-gray-800">{title}</span>
         <span className="ml-auto flex items-center gap-4 text-xs text-gray-500">
           <span>{entryCount} poster</span>
-          {avgConfidence != null && <span>snitt {avgConfidence}%</span>}
+          {avgConfidence != null && (
+            <span
+              className="flex items-center gap-1"
+              title="Gjennomsnittlig datatillit"
+            >
+              <ShieldCheck className="h-3 w-3 text-gray-400" />
+              {avgConfidence}%
+            </span>
+          )}
           <span className="font-medium text-gray-700">
             {fmt(totalCo2)} kg CO₂e
           </span>
