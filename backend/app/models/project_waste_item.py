@@ -42,6 +42,7 @@ class ProjectWasteItem(Base):
     calculated_co2_kg: Mapped[float | None] = mapped_column(Numeric(12, 4))
     total_co2_kg: Mapped[float | None] = mapped_column(Numeric(12, 4))
     confidence_score: Mapped[int | None] = mapped_column(Integer)
+    cost_per_ton: Mapped[float | None] = mapped_column(Numeric(10, 2))
     notes: Mapped[str | None] = mapped_column(Text)
     created_at: Mapped[datetime] = mapped_column(
         DateTime, server_default=func.now(), nullable=False
