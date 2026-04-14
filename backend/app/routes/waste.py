@@ -51,6 +51,9 @@ def _serialize_waste_item(item: ProjectWasteItem) -> dict:
             float(item.total_co2_kg) if item.total_co2_kg is not None else None
         ),
         "confidence_score": item.confidence_score,
+        "cost_per_ton": (
+            float(item.cost_per_ton) if item.cost_per_ton is not None else None
+        ),
         "notes": item.notes,
         "created_at": item.created_at.isoformat() if item.created_at else None,
     }
@@ -90,6 +93,7 @@ def create_manual_waste():
         calculated_co2_kg=item_data["calculated_co2_kg"],
         total_co2_kg=item_data["total_co2_kg"],
         confidence_score=item_data["confidence_score"],
+        cost_per_ton=payload.get("cost_per_ton"),
         notes=item_data["notes"],
     )
 
@@ -167,6 +171,7 @@ def confirm_waste():
                 calculated_co2_kg=co2_kg,
                 total_co2_kg=co2_kg,
                 confidence_score=item_data.get("confidence"),
+                cost_per_ton=item_data.get("cost_per_ton"),
                 notes=item_data.get("co2_source"),
             )
             session.add(waste_item)
@@ -253,6 +258,16 @@ def update_waste_item(item_id: int):
             "total_co2_kg",
             suggestion="Oppgi CO₂-verdi som et tall.",
         )
+
+    if "cost_per_ton" in body:
+        cost = parse_float(
+            body,
+            "cost_per_ton",
+            allow_missing=False,
+            allow_negative=False,
+            suggestion="Oppgi kostnad pr. tonn som et tall.",
+        )
+        item.cost_per_ton = cost
 
     with db_commit(session, "Kunne ikke oppdatere avfallsposten.", "UPDATE_FAILED"):
         pass
