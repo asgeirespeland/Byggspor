@@ -149,7 +149,6 @@ def update_energy(energy_id: int):
         cost = parse_float(
             payload,
             "cost_per_kwh",
-            allow_missing=False,
             allow_negative=False,
             suggestion="Oppgi kostnad pr. kWh som et tall (f.eks. 0.95).",
         )
