@@ -73,7 +73,6 @@ def calculate_energy():
     cost_per_kwh = parse_float(
         payload,
         "cost_per_kwh",
-        allow_missing=True,
         allow_negative=False,
         suggestion="Oppgi kostnad pr. kWh som et tall (f.eks. 0.95).",
     )
