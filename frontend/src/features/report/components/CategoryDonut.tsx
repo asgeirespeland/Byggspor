@@ -1,8 +1,9 @@
-import { Label, Pie, PieChart } from 'recharts'
+import { useState } from 'react'
+import { Label, Pie, PieChart, Sector } from 'recharts'
+import type { PieSectorDataItem } from 'recharts/types/polar/Pie'
 import {
   ChartContainer,
   ChartTooltip,
-  ChartTooltipContent,
   type ChartConfig,
 } from '@/components/ui/chart'
 import { fmt } from '../utils'
@@ -25,6 +26,9 @@ export default function CategoryDonut({
   total,
   sequestration = 0,
 }: CategoryDonutProps) {
+  const [activeIndex, setActiveIndex] = useState<number | undefined>(undefined)
+  const [overlayHovered, setOverlayHovered] = useState(false)
+
   const data = categories.map((c) => ({
     name: c.key,
     label: c.label,
@@ -49,7 +53,10 @@ export default function CategoryDonut({
       : []
 
   return (
-    <ChartContainer config={CHART_CONFIG} className="h-[180px] w-[180px]">
+    <ChartContainer
+      config={CHART_CONFIG}
+      className="h-[200px] w-[200px] overflow-visible [&_svg]:overflow-visible"
+    >
       <PieChart>
         <defs>
           <pattern
@@ -70,14 +77,22 @@ export default function CategoryDonut({
           </pattern>
         </defs>
         <ChartTooltip
-          content={
-            <ChartTooltipContent
-              formatter={(value, name) =>
-                `${name === 'sequestration' ? '−' : ''}${fmt(Number(value))} kg CO₂e`
-              }
-              hideLabel
-            />
-          }
+          cursor={false}
+          content={({ active, payload }) => {
+            if (!active || !payload?.length) return null
+            const d = payload[0].payload as {
+              label: string
+              name: string
+              value: number
+            }
+            const isSeq = d.name === 'sequestration'
+            return (
+              <div className="rounded-md bg-foreground px-3 py-1.5 text-xs text-background">
+                {isSeq ? '−' : ''}
+                {fmt(d.value)} kg CO₂e
+              </div>
+            )
+          }}
         />
         <Pie
           data={data}
@@ -88,6 +103,12 @@ export default function CategoryDonut({
           strokeWidth={2}
           stroke="white"
           isAnimationActive={false}
+          onMouseEnter={(_: unknown, i: number) => setActiveIndex(i)}
+          onMouseLeave={() => setActiveIndex(undefined)}
+          activeShape={(props: PieSectorDataItem) => (
+            <Sector {...props} innerRadius={(props.innerRadius ?? 55) - 4} />
+          )}
+          {...({ activeIndex } as Record<string, unknown>)}
         >
           <Label
             content={({ viewBox }) => {
@@ -125,9 +146,22 @@ export default function CategoryDonut({
             dataKey="value"
             nameKey="name"
             innerRadius={80}
-            outerRadius={85}
+            outerRadius={overlayHovered ? 92 : 87}
             strokeWidth={0}
             isAnimationActive={false}
+            onMouseEnter={(_: unknown, i: number) => {
+              if (overlayData[i]?.name === 'sequestration')
+                setOverlayHovered(true)
+            }}
+            onMouseLeave={() => setOverlayHovered(false)}
+            shape={(props: PieSectorDataItem & { name?: string }) => (
+              <Sector
+                {...props}
+                style={
+                  props.name === 'rest' ? { pointerEvents: 'none' } : undefined
+                }
+              />
+            )}
           />
         )}
       </PieChart>

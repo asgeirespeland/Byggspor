@@ -200,29 +200,6 @@ export default function ReportView({ projectId }: { projectId: number }) {
           )}
         </Section>
       ))}
-
-      {/* Grand total */}
-      <div className="rounded-lg border border-gray-200 bg-gray-50 px-4 py-3 space-y-1">
-        <div className="flex items-center justify-between">
-          <span className="text-sm font-medium text-gray-700">
-            Netto prosjekt
-          </span>
-          <span className="text-sm font-semibold text-gray-900">
-            {fmt(report.total_co2_kg)} kg CO₂e
-          </span>
-        </div>
-        {materialSequestration < 0 && (
-          <div className="flex items-center justify-between text-xs text-gray-500">
-            <span>
-              Brutto {fmt(report.total_co2_kg - materialSequestration)} kg ·
-              Karbonbinding{' '}
-              <span className="text-emerald-600">
-                −{fmt(Math.abs(materialSequestration))} kg
-              </span>
-            </span>
-          </div>
-        )}
-      </div>
     </div>
   )
 }
