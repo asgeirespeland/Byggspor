@@ -9,6 +9,7 @@ import {
   Trash2,
   Zap,
   Leaf,
+  FileText,
 } from 'lucide-react'
 import { useProject } from '@/features/project/hooks/useProject'
 import { STATUS_CONFIG } from '@/features/project/constants'
@@ -18,6 +19,7 @@ import { TransportUpload } from '@/features/transport'
 import { useCo2Summary } from '../hooks/useCo2Summary'
 import WasteTab from './tabs/WasteTab'
 import EnergyTab from './tabs/EnergyTab'
+import ReportTab from './tabs/ReportTab'
 import KpiCard from './KpiCard'
 import ProjectSidebar from './ProjectSidebar'
 
@@ -26,7 +28,7 @@ function formatKg(value: number | undefined): string {
   return value.toLocaleString('nb-NO', { maximumFractionDigits: 1 })
 }
 
-type Tab = 'materials' | 'transport' | 'waste' | 'energy'
+type Tab = 'materials' | 'transport' | 'waste' | 'energy' | 'report'
 
 const TABS: TabDef<Tab>[] = [
   {
@@ -37,6 +39,7 @@ const TABS: TabDef<Tab>[] = [
   { id: 'transport', label: 'Transport', icon: <Truck className="h-4 w-4" /> },
   { id: 'waste', label: 'Avfall', icon: <Trash2 className="h-4 w-4" /> },
   { id: 'energy', label: 'Energi', icon: <Zap className="h-4 w-4" /> },
+  { id: 'report', label: 'Rapport', icon: <FileText className="h-4 w-4" /> },
 ]
 
 const KPI_CONFIG = [
@@ -178,6 +181,7 @@ export default function ProjectDashboard() {
               )}
               {activeTab === 'waste' && <WasteTab projectId={project.id} />}
               {activeTab === 'energy' && <EnergyTab projectId={project.id} />}
+              {activeTab === 'report' && <ReportTab projectId={project.id} />}
             </div>
           </div>
         </div>
