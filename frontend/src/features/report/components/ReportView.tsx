@@ -32,7 +32,7 @@ const TRANSPORT_COLUMNS: Column<TransportLineItem>[] = [
   },
   { header: 'Kilde', render: (i) => sourceLabel(i.source_type) },
   {
-    header: 'Tillit',
+    header: 'Konfidens',
     align: 'right',
     render: (i) => confidenceBadge(i.confidence_score),
   },
@@ -52,7 +52,7 @@ const WASTE_COLUMNS: Column<WasteLineItem>[] = [
   },
   { header: 'Kilde', render: (i) => sourceLabel(i.source_type) },
   {
-    header: 'Tillit',
+    header: 'Konfidens',
     align: 'right',
     render: (i) => confidenceBadge(i.confidence_score),
   },
@@ -74,7 +74,7 @@ const ENERGY_COLUMNS: Column<EnergyLineItem>[] = [
   },
   { header: 'Kilde', render: (i) => sourceLabel(i.source) },
   {
-    header: 'Tillit',
+    header: 'Konfidens',
     align: 'right',
     render: (i) => confidenceBadge(i.confidence_score),
   },
@@ -129,30 +129,40 @@ export default function ReportView({ projectId }: { projectId: number }) {
 
   const { categories } = report
 
-  const allCo2 = [
-    ...categories.materials.items,
-    ...categories.transport.items,
-    ...categories.waste.items,
-    ...categories.energy.items,
-  ].map((i) => i.total_co2_kg ?? 0)
+  const materialItems = categories.materials.items
+  const materialEmissions = materialItems
+    .filter((i) => (i.total_co2_kg ?? 0) > 0)
+    .reduce((s, i) => s + (i.total_co2_kg ?? 0), 0)
+  const materialSequestration = materialItems
+    .filter((i) => (i.total_co2_kg ?? 0) < 0)
+    .reduce((s, i) => s + (i.total_co2_kg ?? 0), 0)
 
-  const gross = allCo2.filter((v) => v > 0).reduce((s, v) => s + v, 0)
-  const sequestration = allCo2.filter((v) => v < 0).reduce((s, v) => s + v, 0)
+  const donutCategories = [
+    { key: 'materials', label: 'Materialer', co2: materialEmissions },
+    {
+      key: 'transport',
+      label: 'Transport',
+      co2: categories.transport.total_co2_kg,
+    },
+    { key: 'waste', label: 'Avfall', co2: categories.waste.total_co2_kg },
+    { key: 'energy', label: 'Energi', co2: categories.energy.total_co2_kg },
+  ]
 
   return (
-    <div className="space-y-4">
+    <div className="-mt-6 pt-4 -mb-6 pb-4 space-y-4 max-h-[calc(100vh-17rem)] overflow-y-auto scrollbar-hide">
       {/* Summary panel */}
       <div className="flex flex-col sm:flex-row items-start gap-6 rounded-lg border border-gray-200 bg-white p-5">
         <CategoryDonut
-          categories={CATEGORIES.map((c) => ({
-            key: c.key,
-            label: c.label,
-            co2: categories[c.key].total_co2_kg,
-          }))}
+          categories={donutCategories}
           total={report.total_co2_kg}
+          sequestration={materialSequestration}
         />
         <div className="flex-1 min-w-0">
-          <TopEmitters report={report} />
+          <TopEmitters
+            report={report}
+            materialEmissions={materialEmissions}
+            materialSequestration={materialSequestration}
+          />
         </div>
       </div>
 
@@ -201,12 +211,13 @@ export default function ReportView({ projectId }: { projectId: number }) {
             {fmt(report.total_co2_kg)} kg CO₂e
           </span>
         </div>
-        {sequestration < 0 && (
+        {materialSequestration < 0 && (
           <div className="flex items-center justify-between text-xs text-gray-500">
             <span>
-              Brutto {fmt(gross)} kg · Karbonbinding{' '}
+              Brutto {fmt(report.total_co2_kg - materialSequestration)} kg ·
+              Karbonbinding{' '}
               <span className="text-emerald-600">
-                −{fmt(Math.abs(sequestration))} kg
+                −{fmt(Math.abs(materialSequestration))} kg
               </span>
             </span>
           </div>

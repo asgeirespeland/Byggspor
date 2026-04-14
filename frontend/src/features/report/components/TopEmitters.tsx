@@ -1,40 +1,77 @@
 import type { DetailedReport } from '../types/report'
 import { fmt } from '../utils'
 
-const CATEGORY_CONFIG = [
-  { key: 'materials' as const, label: 'Materialer', dot: 'bg-blue-500' },
-  { key: 'transport' as const, label: 'Transport', dot: 'bg-orange-500' },
-  { key: 'waste' as const, label: 'Avfall', dot: 'bg-red-500' },
-  { key: 'energy' as const, label: 'Energi', dot: 'bg-yellow-500' },
-]
+interface TopEmittersProps {
+  report: DetailedReport
+  materialEmissions: number
+  materialSequestration: number
+}
 
-export default function TopEmitters({ report }: { report: DetailedReport }) {
+export default function TopEmitters({
+  report,
+  materialEmissions,
+  materialSequestration,
+}: TopEmittersProps) {
+  const gross = report.total_co2_kg - materialSequestration
   const { categories } = report
-  const absTotal = CATEGORY_CONFIG.reduce(
-    (s, c) => s + Math.abs(categories[c.key].total_co2_kg),
-    0,
-  )
 
-  const allItems = [
-    ...categories.materials.items,
-    ...categories.transport.items,
-    ...categories.waste.items,
-    ...categories.energy.items,
-  ].map((i) => i.total_co2_kg ?? 0)
+  type BarSegment = { color: string; pct: number }
+  type BarEntry = {
+    key: string
+    label: string
+    dot: string
+    co2: number
+    segments?: BarSegment[]
+  }
 
-  const gross = allItems.filter((v) => v > 0).reduce((s, v) => s + v, 0)
-  const sequestration = allItems.filter((v) => v < 0).reduce((s, v) => s + v, 0)
+  const absTotal =
+    materialEmissions +
+    Math.abs(materialSequestration) +
+    Math.abs(categories.transport.total_co2_kg) +
+    Math.abs(categories.waste.total_co2_kg) +
+    Math.abs(categories.energy.total_co2_kg)
 
-  const sorted = [...CATEGORY_CONFIG].sort(
-    (a, b) =>
-      Math.abs(categories[b.key].total_co2_kg) -
-      Math.abs(categories[a.key].total_co2_kg),
-  )
+  const pct = (v: number) => (absTotal > 0 ? (Math.abs(v) / absTotal) * 100 : 0)
+
+  const bars: BarEntry[] = [
+    {
+      key: 'materials',
+      label: 'Materialer',
+      dot: 'bg-blue-500',
+      co2: categories.materials.total_co2_kg,
+      segments: [
+        { color: 'bg-blue-500', pct: pct(materialEmissions) },
+        ...(materialSequestration < 0
+          ? [{ color: 'bg-emerald-400', pct: pct(materialSequestration) }]
+          : []),
+      ],
+    },
+    {
+      key: 'transport',
+      label: 'Transport',
+      dot: 'bg-orange-500',
+      co2: categories.transport.total_co2_kg,
+    },
+    {
+      key: 'waste',
+      label: 'Avfall',
+      dot: 'bg-red-500',
+      co2: categories.waste.total_co2_kg,
+    },
+    {
+      key: 'energy',
+      label: 'Energi',
+      dot: 'bg-yellow-500',
+      co2: categories.energy.total_co2_kg,
+    },
+  ]
+
+  const sorted = [...bars].sort((a, b) => Math.abs(b.co2) - Math.abs(a.co2))
 
   return (
     <div className="space-y-4">
       {/* Gross vs sequestration */}
-      {sequestration < 0 && (
+      {materialSequestration < 0 && (
         <div className="flex gap-4 text-xs">
           <div>
             <p className="text-gray-400">Brutto utslipp</p>
@@ -45,7 +82,7 @@ export default function TopEmitters({ report }: { report: DetailedReport }) {
           <div>
             <p className="text-gray-400">Karbonbinding</p>
             <p className="font-semibold text-emerald-600 tabular-nums">
-              −{fmt(Math.abs(sequestration))} kg
+              −{fmt(Math.abs(materialSequestration))} kg
             </p>
           </div>
           <div>
@@ -60,12 +97,13 @@ export default function TopEmitters({ report }: { report: DetailedReport }) {
       {/* Per-category bars */}
       <div className="space-y-2">
         <p className="text-xs font-semibold uppercase tracking-wide text-gray-400">
-          Per kategori
+          Bidrag til beregning
         </p>
         <div className="space-y-2.5">
-          {sorted.map(({ key, label, dot }) => {
-            const co2 = categories[key].total_co2_kg
-            const pct = absTotal > 0 ? (Math.abs(co2) / absTotal) * 100 : 0
+          {sorted.map(({ key, label, dot, co2, segments }) => {
+            const totalPct = segments
+              ? segments.reduce((s, seg) => s + seg.pct, 0)
+              : pct(co2)
             const isNegative = co2 < 0
             return (
               <div key={key} className="space-y-1">
@@ -83,14 +121,29 @@ export default function TopEmitters({ report }: { report: DetailedReport }) {
                     {isNegative ? `−${fmt(Math.abs(co2))}` : fmt(co2)} kg
                   </span>
                   <span className="text-gray-400 w-10 text-right tabular-nums">
-                    {Math.round(pct)}%
+                    {Math.round(totalPct)}%
                   </span>
                 </div>
                 <div className="h-1.5 rounded-full bg-gray-100 overflow-hidden">
                   <div
-                    className={`h-full rounded-full ${isNegative ? 'bg-emerald-400' : dot}`}
-                    style={{ width: `${pct}%` }}
-                  />
+                    className="flex h-full"
+                    style={{ width: `${totalPct}%` }}
+                  >
+                    {segments ? (
+                      segments.map((seg, i) => (
+                        <div
+                          key={i}
+                          className={`h-full ${seg.color}`}
+                          style={{ width: `${(seg.pct / totalPct) * 100}%` }}
+                        />
+                      ))
+                    ) : (
+                      <div
+                        className={`h-full ${isNegative ? 'bg-emerald-400' : dot}`}
+                        style={{ width: '100%' }}
+                      />
+                    )}
+                  </div>
                 </div>
               </div>
             )

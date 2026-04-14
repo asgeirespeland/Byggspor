@@ -58,12 +58,12 @@ function SupplierGroup({
       <button
         type="button"
         onClick={() => setOpen(!open)}
-        className="flex w-full items-center gap-2 px-6 py-2 text-left text-xs cursor-pointer hover:bg-gray-50"
+        className={`flex w-full items-center gap-2 px-6 py-2 text-left text-xs cursor-pointer hover:bg-gray-50 ${!open ? 'rounded-b-lg' : ''}`}
       >
         <Chevron className="h-3 w-3 text-gray-400" />
         <span className="font-medium text-gray-700">{supplier}</span>
         <span className="ml-auto text-gray-500">
-          {items.length} linjer · {fmt(subtotal)} kg CO₂e
+          {items.length} poster · {fmt(subtotal)} kg CO₂e
         </span>
       </button>
       {open && <DataTable items={items} columns={COLUMNS} emptyMessage="" />}

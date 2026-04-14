@@ -27,13 +27,16 @@ export default function Section({
       <button
         type="button"
         onClick={() => setOpen(!open)}
-        className="flex w-full items-center gap-3 px-4 py-3 text-left cursor-pointer hover:bg-gray-50 transition-colors"
+        className={`sticky -top-4 z-10 flex w-full items-center gap-3 px-4 py-3 text-left cursor-pointer bg-white hover:bg-gray-50 transition-colors rounded-t-lg border-b border-gray-200 ${!open ? 'rounded-b-lg' : ''}`}
       >
         <Chevron className="h-4 w-4 text-gray-400 shrink-0" />
         <span className="shrink-0">{icon}</span>
         <span className="text-sm font-medium text-gray-800">{title}</span>
         <span className="ml-auto flex items-center gap-4 text-xs text-gray-500">
           <span>{entryCount} poster</span>
+          <span className="font-medium text-gray-700">
+            {fmt(totalCo2)} kg CO₂e
+          </span>
           {avgConfidence != null && (
             <span
               className="flex items-center gap-1"
@@ -43,9 +46,6 @@ export default function Section({
               {avgConfidence}%
             </span>
           )}
-          <span className="font-medium text-gray-700">
-            {fmt(totalCo2)} kg CO₂e
-          </span>
         </span>
       </button>
       {open && (
