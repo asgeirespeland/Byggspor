@@ -70,11 +70,14 @@ def calculate_energy():
         )
 
     recorded_date = optional_date(payload, "recorded_date")
-    cost_per_kwh = parse_float(
-        payload,
-        "cost_per_kwh",
-        allow_negative=False,
-        suggestion="Oppgi kostnad pr. kWh som et tall (f.eks. 0.95).",
+    cost_per_kwh = (
+        parse_float(
+            payload,
+            "cost_per_kwh",
+            suggestion="Oppgi kostnad pr. kWh som et tall (f.eks. 0.95).",
+        )
+        if "cost_per_kwh" in payload
+        else None
     )
 
     emission_factor = NVE_NATIONAL_EMISSION_FACTOR
@@ -145,13 +148,11 @@ def update_energy(energy_id: int):
         energy.recorded_date = optional_date(payload, "recorded_date")
 
     if "cost_per_kwh" in payload:
-        cost = parse_float(
+        energy.cost_per_kwh = parse_float(
             payload,
             "cost_per_kwh",
-            allow_negative=False,
             suggestion="Oppgi kostnad pr. kWh som et tall (f.eks. 0.95).",
         )
-        energy.cost_per_kwh = cost
 
     with db_commit(session, "Kunne ikke oppdatere energiposten.", "UPDATE_FAILED"):
         pass

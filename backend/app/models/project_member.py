@@ -35,6 +35,7 @@ class ProjectMember(Base):
         Integer,
         ForeignKey("projects.id", ondelete="CASCADE"),
         nullable=False,
+        index=True,
     )
     role: Mapped[ProjectRole] = mapped_column(
         Enum(ProjectRole, name="projectrole"),

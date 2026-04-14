@@ -93,7 +93,15 @@ def create_manual_waste():
         calculated_co2_kg=item_data["calculated_co2_kg"],
         total_co2_kg=item_data["total_co2_kg"],
         confidence_score=item_data["confidence_score"],
-        cost_per_ton=payload.get("cost_per_ton"),
+        cost_per_ton=(
+            parse_float(
+                payload,
+                "cost_per_ton",
+                suggestion="Oppgi kostnad pr. tonn som et tall.",
+            )
+            if "cost_per_ton" in payload
+            else None
+        ),
         notes=item_data["notes"],
     )
 
@@ -260,14 +268,11 @@ def update_waste_item(item_id: int):
         )
 
     if "cost_per_ton" in body:
-        cost = parse_float(
+        item.cost_per_ton = parse_float(
             body,
             "cost_per_ton",
-            allow_missing=False,
-            allow_negative=False,
             suggestion="Oppgi kostnad pr. tonn som et tall.",
         )
-        item.cost_per_ton = cost
 
     with db_commit(session, "Kunne ikke oppdatere avfallsposten.", "UPDATE_FAILED"):
         pass

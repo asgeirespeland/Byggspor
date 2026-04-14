@@ -230,7 +230,15 @@ def create_manual_trip():
         total_co2_kg=total_co2,
         confidence_score=confidence,
         flagged=flagged,
-        cost_per_km=body.get("cost_per_km"),
+        cost_per_km=(
+            parse_float(
+                body,
+                "cost_per_km",
+                suggestion="Kostnad pr. km må være et tall (f.eks. 2.5).",
+            )
+            if "cost_per_km" in body
+            else None
+        ),
     )
     with db_commit(session, "Kunne ikke opprette turen.", "CREATE_FAILED"):
         session.add(pt)
@@ -263,14 +271,11 @@ def update_trip(trip_id: int):
         trip.trip_date = optional_date(body, "trip_date")
 
     if "cost_per_km" in body:
-        cost = parse_float(
+        trip.cost_per_km = parse_float(
             body,
             "cost_per_km",
-            allow_missing=False,
-            allow_negative=False,
             suggestion="Kostnad pr. km må være et tall (f.eks. 2.5).",
         )
-        trip.cost_per_km = cost
 
     if "distance_km" in body:
         distance_km = parse_float(
