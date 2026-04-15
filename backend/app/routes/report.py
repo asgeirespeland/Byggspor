@@ -1,6 +1,7 @@
 from flask import Blueprint, g, jsonify
 from sqlalchemy import func
 
+from app.config.settings_resolver import resolve_settings
 from app.middleware.auth import require_auth
 from app.middleware.roles import require_project_role
 from app.models.energy import Energy
@@ -9,11 +10,26 @@ from app.models.project_member import ProjectRole
 from app.models.project_transport import ProjectTransport
 from app.models.project_waste_item import ProjectWasteItem
 from app.services.report_generator import get_detailed_report
+from app.utils.confidence import aggregate_confidence
 
 report_bp = Blueprint("report", __name__, url_prefix="/report")
 
 
-def _category_stats(session, model, project_id):
+def _category_stats(session, model, project_id, weighting="average"):
+    if weighting == "co2_weighted":
+        rows = (
+            session.query(model.total_co2_kg, model.confidence_score)
+            .filter(model.project_id == project_id)
+            .all()
+        )
+        total_co2 = sum(float(r[0] or 0) for r in rows)
+        entries = [(float(r[0]) if r[0] else None, r[1]) for r in rows]
+        return {
+            "total_co2_kg": total_co2,
+            "entry_count": len(rows),
+            "avg_confidence": aggregate_confidence(entries, weighting),
+        }
+
     row = (
         session.query(
             func.coalesce(func.sum(model.total_co2_kg), 0),
@@ -35,11 +51,13 @@ def _category_stats(session, model, project_id):
 @require_project_role((ProjectRole.OWNER, ProjectRole.EDITOR, ProjectRole.VIEWER))
 def co2_summary(project_id):
     session = g.db
+    settings = resolve_settings(session, project_id)
+    weighting = settings.get("confidence_weighting", "average")
 
-    materials = _category_stats(session, ProjectMaterial, project_id)
-    transport = _category_stats(session, ProjectTransport, project_id)
-    energy = _category_stats(session, Energy, project_id)
-    waste = _category_stats(session, ProjectWasteItem, project_id)
+    materials = _category_stats(session, ProjectMaterial, project_id, weighting)
+    transport = _category_stats(session, ProjectTransport, project_id, weighting)
+    energy = _category_stats(session, Energy, project_id, weighting)
+    waste = _category_stats(session, ProjectWasteItem, project_id, weighting)
 
     total = (
         materials["total_co2_kg"]

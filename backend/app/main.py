@@ -1,3 +1,5 @@
+import os
+
 from dotenv import load_dotenv
 from flask import Flask, g, jsonify
 from flask_cors import CORS
@@ -6,7 +8,9 @@ from app.database import SessionLocal
 from app.errors import register_error_handlers
 from app.middleware.auth import authenticate_request
 
+# Load backend/.env first, then project root .env (won't overwrite existing keys)
 load_dotenv()
+load_dotenv(os.path.join(os.path.dirname(__file__), "..", "..", ".env"))
 
 app = Flask(__name__)
 CORS(app)

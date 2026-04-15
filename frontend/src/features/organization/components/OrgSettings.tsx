@@ -1,7 +1,9 @@
 import { useState } from 'react'
+import { Settings } from 'lucide-react'
 
 import { useAppContext } from '@/shared/hooks/useAppContext'
 import ItemListPanel from '@/shared/components/ItemListPanel'
+import OrgSettingsPanel from '@/features/settings/components/OrgSettingsPanel'
 import { useOrgMembers, useAddMember } from '../hooks/useOrgMembers'
 import MemberCard from './MemberCard'
 import AddMemberDialog from './AddMemberDialog'
@@ -9,6 +11,7 @@ import AddMemberDialog from './AddMemberDialog'
 export default function OrgSettings() {
   const { organizationId, organization } = useAppContext()
   const [dialogOpen, setDialogOpen] = useState(false)
+  const [showCalcSettings, setShowCalcSettings] = useState(false)
 
   const { data: members = [], isLoading, error } = useOrgMembers(organizationId)
   const addMember = useAddMember(organizationId)
@@ -23,6 +26,30 @@ export default function OrgSettings() {
       <h1 className="text-2xl font-bold text-gray-900">
         {organization?.name ?? '\u00A0'}
       </h1>
+
+      {/* Calculation settings collapsible */}
+      <div className="rounded-xl border border-gray-200 bg-white shadow-sm overflow-hidden">
+        <button
+          type="button"
+          onClick={() => setShowCalcSettings((v) => !v)}
+          className="flex w-full items-center justify-between px-5 py-4 text-left hover:bg-gray-50 transition-colors"
+        >
+          <div className="flex items-center gap-3">
+            <Settings className="h-4 w-4 text-gray-400" />
+            <span className="text-sm font-medium text-gray-700">
+              Beregningsinnstillinger
+            </span>
+          </div>
+          <span className="text-xs text-gray-400">
+            {showCalcSettings ? 'Skjul' : 'Vis'}
+          </span>
+        </button>
+        {showCalcSettings && (
+          <div className="border-t border-gray-100 p-5">
+            <OrgSettingsPanel orgId={organizationId} />
+          </div>
+        )}
+      </div>
 
       <ItemListPanel
         title="Medlemmer"

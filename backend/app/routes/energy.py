@@ -13,7 +13,7 @@ from __future__ import annotations
 
 from flask import Blueprint, g, jsonify, request
 
-from app.config.project_defaults import ENERGY_GRID_EMISSION_FACTOR
+from app.config.settings_resolver import resolve_settings
 from app.errors import ApiError
 from app.middleware.auth import require_auth
 from app.middleware.roles import require_project_role
@@ -78,7 +78,8 @@ def calculate_energy():
         else None
     )
 
-    emission_factor = ENERGY_GRID_EMISSION_FACTOR
+    settings = resolve_settings(g.db, project_id)
+    emission_factor = settings["energy_grid_emission_factor"]
     total_co2_kg = round(kwh_used * emission_factor, 4)
 
     session = g.db
@@ -129,7 +130,8 @@ def update_energy(energy_id: int):
                 suggestion="Oppgi en positiv verdi for str\u00f8mforbruk.",
             )
         energy.kwh_used = kwh
-        energy.total_co2_kg = round(kwh * ENERGY_GRID_EMISSION_FACTOR, 4)
+        settings = resolve_settings(g.db, energy.project_id)
+        energy.total_co2_kg = round(kwh * settings["energy_grid_emission_factor"], 4)
 
     if "price_zone" in payload:
         pz = parse_enum(payload["price_zone"], PriceZone)

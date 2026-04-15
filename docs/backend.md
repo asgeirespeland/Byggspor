@@ -31,17 +31,21 @@ backend/
 │   ├── main.py               # Flask app, middleware, blueprint registration
 │   ├── errors.py             # ApiError exception class and error handlers
 │   ├── database.py           # SQLAlchemy engine and session factory
+│   ├── config/               # Settings resolver, project defaults, settings snapshot
 │   ├── middleware/
 │   │   ├── auth.py           # Clerk JWT verification, user sync
 │   │   └── roles.py          # @require_org_role / @require_project_role decorators
 │   ├── models/               # SQLAlchemy ORM models (16 models)
 │   ├── routes/               # Flask blueprints (9 route modules)
-│   └── services/             # Business logic and external API clients
+│   ├── services/             # Business logic and external API clients
+│   └── utils/                # Shared utilities (confidence, parsing, DB helpers)
 ├── tests/
 │   ├── conftest.py           # Fixtures (in-memory SQLite, auth bypass)
 │   ├── test_ehf_parser.py
 │   ├── test_nobb_client.py
+│   ├── test_settings_resolver.py
 │   └── test_routes/
+│       ├── test_energy.py
 │       └── test_invoice.py
 ├── requirements.txt
 └── ruff.toml
@@ -97,6 +101,9 @@ Every request passes through this pipeline in order:
 | GET | `/organizations/<id>/members` | OWNER, ADMIN | List organization members |
 | POST | `/organizations/<id>/members` | OWNER, ADMIN | Add or update member role (upsert) |
 | DELETE | `/organizations/<id>/members/<user_id>` | OWNER, ADMIN | Remove member from organization |
+| GET | `/organizations/<id>/settings` | Any org role | Get resolved calculation settings with source info |
+| PATCH | `/organizations/<id>/settings` | OWNER, ADMIN | Update calculation settings (partial merge). Recalculates all projects in the org. |
+| DELETE | `/organizations/<id>/settings` | OWNER, ADMIN | Reset all org-level overrides to defaults. Recalculates all projects. |
 
 **Organization types:** `COMPANY` or `CUSTOMER`
 
@@ -109,6 +116,10 @@ Every request passes through this pipeline in order:
 | POST | `/projects` | Authenticated | Create project (auto-linked to user's org, creator becomes OWNER) |
 | GET | `/projects` | Authenticated | List all projects in user's organization |
 | GET | `/projects/<id>` | Authenticated | Get single project (scoped to user's org) |
+| GET | `/projects/<id>/settings` | OWNER, EDITOR, VIEWER | Get fully resolved calculation settings with source info |
+| PATCH | `/projects/<id>/settings` | OWNER, EDITOR | Update calculation settings (partial merge). Recalculates affected CO₂ values. |
+| DELETE | `/projects/<id>/settings` | OWNER, EDITOR | Reset all project-level overrides to inherited values |
+| DELETE | `/projects/<id>/settings/<key>` | OWNER, EDITOR | Remove a single project-level override |
 
 When creating a project, you can pass `customer_name` to auto-create a `CUSTOMER` type organization, or `customer_id` to link an existing one.
 
@@ -168,7 +179,7 @@ Returns product info with EPD/GWP data if available. See [nobb-api.md](nobb-api.
 | DELETE | `/energy/entry/<id>` | Authenticated | Delete a single energy entry |
 | GET | `/energy/zones` | Authenticated | List available Norwegian price zones with labels |
 
-**CO₂ calculation:** `kWh × 0.0119` (NVE klimadeklarasjon 2024 national average: 11.9 g CO₂eq/kWh). Manual entries always get a confidence score of 100.
+**CO₂ calculation:** `kWh × grid_emission_factor` (configurable, default 0.0119 from NVE klimadeklarasjon 2024: 11.9 g CO₂eq/kWh). Manual entries always get a confidence score of 100.
 
 **Price zones** (NO1–NO5) are stored for future use when regional emission factors become available from NVE. Currently one national factor is used for all zones.
 
@@ -222,9 +233,12 @@ Returns product info with EPD/GWP data if available. See [nobb-api.md](nobb-api.
 
 | Method | Path | Auth | Description |
 |--------|------|------|-------------|
-| GET | `/report/project/<project_id>/co2-summary` | Authenticated | Aggregated CO₂ summary across all four categories |
+| GET | `/report/project/<project_id>/co2-summary` | Project role | Aggregated CO₂ summary across all four categories |
+| GET | `/report/project/<project_id>/detailed` | Project role | Full line-item breakdown with per-category items, summaries, and settings snapshot |
 
-Returns per-category totals (`materials`, `transport`, `energy`, `waste`) with entry counts, average confidence scores, and an overall weighted confidence score.
+**CO₂ summary:** Returns per-category totals (`materials`, `transport`, `energy`, `waste`) with entry counts, confidence scores (using the project's configured weighting strategy), and an overall weighted confidence score.
+
+**Detailed report:** Returns all individual entries per category with full metadata (product names, vehicle info, supplier names, etc.), per-category summaries, a settings snapshot showing the calculation parameters used, and data source breakdowns.
 
 ## Services
 
@@ -255,7 +269,7 @@ Orchestrates the full invoice processing pipeline:
 4. Upsert `Material` catalog entries
 5. Create `ProjectMaterial` records with CO₂ calculations
 
-**CO₂ calculation:** `GWP per unit (from EPD A1-A3 stage) × quantity`
+**CO₂ calculation:** `GWP per unit × quantity`. GWP is computed by summing EPD values across configurable lifecycle stages (default A1-A3), with optional A4 (transport) and biogenic carbon toggles. Full EPD stage data (A1-D) is stored as JSON on the `Material` model for stage-aware recalculation.
 
 **Confidence scoring:**
 | Scenario | Score |
@@ -336,6 +350,37 @@ Provides manual waste entry logic:
 - `build_waste_item_data`: Builds a complete waste item payload for persistence with calculated CO₂ and confidence scores
 - `parse_waste_csv`: Parses CSV files with `waste_type` and `quantity_tons` columns
 
+### Report Generator (`report_generator.py`)
+
+Builds a detailed CO₂ report for a project. Queries all four categories (materials, transport, waste, energy) with eager-loaded relationships, computes per-category summaries with configurable confidence weighting, and includes a settings snapshot showing the calculation parameters that produced the numbers.
+
+### Recalculation Service (`recalculation.py`)
+
+Recalculates stored CO₂ values for a project when calculation settings change. Maps setting keys to affected categories (`energy`, `materials`, `waste`) and only recalculates the categories whose settings actually changed:
+- **Energy:** `total_co2_kg = kwh_used × emission_factor`
+- **Materials:** Re-sums EPD stages using `compute_gwp_from_stages()` with current include_a4/include_biogenic settings (skips manual overrides)
+- **Waste:** Recalculates manual waste entries using current emission factors
+
+### Settings Resolver (`config/settings_resolver.py`)
+
+Manages the 3-tier settings resolution chain: project → organization → defaults. Key functions:
+- `resolve_settings(session, project_id)`: Returns flat dict of resolved values
+- `resolve_settings_with_sources(session, project_id)`: Returns `{key: {value, source}}` for the UI
+- `validate_settings(payload)`: Type-checks incoming overrides
+- `clean_overrides(overrides, inherited)`: Strips overrides matching inherited values so source badges revert automatically
+
+**Available settings:**
+| Key | Default | Category |
+|-----|---------|----------|
+| `energy_grid_emission_factor` | `0.0119` | Energy |
+| `energy_grid_mix_type` | `"physical"` | Energy |
+| `material_gwp_stages` | `["a1_a3"]` | Materials |
+| `material_include_a4` | `false` | Materials |
+| `material_include_biogenic` | `false` | Materials |
+| `waste_manual_emission_factors` | `{...}` | Waste |
+| `waste_epd_stages` | `["c3", "c4"]` | Waste |
+| `confidence_weighting` | `"co2_weighted"` | Confidence |
+
 ### User Sync (`user_sync.py`)
 
 Syncs Clerk identity to local `User` model on every authenticated request. Handles:
@@ -350,7 +395,7 @@ Syncs Clerk identity to local `User` model on every authenticated request. Handl
 | Model | Table | Key Fields |
 |-------|-------|------------|
 | `User` | `users` | `clerk_id`, `email`, `name`, `phone`, `is_system_admin` |
-| `Organization` | `organizations` | `name`, `org_number`, `org_type` (COMPANY/CUSTOMER) |
+| `Organization` | `organizations` | `name`, `org_number`, `org_type` (COMPANY/CUSTOMER), `settings` (JSON, calculation overrides) |
 | `OrganizationMember` | `organization_members` | `user_id`, `organization_id`, `role` (OWNER/ADMIN/MEMBER/VIEWER) |
 | `ProjectMember` | `project_members` | `user_id`, `project_id`, `role` (OWNER/EDITOR/VIEWER) |
 
@@ -358,7 +403,7 @@ Syncs Clerk identity to local `User` model on every authenticated request. Handl
 
 | Model | Table | Key Fields |
 |-------|-------|------------|
-| `Project` | `projects` | `name`, `organization_id`, `created_by_user_id`, `customer_id`, `status` |
+| `Project` | `projects` | `name`, `organization_id`, `created_by_user_id`, `customer_id`, `status`, `settings` (JSON, calculation overrides) |
 
 Project creators are automatically added as `OWNER` via an `after_insert` SQLAlchemy event.
 
@@ -368,7 +413,7 @@ These are not owned by any project. They cache data from external APIs:
 
 | Model | Table | Source | Key Fields |
 |-------|-------|--------|------------|
-| `Material` | `materials` | NOBB API | `gtin`, `nobb_number`, `gwp_per_unit`, `has_epd`, `epd_id` |
+| `Material` | `materials` | NOBB API | `gtin`, `nobb_number`, `gwp_per_unit`, `has_epd`, `epd_id`, `epd_gwp` (JSON, full A1-D stage breakdown) |
 | `Vehicle` | `vehicles` | Vegvesen API | `registration_number`, `make`, `model`, `fuel_type`, `co2_per_km` |
 
 ### Source Records (upload metadata)
@@ -379,7 +424,7 @@ These store metadata about uploaded files, not linked to projects directly:
 |-------|-------|------------|
 | `MaterialInvoice` | `material_invoices` | `supplier_name`, `invoice_number`, `invoice_date` |
 | `TransportReport` | `transport_reports` | `file_name`, `report_period_start/end` |
-| `WasteInvoice` | `waste_invoices` | `file_path` |
+| `WasteInvoice` | `waste_invoices` | `file_path`, `supplier_name` |
 
 ### Project Data (per-project records)
 

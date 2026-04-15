@@ -46,6 +46,14 @@ def _check_catalog(
     if material is None:
         return None
 
+    # Force re-fetch from NOBB if full stage breakdown is missing
+    if not material.epd_gwp:
+        logger.info(
+            "Catalog entry material_id=%s missing epd_gwp, forcing NOBB re-fetch",
+            material.id,
+        )
+        return None
+
     logger.info(
         "Catalog hit for gtin=%s nobb=%s (material_id=%s)",
         gtin,
@@ -56,13 +64,18 @@ def _check_catalog(
     # Reconstruct EPD response from stored fields
     epd = None
     if material.has_epd:
-        gwp_stages = {}
-        if material.gwp_per_unit is not None:
-            gwp_stages["a1_a3"] = {
-                "total": float(material.gwp_per_unit),
-                "fossil": None,
-                "biogenic": None,
+        if material.epd_gwp:
+            gwp_stages = material.epd_gwp
+        elif material.gwp_per_unit is not None:
+            gwp_stages = {
+                "a1_a3": {
+                    "total": float(material.gwp_per_unit),
+                    "fossil": None,
+                    "biogenic": None,
+                }
             }
+        else:
+            gwp_stages = {}
         epd = {"epd_number": material.epd_id, "gwp_stages": gwp_stages}
 
     return {
