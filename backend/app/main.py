@@ -41,6 +41,7 @@ def health_check():
 
 
 from app.routes.energy import energy_bp  # noqa: E402
+from app.routes.export import export_bp  # noqa: E402
 from app.routes.invoice import invoice_bp  # noqa: E402
 from app.routes.nobb import nobb_bp  # noqa: E402
 from app.routes.organization import organization_bp  # noqa: E402
@@ -51,6 +52,7 @@ from app.routes.user import user_bp  # noqa: E402
 from app.routes.waste import waste_bp  # noqa: E402
 
 app.register_blueprint(energy_bp)
+app.register_blueprint(export_bp)
 app.register_blueprint(nobb_bp)
 app.register_blueprint(invoice_bp)
 app.register_blueprint(report_bp)
