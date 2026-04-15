@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { RotateCcw, Loader2, Save } from 'lucide-react'
+import { RotateCcw, Loader2, Save, Info } from 'lucide-react'
 import type { ResolvedSetting } from '../api/settings'
 import { SETTING_GROUPS } from '../settings-meta'
 import SettingRow from './SettingRow'
@@ -49,6 +49,13 @@ function PanelContent({
 
   return (
     <div className="space-y-4">
+      <div className="flex items-start gap-3 rounded-lg border border-blue-200 bg-blue-50 px-4 py-3">
+        <Info className="mt-0.5 h-4 w-4 shrink-0 text-blue-500" />
+        <p className="text-sm text-blue-700">
+          Disse innstillingene påvirker hvordan CO₂-utslipp beregnes. Hvis du er
+          usikker, anbefaler vi at du lar standardverdiene stå.
+        </p>
+      </div>
       <div className="flex items-center justify-end gap-2">
         {hasDraftChanges && (
           <p className="mr-auto text-sm text-amber-600">
