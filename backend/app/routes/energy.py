@@ -68,6 +68,15 @@ def calculate_energy():
         )
 
     recorded_date = optional_date(payload, "recorded_date")
+    cost_per_kwh = (
+        parse_float(
+            payload,
+            "cost_per_kwh",
+            suggestion="Oppgi kostnad pr. kWh som et tall (f.eks. 0.95).",
+        )
+        if "cost_per_kwh" in payload
+        else None
+    )
 
     settings = resolve_settings(g.db, project_id)
     emission_factor = settings["energy_grid_emission_factor"]
@@ -82,6 +91,7 @@ def calculate_energy():
         grid_emission_factor=emission_factor,
         total_co2_kg=total_co2_kg,
         recorded_date=recorded_date,
+        cost_per_kwh=cost_per_kwh,
         confidence_score=ENERGY_CONFIDENCE,
     )
     with db_commit(session, "Kunne ikke lagre energiposten.", "SAVE_FAILED"):
@@ -136,6 +146,13 @@ def update_energy(energy_id: int):
 
     if "recorded_date" in payload:
         energy.recorded_date = optional_date(payload, "recorded_date")
+
+    if "cost_per_kwh" in payload:
+        energy.cost_per_kwh = parse_float(
+            payload,
+            "cost_per_kwh",
+            suggestion="Oppgi kostnad pr. kWh som et tall (f.eks. 0.95).",
+        )
 
     with db_commit(session, "Kunne ikke oppdatere energiposten.", "UPDATE_FAILED"):
         pass

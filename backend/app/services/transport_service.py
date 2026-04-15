@@ -140,6 +140,7 @@ def save_transport_report(
             total_co2_kg=trip.get("total_co2_kg"),
             confidence_score=trip.get("confidence_score", 50),
             flagged=trip.get("flagged", False),
+            cost_per_km=trip.get("cost_per_km"),
         )
         session.add(pt)
         created.append(pt)

@@ -150,6 +150,7 @@ def list_project_transports(project_id: int):
             "total_co2_kg": float(pt.total_co2_kg) if pt.total_co2_kg else None,
             "confidence_score": pt.confidence_score,
             "flagged": pt.flagged,
+            "cost_per_km": float(pt.cost_per_km) if pt.cost_per_km else None,
             "vehicle": (
                 {
                     "registration_number": vehicle.registration_number,
@@ -229,6 +230,15 @@ def create_manual_trip():
         total_co2_kg=total_co2,
         confidence_score=confidence,
         flagged=flagged,
+        cost_per_km=(
+            parse_float(
+                body,
+                "cost_per_km",
+                suggestion="Kostnad pr. km må være et tall (f.eks. 2.5).",
+            )
+            if "cost_per_km" in body
+            else None
+        ),
     )
     with db_commit(session, "Kunne ikke opprette turen.", "CREATE_FAILED"):
         session.add(pt)
@@ -259,6 +269,13 @@ def update_trip(trip_id: int):
 
     if "trip_date" in body:
         trip.trip_date = optional_date(body, "trip_date")
+
+    if "cost_per_km" in body:
+        trip.cost_per_km = parse_float(
+            body,
+            "cost_per_km",
+            suggestion="Kostnad pr. km må være et tall (f.eks. 2.5).",
+        )
 
     if "distance_km" in body:
         distance_km = parse_float(

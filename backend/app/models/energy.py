@@ -37,6 +37,7 @@ class Energy(Base):
     grid_emission_factor: Mapped[float | None] = mapped_column(Numeric(10, 6))
     total_co2_kg: Mapped[float | None] = mapped_column(Numeric(12, 4))
     recorded_date: Mapped[date | None] = mapped_column(Date)
+    cost_per_kwh: Mapped[float | None] = mapped_column(Numeric(10, 4))
     confidence_score: Mapped[int | None] = mapped_column(Integer)
     file_path: Mapped[str | None] = mapped_column(String(500))
     created_at: Mapped[datetime] = mapped_column(
@@ -61,6 +62,9 @@ class Energy(Base):
                 float(self.total_co2_kg) if self.total_co2_kg is not None else None
             ),
             "confidence_score": self.confidence_score,
+            "cost_per_kwh": (
+                float(self.cost_per_kwh) if self.cost_per_kwh is not None else None
+            ),
             "recorded_date": (
                 self.recorded_date.isoformat() if self.recorded_date else None
             ),

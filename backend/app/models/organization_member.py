@@ -32,6 +32,7 @@ class OrganizationMember(Base):
         Integer,
         ForeignKey("organizations.id", ondelete="CASCADE"),
         nullable=False,
+        index=True,
     )
     role: Mapped[OrgRole] = mapped_column(
         Enum(OrgRole, name="orgrole"),

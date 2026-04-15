@@ -88,7 +88,7 @@ export default function SettingsPage() {
                 <div className="flex flex-col items-center justify-center py-12 text-center">
                   <FolderKanban className="h-8 w-8 text-gray-300 mb-3" />
                   <p className="text-sm text-gray-400">
-                    Velg et prosjekt for \u00e5 se innstillingene
+                    Velg et prosjekt for å se innstillingene
                   </p>
                 </div>
               )}
