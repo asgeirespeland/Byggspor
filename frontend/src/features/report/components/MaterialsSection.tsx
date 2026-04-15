@@ -1,8 +1,7 @@
-import { useState } from 'react'
-import { ChevronDown, ChevronRight } from 'lucide-react'
 import type { MaterialLineItem } from '../types/report'
 import type { Column } from './DataTable'
 import DataTable from './DataTable'
+import CollapsibleGroup from './CollapsibleGroup'
 import { fmt, co2Label, sourceLabel, confidenceBadge } from '../utils'
 
 const COLUMNS: Column<MaterialLineItem>[] = [
@@ -36,39 +35,25 @@ const COLUMNS: Column<MaterialLineItem>[] = [
   },
   { header: 'Kilde', render: (i) => sourceLabel(i.source_type) },
   {
-    header: 'Tillit',
+    header: 'Konfidens',
     align: 'right',
     render: (i) => confidenceBadge(i.confidence_score),
   },
 ]
 
-function SupplierGroup({
-  supplier,
-  items,
-}: {
-  supplier: string
-  items: MaterialLineItem[]
-}) {
-  const [open, setOpen] = useState(false)
-  const subtotal = items.reduce((s, i) => s + (i.total_co2_kg ?? 0), 0)
-  const Chevron = open ? ChevronDown : ChevronRight
+function groupBy<T>(items: T[], key: (item: T) => string): Map<string, T[]> {
+  const map = new Map<string, T[]>()
+  for (const item of items) {
+    const k = key(item)
+    const list = map.get(k)
+    if (list) list.push(item)
+    else map.set(k, [item])
+  }
+  return map
+}
 
-  return (
-    <div>
-      <button
-        type="button"
-        onClick={() => setOpen(!open)}
-        className={`flex w-full items-center gap-2 px-6 py-2 text-left text-xs cursor-pointer hover:bg-gray-50 ${!open ? 'rounded-b-lg' : ''}`}
-      >
-        <Chevron className="h-3 w-3 text-gray-400" />
-        <span className="font-medium text-gray-700">{supplier}</span>
-        <span className="ml-auto text-gray-500">
-          {items.length} poster · {fmt(subtotal)} kg CO₂e
-        </span>
-      </button>
-      {open && <DataTable items={items} columns={COLUMNS} emptyMessage="" />}
-    </div>
-  )
+function sumCo2(items: MaterialLineItem[]) {
+  return items.reduce((s, i) => s + (i.total_co2_kg ?? 0), 0)
 }
 
 export default function MaterialsSection({
@@ -84,19 +69,55 @@ export default function MaterialsSection({
     )
   }
 
-  const groups = new Map<string, MaterialLineItem[]>()
-  for (const item of items) {
-    const key = item.supplier_name ?? 'Ukjent leverandør'
-    const list = groups.get(key)
-    if (list) list.push(item)
-    else groups.set(key, [item])
-  }
+  const suppliers = groupBy(
+    items,
+    (i) => i.supplier_name ?? 'Ukjent leverandør',
+  )
 
   return (
     <div className="divide-y divide-gray-100">
-      {[...groups.entries()].map(([supplier, group]) => (
-        <SupplierGroup key={supplier} supplier={supplier} items={group} />
-      ))}
+      {[...suppliers.entries()].map(([supplier, supplierItems]) => {
+        const invoices = groupBy(
+          supplierItems,
+          (i) => i.invoice_number ?? 'Ukjent faktura',
+        )
+        const hasMultipleInvoices = invoices.size > 1
+
+        return (
+          <CollapsibleGroup
+            key={supplier}
+            label={supplier}
+            itemCount={supplierItems.length}
+            totalCo2={sumCo2(supplierItems)}
+          >
+            {hasMultipleInvoices ? (
+              <div className="divide-y divide-gray-50">
+                {[...invoices.entries()].map(([invoice, invoiceItems]) => (
+                  <CollapsibleGroup
+                    key={invoice}
+                    label={`Faktura ${invoice}`}
+                    itemCount={invoiceItems.length}
+                    totalCo2={sumCo2(invoiceItems)}
+                    indent={1}
+                  >
+                    <DataTable
+                      items={invoiceItems}
+                      columns={COLUMNS}
+                      emptyMessage=""
+                    />
+                  </CollapsibleGroup>
+                ))}
+              </div>
+            ) : (
+              <DataTable
+                items={supplierItems}
+                columns={COLUMNS}
+                emptyMessage=""
+              />
+            )}
+          </CollapsibleGroup>
+        )
+      })}
     </div>
   )
 }

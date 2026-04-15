@@ -9,66 +9,19 @@ import {
   Settings2,
 } from 'lucide-react'
 import { useDetailedReport } from '../hooks/useDetailedReport'
-import type {
-  TransportLineItem,
-  WasteLineItem,
-  EnergyLineItem,
-} from '../types/report'
+import type { EnergyLineItem } from '../types/report'
 import type { Column } from './DataTable'
 import DataTable from './DataTable'
 import Section from './Section'
 import MaterialsSection from './MaterialsSection'
+import TransportSection from './TransportSection'
+import WasteSection from './WasteSection'
 import CategoryDonut from './CategoryDonut'
 import TopEmitters from './TopEmitters'
 import MethodologySection from './MethodologySection'
 import { fmt, sourceLabel, confidenceBadge } from '../utils'
 
 type ReportTab = 'overview' | 'methodology'
-
-const TRANSPORT_COLUMNS: Column<TransportLineItem>[] = [
-  { header: 'Dato', render: (i) => i.trip_date ?? '—' },
-  {
-    header: 'Kjøretøy',
-    render: (i) =>
-      i.vehicle
-        ? `${i.vehicle.make ?? ''} ${i.vehicle.model ?? ''} (${i.vehicle.registration_number})`.trim()
-        : '—',
-  },
-  { header: 'Fra', render: (i) => i.start_address ?? '—' },
-  { header: 'Til', render: (i) => i.end_address ?? '—' },
-  { header: 'Km', align: 'right', render: (i) => fmt(i.distance_km) },
-  {
-    header: 'CO₂ (kg)',
-    align: 'right',
-    render: (i) => <span className="font-medium">{fmt(i.total_co2_kg)}</span>,
-  },
-  { header: 'Kilde', render: (i) => sourceLabel(i.source_type) },
-  {
-    header: 'Konfidens',
-    align: 'right',
-    render: (i) => confidenceBadge(i.confidence_score),
-  },
-]
-
-const WASTE_COLUMNS: Column<WasteLineItem>[] = [
-  { header: 'Avfallstype', render: (i) => i.waste_type ?? '—' },
-  {
-    header: 'Tonn',
-    align: 'right',
-    render: (i) => fmt(i.quantity_tons, 3),
-  },
-  {
-    header: 'CO₂ (kg)',
-    align: 'right',
-    render: (i) => <span className="font-medium">{fmt(i.total_co2_kg)}</span>,
-  },
-  { header: 'Kilde', render: (i) => sourceLabel(i.source_type) },
-  {
-    header: 'Konfidens',
-    align: 'right',
-    render: (i) => confidenceBadge(i.confidence_score),
-  },
-]
 
 const ENERGY_COLUMNS: Column<EnergyLineItem>[] = [
   { header: 'Dato', render: (i) => i.recorded_date ?? '—' },
@@ -223,17 +176,9 @@ export default function ReportView({ projectId }: { projectId: number }) {
               {key === 'materials' ? (
                 <MaterialsSection items={categories.materials.items} />
               ) : key === 'transport' ? (
-                <DataTable
-                  items={categories.transport.items}
-                  columns={TRANSPORT_COLUMNS}
-                  emptyMessage="Ingen transport registrert."
-                />
+                <TransportSection items={categories.transport.items} />
               ) : key === 'waste' ? (
-                <DataTable
-                  items={categories.waste.items}
-                  columns={WASTE_COLUMNS}
-                  emptyMessage="Ingen avfall registrert."
-                />
+                <WasteSection items={categories.waste.items} />
               ) : (
                 <DataTable
                   items={categories.energy.items}

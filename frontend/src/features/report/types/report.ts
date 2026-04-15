@@ -32,6 +32,7 @@ export interface TransportLineItem {
   total_co2_kg: number | null
   confidence_score: number | null
   source_type: string | null
+  source_name: string | null
   vehicle: TransportVehicle | null
   source_id: number | null
 }
@@ -43,6 +44,8 @@ export interface WasteLineItem {
   total_co2_kg: number | null
   confidence_score: number | null
   source_type: string | null
+  source_name: string | null
+  supplier_name: string | null
   source_id: number | null
 }
 
