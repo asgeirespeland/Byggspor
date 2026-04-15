@@ -64,6 +64,34 @@ export interface DetailedCategoryStats<T> {
   items: T[]
 }
 
+export interface ReportSettings {
+  energy: {
+    grid_emission_factor: number
+    grid_mix_type: string
+    source: string
+    source_url: string
+  }
+  materials: {
+    gwp_stages: string[]
+    include_a4: boolean
+    include_biogenic: boolean
+  }
+  transport: {
+    co2_source: string
+  }
+  waste: {
+    epd_stages: string[]
+    manual_factors: Record<string, number>
+    manual_factors_note: string
+    ns9431_factors: { code: string; label: string; factor: number }[]
+    ns9431_source: string
+  }
+  confidence: {
+    weighting: string
+    thresholds: Record<string, number>
+  }
+}
+
 export interface DetailedReport {
   project_id: number
   total_co2_kg: number
@@ -73,4 +101,6 @@ export interface DetailedReport {
     waste: DetailedCategoryStats<WasteLineItem>
     energy: DetailedCategoryStats<EnergyLineItem>
   }
+  settings: ReportSettings
+  data_sources: Record<string, number>
 }

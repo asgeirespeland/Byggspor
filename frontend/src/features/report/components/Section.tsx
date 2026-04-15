@@ -40,7 +40,7 @@ export default function Section({
           {avgConfidence != null && (
             <span
               className="flex items-center gap-1"
-              title="Gjennomsnittlig datatillit"
+              title="Gjennomsnittlig konfidens"
             >
               <ShieldCheck className="h-3 w-3 text-gray-400" />
               {avgConfidence}%
