@@ -1,4 +1,4 @@
-import type { SettingSource } from '../api/settings'
+import type { SettingSource } from './api/settings'
 
 // ---------------------------------------------------------------------------
 // Setting metadata — labels, groups, display helpers
