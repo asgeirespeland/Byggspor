@@ -9,6 +9,7 @@ from datetime import datetime
 
 from sqlalchemy.orm import Session
 
+from app.config.project_defaults import MATERIAL_GWP_STAGES
 from app.models.material import Material
 from app.models.material_invoice import MaterialInvoice
 from app.models.project_material import MaterialSourceType, ProjectMaterial
@@ -77,11 +78,14 @@ def _apply_nobb_data(material: Material, nobb_data: dict) -> None:
     if epd:
         material.has_epd = True
         material.epd_id = epd.get("epd_number")
-        # Extract GWP from A1-A3 stage (production) if available
+        # Extract GWP from configured stages (see MATERIAL_GWP_STAGES)
         gwp_stages = epd.get("gwp_stages", {})
         a1_a3 = None
         if isinstance(gwp_stages, dict):
-            a1_a3 = gwp_stages.get("a1_a3") or gwp_stages.get("A1-A3")
+            for stage_key in MATERIAL_GWP_STAGES:
+                a1_a3 = gwp_stages.get(stage_key) or gwp_stages.get(stage_key.upper())
+                if a1_a3 is not None:
+                    break
         if isinstance(a1_a3, dict) and a1_a3.get("total") is not None:
             try:
                 material.gwp_per_unit = float(a1_a3["total"])

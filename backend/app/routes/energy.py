@@ -13,6 +13,7 @@ from __future__ import annotations
 
 from flask import Blueprint, g, jsonify, request
 
+from app.config.project_defaults import ENERGY_GRID_EMISSION_FACTOR
 from app.errors import ApiError
 from app.middleware.auth import require_auth
 from app.middleware.roles import require_project_role
@@ -29,9 +30,6 @@ from app.utils.parsing import (
 )
 
 energy_bp = Blueprint("energy", __name__, url_prefix="/energy")
-
-# NVE klimadeklarasjon 2024 — national average (kg CO₂eq per kWh)
-NVE_NATIONAL_EMISSION_FACTOR = 0.0119
 
 PRICE_ZONE_LABELS = {
     "NO1": "Østlandet (Oslo, Akershus, Østfold, Buskerud, Innlandet)",
@@ -71,7 +69,7 @@ def calculate_energy():
 
     recorded_date = optional_date(payload, "recorded_date")
 
-    emission_factor = NVE_NATIONAL_EMISSION_FACTOR
+    emission_factor = ENERGY_GRID_EMISSION_FACTOR
     total_co2_kg = round(kwh_used * emission_factor, 4)
 
     session = g.db
@@ -121,7 +119,7 @@ def update_energy(energy_id: int):
                 suggestion="Oppgi en positiv verdi for str\u00f8mforbruk.",
             )
         energy.kwh_used = kwh
-        energy.total_co2_kg = round(kwh * NVE_NATIONAL_EMISSION_FACTOR, 4)
+        energy.total_co2_kg = round(kwh * ENERGY_GRID_EMISSION_FACTOR, 4)
 
     if "price_zone" in payload:
         pz = parse_enum(payload["price_zone"], PriceZone)

@@ -8,6 +8,7 @@ from __future__ import annotations
 
 from sqlalchemy.orm import Session, joinedload
 
+from app.config.settings_snapshot import get_active_settings
 from app.models.energy import Energy
 from app.models.material import Material
 from app.models.material_invoice import MaterialInvoice
@@ -176,8 +177,17 @@ def get_detailed_report(session: Session, project_id: int) -> dict:
 
     grand_total = sum(c["total_co2_kg"] for c in categories.values())
 
+    # Data source breakdown across all entries
+    all_items = materials + transport + waste + energy
+    source_counts: dict[str, int] = {}
+    for item in all_items:
+        src = item.get("source_type") or item.get("source") or "unknown"
+        source_counts[src] = source_counts.get(src, 0) + 1
+
     return {
         "project_id": project_id,
         "total_co2_kg": round(grand_total, 4),
         "categories": categories,
+        "settings": get_active_settings(),
+        "data_sources": source_counts,
     }
