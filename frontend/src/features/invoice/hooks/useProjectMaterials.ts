@@ -24,6 +24,7 @@ export function useUpdateMaterial(projectId: number) {
       invalidateKeys: [
         ['project-materials', projectId],
         ['co2-summary', projectId],
+        ['detailed-report', projectId],
       ],
       successMessage: 'CO₂-verdi oppdatert',
       errorMessage: 'Kunne ikke oppdatere materialposten',

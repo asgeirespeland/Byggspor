@@ -53,6 +53,9 @@ export function useOptimisticDelete<TSnapshot>({
           queryClient.invalidateQueries({
             queryKey: ['co2-summary', projectId],
           })
+          queryClient.invalidateQueries({
+            queryKey: ['detailed-report', projectId],
+          })
         } catch (err) {
           if (snapshot) queryClient.setQueryData(listQueryKey, snapshot)
           adjustCo2(

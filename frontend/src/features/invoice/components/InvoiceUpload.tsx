@@ -56,6 +56,9 @@ export default function InvoiceUpload({ projectId }: Props) {
                 queryClient.invalidateQueries({
                   queryKey: ['co2-summary', projectId],
                 })
+                queryClient.invalidateQueries({
+                  queryKey: ['detailed-report', projectId],
+                })
                 clear()
                 toast.success('Faktura bekreftet og lagret')
               } catch {

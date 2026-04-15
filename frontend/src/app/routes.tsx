@@ -12,7 +12,7 @@ function AppShell() {
   return (
     <div className="flex h-screen overflow-hidden bg-gray-100">
       <Sidebar />
-      <main className="flex-1 min-w-0 overflow-y-auto p-6">
+      <main className="flex-1 min-w-0 overflow-y-auto scrollbar-hide p-6">
         <Outlet />
       </main>
     </div>

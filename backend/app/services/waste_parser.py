@@ -3,16 +3,11 @@ from __future__ import annotations
 import csv
 import io
 
+from app.config.project_defaults import WASTE_MANUAL_EMISSION_FACTORS
 from app.errors import ApiError
 from app.utils.confidence import waste_confidence
 
-# Placeholder factors in kg CO2e per ton.
-# TODO: replace when the team agrees on final emission factors.
-WASTE_EMISSION_FACTORS = {
-    "metall": 50.0,
-    "treverk": 30.0,
-    "betong": 10.0,
-}
+WASTE_EMISSION_FACTORS = WASTE_MANUAL_EMISSION_FACTORS
 
 
 def normalize_waste_type(value: str | None) -> str:
