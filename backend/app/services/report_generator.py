@@ -15,7 +15,9 @@ from app.models.material_invoice import MaterialInvoice
 from app.models.project_material import ProjectMaterial
 from app.models.project_transport import ProjectTransport
 from app.models.project_waste_item import ProjectWasteItem
+from app.models.transport_report import TransportReport
 from app.models.vehicle import Vehicle
+from app.models.waste_invoice import WasteInvoice
 
 
 def _float(val) -> float | None:
@@ -63,7 +65,10 @@ def _material_items(session: Session, project_id: int) -> list[dict]:
 def _transport_items(session: Session, project_id: int) -> list[dict]:
     rows = (
         session.query(ProjectTransport)
-        .options(joinedload(ProjectTransport.vehicle))
+        .options(
+            joinedload(ProjectTransport.vehicle),
+            joinedload(ProjectTransport.source_report),
+        )
         .filter(ProjectTransport.project_id == project_id)
         .order_by(ProjectTransport.id)
         .all()
@@ -72,6 +77,7 @@ def _transport_items(session: Session, project_id: int) -> list[dict]:
     items = []
     for pt in rows:
         v: Vehicle | None = pt.vehicle
+        report: TransportReport | None = pt.source_report
         items.append(
             {
                 "id": pt.id,
@@ -82,6 +88,7 @@ def _transport_items(session: Session, project_id: int) -> list[dict]:
                 "total_co2_kg": _float(pt.total_co2_kg),
                 "confidence_score": pt.confidence_score,
                 "source_type": pt.source_type.value if pt.source_type else None,
+                "source_name": report.file_name if report else None,
                 "vehicle": {
                     "registration_number": v.registration_number,
                     "make": v.make,
@@ -99,6 +106,7 @@ def _transport_items(session: Session, project_id: int) -> list[dict]:
 def _waste_items(session: Session, project_id: int) -> list[dict]:
     rows = (
         session.query(ProjectWasteItem)
+        .options(joinedload(ProjectWasteItem.source_invoice))
         .filter(ProjectWasteItem.project_id == project_id)
         .order_by(ProjectWasteItem.id)
         .all()
@@ -106,6 +114,7 @@ def _waste_items(session: Session, project_id: int) -> list[dict]:
 
     items = []
     for pw in rows:
+        inv: WasteInvoice | None = pw.source_invoice
         items.append(
             {
                 "id": pw.id,
@@ -114,6 +123,8 @@ def _waste_items(session: Session, project_id: int) -> list[dict]:
                 "total_co2_kg": _float(pw.total_co2_kg),
                 "confidence_score": pw.confidence_score,
                 "source_type": pw.source_type.value if pw.source_type else None,
+                "source_name": inv.file_path if inv else None,
+                "supplier_name": inv.supplier_name if inv else None,
                 "source_id": pw.source_id,
             }
         )

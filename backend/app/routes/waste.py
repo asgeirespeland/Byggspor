@@ -132,7 +132,7 @@ def parse_waste():
 def confirm_waste():
     """Persist user-confirmed waste items to the database.
 
-    Expects JSON: { project_id, file_name?, items: [...enriched line items] }
+    Expects JSON: { project_id, file_name?, supplier_name?, items: [...] }
     """
     body = request.get_json(silent=True) or {}
     project_id = require_int(body, "project_id")
@@ -146,12 +146,16 @@ def confirm_waste():
         )
 
     file_name = body.get("file_name")
+    supplier_name = body.get("supplier_name")
     session = g.db
 
     created_items: list[ProjectWasteItem] = []
 
     with db_commit(session, "Kunne ikke lagre avfallsrapport.", "SAVE_FAILED"):
-        source = WasteInvoice(file_path=file_name)
+        source = WasteInvoice(
+            file_path=file_name,
+            supplier_name=supplier_name,
+        )
         session.add(source)
         session.flush()
 
