@@ -1,4 +1,12 @@
-import { Leaf, FileBarChart2, Hash, Building2, User } from 'lucide-react'
+import { useState } from 'react'
+import {
+  Leaf,
+  FileBarChart2,
+  Hash,
+  Building2,
+  User,
+  Receipt,
+} from 'lucide-react'
 import type { Project } from '@/features/project/hooks/useProjects'
 import ConfidenceGauge from './ConfidenceGauge'
 import ConfidenceInfo from './ConfidenceInfo'
@@ -9,6 +17,8 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from '@/components/ui/tooltip'
+import GenerateInvoiceDialog from '@/features/export/components/GenerateInvoiceDialog'
+import type { Co2Summary } from '@/features/dashboard/api/report'
 
 export default function ProjectSidebar({
   project,
@@ -17,8 +27,11 @@ export default function ProjectSidebar({
 }: {
   project: Project
   confidenceScore: number | null
+  co2Summary?: Co2Summary | null
   onNavigateToTab?: (tab: 'materials' | 'transport') => void
 }) {
+  const [invoiceOpen, setInvoiceOpen] = useState(false)
+
   return (
     <div className="flex w-full lg:w-60 shrink-0 flex-col gap-3 self-stretch">
       <div className="grid grid-cols-2 gap-3 lg:grid-cols-1">
@@ -113,6 +126,32 @@ export default function ProjectSidebar({
           </TooltipContent>
         </Tooltip>
       </TooltipProvider>
+
+      {/* Generate EHF invoice button */}
+      <button
+        type="button"
+        onClick={() => setInvoiceOpen(true)}
+        className="group relative w-full overflow-hidden rounded-xl bg-gray-900 px-4 py-4 text-left shadow-md transition-opacity hover:opacity-90"
+      >
+        <div className="absolute inset-0 bg-gradient-to-br from-violet-400 to-transparent opacity-20 pointer-events-none" />
+        <div className="relative flex items-center gap-3">
+          <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-violet-500/20">
+            <Receipt className="h-4 w-4 text-violet-400" />
+          </div>
+          <div className="min-w-0">
+            <p className="text-sm font-semibold text-white">
+              Generer EHF-faktura
+            </p>
+            <p className="text-xs text-gray-400">Med CO₂-data</p>
+          </div>
+        </div>
+      </button>
+
+      <GenerateInvoiceDialog
+        open={invoiceOpen}
+        onOpenChange={setInvoiceOpen}
+        project={project}
+      />
     </div>
   )
 }

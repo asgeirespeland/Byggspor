@@ -187,6 +187,7 @@ export default function ProjectDashboard() {
           <ProjectSidebar
             project={project}
             confidenceScore={co2?.overall_confidence ?? null}
+            co2Summary={co2 ?? null}
             onNavigateToTab={setActiveTab}
           />
         </div>

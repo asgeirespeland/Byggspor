@@ -238,6 +238,7 @@ def list_project_materials(project_id: int):
             "nobb_number": pm.material.nobb_number if pm.material else None,
             "quantity": float(pm.quantity) if pm.quantity else None,
             "unit": pm.unit,
+            "price_per_unit": float(pm.price_per_unit) if pm.price_per_unit else None,
             "total_price": float(pm.total_price) if pm.total_price else None,
             "total_co2_kg": float(pm.total_co2_kg) if pm.total_co2_kg else None,
             "confidence_score": pm.confidence_score,

@@ -7,6 +7,7 @@ export interface ProjectMaterialItem {
   nobb_number: string | null
   quantity: number | null
   unit: string | null
+  price_per_unit: number | null
   total_price: number | null
   total_co2_kg: number | null
   confidence_score: number | null
