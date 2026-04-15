@@ -174,11 +174,20 @@ def upload_invoice_route():
     project_id = require_int(dict(request.form), "project_id")
     xml_content = validate_xml_upload(EHF_XML_SUGGESTION)
 
+    from app.config.settings_resolver import resolve_settings
     from app.services.material_service import process_invoice_for_project
 
     session = g.db
+    settings = resolve_settings(session, project_id)
     try:
-        result = process_invoice_for_project(session, project_id, xml_content)
+        result = process_invoice_for_project(
+            session,
+            project_id,
+            xml_content,
+            gwp_stages=settings["material_gwp_stages"],
+            include_a4=settings["material_include_a4"],
+            include_biogenic=settings["material_include_biogenic"],
+        )
     except ET.ParseError:
         session.rollback()
         raise ApiError(

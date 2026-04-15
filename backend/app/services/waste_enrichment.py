@@ -86,6 +86,10 @@ def _check_catalog(
     if material is None:
         return None
 
+    # Force re-fetch from NOBB if full stage breakdown is missing
+    if not material.epd_gwp:
+        return None
+
     logger.info(
         "Catalog hit for gtin=%s nobb=%s (material_id=%s)",
         gtin,
@@ -95,13 +99,18 @@ def _check_catalog(
 
     epd = None
     if material.has_epd:
-        gwp_stages = {}
-        if material.gwp_per_unit is not None:
-            gwp_stages["a1_a3"] = {
-                "total": float(material.gwp_per_unit),
-                "fossil": None,
-                "biogenic": None,
+        if material.epd_gwp:
+            gwp_stages = material.epd_gwp
+        elif material.gwp_per_unit is not None:
+            gwp_stages = {
+                "a1_a3": {
+                    "total": float(material.gwp_per_unit),
+                    "fossil": None,
+                    "biogenic": None,
+                }
             }
+        else:
+            gwp_stages = {}
         epd = {"epd_number": material.epd_id, "gwp_stages": gwp_stages}
 
     return {
@@ -180,12 +189,15 @@ def _enrich_product_item(item: dict, session: Session | None) -> None:
         item["confidence"] = waste_confidence(has_emission_factor=co2_kg is not None)
 
 
-def _enrich_fraction_item(item: dict) -> None:
+def _enrich_fraction_item(
+    item: dict, ns9431_factors: dict[str, float] | None = None
+) -> None:
     """Enrich a line item using NS 9431 fraction code + generic factors."""
+    factors = ns9431_factors or NS9431_EMISSION_FACTORS
     fraction_code = item.get("fraction_code")
     quantity_tons = item.get("quantity_tons") or 0.0
 
-    factor = NS9431_EMISSION_FACTORS.get(fraction_code) if fraction_code else None
+    factor = factors.get(fraction_code) if fraction_code else None
 
     if factor is not None:
         co2_kg = round(quantity_tons * factor, 4)
@@ -204,7 +216,11 @@ def _enrich_fraction_item(item: dict) -> None:
     item["nobb_data"] = None
 
 
-def enrich_waste_report(parsed_report: dict, session: Session | None = None) -> dict:
+def enrich_waste_report(
+    parsed_report: dict,
+    session: Session | None = None,
+    ns9431_factors: dict[str, float] | None = None,
+) -> dict:
     """Enrich parsed waste report line items with CO₂ data.
 
     Product-level items (GTIN/NOBB) are enriched via the NOBB API using
@@ -223,6 +239,6 @@ def enrich_waste_report(parsed_report: dict, session: Session | None = None) -> 
         if has_product_id:
             _enrich_product_item(item, session)
         else:
-            _enrich_fraction_item(item)
+            _enrich_fraction_item(item, ns9431_factors)
 
     return parsed_report

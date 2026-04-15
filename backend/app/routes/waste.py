@@ -4,6 +4,7 @@ import xml.etree.ElementTree as ET
 
 from flask import Blueprint, g, jsonify, request
 
+from app.config.settings_resolver import resolve_settings
 from app.errors import ApiError
 from app.middleware.auth import require_auth
 from app.middleware.roles import require_project_role
@@ -73,10 +74,12 @@ def create_manual_waste():
     quantity_tons = payload.get("quantity_tons")
     notes = payload.get("notes")
 
+    settings = resolve_settings(g.db, project_id)
     item_data = build_waste_item_data(
         waste_type=waste_type,
         quantity_tons=quantity_tons,
         notes=notes,
+        emission_factors=settings["waste_manual_emission_factors"],
     )
 
     session = g.db

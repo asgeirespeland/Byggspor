@@ -8,7 +8,7 @@ from __future__ import annotations
 
 from sqlalchemy.orm import Session, joinedload
 
-from app.config.settings_snapshot import get_active_settings
+from app.config.settings_resolver import resolve_for_snapshot
 from app.models.energy import Energy
 from app.models.material import Material
 from app.models.material_invoice import MaterialInvoice
@@ -199,6 +199,6 @@ def get_detailed_report(session: Session, project_id: int) -> dict:
         "project_id": project_id,
         "total_co2_kg": round(grand_total, 4),
         "categories": categories,
-        "settings": get_active_settings(),
+        "settings": resolve_for_snapshot(session, project_id),
         "data_sources": source_counts,
     }
