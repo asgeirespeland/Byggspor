@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useRef, useEffect } from 'react'
 import { ChevronDown, ChevronRight, ShieldCheck } from 'lucide-react'
 import { fmt } from '../utils'
 
@@ -20,14 +20,28 @@ export default function Section({
   children: React.ReactNode
 }) {
   const [open, setOpen] = useState(defaultOpen)
+  const [stuck, setStuck] = useState(false)
+  const sentinelRef = useRef<HTMLDivElement>(null)
   const Chevron = open ? ChevronDown : ChevronRight
 
+  useEffect(() => {
+    const el = sentinelRef.current
+    if (!el) return
+    const observer = new IntersectionObserver(
+      ([entry]) => setStuck(!entry.isIntersecting),
+      { threshold: 0 },
+    )
+    observer.observe(el)
+    return () => observer.disconnect()
+  }, [])
+
   return (
-    <div className="rounded-lg border border-gray-200">
+    <div>
+      <div ref={sentinelRef} className="h-0" />
       <button
         type="button"
         onClick={() => setOpen(!open)}
-        className={`sticky -top-4 z-10 flex w-full items-center gap-3 px-4 py-3 text-left cursor-pointer bg-white hover:bg-gray-50 transition-colors rounded-t-lg border-b border-gray-200 ${!open ? 'rounded-b-lg' : ''}`}
+        className={`sticky -top-4 z-10 flex w-full items-center gap-3 px-4 py-3 text-left cursor-pointer bg-white hover:bg-gray-50 transition-colors border border-gray-200 ${stuck ? '' : 'rounded-t-lg'} ${!open ? 'rounded-b-lg' : ''}`}
       >
         <Chevron className="h-4 w-4 text-gray-400 shrink-0" />
         <span className="shrink-0">{icon}</span>
@@ -49,7 +63,7 @@ export default function Section({
         </span>
       </button>
       {open && (
-        <div className="border-t border-gray-100 overflow-x-auto">
+        <div className="border-x border-b border-gray-200 rounded-b-lg overflow-x-auto">
           {children}
         </div>
       )}

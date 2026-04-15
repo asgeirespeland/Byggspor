@@ -117,7 +117,7 @@ export default function ReportView({ projectId }: { projectId: number }) {
   return (
     <div className="-mt-6 -mb-6">
       {/* Internal tab bar */}
-      <div className="flex gap-1 border-b border-gray-200 mb-4">
+      <div className="flex gap-1 border-b border-gray-200">
         <button
           type="button"
           onClick={() => setActiveTab('overview')}
