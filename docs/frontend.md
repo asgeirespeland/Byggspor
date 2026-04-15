@@ -40,6 +40,7 @@ frontend/src/
 │   ├── label.tsx
 │   ├── sheet.tsx
 │   ├── sonner.tsx
+│   ├── switch.tsx
 │   ├── textarea.tsx
 │   └── tooltip.tsx
 │
@@ -51,6 +52,7 @@ frontend/src/
 │   ├── onboarding/
 │   ├── organization/
 │   ├── project/
+│   ├── report/
 │   ├── settings/
 │   ├── transport/
 │   ├── waste/
@@ -93,7 +95,7 @@ ClerkProvider               → Authentication
 | `/projects/:projectId` | `ProjectDashboard` | Protected | Single project with tabbed data entry |
 | `/profile` | `UserProfile` | Protected | User profile settings |
 | `/organization` | `OrgSettings` | Protected | Organization member management |
-| `/settings` | `SettingsPage` | Protected | App settings (placeholder) |
+| `/settings` | `SettingsPage` | Protected | Calculation settings (org + project level) |
 | `*` | — | — | Redirects to `/` |
 
 Protected routes are wrapped in `ProtectedRoute`, which:
@@ -120,8 +122,8 @@ Each feature encapsulates its own components, hooks, API calls, types, and tests
 - `ProjectDashboard`: Single project view with:
   - Breadcrumb navigation with project status badge
   - KPI row showing CO₂ totals per category (materials, transport, waste, energy) with icons
-  - Tabbed content panel for data entry (Materials, Transport, Waste, Energy)
-  - Project sidebar with details and confidence gauge
+  - Tabbed content panel for data entry (Materials, Transport, Waste, Energy, Report)
+  - Project sidebar with details, confidence gauge, and calculation settings dialog
 - `KpiCard`: Stat card displaying a label, value, unit, and icon with accent background.
 - `ProjectCard`: Clickable project card showing name, status, customer, and project number.
 - `ProjectSidebar`: Right-side panel showing project metadata, overall confidence score, flagged items widget, and confidence info link.
@@ -137,6 +139,7 @@ Each feature encapsulates its own components, hooks, API calls, types, and tests
 - `EnergyTab`: Renders the `EnergyInput` component.
 - `TransportTab`: Renders the `TransportUpload` component.
 - `WasteTab`: Renders the `WasteUpload` component.
+- `ReportTab`: Renders the `ReportView` component from the report feature.
 
 ### energy
 
@@ -221,10 +224,30 @@ Each feature encapsulates its own components, hooks, API calls, types, and tests
 **Components:**
 - `OnboardingPage`: Organization creation form (name, org number). Required on first login before accessing the dashboard. Creates a `COMPANY` type organization and assigns the user as `OWNER`.
 
+### report
+
+**Components:**
+- `ReportView`: Full CO₂ report with summary panel, donut chart, per-category sections, and methodology tab.
+- `CategoryDonut`: Interactive donut chart showing CO₂ distribution across categories with hover effects.
+- `MaterialsSection`: Materials breakdown with hierarchical sub-grouping by supplier/invoice.
+- `TransportSection`: Transport breakdown grouped by source report.
+- `WasteSection`: Waste breakdown grouped by source.
+- `MethodologySection`: Settings overview showing calculation parameters used in the report.
+- `CollapsibleGroup`: Expandable group container for report line items.
+- `DataTable`: Generic table for report line items.
+- `TopEmitters`: Shows the highest CO₂-contributing items across categories.
+- `InfoCard`: Summary card for category totals.
+
+**Hooks:**
+- `useDetailedReport`: Fetches the detailed report from `/report/project/:id/detailed`.
+
+**API:**
+- `report.ts`: `getDetailedReport(projectId, token)`, `getCo2Summary(projectId, token)`
+
 ### organization
 
 **Components:**
-- `OrgSettings`: Organization member list with search and add dialog.
+- `OrgSettings`: Organization member list with search and add dialog. Includes collapsible calculation settings panel.
 - `MemberCard`: Displays a member's name, email, and role.
 - `AddMemberDialog`: Dialog for adding members by user ID with role selection.
 
@@ -241,7 +264,27 @@ Each feature encapsulates its own components, hooks, API calls, types, and tests
 ### settings
 
 **Components:**
-- `SettingsPage`: Placeholder page ("Kommer snart").
+- `SettingsPage`: Tabbed settings page with Personal (placeholder), Organization, and Projects tabs.
+- `CalculationSettingsPanel`: Reusable settings panel with batch save, source-level badges (Standard/Organisasjon/Prosjekt), and reset functionality. Uses local draft state; changes are sent as a single PATCH on save.
+- `OrgSettingsPanel`: Wires `CalculationSettingsPanel` to org settings hooks.
+- `ProjectSettingsPanel`: Wires `CalculationSettingsPanel` to project settings hooks. Also accessible from the project sidebar.
+- `SettingRow`: Individual setting row with inline number editing, boolean switches, and select dropdowns.
+- `SourceBadge`: Badge showing where a setting value comes from (default/organization/project).
+
+**Hooks:**
+- `useOrgSettings`: Fetches org-level settings.
+- `useUpdateOrgSettings`: Mutation to update org settings. Invalidates all downstream project queries.
+- `useResetOrgSettings`: Mutation to reset all org overrides.
+- `useProjectSettings`: Fetches project-level settings.
+- `useUpdateProjectSettings`: Mutation to update project settings. Invalidates all project data queries.
+- `useResetProjectSetting`: Mutation to remove a single project override.
+- `useResetAllProjectSettings`: Mutation to reset all project overrides.
+
+**API:**
+- `settings.ts`: CRUD functions for org and project settings (`getOrgSettings`, `patchOrgSettings`, `resetOrgSettings`, `getProjectSettings`, `patchProjectSettings`, `resetProjectSettings`, `deleteProjectSetting`).
+
+**Config:**
+- `settings-meta.ts`: Setting group definitions, labels, display helpers, and source badge styles.
 
 ### user
 
@@ -317,7 +360,7 @@ Utility-first CSS framework. Imports are in `index.css`. No custom Tailwind conf
 
 ### shadcn/ui
 
-Pre-built accessible UI primitives based on Base UI and styled with CVA (Class Variance Authority). Components are installed directly into `components/ui/` and can be customized. Current primitives: Button, Checkbox, Dialog, Input, Label, Sheet, Textarea, Tooltip, Sonner (toasts).
+Pre-built accessible UI primitives based on Base UI and styled with CVA (Class Variance Authority). Components are installed directly into `components/ui/` and can be customized. Current primitives: Button, Checkbox, Dialog, Input, Label, Sheet, Switch, Textarea, Tooltip, Sonner (toasts).
 
 ### Design Patterns
 
