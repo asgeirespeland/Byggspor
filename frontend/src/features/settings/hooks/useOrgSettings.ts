@@ -14,11 +14,22 @@ export function useOrgSettings(orgId: number | undefined) {
   )
 }
 
+/** Query keys that inherit from org settings */
+const ORG_DOWNSTREAM_KEYS = [
+  ['org-settings'],
+  ['project-settings'],
+  ['energies'],
+  ['project-materials'],
+  ['project-waste'],
+  ['co2-summary'],
+  ['detailed-report'],
+]
+
 export function useUpdateOrgSettings(orgId: number | undefined) {
   return useAuthMutation<Record<string, unknown>>({
     mutationFn: (overrides, token) =>
       patchOrgSettings(orgId!, overrides, token),
-    invalidateKeys: [['org-settings', orgId]],
+    invalidateKeys: ORG_DOWNSTREAM_KEYS,
     successMessage: 'Innstillingene ble oppdatert',
     errorMessage: 'Kunne ikke oppdatere innstillingene',
   })
@@ -27,7 +38,7 @@ export function useUpdateOrgSettings(orgId: number | undefined) {
 export function useResetOrgSettings(orgId: number | undefined) {
   return useAuthMutation<void>({
     mutationFn: (_data, token) => resetOrgSettings(orgId!, token),
-    invalidateKeys: [['org-settings', orgId]],
+    invalidateKeys: ORG_DOWNSTREAM_KEYS,
     successMessage: 'Innstillingene ble tilbakestilt',
     errorMessage: 'Kunne ikke tilbakestille innstillingene',
   })

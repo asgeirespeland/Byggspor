@@ -8,7 +8,7 @@ from __future__ import annotations
 
 from sqlalchemy.orm import Session, joinedload
 
-from app.config.settings_resolver import resolve_for_snapshot
+from app.config.settings_resolver import resolve_for_snapshot, resolve_settings
 from app.models.energy import Energy
 from app.models.material import Material
 from app.models.material_invoice import MaterialInvoice
@@ -18,6 +18,7 @@ from app.models.project_waste_item import ProjectWasteItem
 from app.models.transport_report import TransportReport
 from app.models.vehicle import Vehicle
 from app.models.waste_invoice import WasteInvoice
+from app.utils.confidence import aggregate_confidence
 
 
 def _float(val) -> float | None:
@@ -158,21 +159,21 @@ def _energy_items(session: Session, project_id: int) -> list[dict]:
     return items
 
 
-def _category_summary(items: list[dict]) -> dict:
+def _category_summary(items: list[dict], weighting: str = "average") -> dict:
     total_co2 = sum(i.get("total_co2_kg") or 0 for i in items)
-    scores = [
-        i["confidence_score"] for i in items if i.get("confidence_score") is not None
-    ]
-    avg_confidence = round(sum(scores) / len(scores), 1) if scores else None
+    entries = [(i.get("total_co2_kg"), i.get("confidence_score")) for i in items]
     return {
         "total_co2_kg": round(total_co2, 4),
         "entry_count": len(items),
-        "avg_confidence": avg_confidence,
+        "avg_confidence": aggregate_confidence(entries, weighting),
     }
 
 
 def get_detailed_report(session: Session, project_id: int) -> dict:
     """Build a full line-item breakdown for all four CO₂ categories."""
+
+    settings = resolve_settings(session, project_id)
+    weighting = settings.get("confidence_weighting", "average")
 
     materials = _material_items(session, project_id)
     transport = _transport_items(session, project_id)
@@ -180,10 +181,10 @@ def get_detailed_report(session: Session, project_id: int) -> dict:
     energy = _energy_items(session, project_id)
 
     categories = {
-        "materials": {**_category_summary(materials), "items": materials},
-        "transport": {**_category_summary(transport), "items": transport},
-        "waste": {**_category_summary(waste), "items": waste},
-        "energy": {**_category_summary(energy), "items": energy},
+        "materials": {**_category_summary(materials, weighting), "items": materials},
+        "transport": {**_category_summary(transport, weighting), "items": transport},
+        "waste": {**_category_summary(waste, weighting), "items": waste},
+        "energy": {**_category_summary(energy, weighting), "items": energy},
     }
 
     grand_total = sum(c["total_co2_kg"] for c in categories.values())
