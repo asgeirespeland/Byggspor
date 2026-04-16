@@ -111,6 +111,15 @@ export default function GenerateInvoiceDialog({
       our_reference: ourReference || undefined,
       their_reference: theirReference || undefined,
       customer_name: customerName || undefined,
+      line_items: lineItems
+        .filter((item) => item.description.trim() !== '')
+        .map((item) => ({
+          description: item.description,
+          quantity: parseFloat(item.quantity) || 1,
+          unit: item.unit,
+          unit_price_kr: parseFloat(item.price) || 0,
+          discount_percent: parseFloat(item.discount) || 0,
+        })),
     })
   }
 

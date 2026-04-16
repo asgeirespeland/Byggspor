@@ -1,5 +1,13 @@
 export type InvoiceFormat = 'aggregated' | 'detailed'
 
+export interface InvoiceLineInput {
+  description: string
+  quantity: number
+  unit: string
+  unit_price_kr: number
+  discount_percent: number
+}
+
 export interface GenerateInvoiceInput {
   format_type: InvoiceFormat
   invoice_number?: string
@@ -17,6 +25,7 @@ export interface GenerateInvoiceInput {
     address?: string
     email?: string
   }
+  line_items?: InvoiceLineInput[]
 }
 
 export interface GeneratedInvoice {

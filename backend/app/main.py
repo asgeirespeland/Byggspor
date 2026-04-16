@@ -9,7 +9,7 @@ from app.middleware.auth import authenticate_request
 load_dotenv()
 
 app = Flask(__name__)
-CORS(app)
+CORS(app, expose_headers=["Content-Disposition"])
 register_error_handlers(app)
 
 

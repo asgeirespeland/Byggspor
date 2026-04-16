@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { useAuth } from '@clerk/react'
 import { listProjectMaterials } from '@/features/invoice/api/invoice'
 
@@ -28,9 +28,10 @@ export function useProjectLineItems(projectId: number, open: boolean) {
   const { getToken } = useAuth()
   const [lineItems, setLineItems] = useState<LineItem[]>([newLineItem()])
   const [isLoading, setIsLoading] = useState(false)
+  const hasFetched = useRef(false)
 
   useEffect(() => {
-    if (!open) return
+    if (!open || hasFetched.current) return
 
     let cancelled = false
 
@@ -62,9 +63,13 @@ export function useProjectLineItems(projectId: number, open: boolean) {
 
         if (!cancelled) {
           setLineItems(items.length > 0 ? items : [newLineItem()])
+          hasFetched.current = true
         }
       } catch {
-        if (!cancelled) setLineItems([newLineItem()])
+        if (!cancelled) {
+          setLineItems([newLineItem()])
+          hasFetched.current = true
+        }
       } finally {
         if (!cancelled) setIsLoading(false)
       }

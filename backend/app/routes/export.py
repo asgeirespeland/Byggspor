@@ -239,6 +239,29 @@ def _aggregated_lines(session, project_id: int) -> list[InvoiceLine]:
     return agg_lines
 
 
+def _lines_from_client(raw: list[dict]) -> list[InvoiceLine]:
+    """Build InvoiceLine objects from user-edited line items sent by the client."""
+    lines = []
+    for item in raw:
+        qty = float(item.get("quantity") or 1)
+        unit_price = float(item.get("unit_price_kr") or 0)
+        discount = float(item.get("discount_percent") or 0)
+        line_total = round(qty * unit_price * (1 - discount / 100), 2)
+        lines.append(
+            InvoiceLine(
+                category=InvoiceLineCategory.MATERIAL,
+                description=item.get("description") or "",
+                quantity=qty,
+                unit=item.get("unit") or "STK",
+                unit_price_kr=unit_price,
+                vat_rate=0.25,
+                line_total_kr=line_total,
+                source_type=InvoiceLineSourceType.MANUAL,
+            )
+        )
+    return lines
+
+
 def _invoice_to_dict(inv: GeneratedInvoice) -> dict:
     return {
         "id": inv.id,
@@ -329,8 +352,12 @@ def generate_invoice(project_id: int):
                 code="INVALID_DUE_DATE",
             )
 
-    # Collect invoice lines from project data
-    lines = _collect_lines(session, project_id, format_type)
+    # Use client-provided line items if present, otherwise derive from project data
+    raw_lines = body.get("line_items")
+    if raw_lines and isinstance(raw_lines, list):
+        lines = _lines_from_client(raw_lines)
+    else:
+        lines = _collect_lines(session, project_id, format_type)
 
     # Compute financial totals
     subtotal = sum(float(ln.line_total_kr or 0) for ln in lines)
