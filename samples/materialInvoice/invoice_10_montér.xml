@@ -1,0 +1,1172 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Invoice xmlns="urn:oasis:names:specification:ubl:schema:xsd:Invoice-2"
+         xmlns:cac="urn:oasis:names:specification:ubl:schema:xsd:CommonAggregateComponents-2"
+         xmlns:cbc="urn:oasis:names:specification:ubl:schema:xsd:CommonBasicComponents-2">
+	<cbc:UBLVersionID>2.0</cbc:UBLVersionID>
+	<cbc:CustomizationID>urn:www.cenbii.eu:transaction:biicoretrdm010:ver1.0:#urn:www.peppol.eu:bis:peppol4a:ver1.0#urn:www.difi.no:ehf:faktura:ver1</cbc:CustomizationID>
+	<cbc:ProfileID>urn:www.cenbii.eu:profile:bii05:ver1.0</cbc:ProfileID>
+	<cbc:ID>2025050310010</cbc:ID>
+	<cbc:IssueDate>2025-05-03</cbc:IssueDate>
+	<cbc:InvoiceTypeCode listID="UN/ECE 1001 Subset" listAgencyID="6">380</cbc:InvoiceTypeCode>
+	<cbc:DocumentCurrencyCode listID="ISO 4217 Alpha" listAgencyID="6">NOK</cbc:DocumentCurrencyCode>
+	<cac:AccountingSupplierParty>
+		<cac:Party>
+			<cac:PartyName>
+				<cbc:Name>Montér Hus AS</cbc:Name>
+			</cac:PartyName>
+			<cac:PostalAddress>
+				<cbc:CityName>Stavanger</cbc:CityName>
+				<cac:Country>
+					<cbc:IdentificationCode listID="ISO3166-1" listAgencyID="6">NO</cbc:IdentificationCode>
+				</cac:Country>
+			</cac:PostalAddress>
+			<cac:PartyLegalEntity>
+				<cbc:RegistrationName>Montér Hus AS</cbc:RegistrationName>
+				<cbc:CompanyID schemeID="NO:ORGNR">912345678</cbc:CompanyID>
+			</cac:PartyLegalEntity>
+		</cac:Party>
+	</cac:AccountingSupplierParty>
+	<cac:AccountingCustomerParty>
+		<cac:Party>
+			<cac:PartyName>
+				<cbc:Name>Veidekke Entreprenør AS</cbc:Name>
+			</cac:PartyName>
+			<cac:PostalAddress>
+				<cbc:CityName>Oslo</cbc:CityName>
+				<cac:Country>
+					<cbc:IdentificationCode listID="ISO3166-1" listAgencyID="6">NO</cbc:IdentificationCode>
+				</cac:Country>
+			</cac:PostalAddress>
+			<cac:PartyLegalEntity>
+				<cbc:RegistrationName>Veidekke Entreprenør AS</cbc:RegistrationName>
+				<cbc:CompanyID schemeAgencyID="NO:ORGNR">976098897</cbc:CompanyID>
+			</cac:PartyLegalEntity>
+		</cac:Party>
+	</cac:AccountingCustomerParty>
+	<cac:PaymentMeans>
+		<cbc:PaymentMeansCode listID="UN/ECE 4461 Subset" listAgencyID="NES">31</cbc:PaymentMeansCode>
+		<cbc:PaymentDueDate>2025-06-02</cbc:PaymentDueDate>
+	</cac:PaymentMeans>
+	<cac:TaxTotal>
+		<cbc:TaxAmount currencyID="NOK">70209.21</cbc:TaxAmount>
+		<cac:TaxSubtotal>
+			<cbc:TaxableAmount currencyID="NOK">280836.85</cbc:TaxableAmount>
+			<cbc:TaxAmount currencyID="NOK">70209.21</cbc:TaxAmount>
+			<cac:TaxCategory>
+				<cbc:ID schemeID="UN/ECE 5305" schemeAgencyID="6">S</cbc:ID>
+				<cbc:Percent>25</cbc:Percent>
+				<cac:TaxScheme>
+					<cbc:ID schemeID="UN/ECE 5153" schemeAgencyID="6">VAT</cbc:ID>
+				</cac:TaxScheme>
+			</cac:TaxCategory>
+		</cac:TaxSubtotal>
+	</cac:TaxTotal>
+	<cac:LegalMonetaryTotal>
+		<cbc:LineExtensionAmount currencyID="NOK">280836.85</cbc:LineExtensionAmount>
+		<cbc:TaxExclusiveAmount currencyID="NOK">280836.85</cbc:TaxExclusiveAmount>
+		<cbc:TaxInclusiveAmount currencyID="NOK">351046.06</cbc:TaxInclusiveAmount>
+		<cbc:PayableAmount currencyID="NOK">351046.06</cbc:PayableAmount>
+	</cac:LegalMonetaryTotal>
+	<cac:InvoiceLine>
+		<cbc:ID>1</cbc:ID>
+		<cbc:InvoicedQuantity unitCode="EA">20</cbc:InvoicedQuantity>
+		<cbc:LineExtensionAmount currencyID="NOK">4783.60</cbc:LineExtensionAmount>
+		<cac:TaxTotal>
+			<cbc:TaxAmount currencyID="NOK">1195.90</cbc:TaxAmount>
+		</cac:TaxTotal>
+		<cac:Item>
+			<cbc:Name>TRELIM 700 INNE 0,75 L</cbc:Name>
+			<cac:StandardItemIdentification>
+				<cbc:ID schemeID="0160" schemeAgencyID="9">7311020038625</cbc:ID>
+			</cac:StandardItemIdentification>
+			<cac:ClassifiedTaxCategory xmlns="urn:oasis:names:specification:ubl:schema:xsd:CommonAggregateComponents-2">
+				<cbc:ID schemeID="UN/ECE 5305" schemeAgencyID="6">S</cbc:ID>
+				<cbc:Percent>25</cbc:Percent>
+				<TaxScheme>
+					<cbc:ID schemeID="UN/ECE 5153" schemeAgencyID="6">VAT</cbc:ID>
+				</TaxScheme>
+			</cac:ClassifiedTaxCategory>
+			<cac:AdditionalItemProperty>
+				<cbc:Name>NOBB</cbc:Name>
+				<cbc:Value>21511308</cbc:Value>
+			</cac:AdditionalItemProperty>
+		</cac:Item>
+		<cac:Price>
+			<cbc:PriceAmount currencyID="NOK">239.18</cbc:PriceAmount>
+			<cbc:BaseQuantity unitCode="C62">1</cbc:BaseQuantity>
+		</cac:Price>
+	</cac:InvoiceLine>
+	<cac:InvoiceLine>
+		<cbc:ID>2</cbc:ID>
+		<cbc:InvoicedQuantity unitCode="LMT">45.9</cbc:InvoicedQuantity>
+		<cbc:LineExtensionAmount currencyID="NOK">18387.08</cbc:LineExtensionAmount>
+		<cac:TaxTotal>
+			<cbc:TaxAmount currencyID="NOK">4596.77</cbc:TaxAmount>
+		</cac:TaxTotal>
+		<cac:Item>
+			<cbc:Name>STÅLPR ER50 STENDER 35X50X2485</cbc:Name>
+			<cac:StandardItemIdentification>
+				<cbc:ID schemeID="0160" schemeAgencyID="9">7318931927215</cbc:ID>
+			</cac:StandardItemIdentification>
+			<cac:ClassifiedTaxCategory xmlns="urn:oasis:names:specification:ubl:schema:xsd:CommonAggregateComponents-2">
+				<cbc:ID schemeID="UN/ECE 5305" schemeAgencyID="6">S</cbc:ID>
+				<cbc:Percent>25</cbc:Percent>
+				<TaxScheme>
+					<cbc:ID schemeID="UN/ECE 5153" schemeAgencyID="6">VAT</cbc:ID>
+				</TaxScheme>
+			</cac:ClassifiedTaxCategory>
+			<cac:AdditionalItemProperty>
+				<cbc:Name>NOBB</cbc:Name>
+				<cbc:Value>21414107</cbc:Value>
+			</cac:AdditionalItemProperty>
+		</cac:Item>
+		<cac:Price>
+			<cbc:PriceAmount currencyID="NOK">400.59</cbc:PriceAmount>
+			<cbc:BaseQuantity unitCode="C62">1</cbc:BaseQuantity>
+		</cac:Price>
+	</cac:InvoiceLine>
+	<cac:InvoiceLine>
+		<cbc:ID>3</cbc:ID>
+		<cbc:InvoicedQuantity unitCode="EA">4</cbc:InvoicedQuantity>
+		<cbc:LineExtensionAmount currencyID="NOK">486.20</cbc:LineExtensionAmount>
+		<cac:TaxTotal>
+			<cbc:TaxAmount currencyID="NOK">121.55</cbc:TaxAmount>
+		</cac:TaxTotal>
+		<cac:Item>
+			<cbc:Name>RENNEKROK KORT 125MM AVIT LINDAB</cbc:Name>
+			<cac:StandardItemIdentification>
+				<cbc:ID schemeID="0160" schemeAgencyID="9">7319660298041</cbc:ID>
+			</cac:StandardItemIdentification>
+			<cac:ClassifiedTaxCategory xmlns="urn:oasis:names:specification:ubl:schema:xsd:CommonAggregateComponents-2">
+				<cbc:ID schemeID="UN/ECE 5305" schemeAgencyID="6">S</cbc:ID>
+				<cbc:Percent>25</cbc:Percent>
+				<TaxScheme>
+					<cbc:ID schemeID="UN/ECE 5153" schemeAgencyID="6">VAT</cbc:ID>
+				</TaxScheme>
+			</cac:ClassifiedTaxCategory>
+			<cac:AdditionalItemProperty>
+				<cbc:Name>NOBB</cbc:Name>
+				<cbc:Value>22154843</cbc:Value>
+			</cac:AdditionalItemProperty>
+		</cac:Item>
+		<cac:Price>
+			<cbc:PriceAmount currencyID="NOK">121.55</cbc:PriceAmount>
+			<cbc:BaseQuantity unitCode="C62">1</cbc:BaseQuantity>
+		</cac:Price>
+	</cac:InvoiceLine>
+	<cac:InvoiceLine>
+		<cbc:ID>4</cbc:ID>
+		<cbc:InvoicedQuantity unitCode="XPA">3</cbc:InvoicedQuantity>
+		<cbc:LineExtensionAmount currencyID="NOK">1109.55</cbc:LineExtensionAmount>
+		<cac:TaxTotal>
+			<cbc:TaxAmount currencyID="NOK">277.39</cbc:TaxAmount>
+		</cac:TaxTotal>
+		<cac:Item>
+			<cbc:Name>SOILKRAGEBEND N70 SORT</cbc:Name>
+			<cac:StandardItemIdentification>
+				<cbc:ID schemeID="0160" schemeAgencyID="9">7071528005320</cbc:ID>
+			</cac:StandardItemIdentification>
+			<cac:ClassifiedTaxCategory xmlns="urn:oasis:names:specification:ubl:schema:xsd:CommonAggregateComponents-2">
+				<cbc:ID schemeID="UN/ECE 5305" schemeAgencyID="6">S</cbc:ID>
+				<cbc:Percent>25</cbc:Percent>
+				<TaxScheme>
+					<cbc:ID schemeID="UN/ECE 5153" schemeAgencyID="6">VAT</cbc:ID>
+				</TaxScheme>
+			</cac:ClassifiedTaxCategory>
+			<cac:AdditionalItemProperty>
+				<cbc:Name>NOBB</cbc:Name>
+				<cbc:Value>22432041</cbc:Value>
+			</cac:AdditionalItemProperty>
+		</cac:Item>
+		<cac:Price>
+			<cbc:PriceAmount currencyID="NOK">369.85</cbc:PriceAmount>
+			<cbc:BaseQuantity unitCode="C62">1</cbc:BaseQuantity>
+		</cac:Price>
+	</cac:InvoiceLine>
+	<cac:InvoiceLine>
+		<cbc:ID>5</cbc:ID>
+		<cbc:InvoicedQuantity unitCode="LMT">45.0</cbc:InvoicedQuantity>
+		<cbc:LineExtensionAmount currencyID="NOK">16398.45</cbc:LineExtensionAmount>
+		<cac:TaxTotal>
+			<cbc:TaxAmount currencyID="NOK">4099.61</cbc:TaxAmount>
+		</cac:TaxTotal>
+		<cac:Item>
+			<cbc:Name>FURU 21X095 GULV CW250 ANTIKK UBH</cbc:Name>
+			<cac:StandardItemIdentification>
+				<cbc:ID schemeID="0160" schemeAgencyID="9">7059420021525</cbc:ID>
+			</cac:StandardItemIdentification>
+			<cac:ClassifiedTaxCategory xmlns="urn:oasis:names:specification:ubl:schema:xsd:CommonAggregateComponents-2">
+				<cbc:ID schemeID="UN/ECE 5305" schemeAgencyID="6">S</cbc:ID>
+				<cbc:Percent>25</cbc:Percent>
+				<TaxScheme>
+					<cbc:ID schemeID="UN/ECE 5153" schemeAgencyID="6">VAT</cbc:ID>
+				</TaxScheme>
+			</cac:ClassifiedTaxCategory>
+			<cac:AdditionalItemProperty>
+				<cbc:Name>NOBB</cbc:Name>
+				<cbc:Value>21685821</cbc:Value>
+			</cac:AdditionalItemProperty>
+		</cac:Item>
+		<cac:Price>
+			<cbc:PriceAmount currencyID="NOK">364.41</cbc:PriceAmount>
+			<cbc:BaseQuantity unitCode="C62">1</cbc:BaseQuantity>
+		</cac:Price>
+	</cac:InvoiceLine>
+	<cac:InvoiceLine>
+		<cbc:ID>6</cbc:ID>
+		<cbc:InvoicedQuantity unitCode="EA">3</cbc:InvoicedQuantity>
+		<cbc:LineExtensionAmount currencyID="NOK">1953.75</cbc:LineExtensionAmount>
+		<cac:TaxTotal>
+			<cbc:TaxAmount currencyID="NOK">488.44</cbc:TaxAmount>
+		</cac:TaxTotal>
+		<cac:Item>
+			<cbc:Name>GRENRØR 45GR 110/110MM SORT</cbc:Name>
+			<cac:StandardItemIdentification>
+				<cbc:ID schemeID="0160" schemeAgencyID="9">5702752545703</cbc:ID>
+			</cac:StandardItemIdentification>
+			<cac:ClassifiedTaxCategory xmlns="urn:oasis:names:specification:ubl:schema:xsd:CommonAggregateComponents-2">
+				<cbc:ID schemeID="UN/ECE 5305" schemeAgencyID="6">S</cbc:ID>
+				<cbc:Percent>25</cbc:Percent>
+				<TaxScheme>
+					<cbc:ID schemeID="UN/ECE 5153" schemeAgencyID="6">VAT</cbc:ID>
+				</TaxScheme>
+			</cac:ClassifiedTaxCategory>
+			<cac:AdditionalItemProperty>
+				<cbc:Name>NOBB</cbc:Name>
+				<cbc:Value>21019849</cbc:Value>
+			</cac:AdditionalItemProperty>
+		</cac:Item>
+		<cac:Price>
+			<cbc:PriceAmount currencyID="NOK">651.25</cbc:PriceAmount>
+			<cbc:BaseQuantity unitCode="C62">1</cbc:BaseQuantity>
+		</cac:Price>
+	</cac:InvoiceLine>
+	<cac:InvoiceLine>
+		<cbc:ID>7</cbc:ID>
+		<cbc:InvoicedQuantity unitCode="LMT">48.4</cbc:InvoicedQuantity>
+		<cbc:LineExtensionAmount currencyID="NOK">38209.86</cbc:LineExtensionAmount>
+		<cac:TaxTotal>
+			<cbc:TaxAmount currencyID="NOK">9552.47</cbc:TaxAmount>
+		</cac:TaxTotal>
+		<cac:Item>
+			<cbc:Name>GRAN 14X145 VEKSEL SKRÅ INT</cbc:Name>
+			<cac:StandardItemIdentification>
+				<cbc:ID schemeID="0160" schemeAgencyID="9">7042757211905</cbc:ID>
+			</cac:StandardItemIdentification>
+			<cac:ClassifiedTaxCategory xmlns="urn:oasis:names:specification:ubl:schema:xsd:CommonAggregateComponents-2">
+				<cbc:ID schemeID="UN/ECE 5305" schemeAgencyID="6">S</cbc:ID>
+				<cbc:Percent>25</cbc:Percent>
+				<TaxScheme>
+					<cbc:ID schemeID="UN/ECE 5153" schemeAgencyID="6">VAT</cbc:ID>
+				</TaxScheme>
+			</cac:ClassifiedTaxCategory>
+			<cac:AdditionalItemProperty>
+				<cbc:Name>NOBB</cbc:Name>
+				<cbc:Value>22207476</cbc:Value>
+			</cac:AdditionalItemProperty>
+		</cac:Item>
+		<cac:Price>
+			<cbc:PriceAmount currencyID="NOK">789.46</cbc:PriceAmount>
+			<cbc:BaseQuantity unitCode="C62">1</cbc:BaseQuantity>
+		</cac:Price>
+	</cac:InvoiceLine>
+	<cac:InvoiceLine>
+		<cbc:ID>8</cbc:ID>
+		<cbc:InvoicedQuantity unitCode="XPK">22</cbc:InvoicedQuantity>
+		<cbc:LineExtensionAmount currencyID="NOK">6330.06</cbc:LineExtensionAmount>
+		<cac:TaxTotal>
+			<cbc:TaxAmount currencyID="NOK">1582.52</cbc:TaxAmount>
+		</cac:TaxTotal>
+		<cac:Item>
+			<cbc:Name>MESSINGSPIKER 50-2,5 A 1000</cbc:Name>
+			<cac:StandardItemIdentification>
+				<cbc:ID schemeID="0160" schemeAgencyID="9">7318472327161</cbc:ID>
+			</cac:StandardItemIdentification>
+			<cac:ClassifiedTaxCategory xmlns="urn:oasis:names:specification:ubl:schema:xsd:CommonAggregateComponents-2">
+				<cbc:ID schemeID="UN/ECE 5305" schemeAgencyID="6">S</cbc:ID>
+				<cbc:Percent>25</cbc:Percent>
+				<TaxScheme>
+					<cbc:ID schemeID="UN/ECE 5153" schemeAgencyID="6">VAT</cbc:ID>
+				</TaxScheme>
+			</cac:ClassifiedTaxCategory>
+			<cac:AdditionalItemProperty>
+				<cbc:Name>NOBB</cbc:Name>
+				<cbc:Value>21035167</cbc:Value>
+			</cac:AdditionalItemProperty>
+		</cac:Item>
+		<cac:Price>
+			<cbc:PriceAmount currencyID="NOK">287.73</cbc:PriceAmount>
+			<cbc:BaseQuantity unitCode="C62">1</cbc:BaseQuantity>
+		</cac:Price>
+	</cac:InvoiceLine>
+	<cac:InvoiceLine>
+		<cbc:ID>9</cbc:ID>
+		<cbc:InvoicedQuantity unitCode="EA">3</cbc:InvoicedQuantity>
+		<cbc:LineExtensionAmount currencyID="NOK">1340.25</cbc:LineExtensionAmount>
+		<cac:TaxTotal>
+			<cbc:TaxAmount currencyID="NOK">335.06</cbc:TaxAmount>
+		</cac:TaxTotal>
+		<cac:Item>
+			<cbc:Name>HULLPLATESTRIMMEL 40X1200X2,0MM EAN</cbc:Name>
+			<cac:StandardItemIdentification>
+				<cbc:ID schemeID="0160" schemeAgencyID="9">5701953366407</cbc:ID>
+			</cac:StandardItemIdentification>
+			<cac:ClassifiedTaxCategory xmlns="urn:oasis:names:specification:ubl:schema:xsd:CommonAggregateComponents-2">
+				<cbc:ID schemeID="UN/ECE 5305" schemeAgencyID="6">S</cbc:ID>
+				<cbc:Percent>25</cbc:Percent>
+				<TaxScheme>
+					<cbc:ID schemeID="UN/ECE 5153" schemeAgencyID="6">VAT</cbc:ID>
+				</TaxScheme>
+			</cac:ClassifiedTaxCategory>
+			<cac:AdditionalItemProperty>
+				<cbc:Name>NOBB</cbc:Name>
+				<cbc:Value>21594015</cbc:Value>
+			</cac:AdditionalItemProperty>
+		</cac:Item>
+		<cac:Price>
+			<cbc:PriceAmount currencyID="NOK">446.75</cbc:PriceAmount>
+			<cbc:BaseQuantity unitCode="C62">1</cbc:BaseQuantity>
+		</cac:Price>
+	</cac:InvoiceLine>
+	<cac:InvoiceLine>
+		<cbc:ID>10</cbc:ID>
+		<cbc:InvoicedQuantity unitCode="EA">10</cbc:InvoicedQuantity>
+		<cbc:LineExtensionAmount currencyID="NOK">7147.00</cbc:LineExtensionAmount>
+		<cac:TaxTotal>
+			<cbc:TaxAmount currencyID="NOK">1786.75</cbc:TaxAmount>
+		</cac:TaxTotal>
+		<cac:Item>
+			<cbc:Name>RENSETRAKT FOR NEDLØP AVIT</cbc:Name>
+			<cac:StandardItemIdentification>
+				<cbc:ID schemeID="0160" schemeAgencyID="9">7319660743091</cbc:ID>
+			</cac:StandardItemIdentification>
+			<cac:ClassifiedTaxCategory xmlns="urn:oasis:names:specification:ubl:schema:xsd:CommonAggregateComponents-2">
+				<cbc:ID schemeID="UN/ECE 5305" schemeAgencyID="6">S</cbc:ID>
+				<cbc:Percent>25</cbc:Percent>
+				<TaxScheme>
+					<cbc:ID schemeID="UN/ECE 5153" schemeAgencyID="6">VAT</cbc:ID>
+				</TaxScheme>
+			</cac:ClassifiedTaxCategory>
+			<cac:AdditionalItemProperty>
+				<cbc:Name>NOBB</cbc:Name>
+				<cbc:Value>22156814</cbc:Value>
+			</cac:AdditionalItemProperty>
+		</cac:Item>
+		<cac:Price>
+			<cbc:PriceAmount currencyID="NOK">714.70</cbc:PriceAmount>
+			<cbc:BaseQuantity unitCode="C62">1</cbc:BaseQuantity>
+		</cac:Price>
+	</cac:InvoiceLine>
+	<cac:InvoiceLine>
+		<cbc:ID>11</cbc:ID>
+		<cbc:InvoicedQuantity unitCode="EA">28</cbc:InvoicedQuantity>
+		<cbc:LineExtensionAmount currencyID="NOK">3881.92</cbc:LineExtensionAmount>
+		<cac:TaxTotal>
+			<cbc:TaxAmount currencyID="NOK">970.48</cbc:TaxAmount>
+		</cac:TaxTotal>
+		<cac:Item>
+			<cbc:Name>VINKELBESLAG 40412 EAN</cbc:Name>
+			<cac:StandardItemIdentification>
+				<cbc:ID schemeID="0160" schemeAgencyID="9">5701953004415</cbc:ID>
+			</cac:StandardItemIdentification>
+			<cac:ClassifiedTaxCategory xmlns="urn:oasis:names:specification:ubl:schema:xsd:CommonAggregateComponents-2">
+				<cbc:ID schemeID="UN/ECE 5305" schemeAgencyID="6">S</cbc:ID>
+				<cbc:Percent>25</cbc:Percent>
+				<TaxScheme>
+					<cbc:ID schemeID="UN/ECE 5153" schemeAgencyID="6">VAT</cbc:ID>
+				</TaxScheme>
+			</cac:ClassifiedTaxCategory>
+			<cac:AdditionalItemProperty>
+				<cbc:Name>NOBB</cbc:Name>
+				<cbc:Value>21594494</cbc:Value>
+			</cac:AdditionalItemProperty>
+		</cac:Item>
+		<cac:Price>
+			<cbc:PriceAmount currencyID="NOK">138.64</cbc:PriceAmount>
+			<cbc:BaseQuantity unitCode="C62">1</cbc:BaseQuantity>
+		</cac:Price>
+	</cac:InvoiceLine>
+	<cac:InvoiceLine>
+		<cbc:ID>12</cbc:ID>
+		<cbc:InvoicedQuantity unitCode="EA">23</cbc:InvoicedQuantity>
+		<cbc:LineExtensionAmount currencyID="NOK">17087.85</cbc:LineExtensionAmount>
+		<cac:TaxTotal>
+			<cbc:TaxAmount currencyID="NOK">4271.96</cbc:TaxAmount>
+		</cac:TaxTotal>
+		<cac:Item>
+			<cbc:Name>ENDEMØNE GAVL ANTIKK SLUTT</cbc:Name>
+			<cac:StandardItemIdentification>
+				<cbc:ID schemeID="0160" schemeAgencyID="9">7071449225234</cbc:ID>
+			</cac:StandardItemIdentification>
+			<cac:ClassifiedTaxCategory xmlns="urn:oasis:names:specification:ubl:schema:xsd:CommonAggregateComponents-2">
+				<cbc:ID schemeID="UN/ECE 5305" schemeAgencyID="6">S</cbc:ID>
+				<cbc:Percent>25</cbc:Percent>
+				<TaxScheme>
+					<cbc:ID schemeID="UN/ECE 5153" schemeAgencyID="6">VAT</cbc:ID>
+				</TaxScheme>
+			</cac:ClassifiedTaxCategory>
+			<cac:AdditionalItemProperty>
+				<cbc:Name>NOBB</cbc:Name>
+				<cbc:Value>21062211</cbc:Value>
+			</cac:AdditionalItemProperty>
+		</cac:Item>
+		<cac:Price>
+			<cbc:PriceAmount currencyID="NOK">742.95</cbc:PriceAmount>
+			<cbc:BaseQuantity unitCode="C62">1</cbc:BaseQuantity>
+		</cac:Price>
+	</cac:InvoiceLine>
+	<cac:InvoiceLine>
+		<cbc:ID>13</cbc:ID>
+		<cbc:InvoicedQuantity unitCode="EA">21</cbc:InvoicedQuantity>
+		<cbc:LineExtensionAmount currencyID="NOK">3184.86</cbc:LineExtensionAmount>
+		<cac:TaxTotal>
+			<cbc:TaxAmount currencyID="NOK">796.22</cbc:TaxAmount>
+		</cac:TaxTotal>
+		<cac:Item>
+			<cbc:Name>KAPPESKINNE 85 KOMPL DOB 450CM</cbc:Name>
+			<cac:StandardItemIdentification>
+				<cbc:ID schemeID="0160" schemeAgencyID="9">7055078524500</cbc:ID>
+			</cac:StandardItemIdentification>
+			<cac:ClassifiedTaxCategory xmlns="urn:oasis:names:specification:ubl:schema:xsd:CommonAggregateComponents-2">
+				<cbc:ID schemeID="UN/ECE 5305" schemeAgencyID="6">S</cbc:ID>
+				<cbc:Percent>25</cbc:Percent>
+				<TaxScheme>
+					<cbc:ID schemeID="UN/ECE 5153" schemeAgencyID="6">VAT</cbc:ID>
+				</TaxScheme>
+			</cac:ClassifiedTaxCategory>
+			<cac:AdditionalItemProperty>
+				<cbc:Name>NOBB</cbc:Name>
+				<cbc:Value>21305198</cbc:Value>
+			</cac:AdditionalItemProperty>
+		</cac:Item>
+		<cac:Price>
+			<cbc:PriceAmount currencyID="NOK">151.66</cbc:PriceAmount>
+			<cbc:BaseQuantity unitCode="C62">1</cbc:BaseQuantity>
+		</cac:Price>
+	</cac:InvoiceLine>
+	<cac:InvoiceLine>
+		<cbc:ID>14</cbc:ID>
+		<cbc:InvoicedQuantity unitCode="EA">12</cbc:InvoicedQuantity>
+		<cbc:LineExtensionAmount currencyID="NOK">4972.44</cbc:LineExtensionAmount>
+		<cac:TaxTotal>
+			<cbc:TaxAmount currencyID="NOK">1243.11</cbc:TaxAmount>
+		</cac:TaxTotal>
+		<cac:Item>
+			<cbc:Name>EKSPANSJONSTAPPSTYKKE 12/110 HVIT</cbc:Name>
+			<cac:StandardItemIdentification>
+				<cbc:ID schemeID="0160" schemeAgencyID="9">5702751223725</cbc:ID>
+			</cac:StandardItemIdentification>
+			<cac:ClassifiedTaxCategory xmlns="urn:oasis:names:specification:ubl:schema:xsd:CommonAggregateComponents-2">
+				<cbc:ID schemeID="UN/ECE 5305" schemeAgencyID="6">S</cbc:ID>
+				<cbc:Percent>25</cbc:Percent>
+				<TaxScheme>
+					<cbc:ID schemeID="UN/ECE 5153" schemeAgencyID="6">VAT</cbc:ID>
+				</TaxScheme>
+			</cac:ClassifiedTaxCategory>
+			<cac:AdditionalItemProperty>
+				<cbc:Name>NOBB</cbc:Name>
+				<cbc:Value>21016225</cbc:Value>
+			</cac:AdditionalItemProperty>
+		</cac:Item>
+		<cac:Price>
+			<cbc:PriceAmount currencyID="NOK">414.37</cbc:PriceAmount>
+			<cbc:BaseQuantity unitCode="C62">1</cbc:BaseQuantity>
+		</cac:Price>
+	</cac:InvoiceLine>
+	<cac:InvoiceLine>
+		<cbc:ID>15</cbc:ID>
+		<cbc:InvoicedQuantity unitCode="LMT">6.9</cbc:InvoicedQuantity>
+		<cbc:LineExtensionAmount currencyID="NOK">1192.11</cbc:LineExtensionAmount>
+		<cac:TaxTotal>
+			<cbc:TaxAmount currencyID="NOK">298.03</cbc:TaxAmount>
+		</cac:TaxTotal>
+		<cac:Item>
+			<cbc:Name>FURU 21X120 TAK ANTIKK UBEHANDLET</cbc:Name>
+			<cac:StandardItemIdentification>
+				<cbc:ID schemeID="0160" schemeAgencyID="9">7059420023567</cbc:ID>
+			</cac:StandardItemIdentification>
+			<cac:ClassifiedTaxCategory xmlns="urn:oasis:names:specification:ubl:schema:xsd:CommonAggregateComponents-2">
+				<cbc:ID schemeID="UN/ECE 5305" schemeAgencyID="6">S</cbc:ID>
+				<cbc:Percent>25</cbc:Percent>
+				<TaxScheme>
+					<cbc:ID schemeID="UN/ECE 5153" schemeAgencyID="6">VAT</cbc:ID>
+				</TaxScheme>
+			</cac:ClassifiedTaxCategory>
+			<cac:AdditionalItemProperty>
+				<cbc:Name>NOBB</cbc:Name>
+				<cbc:Value>21799788</cbc:Value>
+			</cac:AdditionalItemProperty>
+		</cac:Item>
+		<cac:Price>
+			<cbc:PriceAmount currencyID="NOK">172.77</cbc:PriceAmount>
+			<cbc:BaseQuantity unitCode="C62">1</cbc:BaseQuantity>
+		</cac:Price>
+	</cac:InvoiceLine>
+	<cac:InvoiceLine>
+		<cbc:ID>16</cbc:ID>
+		<cbc:InvoicedQuantity unitCode="MTK">7.8</cbc:InvoicedQuantity>
+		<cbc:LineExtensionAmount currencyID="NOK">4956.43</cbc:LineExtensionAmount>
+		<cac:TaxTotal>
+			<cbc:TaxAmount currencyID="NOK">1239.11</cbc:TaxAmount>
+		</cac:TaxTotal>
+		<cac:Item>
+			<cbc:Name>VÅTROMPL TAK 12X620X1220 HV ELITEX</cbc:Name>
+			<cac:StandardItemIdentification>
+				<cbc:ID schemeID="0160" schemeAgencyID="9">7029560098749</cbc:ID>
+			</cac:StandardItemIdentification>
+			<cac:ClassifiedTaxCategory xmlns="urn:oasis:names:specification:ubl:schema:xsd:CommonAggregateComponents-2">
+				<cbc:ID schemeID="UN/ECE 5305" schemeAgencyID="6">S</cbc:ID>
+				<cbc:Percent>25</cbc:Percent>
+				<TaxScheme>
+					<cbc:ID schemeID="UN/ECE 5153" schemeAgencyID="6">VAT</cbc:ID>
+				</TaxScheme>
+			</cac:ClassifiedTaxCategory>
+			<cac:AdditionalItemProperty>
+				<cbc:Name>NOBB</cbc:Name>
+				<cbc:Value>10398204</cbc:Value>
+			</cac:AdditionalItemProperty>
+		</cac:Item>
+		<cac:Price>
+			<cbc:PriceAmount currencyID="NOK">635.44</cbc:PriceAmount>
+			<cbc:BaseQuantity unitCode="C62">1</cbc:BaseQuantity>
+		</cac:Price>
+	</cac:InvoiceLine>
+	<cac:InvoiceLine>
+		<cbc:ID>17</cbc:ID>
+		<cbc:InvoicedQuantity unitCode="XPK">1</cbc:InvoicedQuantity>
+		<cbc:LineExtensionAmount currencyID="NOK">298.30</cbc:LineExtensionAmount>
+		<cac:TaxTotal>
+			<cbc:TaxAmount currencyID="NOK">74.58</cbc:TaxAmount>
+		</cac:TaxTotal>
+		<cac:Item>
+			<cbc:Name>SPONPLATESKRUE B 4,2X30 FZB -1000</cbc:Name>
+			<cac:StandardItemIdentification>
+				<cbc:ID schemeID="0160" schemeAgencyID="9">7317761102984</cbc:ID>
+			</cac:StandardItemIdentification>
+			<cac:ClassifiedTaxCategory xmlns="urn:oasis:names:specification:ubl:schema:xsd:CommonAggregateComponents-2">
+				<cbc:ID schemeID="UN/ECE 5305" schemeAgencyID="6">S</cbc:ID>
+				<cbc:Percent>25</cbc:Percent>
+				<TaxScheme>
+					<cbc:ID schemeID="UN/ECE 5153" schemeAgencyID="6">VAT</cbc:ID>
+				</TaxScheme>
+			</cac:ClassifiedTaxCategory>
+			<cac:AdditionalItemProperty>
+				<cbc:Name>NOBB</cbc:Name>
+				<cbc:Value>21697990</cbc:Value>
+			</cac:AdditionalItemProperty>
+		</cac:Item>
+		<cac:Price>
+			<cbc:PriceAmount currencyID="NOK">298.30</cbc:PriceAmount>
+			<cbc:BaseQuantity unitCode="C62">1</cbc:BaseQuantity>
+		</cac:Price>
+	</cac:InvoiceLine>
+	<cac:InvoiceLine>
+		<cbc:ID>18</cbc:ID>
+		<cbc:InvoicedQuantity unitCode="EA">19</cbc:InvoicedQuantity>
+		<cbc:LineExtensionAmount currencyID="NOK">5787.40</cbc:LineExtensionAmount>
+		<cac:TaxTotal>
+			<cbc:TaxAmount currencyID="NOK">1446.85</cbc:TaxAmount>
+		</cac:TaxTotal>
+		<cac:Item>
+			<cbc:Name>OVERLIGGER T150  UBH</cbc:Name>
+			<cac:StandardItemIdentification>
+				<cbc:ID schemeID="0160" schemeAgencyID="9">7071528003982</cbc:ID>
+			</cac:StandardItemIdentification>
+			<cac:ClassifiedTaxCategory xmlns="urn:oasis:names:specification:ubl:schema:xsd:CommonAggregateComponents-2">
+				<cbc:ID schemeID="UN/ECE 5305" schemeAgencyID="6">S</cbc:ID>
+				<cbc:Percent>25</cbc:Percent>
+				<TaxScheme>
+					<cbc:ID schemeID="UN/ECE 5153" schemeAgencyID="6">VAT</cbc:ID>
+				</TaxScheme>
+			</cac:ClassifiedTaxCategory>
+			<cac:AdditionalItemProperty>
+				<cbc:Name>NOBB</cbc:Name>
+				<cbc:Value>22430789</cbc:Value>
+			</cac:AdditionalItemProperty>
+		</cac:Item>
+		<cac:Price>
+			<cbc:PriceAmount currencyID="NOK">304.60</cbc:PriceAmount>
+			<cbc:BaseQuantity unitCode="C62">1</cbc:BaseQuantity>
+		</cac:Price>
+	</cac:InvoiceLine>
+	<cac:InvoiceLine>
+		<cbc:ID>19</cbc:ID>
+		<cbc:InvoicedQuantity unitCode="EA">26</cbc:InvoicedQuantity>
+		<cbc:LineExtensionAmount currencyID="NOK">20453.16</cbc:LineExtensionAmount>
+		<cac:TaxTotal>
+			<cbc:TaxAmount currencyID="NOK">5113.29</cbc:TaxAmount>
+		</cac:TaxTotal>
+		<cac:Item>
+			<cbc:Name>VINDU SIDESV 1-RAMS 4X4-H,UV 1,2</cbc:Name>
+			<cac:StandardItemIdentification>
+				<cbc:ID schemeID="0160" schemeAgencyID="9">7071895012143</cbc:ID>
+			</cac:StandardItemIdentification>
+			<cac:ClassifiedTaxCategory xmlns="urn:oasis:names:specification:ubl:schema:xsd:CommonAggregateComponents-2">
+				<cbc:ID schemeID="UN/ECE 5305" schemeAgencyID="6">S</cbc:ID>
+				<cbc:Percent>25</cbc:Percent>
+				<TaxScheme>
+					<cbc:ID schemeID="UN/ECE 5153" schemeAgencyID="6">VAT</cbc:ID>
+				</TaxScheme>
+			</cac:ClassifiedTaxCategory>
+			<cac:AdditionalItemProperty>
+				<cbc:Name>NOBB</cbc:Name>
+				<cbc:Value>22081814</cbc:Value>
+			</cac:AdditionalItemProperty>
+		</cac:Item>
+		<cac:Price>
+			<cbc:PriceAmount currencyID="NOK">786.66</cbc:PriceAmount>
+			<cbc:BaseQuantity unitCode="C62">1</cbc:BaseQuantity>
+		</cac:Price>
+	</cac:InvoiceLine>
+	<cac:InvoiceLine>
+		<cbc:ID>20</cbc:ID>
+		<cbc:InvoicedQuantity unitCode="EA">5</cbc:InvoicedQuantity>
+		<cbc:LineExtensionAmount currencyID="NOK">2476.90</cbc:LineExtensionAmount>
+		<cac:TaxTotal>
+			<cbc:TaxAmount currencyID="NOK">619.23</cbc:TaxAmount>
+		</cac:TaxTotal>
+		<cac:Item>
+			<cbc:Name>STIKKSAGBL T244D 74MM A3 TRE/GROV</cbc:Name>
+			<cac:StandardItemIdentification>
+				<cbc:ID schemeID="0160" schemeAgencyID="9">3165140007221</cbc:ID>
+			</cac:StandardItemIdentification>
+			<cac:ClassifiedTaxCategory xmlns="urn:oasis:names:specification:ubl:schema:xsd:CommonAggregateComponents-2">
+				<cbc:ID schemeID="UN/ECE 5305" schemeAgencyID="6">S</cbc:ID>
+				<cbc:Percent>25</cbc:Percent>
+				<TaxScheme>
+					<cbc:ID schemeID="UN/ECE 5153" schemeAgencyID="6">VAT</cbc:ID>
+				</TaxScheme>
+			</cac:ClassifiedTaxCategory>
+			<cac:AdditionalItemProperty>
+				<cbc:Name>NOBB</cbc:Name>
+				<cbc:Value>21441704</cbc:Value>
+			</cac:AdditionalItemProperty>
+		</cac:Item>
+		<cac:Price>
+			<cbc:PriceAmount currencyID="NOK">495.38</cbc:PriceAmount>
+			<cbc:BaseQuantity unitCode="C62">1</cbc:BaseQuantity>
+		</cac:Price>
+	</cac:InvoiceLine>
+	<cac:InvoiceLine>
+		<cbc:ID>21</cbc:ID>
+		<cbc:InvoicedQuantity unitCode="EA">3</cbc:InvoicedQuantity>
+		<cbc:LineExtensionAmount currencyID="NOK">199.83</cbc:LineExtensionAmount>
+		<cac:TaxTotal>
+			<cbc:TaxAmount currencyID="NOK">49.96</cbc:TaxAmount>
+		</cac:TaxTotal>
+		<cac:Item>
+			<cbc:Name>NEDLØPSRØR 70 MM LGD 6M SORT</cbc:Name>
+			<cac:StandardItemIdentification>
+				<cbc:ID schemeID="0160" schemeAgencyID="9">7071528006754</cbc:ID>
+			</cac:StandardItemIdentification>
+			<cac:ClassifiedTaxCategory xmlns="urn:oasis:names:specification:ubl:schema:xsd:CommonAggregateComponents-2">
+				<cbc:ID schemeID="UN/ECE 5305" schemeAgencyID="6">S</cbc:ID>
+				<cbc:Percent>25</cbc:Percent>
+				<TaxScheme>
+					<cbc:ID schemeID="UN/ECE 5153" schemeAgencyID="6">VAT</cbc:ID>
+				</TaxScheme>
+			</cac:ClassifiedTaxCategory>
+			<cac:AdditionalItemProperty>
+				<cbc:Name>NOBB</cbc:Name>
+				<cbc:Value>22431886</cbc:Value>
+			</cac:AdditionalItemProperty>
+		</cac:Item>
+		<cac:Price>
+			<cbc:PriceAmount currencyID="NOK">66.61</cbc:PriceAmount>
+			<cbc:BaseQuantity unitCode="C62">1</cbc:BaseQuantity>
+		</cac:Price>
+	</cac:InvoiceLine>
+	<cac:InvoiceLine>
+		<cbc:ID>22</cbc:ID>
+		<cbc:InvoicedQuantity unitCode="MTK">20.5</cbc:InvoicedQuantity>
+		<cbc:LineExtensionAmount currencyID="NOK">11844.69</cbc:LineExtensionAmount>
+		<cac:TaxTotal>
+			<cbc:TaxAmount currencyID="NOK">2961.17</cbc:TaxAmount>
+		</cac:TaxTotal>
+		<cac:Item>
+			<cbc:Name>GIPSPL BRANN F 1200X3000X15 NORGIPS</cbc:Name>
+			<cac:StandardItemIdentification>
+				<cbc:ID schemeID="0160" schemeAgencyID="9">7046630121725</cbc:ID>
+			</cac:StandardItemIdentification>
+			<cac:ClassifiedTaxCategory xmlns="urn:oasis:names:specification:ubl:schema:xsd:CommonAggregateComponents-2">
+				<cbc:ID schemeID="UN/ECE 5305" schemeAgencyID="6">S</cbc:ID>
+				<cbc:Percent>25</cbc:Percent>
+				<TaxScheme>
+					<cbc:ID schemeID="UN/ECE 5153" schemeAgencyID="6">VAT</cbc:ID>
+				</TaxScheme>
+			</cac:ClassifiedTaxCategory>
+			<cac:AdditionalItemProperty>
+				<cbc:Name>NOBB</cbc:Name>
+				<cbc:Value>10896181</cbc:Value>
+			</cac:AdditionalItemProperty>
+		</cac:Item>
+		<cac:Price>
+			<cbc:PriceAmount currencyID="NOK">577.79</cbc:PriceAmount>
+			<cbc:BaseQuantity unitCode="C62">1</cbc:BaseQuantity>
+		</cac:Price>
+	</cac:InvoiceLine>
+	<cac:InvoiceLine>
+		<cbc:ID>23</cbc:ID>
+		<cbc:InvoicedQuantity unitCode="EA">16</cbc:InvoicedQuantity>
+		<cbc:LineExtensionAmount currencyID="NOK">6842.72</cbc:LineExtensionAmount>
+		<cac:TaxTotal>
+			<cbc:TaxAmount currencyID="NOK">1710.68</cbc:TaxAmount>
+		</cac:TaxTotal>
+		<cac:Item>
+			<cbc:Name>INNDEKN EKW 55X98 0007E</cbc:Name>
+			<cac:StandardItemIdentification>
+				<cbc:ID schemeID="0160" schemeAgencyID="9">5702321626604</cbc:ID>
+			</cac:StandardItemIdentification>
+			<cac:ClassifiedTaxCategory xmlns="urn:oasis:names:specification:ubl:schema:xsd:CommonAggregateComponents-2">
+				<cbc:ID schemeID="UN/ECE 5305" schemeAgencyID="6">S</cbc:ID>
+				<cbc:Percent>25</cbc:Percent>
+				<TaxScheme>
+					<cbc:ID schemeID="UN/ECE 5153" schemeAgencyID="6">VAT</cbc:ID>
+				</TaxScheme>
+			</cac:ClassifiedTaxCategory>
+			<cac:AdditionalItemProperty>
+				<cbc:Name>NOBB</cbc:Name>
+				<cbc:Value>22463814</cbc:Value>
+			</cac:AdditionalItemProperty>
+		</cac:Item>
+		<cac:Price>
+			<cbc:PriceAmount currencyID="NOK">427.67</cbc:PriceAmount>
+			<cbc:BaseQuantity unitCode="C62">1</cbc:BaseQuantity>
+		</cac:Price>
+	</cac:InvoiceLine>
+	<cac:InvoiceLine>
+		<cbc:ID>24</cbc:ID>
+		<cbc:InvoicedQuantity unitCode="EA">25</cbc:InvoicedQuantity>
+		<cbc:LineExtensionAmount currencyID="NOK">8410.25</cbc:LineExtensionAmount>
+		<cac:TaxTotal>
+			<cbc:TaxAmount currencyID="NOK">2102.56</cbc:TaxAmount>
+		</cac:TaxTotal>
+		<cac:Item>
+			<cbc:Name>HULLPLATE 80X300X2,0MM EAN</cbc:Name>
+			<cac:StandardItemIdentification>
+				<cbc:ID schemeID="0160" schemeAgencyID="9">5701953365653</cbc:ID>
+			</cac:StandardItemIdentification>
+			<cac:ClassifiedTaxCategory xmlns="urn:oasis:names:specification:ubl:schema:xsd:CommonAggregateComponents-2">
+				<cbc:ID schemeID="UN/ECE 5305" schemeAgencyID="6">S</cbc:ID>
+				<cbc:Percent>25</cbc:Percent>
+				<TaxScheme>
+					<cbc:ID schemeID="UN/ECE 5153" schemeAgencyID="6">VAT</cbc:ID>
+				</TaxScheme>
+			</cac:ClassifiedTaxCategory>
+			<cac:AdditionalItemProperty>
+				<cbc:Name>NOBB</cbc:Name>
+				<cbc:Value>21594049</cbc:Value>
+			</cac:AdditionalItemProperty>
+		</cac:Item>
+		<cac:Price>
+			<cbc:PriceAmount currencyID="NOK">336.41</cbc:PriceAmount>
+			<cbc:BaseQuantity unitCode="C62">1</cbc:BaseQuantity>
+		</cac:Price>
+	</cac:InvoiceLine>
+	<cac:InvoiceLine>
+		<cbc:ID>25</cbc:ID>
+		<cbc:InvoicedQuantity unitCode="MTK">29.2</cbc:InvoicedQuantity>
+		<cbc:LineExtensionAmount currencyID="NOK">3310.70</cbc:LineExtensionAmount>
+		<cac:TaxTotal>
+			<cbc:TaxAmount currencyID="NOK">827.67</cbc:TaxAmount>
+		</cac:TaxTotal>
+		<cac:Item>
+			<cbc:Name>JACKOFOAM 500 ISOLASJON 80MM XPS U</cbc:Name>
+			<cac:StandardItemIdentification>
+				<cbc:ID schemeID="0160" schemeAgencyID="9">7032299826828</cbc:ID>
+			</cac:StandardItemIdentification>
+			<cac:ClassifiedTaxCategory xmlns="urn:oasis:names:specification:ubl:schema:xsd:CommonAggregateComponents-2">
+				<cbc:ID schemeID="UN/ECE 5305" schemeAgencyID="6">S</cbc:ID>
+				<cbc:Percent>25</cbc:Percent>
+				<TaxScheme>
+					<cbc:ID schemeID="UN/ECE 5153" schemeAgencyID="6">VAT</cbc:ID>
+				</TaxScheme>
+			</cac:ClassifiedTaxCategory>
+			<cac:AdditionalItemProperty>
+				<cbc:Name>NOBB</cbc:Name>
+				<cbc:Value>21118492</cbc:Value>
+			</cac:AdditionalItemProperty>
+		</cac:Item>
+		<cac:Price>
+			<cbc:PriceAmount currencyID="NOK">113.38</cbc:PriceAmount>
+			<cbc:BaseQuantity unitCode="C62">1</cbc:BaseQuantity>
+		</cac:Price>
+	</cac:InvoiceLine>
+	<cac:InvoiceLine>
+		<cbc:ID>26</cbc:ID>
+		<cbc:InvoicedQuantity unitCode="LMT">16.5</cbc:InvoicedQuantity>
+		<cbc:LineExtensionAmount currencyID="NOK">1208.13</cbc:LineExtensionAmount>
+		<cac:TaxTotal>
+			<cbc:TaxAmount currencyID="NOK">302.03</cbc:TaxAmount>
+		</cac:TaxTotal>
+		<cac:Item>
+			<cbc:Name>FURU 14X120 VEKSEL SKRÅ INT</cbc:Name>
+			<cac:StandardItemIdentification>
+				<cbc:ID schemeID="0160" schemeAgencyID="9">7042757210403</cbc:ID>
+			</cac:StandardItemIdentification>
+			<cac:ClassifiedTaxCategory xmlns="urn:oasis:names:specification:ubl:schema:xsd:CommonAggregateComponents-2">
+				<cbc:ID schemeID="UN/ECE 5305" schemeAgencyID="6">S</cbc:ID>
+				<cbc:Percent>25</cbc:Percent>
+				<TaxScheme>
+					<cbc:ID schemeID="UN/ECE 5153" schemeAgencyID="6">VAT</cbc:ID>
+				</TaxScheme>
+			</cac:ClassifiedTaxCategory>
+			<cac:AdditionalItemProperty>
+				<cbc:Name>NOBB</cbc:Name>
+				<cbc:Value>22207443</cbc:Value>
+			</cac:AdditionalItemProperty>
+		</cac:Item>
+		<cac:Price>
+			<cbc:PriceAmount currencyID="NOK">73.22</cbc:PriceAmount>
+			<cbc:BaseQuantity unitCode="C62">1</cbc:BaseQuantity>
+		</cac:Price>
+	</cac:InvoiceLine>
+	<cac:InvoiceLine>
+		<cbc:ID>27</cbc:ID>
+		<cbc:InvoicedQuantity unitCode="XBX">15</cbc:InvoicedQuantity>
+		<cbc:LineExtensionAmount currencyID="NOK">8233.35</cbc:LineExtensionAmount>
+		<cac:TaxTotal>
+			<cbc:TaxAmount currencyID="NOK">2058.34</cbc:TaxAmount>
+		</cac:TaxTotal>
+		<cac:Item>
+			<cbc:Name>SEKSKANTSKRUE ELF 8,8 M6X80D A100</cbc:Name>
+			<cac:StandardItemIdentification>
+				<cbc:ID schemeID="0160" schemeAgencyID="9">7034355300587</cbc:ID>
+			</cac:StandardItemIdentification>
+			<cac:ClassifiedTaxCategory xmlns="urn:oasis:names:specification:ubl:schema:xsd:CommonAggregateComponents-2">
+				<cbc:ID schemeID="UN/ECE 5305" schemeAgencyID="6">S</cbc:ID>
+				<cbc:Percent>25</cbc:Percent>
+				<TaxScheme>
+					<cbc:ID schemeID="UN/ECE 5153" schemeAgencyID="6">VAT</cbc:ID>
+				</TaxScheme>
+			</cac:ClassifiedTaxCategory>
+			<cac:AdditionalItemProperty>
+				<cbc:Name>NOBB</cbc:Name>
+				<cbc:Value>11468931</cbc:Value>
+			</cac:AdditionalItemProperty>
+		</cac:Item>
+		<cac:Price>
+			<cbc:PriceAmount currencyID="NOK">548.89</cbc:PriceAmount>
+			<cbc:BaseQuantity unitCode="C62">1</cbc:BaseQuantity>
+		</cac:Price>
+	</cac:InvoiceLine>
+	<cac:InvoiceLine>
+		<cbc:ID>28</cbc:ID>
+		<cbc:InvoicedQuantity unitCode="EA">12</cbc:InvoicedQuantity>
+		<cbc:LineExtensionAmount currencyID="NOK">1388.88</cbc:LineExtensionAmount>
+		<cac:TaxTotal>
+			<cbc:TaxAmount currencyID="NOK">347.22</cbc:TaxAmount>
+		</cac:TaxTotal>
+		<cac:Item>
+			<cbc:Name>BETONGANKER 600</cbc:Name>
+			<cac:StandardItemIdentification>
+				<cbc:ID schemeID="0160" schemeAgencyID="9">5701953613709</cbc:ID>
+			</cac:StandardItemIdentification>
+			<cac:ClassifiedTaxCategory xmlns="urn:oasis:names:specification:ubl:schema:xsd:CommonAggregateComponents-2">
+				<cbc:ID schemeID="UN/ECE 5305" schemeAgencyID="6">S</cbc:ID>
+				<cbc:Percent>25</cbc:Percent>
+				<TaxScheme>
+					<cbc:ID schemeID="UN/ECE 5153" schemeAgencyID="6">VAT</cbc:ID>
+				</TaxScheme>
+			</cac:ClassifiedTaxCategory>
+			<cac:AdditionalItemProperty>
+				<cbc:Name>NOBB</cbc:Name>
+				<cbc:Value>21215694</cbc:Value>
+			</cac:AdditionalItemProperty>
+		</cac:Item>
+		<cac:Price>
+			<cbc:PriceAmount currencyID="NOK">115.74</cbc:PriceAmount>
+			<cbc:BaseQuantity unitCode="C62">1</cbc:BaseQuantity>
+		</cac:Price>
+	</cac:InvoiceLine>
+	<cac:InvoiceLine>
+		<cbc:ID>29</cbc:ID>
+		<cbc:InvoicedQuantity unitCode="EA">27</cbc:InvoicedQuantity>
+		<cbc:LineExtensionAmount currencyID="NOK">16942.77</cbc:LineExtensionAmount>
+		<cac:TaxTotal>
+			<cbc:TaxAmount currencyID="NOK">4235.69</cbc:TaxAmount>
+		</cac:TaxTotal>
+		<cac:Item>
+			<cbc:Name>STIGEHOLDER GALVANISERT</cbc:Name>
+			<cac:StandardItemIdentification>
+				<cbc:ID schemeID="0160" schemeAgencyID="9">5702771970005</cbc:ID>
+			</cac:StandardItemIdentification>
+			<cac:ClassifiedTaxCategory xmlns="urn:oasis:names:specification:ubl:schema:xsd:CommonAggregateComponents-2">
+				<cbc:ID schemeID="UN/ECE 5305" schemeAgencyID="6">S</cbc:ID>
+				<cbc:Percent>25</cbc:Percent>
+				<TaxScheme>
+					<cbc:ID schemeID="UN/ECE 5153" schemeAgencyID="6">VAT</cbc:ID>
+				</TaxScheme>
+			</cac:ClassifiedTaxCategory>
+			<cac:AdditionalItemProperty>
+				<cbc:Name>NOBB</cbc:Name>
+				<cbc:Value>22202295</cbc:Value>
+			</cac:AdditionalItemProperty>
+		</cac:Item>
+		<cac:Price>
+			<cbc:PriceAmount currencyID="NOK">627.51</cbc:PriceAmount>
+			<cbc:BaseQuantity unitCode="C62">1</cbc:BaseQuantity>
+		</cac:Price>
+	</cac:InvoiceLine>
+	<cac:InvoiceLine>
+		<cbc:ID>30</cbc:ID>
+		<cbc:InvoicedQuantity unitCode="LMT">32.3</cbc:InvoicedQuantity>
+		<cbc:LineExtensionAmount currencyID="NOK">5098.23</cbc:LineExtensionAmount>
+		<cac:TaxTotal>
+			<cbc:TaxAmount currencyID="NOK">1274.56</cbc:TaxAmount>
+		</cac:TaxTotal>
+		<cac:Item>
+			<cbc:Name>STÅLPR SKP70/30 SKINNE 30X72X2500</cbc:Name>
+			<cac:StandardItemIdentification>
+				<cbc:ID schemeID="0160" schemeAgencyID="9">7318931926300</cbc:ID>
+			</cac:StandardItemIdentification>
+			<cac:ClassifiedTaxCategory xmlns="urn:oasis:names:specification:ubl:schema:xsd:CommonAggregateComponents-2">
+				<cbc:ID schemeID="UN/ECE 5305" schemeAgencyID="6">S</cbc:ID>
+				<cbc:Percent>25</cbc:Percent>
+				<TaxScheme>
+					<cbc:ID schemeID="UN/ECE 5153" schemeAgencyID="6">VAT</cbc:ID>
+				</TaxScheme>
+			</cac:ClassifiedTaxCategory>
+			<cac:AdditionalItemProperty>
+				<cbc:Name>NOBB</cbc:Name>
+				<cbc:Value>21238274</cbc:Value>
+			</cac:AdditionalItemProperty>
+		</cac:Item>
+		<cac:Price>
+			<cbc:PriceAmount currencyID="NOK">157.84</cbc:PriceAmount>
+			<cbc:BaseQuantity unitCode="C62">1</cbc:BaseQuantity>
+		</cac:Price>
+	</cac:InvoiceLine>
+	<cac:InvoiceLine>
+		<cbc:ID>31</cbc:ID>
+		<cbc:InvoicedQuantity unitCode="LMT">48.3</cbc:InvoicedQuantity>
+		<cbc:LineExtensionAmount currencyID="NOK">17127.66</cbc:LineExtensionAmount>
+		<cac:TaxTotal>
+			<cbc:TaxAmount currencyID="NOK">4281.91</cbc:TaxAmount>
+		</cac:TaxTotal>
+		<cac:Item>
+			<cbc:Name>FURU 14X170 HERREGÅRD INT</cbc:Name>
+			<cac:StandardItemIdentification>
+				<cbc:ID schemeID="0160" schemeAgencyID="9">7042756912407</cbc:ID>
+			</cac:StandardItemIdentification>
+			<cac:ClassifiedTaxCategory xmlns="urn:oasis:names:specification:ubl:schema:xsd:CommonAggregateComponents-2">
+				<cbc:ID schemeID="UN/ECE 5305" schemeAgencyID="6">S</cbc:ID>
+				<cbc:Percent>25</cbc:Percent>
+				<TaxScheme>
+					<cbc:ID schemeID="UN/ECE 5153" schemeAgencyID="6">VAT</cbc:ID>
+				</TaxScheme>
+			</cac:ClassifiedTaxCategory>
+			<cac:AdditionalItemProperty>
+				<cbc:Name>NOBB</cbc:Name>
+				<cbc:Value>22207419</cbc:Value>
+			</cac:AdditionalItemProperty>
+		</cac:Item>
+		<cac:Price>
+			<cbc:PriceAmount currencyID="NOK">354.61</cbc:PriceAmount>
+			<cbc:BaseQuantity unitCode="C62">1</cbc:BaseQuantity>
+		</cac:Price>
+	</cac:InvoiceLine>
+	<cac:InvoiceLine>
+		<cbc:ID>32</cbc:ID>
+		<cbc:InvoicedQuantity unitCode="LMT">45.6</cbc:InvoicedQuantity>
+		<cbc:LineExtensionAmount currencyID="NOK">2667.60</cbc:LineExtensionAmount>
+		<cac:TaxTotal>
+			<cbc:TaxAmount currencyID="NOK">666.90</cbc:TaxAmount>
+		</cac:TaxTotal>
+		<cac:Item>
+			<cbc:Name>FURU 21X120 KARM ANTIKK UBEH</cbc:Name>
+			<cac:StandardItemIdentification>
+				<cbc:ID schemeID="0160" schemeAgencyID="9">7059420022539</cbc:ID>
+			</cac:StandardItemIdentification>
+			<cac:ClassifiedTaxCategory xmlns="urn:oasis:names:specification:ubl:schema:xsd:CommonAggregateComponents-2">
+				<cbc:ID schemeID="UN/ECE 5305" schemeAgencyID="6">S</cbc:ID>
+				<cbc:Percent>25</cbc:Percent>
+				<TaxScheme>
+					<cbc:ID schemeID="UN/ECE 5153" schemeAgencyID="6">VAT</cbc:ID>
+				</TaxScheme>
+			</cac:ClassifiedTaxCategory>
+			<cac:AdditionalItemProperty>
+				<cbc:Name>NOBB</cbc:Name>
+				<cbc:Value>21685995</cbc:Value>
+			</cac:AdditionalItemProperty>
+		</cac:Item>
+		<cac:Price>
+			<cbc:PriceAmount currencyID="NOK">58.50</cbc:PriceAmount>
+			<cbc:BaseQuantity unitCode="C62">1</cbc:BaseQuantity>
+		</cac:Price>
+	</cac:InvoiceLine>
+	<cac:InvoiceLine>
+		<cbc:ID>33</cbc:ID>
+		<cbc:InvoicedQuantity unitCode="EA">4</cbc:InvoicedQuantity>
+		<cbc:LineExtensionAmount currencyID="NOK">1686.84</cbc:LineExtensionAmount>
+		<cac:TaxTotal>
+			<cbc:TaxAmount currencyID="NOK">421.71</cbc:TaxAmount>
+		</cac:TaxTotal>
+		<cac:Item>
+			<cbc:Name>HULLPLATE 160X180X1,5MM EAN</cbc:Name>
+			<cac:StandardItemIdentification>
+				<cbc:ID schemeID="0160" schemeAgencyID="9">5701953004842</cbc:ID>
+			</cac:StandardItemIdentification>
+			<cac:ClassifiedTaxCategory xmlns="urn:oasis:names:specification:ubl:schema:xsd:CommonAggregateComponents-2">
+				<cbc:ID schemeID="UN/ECE 5305" schemeAgencyID="6">S</cbc:ID>
+				<cbc:Percent>25</cbc:Percent>
+				<TaxScheme>
+					<cbc:ID schemeID="UN/ECE 5153" schemeAgencyID="6">VAT</cbc:ID>
+				</TaxScheme>
+			</cac:ClassifiedTaxCategory>
+			<cac:AdditionalItemProperty>
+				<cbc:Name>NOBB</cbc:Name>
+				<cbc:Value>21593967</cbc:Value>
+			</cac:AdditionalItemProperty>
+		</cac:Item>
+		<cac:Price>
+			<cbc:PriceAmount currencyID="NOK">421.71</cbc:PriceAmount>
+			<cbc:BaseQuantity unitCode="C62">1</cbc:BaseQuantity>
+		</cac:Price>
+	</cac:InvoiceLine>
+	<cac:InvoiceLine>
+		<cbc:ID>34</cbc:ID>
+		<cbc:InvoicedQuantity unitCode="LMT">15.9</cbc:InvoicedQuantity>
+		<cbc:LineExtensionAmount currencyID="NOK">2260.03</cbc:LineExtensionAmount>
+		<cac:TaxTotal>
+			<cbc:TaxAmount currencyID="NOK">565.01</cbc:TaxAmount>
+		</cac:TaxTotal>
+		<cac:Item>
+			<cbc:Name>STÅLPR SKP70/55 SKINNE 2500</cbc:Name>
+			<cac:StandardItemIdentification>
+				<cbc:ID schemeID="0160" schemeAgencyID="9">7318931926652</cbc:ID>
+			</cac:StandardItemIdentification>
+			<cac:ClassifiedTaxCategory xmlns="urn:oasis:names:specification:ubl:schema:xsd:CommonAggregateComponents-2">
+				<cbc:ID schemeID="UN/ECE 5305" schemeAgencyID="6">S</cbc:ID>
+				<cbc:Percent>25</cbc:Percent>
+				<TaxScheme>
+					<cbc:ID schemeID="UN/ECE 5153" schemeAgencyID="6">VAT</cbc:ID>
+				</TaxScheme>
+			</cac:ClassifiedTaxCategory>
+			<cac:AdditionalItemProperty>
+				<cbc:Name>NOBB</cbc:Name>
+				<cbc:Value>21413802</cbc:Value>
+			</cac:AdditionalItemProperty>
+		</cac:Item>
+		<cac:Price>
+			<cbc:PriceAmount currencyID="NOK">142.14</cbc:PriceAmount>
+			<cbc:BaseQuantity unitCode="C62">1</cbc:BaseQuantity>
+		</cac:Price>
+	</cac:InvoiceLine>
+	<cac:InvoiceLine>
+		<cbc:ID>35</cbc:ID>
+		<cbc:InvoicedQuantity unitCode="XPK">30</cbc:InvoicedQuantity>
+		<cbc:LineExtensionAmount currencyID="NOK">17154.90</cbc:LineExtensionAmount>
+		<cac:TaxTotal>
+			<cbc:TaxAmount currencyID="NOK">4288.73</cbc:TaxAmount>
+		</cac:TaxTotal>
+		<cac:Item>
+			<cbc:Name>TAKPLATESPIKER KAMGJ 75-37 SORT</cbc:Name>
+			<cac:StandardItemIdentification>
+				<cbc:ID schemeID="0160" schemeAgencyID="9">7318473925939</cbc:ID>
+			</cac:StandardItemIdentification>
+			<cac:ClassifiedTaxCategory xmlns="urn:oasis:names:specification:ubl:schema:xsd:CommonAggregateComponents-2">
+				<cbc:ID schemeID="UN/ECE 5305" schemeAgencyID="6">S</cbc:ID>
+				<cbc:Percent>25</cbc:Percent>
+				<TaxScheme>
+					<cbc:ID schemeID="UN/ECE 5153" schemeAgencyID="6">VAT</cbc:ID>
+				</TaxScheme>
+			</cac:ClassifiedTaxCategory>
+			<cac:AdditionalItemProperty>
+				<cbc:Name>NOBB</cbc:Name>
+				<cbc:Value>21805726</cbc:Value>
+			</cac:AdditionalItemProperty>
+		</cac:Item>
+		<cac:Price>
+			<cbc:PriceAmount currencyID="NOK">571.83</cbc:PriceAmount>
+			<cbc:BaseQuantity unitCode="C62">1</cbc:BaseQuantity>
+		</cac:Price>
+	</cac:InvoiceLine>
+	<cac:InvoiceLine>
+		<cbc:ID>36</cbc:ID>
+		<cbc:InvoicedQuantity unitCode="EA">12</cbc:InvoicedQuantity>
+		<cbc:LineExtensionAmount currencyID="NOK">9105.24</cbc:LineExtensionAmount>
+		<cac:TaxTotal>
+			<cbc:TaxAmount currencyID="NOK">2276.31</cbc:TaxAmount>
+		</cac:TaxTotal>
+		<cac:Item>
+			<cbc:Name>TAPPSTYKKE 10/75 HVIT</cbc:Name>
+			<cac:StandardItemIdentification>
+				<cbc:ID schemeID="0160" schemeAgencyID="9">5702751123407</cbc:ID>
+			</cac:StandardItemIdentification>
+			<cac:ClassifiedTaxCategory xmlns="urn:oasis:names:specification:ubl:schema:xsd:CommonAggregateComponents-2">
+				<cbc:ID schemeID="UN/ECE 5305" schemeAgencyID="6">S</cbc:ID>
+				<cbc:Percent>25</cbc:Percent>
+				<TaxScheme>
+					<cbc:ID schemeID="UN/ECE 5153" schemeAgencyID="6">VAT</cbc:ID>
+				</TaxScheme>
+			</cac:ClassifiedTaxCategory>
+			<cac:AdditionalItemProperty>
+				<cbc:Name>NOBB</cbc:Name>
+				<cbc:Value>21013404</cbc:Value>
+			</cac:AdditionalItemProperty>
+		</cac:Item>
+		<cac:Price>
+			<cbc:PriceAmount currencyID="NOK">758.77</cbc:PriceAmount>
+			<cbc:BaseQuantity unitCode="C62">1</cbc:BaseQuantity>
+		</cac:Price>
+	</cac:InvoiceLine>
+	<cac:InvoiceLine>
+		<cbc:ID>37</cbc:ID>
+		<cbc:InvoicedQuantity unitCode="LMT">26.4</cbc:InvoicedQuantity>
+		<cbc:LineExtensionAmount currencyID="NOK">6282.67</cbc:LineExtensionAmount>
+		<cac:TaxTotal>
+			<cbc:TaxAmount currencyID="NOK">1570.67</cbc:TaxAmount>
+		</cac:TaxTotal>
+		<cac:Item>
+			<cbc:Name>STÅLPR SK95 SKINNE 30X97X2500</cbc:Name>
+			<cac:StandardItemIdentification>
+				<cbc:ID schemeID="0160" schemeAgencyID="9">7318931926133</cbc:ID>
+			</cac:StandardItemIdentification>
+			<cac:ClassifiedTaxCategory xmlns="urn:oasis:names:specification:ubl:schema:xsd:CommonAggregateComponents-2">
+				<cbc:ID schemeID="UN/ECE 5305" schemeAgencyID="6">S</cbc:ID>
+				<cbc:Percent>25</cbc:Percent>
+				<TaxScheme>
+					<cbc:ID schemeID="UN/ECE 5153" schemeAgencyID="6">VAT</cbc:ID>
+				</TaxScheme>
+			</cac:ClassifiedTaxCategory>
+			<cac:AdditionalItemProperty>
+				<cbc:Name>NOBB</cbc:Name>
+				<cbc:Value>10545242</cbc:Value>
+			</cac:AdditionalItemProperty>
+		</cac:Item>
+		<cac:Price>
+			<cbc:PriceAmount currencyID="NOK">237.98</cbc:PriceAmount>
+			<cbc:BaseQuantity unitCode="C62">1</cbc:BaseQuantity>
+		</cac:Price>
+	</cac:InvoiceLine>
+	<cac:InvoiceLine>
+		<cbc:ID>38</cbc:ID>
+		<cbc:InvoicedQuantity unitCode="EA">3</cbc:InvoicedQuantity>
+		<cbc:LineExtensionAmount currencyID="NOK">635.19</cbc:LineExtensionAmount>
+		<cac:TaxTotal>
+			<cbc:TaxAmount currencyID="NOK">158.80</cbc:TaxAmount>
+		</cac:TaxTotal>
+		<cac:Item>
+			<cbc:Name>AVSTANDSKLIPS VK25 25X25 GYPROC</cbc:Name>
+			<cac:StandardItemIdentification>
+				<cbc:ID schemeID="0160" schemeAgencyID="9">7318935060550</cbc:ID>
+			</cac:StandardItemIdentification>
+			<cac:ClassifiedTaxCategory xmlns="urn:oasis:names:specification:ubl:schema:xsd:CommonAggregateComponents-2">
+				<cbc:ID schemeID="UN/ECE 5305" schemeAgencyID="6">S</cbc:ID>
+				<cbc:Percent>25</cbc:Percent>
+				<TaxScheme>
+					<cbc:ID schemeID="UN/ECE 5153" schemeAgencyID="6">VAT</cbc:ID>
+				</TaxScheme>
+			</cac:ClassifiedTaxCategory>
+			<cac:AdditionalItemProperty>
+				<cbc:Name>NOBB</cbc:Name>
+				<cbc:Value>10545135</cbc:Value>
+			</cac:AdditionalItemProperty>
+		</cac:Item>
+		<cac:Price>
+			<cbc:PriceAmount currencyID="NOK">211.73</cbc:PriceAmount>
+			<cbc:BaseQuantity unitCode="C62">1</cbc:BaseQuantity>
+		</cac:Price>
+	</cac:InvoiceLine>
+</Invoice>

@@ -1,0 +1,288 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<WasteReport xmlns="urn:byggspor:waste:report:1.0"
+             xmlns:cbc="urn:byggspor:waste:CommonBasic:1.0"
+             xmlns:cac="urn:byggspor:waste:CommonAggregate:1.0">
+  <cbc:ID>WR-F-2025-005</cbc:ID>
+  <cbc:IssueDate>2025-03-29</cbc:IssueDate>
+
+  <cac:WasteReceiverParty>
+    <cac:Party>
+      <cac:PartyName><cbc:Name>Retura Norge AS</cbc:Name></cac:PartyName>
+    </cac:Party>
+  </cac:WasteReceiverParty>
+
+  <cac:WasteLine>
+    <cbc:ID>1</cbc:ID>
+    <cbc:Quantity unitCode="KG">177.0</cbc:Quantity>
+    <cac:Item>
+      <cbc:Name>Blandet plast</cbc:Name>
+      <cac:WasteFraction>
+        <cbc:ID schemeID="NS9431">1799</cbc:ID>
+      </cac:WasteFraction>
+    </cac:Item>
+  </cac:WasteLine>
+
+  <cac:WasteLine>
+    <cbc:ID>2</cbc:ID>
+    <cbc:Quantity unitCode="TON">3.3</cbc:Quantity>
+    <cac:Item>
+      <cbc:Name>Blandet næringsavfall</cbc:Name>
+      <cac:WasteFraction>
+        <cbc:ID schemeID="NS9431">9912</cbc:ID>
+      </cac:WasteFraction>
+    </cac:Item>
+  </cac:WasteLine>
+
+  <cac:WasteLine>
+    <cbc:ID>3</cbc:ID>
+    <cbc:Quantity unitCode="KG">63.0</cbc:Quantity>
+    <cac:Item>
+      <cbc:Name>Ekspandert og ekstrudert plast, emballasje</cbc:Name>
+      <cac:WasteFraction>
+        <cbc:ID schemeID="NS9431">1731</cbc:ID>
+      </cac:WasteFraction>
+    </cac:Item>
+  </cac:WasteLine>
+
+  <cac:WasteLine>
+    <cbc:ID>4</cbc:ID>
+    <cbc:Quantity unitCode="KG">1678.0</cbc:Quantity>
+    <cac:Item>
+      <cbc:Name>Rent magnetisk metall</cbc:Name>
+      <cac:WasteFraction>
+        <cbc:ID schemeID="NS9431">1447</cbc:ID>
+      </cac:WasteFraction>
+    </cac:Item>
+  </cac:WasteLine>
+
+  <cac:WasteLine>
+    <cbc:ID>5</cbc:ID>
+    <cbc:Quantity unitCode="TON">5.0</cbc:Quantity>
+    <cac:Item>
+      <cbc:Name>Tegl og takstein</cbc:Name>
+      <cac:WasteFraction>
+        <cbc:ID schemeID="NS9431">1613</cbc:ID>
+      </cac:WasteFraction>
+    </cac:Item>
+  </cac:WasteLine>
+
+  <cac:WasteLine>
+    <cbc:ID>6</cbc:ID>
+    <cbc:Quantity unitCode="TON">10.1</cbc:Quantity>
+    <cac:Item>
+      <cbc:Name>Betong uten armeringsjern</cbc:Name>
+      <cac:WasteFraction>
+        <cbc:ID schemeID="NS9431">1611</cbc:ID>
+      </cac:WasteFraction>
+    </cac:Item>
+  </cac:WasteLine>
+
+  <cac:WasteLine>
+    <cbc:ID>7</cbc:ID>
+    <cbc:Quantity unitCode="KG">75.0</cbc:Quantity>
+    <cac:Item>
+      <cbc:Name>PVC</cbc:Name>
+      <cac:WasteFraction>
+        <cbc:ID schemeID="NS9431">1723</cbc:ID>
+      </cac:WasteFraction>
+    </cac:Item>
+  </cac:WasteLine>
+
+  <cac:WasteLine>
+    <cbc:ID>8</cbc:ID>
+    <cbc:Quantity unitCode="TON">20.0</cbc:Quantity>
+    <cac:Item>
+      <cbc:Name>Betong med armeringsjern</cbc:Name>
+      <cac:WasteFraction>
+        <cbc:ID schemeID="NS9431">1612</cbc:ID>
+      </cac:WasteFraction>
+    </cac:Item>
+  </cac:WasteLine>
+
+  <cac:WasteLine>
+    <cbc:ID>9</cbc:ID>
+    <cbc:Quantity unitCode="TON">6.5</cbc:Quantity>
+    <cac:Item>
+      <cbc:Name>Rent trevirke</cbc:Name>
+      <cac:WasteFraction>
+        <cbc:ID schemeID="NS9431">1141</cbc:ID>
+      </cac:WasteFraction>
+    </cac:Item>
+  </cac:WasteLine>
+
+  <cac:WasteLine>
+    <cbc:ID>10</cbc:ID>
+    <cbc:Quantity unitCode="KG">84.0</cbc:Quantity>
+    <cac:Item>
+      <cbc:Name>Blandet papir, papp og kartong</cbc:Name>
+      <cac:WasteFraction>
+        <cbc:ID schemeID="NS9431">1299</cbc:ID>
+      </cac:WasteFraction>
+    </cac:Item>
+  </cac:WasteLine>
+
+  <cac:WasteLine>
+    <cbc:ID>11</cbc:ID>
+    <cbc:Quantity unitCode="KG">29.0</cbc:Quantity>
+    <cac:Item>
+      <cbc:Name>Keramikk og porselen</cbc:Name>
+      <cac:WasteFraction>
+        <cbc:ID schemeID="NS9431">1618</cbc:ID>
+      </cac:WasteFraction>
+    </cac:Item>
+  </cac:WasteLine>
+
+  <cac:WasteLine>
+    <cbc:ID>12</cbc:ID>
+    <cbc:Quantity unitCode="KG">18.0</cbc:Quantity>
+    <cac:Item>
+      <cbc:Name>Metallemballasje</cbc:Name>
+      <cac:WasteFraction>
+        <cbc:ID schemeID="NS9431">1411</cbc:ID>
+      </cac:WasteFraction>
+    </cac:Item>
+  </cac:WasteLine>
+
+  <cac:WasteLine>
+    <cbc:ID>13</cbc:ID>
+    <cbc:Quantity unitCode="KG">67.0</cbc:Quantity>
+    <cac:Item>
+      <cbc:Name>Folieplast, emballasje</cbc:Name>
+      <cac:WasteFraction>
+        <cbc:ID schemeID="NS9431">1711</cbc:ID>
+      </cac:WasteFraction>
+    </cac:Item>
+  </cac:WasteLine>
+
+  <cac:WasteLine>
+    <cbc:ID>14</cbc:ID>
+    <cbc:Quantity unitCode="KG">778.0</cbc:Quantity>
+    <cac:Item>
+      <cbc:Name>Rent umagnetisk metall</cbc:Name>
+      <cac:WasteFraction>
+        <cbc:ID schemeID="NS9431">1451</cbc:ID>
+      </cac:WasteFraction>
+    </cac:Item>
+  </cac:WasteLine>
+
+  <cac:WasteLine>
+    <cbc:ID>15</cbc:ID>
+    <cbc:Quantity unitCode="KG">199.0</cbc:Quantity>
+    <cac:Item>
+      <cbc:Name>Vindusglass, ikke laminert</cbc:Name>
+      <cac:WasteFraction>
+        <cbc:ID schemeID="NS9431">1331</cbc:ID>
+      </cac:WasteFraction>
+    </cac:Item>
+  </cac:WasteLine>
+
+  <cac:WasteLine>
+    <cbc:ID>16</cbc:ID>
+    <cbc:Quantity unitCode="TON">37.0</cbc:Quantity>
+    <cac:Item>
+      <cbc:Name>Rene masser</cbc:Name>
+      <cac:WasteFraction>
+        <cbc:ID schemeID="NS9431">1601</cbc:ID>
+      </cac:WasteFraction>
+    </cac:Item>
+  </cac:WasteLine>
+
+  <cac:WasteLine>
+    <cbc:ID>17</cbc:ID>
+    <cbc:Quantity unitCode="KG">905.0</cbc:Quantity>
+    <cac:Item>
+      <cbc:Name>Utsortert brennbart avfall</cbc:Name>
+      <cac:WasteFraction>
+        <cbc:ID schemeID="NS9431">9913</cbc:ID>
+      </cac:WasteFraction>
+    </cac:Item>
+  </cac:WasteLine>
+
+  <cac:WasteLine>
+    <cbc:ID>18</cbc:ID>
+    <cbc:Quantity unitCode="TON">0.7</cbc:Quantity>
+    <cac:Item>
+      <cbc:Name>Blandet bearbeidet trevirke</cbc:Name>
+      <cac:WasteFraction>
+        <cbc:ID schemeID="NS9431">1149</cbc:ID>
+      </cac:WasteFraction>
+    </cac:Item>
+  </cac:WasteLine>
+
+  <cac:WasteLine>
+    <cbc:ID>19</cbc:ID>
+    <cbc:Quantity unitCode="KG">480.0</cbc:Quantity>
+    <cac:Item>
+      <cbc:Name>Gips</cbc:Name>
+      <cac:WasteFraction>
+        <cbc:ID schemeID="NS9431">1615</cbc:ID>
+      </cac:WasteFraction>
+    </cac:Item>
+  </cac:WasteLine>
+
+  <cac:WasteLine>
+    <cbc:ID>20</cbc:ID>
+    <cbc:Quantity unitCode="KG">70.0</cbc:Quantity>
+    <cac:Item>
+      <cbc:Name>Maling, lim og lakk</cbc:Name>
+      <cac:WasteFraction>
+        <cbc:ID schemeID="NS9431">7051</cbc:ID>
+      </cac:WasteFraction>
+    </cac:Item>
+  </cac:WasteLine>
+
+  <cac:WasteLine>
+    <cbc:ID>21</cbc:ID>
+    <cbc:Quantity unitCode="KG">228.0</cbc:Quantity>
+    <cac:Item>
+      <cbc:Name>Takpapp/tjærepapp</cbc:Name>
+      <cac:WasteFraction>
+        <cbc:ID schemeID="NS9431">1621</cbc:ID>
+      </cac:WasteFraction>
+    </cac:Item>
+  </cac:WasteLine>
+
+  <cac:WasteLine>
+    <cbc:ID>22</cbc:ID>
+    <cbc:Quantity unitCode="KG">120.0</cbc:Quantity>
+    <cac:Item>
+      <cbc:Name>Hardplast, emballasje</cbc:Name>
+      <cac:WasteFraction>
+        <cbc:ID schemeID="NS9431">1721</cbc:ID>
+      </cac:WasteFraction>
+    </cac:Item>
+  </cac:WasteLine>
+
+  <cac:WasteLine>
+    <cbc:ID>23</cbc:ID>
+    <cbc:Quantity unitCode="KG">68.0</cbc:Quantity>
+    <cac:Item>
+      <cbc:Name>Laminert glass</cbc:Name>
+      <cac:WasteFraction>
+        <cbc:ID schemeID="NS9431">1341</cbc:ID>
+      </cac:WasteFraction>
+    </cac:Item>
+  </cac:WasteLine>
+
+  <cac:WasteLine>
+    <cbc:ID>24</cbc:ID>
+    <cbc:Quantity unitCode="KG">561.0</cbc:Quantity>
+    <cac:Item>
+      <cbc:Name>Blandede metaller</cbc:Name>
+      <cac:WasteFraction>
+        <cbc:ID schemeID="NS9431">1452</cbc:ID>
+      </cac:WasteFraction>
+    </cac:Item>
+  </cac:WasteLine>
+
+  <cac:WasteLine>
+    <cbc:ID>25</cbc:ID>
+    <cbc:Quantity unitCode="KG">27.0</cbc:Quantity>
+    <cac:Item>
+      <cbc:Name>Spraybokser</cbc:Name>
+      <cac:WasteFraction>
+        <cbc:ID schemeID="NS9431">7055</cbc:ID>
+      </cac:WasteFraction>
+    </cac:Item>
+  </cac:WasteLine>
+</WasteReport>

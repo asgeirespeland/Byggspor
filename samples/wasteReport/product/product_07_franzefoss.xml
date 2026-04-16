@@ -1,0 +1,238 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<WasteReport xmlns="urn:byggspor:waste:report:1.0"
+             xmlns:cbc="urn:byggspor:waste:CommonBasic:1.0"
+             xmlns:cac="urn:byggspor:waste:CommonAggregate:1.0">
+  <cbc:ID>WR-P-2025-007</cbc:ID>
+  <cbc:IssueDate>2025-05-03</cbc:IssueDate>
+
+  <cac:WasteReceiverParty>
+    <cac:Party>
+      <cac:PartyName><cbc:Name>Franzefoss Gjenvinning AS</cbc:Name></cac:PartyName>
+    </cac:Party>
+  </cac:WasteReceiverParty>
+
+  <cac:WasteLine>
+    <cbc:ID>1</cbc:ID>
+    <cbc:Quantity unitCode="EA">17</cbc:Quantity>
+    <cac:Item>
+      <cbc:Name>VINKELBESLAG 40412 EAN</cbc:Name>
+      <cac:StandardItemIdentification>
+        <cbc:ID schemeID="0160">5701953004415</cbc:ID>
+      </cac:StandardItemIdentification>
+      <cac:AdditionalItemProperty>
+        <cbc:Name>NOBB</cbc:Name>
+        <cbc:Value>21594494</cbc:Value>
+      </cac:AdditionalItemProperty>
+    </cac:Item>
+  </cac:WasteLine>
+
+  <cac:WasteLine>
+    <cbc:ID>2</cbc:ID>
+    <cbc:Quantity unitCode="MTK">3.2</cbc:Quantity>
+    <cac:Item>
+      <cbc:Name>ARBOR SPONPL VEGG 2440 FALS FUKTB</cbc:Name>
+      <cac:StandardItemIdentification>
+        <cbc:ID schemeID="0160">7038840007500</cbc:ID>
+      </cac:StandardItemIdentification>
+      <cac:AdditionalItemProperty>
+        <cbc:Name>NOBB</cbc:Name>
+        <cbc:Value>21345566</cbc:Value>
+      </cac:AdditionalItemProperty>
+    </cac:Item>
+  </cac:WasteLine>
+
+  <cac:WasteLine>
+    <cbc:ID>3</cbc:ID>
+    <cbc:Quantity unitCode="EA">30</cbc:Quantity>
+    <cac:Item>
+      <cbc:Name>BETONGANKER 600</cbc:Name>
+      <cac:StandardItemIdentification>
+        <cbc:ID schemeID="0160">5701953613709</cbc:ID>
+      </cac:StandardItemIdentification>
+      <cac:AdditionalItemProperty>
+        <cbc:Name>NOBB</cbc:Name>
+        <cbc:Value>21215694</cbc:Value>
+      </cac:AdditionalItemProperty>
+    </cac:Item>
+  </cac:WasteLine>
+
+  <cac:WasteLine>
+    <cbc:ID>4</cbc:ID>
+    <cbc:Quantity unitCode="MTK">45.4</cbc:Quantity>
+    <cac:Item>
+      <cbc:Name>DRENSPLATE 50X575X1200 ROCKWOOL</cbc:Name>
+      <cac:StandardItemIdentification>
+        <cbc:ID schemeID="0160">7050780089835</cbc:ID>
+      </cac:StandardItemIdentification>
+      <cac:AdditionalItemProperty>
+        <cbc:Name>NOBB</cbc:Name>
+        <cbc:Value>11289063</cbc:Value>
+      </cac:AdditionalItemProperty>
+    </cac:Item>
+  </cac:WasteLine>
+
+  <cac:WasteLine>
+    <cbc:ID>5</cbc:ID>
+    <cbc:Quantity unitCode="XPK">11</cbc:Quantity>
+    <cac:Item>
+      <cbc:Name>MESSINSPIKER 35-2,0 A 1000</cbc:Name>
+      <cac:StandardItemIdentification>
+        <cbc:ID schemeID="0160">7318472532183</cbc:ID>
+      </cac:StandardItemIdentification>
+      <cac:AdditionalItemProperty>
+        <cbc:Name>NOBB</cbc:Name>
+        <cbc:Value>21035142</cbc:Value>
+      </cac:AdditionalItemProperty>
+    </cac:Item>
+  </cac:WasteLine>
+
+  <cac:WasteLine>
+    <cbc:ID>6</cbc:ID>
+    <cbc:Quantity unitCode="EA">17</cbc:Quantity>
+    <cac:Item>
+      <cbc:Name>VINDU SIDESV 2-RAMS 13X7 ,UV 1,2</cbc:Name>
+      <cac:StandardItemIdentification>
+        <cbc:ID schemeID="0160">7071895011399</cbc:ID>
+      </cac:StandardItemIdentification>
+      <cac:AdditionalItemProperty>
+        <cbc:Name>NOBB</cbc:Name>
+        <cbc:Value>22084719</cbc:Value>
+      </cac:AdditionalItemProperty>
+    </cac:Item>
+  </cac:WasteLine>
+
+  <cac:WasteLine>
+    <cbc:ID>7</cbc:ID>
+    <cbc:Quantity unitCode="LMT">41.2</cbc:Quantity>
+    <cac:Item>
+      <cbc:Name>FURU 14X145 RUSTIKKSKRÅ KL2</cbc:Name>
+      <cac:StandardItemIdentification>
+        <cbc:ID schemeID="0160">7070276015926</cbc:ID>
+      </cac:StandardItemIdentification>
+      <cac:AdditionalItemProperty>
+        <cbc:Name>NOBB</cbc:Name>
+        <cbc:Value>21712351</cbc:Value>
+      </cac:AdditionalItemProperty>
+    </cac:Item>
+  </cac:WasteLine>
+
+  <cac:WasteLine>
+    <cbc:ID>8</cbc:ID>
+    <cbc:Quantity unitCode="EA">15</cbc:Quantity>
+    <cac:Item>
+      <cbc:Name>HULLPLATE 120X300X2,0MM EAN</cbc:Name>
+      <cac:StandardItemIdentification>
+        <cbc:ID schemeID="0160">5701953366100</cbc:ID>
+      </cac:StandardItemIdentification>
+      <cac:AdditionalItemProperty>
+        <cbc:Name>NOBB</cbc:Name>
+        <cbc:Value>21594080</cbc:Value>
+      </cac:AdditionalItemProperty>
+    </cac:Item>
+  </cac:WasteLine>
+
+  <cac:WasteLine>
+    <cbc:ID>9</cbc:ID>
+    <cbc:Quantity unitCode="MTR">2.8</cbc:Quantity>
+    <cac:Item>
+      <cbc:Name>STÅLPR CL 200-1,2 FRI LENGDE</cbc:Name>
+      <cac:StandardItemIdentification>
+        <cbc:ID schemeID="0160">7071478016520</cbc:ID>
+      </cac:StandardItemIdentification>
+      <cac:AdditionalItemProperty>
+        <cbc:Name>NOBB</cbc:Name>
+        <cbc:Value>22203137</cbc:Value>
+      </cac:AdditionalItemProperty>
+    </cac:Item>
+  </cac:WasteLine>
+
+  <cac:WasteLine>
+    <cbc:ID>10</cbc:ID>
+    <cbc:Quantity unitCode="EA">26</cbc:Quantity>
+    <cac:Item>
+      <cbc:Name>NEDLØPSRØR 85 MM LGD 3M UBH</cbc:Name>
+      <cac:StandardItemIdentification>
+        <cbc:ID schemeID="0160">7071528006815</cbc:ID>
+      </cac:StandardItemIdentification>
+      <cac:AdditionalItemProperty>
+        <cbc:Name>NOBB</cbc:Name>
+        <cbc:Value>22432249</cbc:Value>
+      </cac:AdditionalItemProperty>
+    </cac:Item>
+  </cac:WasteLine>
+
+  <cac:WasteLine>
+    <cbc:ID>11</cbc:ID>
+    <cbc:Quantity unitCode="LMT">37.2</cbc:Quantity>
+    <cac:Item>
+      <cbc:Name>FURU 21X195 VEKSEL SKRÅ INT</cbc:Name>
+      <cac:StandardItemIdentification>
+        <cbc:ID schemeID="0160">7042757235406</cbc:ID>
+      </cac:StandardItemIdentification>
+      <cac:AdditionalItemProperty>
+        <cbc:Name>NOBB</cbc:Name>
+        <cbc:Value>22207534</cbc:Value>
+      </cac:AdditionalItemProperty>
+    </cac:Item>
+  </cac:WasteLine>
+
+  <cac:WasteLine>
+    <cbc:ID>12</cbc:ID>
+    <cbc:Quantity unitCode="LMT">24.2</cbc:Quantity>
+    <cac:Item>
+      <cbc:Name>FURU 09X070 UNDERLIGGER 1.S</cbc:Name>
+      <cac:StandardItemIdentification>
+        <cbc:ID schemeID="0160">7042756602100</cbc:ID>
+      </cac:StandardItemIdentification>
+      <cac:AdditionalItemProperty>
+        <cbc:Name>NOBB</cbc:Name>
+        <cbc:Value>22207328</cbc:Value>
+      </cac:AdditionalItemProperty>
+    </cac:Item>
+  </cac:WasteLine>
+
+  <cac:WasteLine>
+    <cbc:ID>13</cbc:ID>
+    <cbc:Quantity unitCode="EA">6</cbc:Quantity>
+    <cac:Item>
+      <cbc:Name>PIPE 3/8" TOLVK 7402 L11MM</cbc:Name>
+      <cac:StandardItemIdentification>
+        <cbc:ID schemeID="0160">7314151820145</cbc:ID>
+      </cac:StandardItemIdentification>
+      <cac:AdditionalItemProperty>
+        <cbc:Name>NOBB</cbc:Name>
+        <cbc:Value>21563572</cbc:Value>
+      </cac:AdditionalItemProperty>
+    </cac:Item>
+  </cac:WasteLine>
+
+  <cac:WasteLine>
+    <cbc:ID>14</cbc:ID>
+    <cbc:Quantity unitCode="EA">28</cbc:Quantity>
+    <cac:Item>
+      <cbc:Name>OVERGANG 90/75MM GRAFITT</cbc:Name>
+      <cac:StandardItemIdentification>
+        <cbc:ID schemeID="0160">5702752492540</cbc:ID>
+      </cac:StandardItemIdentification>
+      <cac:AdditionalItemProperty>
+        <cbc:Name>NOBB</cbc:Name>
+        <cbc:Value>21021175</cbc:Value>
+      </cac:AdditionalItemProperty>
+    </cac:Item>
+  </cac:WasteLine>
+
+  <cac:WasteLine>
+    <cbc:ID>15</cbc:ID>
+    <cbc:Quantity unitCode="EA">10</cbc:Quantity>
+    <cac:Item>
+      <cbc:Name>BJELKEBÆRER TYPE 160 - 4</cbc:Name>
+      <cac:StandardItemIdentification>
+        <cbc:ID schemeID="0160">5701953202903</cbc:ID>
+      </cac:StandardItemIdentification>
+      <cac:AdditionalItemProperty>
+        <cbc:Name>NOBB</cbc:Name>
+        <cbc:Value>21593652</cbc:Value>
+      </cac:AdditionalItemProperty>
+    </cac:Item>
+  </cac:WasteLine>
+</WasteReport>
