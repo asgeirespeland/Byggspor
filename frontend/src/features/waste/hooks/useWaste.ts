@@ -23,6 +23,7 @@ export function useCreateManualWaste(projectId: number) {
     invalidateKeys: [
       ['project-waste', projectId],
       ['co2-summary', projectId],
+      ['detailed-report', projectId],
     ],
     successMessage: 'Avfallsdata lagret',
     errorMessage: 'Kunne ikke lagre avfallsdata',
@@ -46,6 +47,7 @@ export function useUpdateWasteItem(projectId: number) {
     invalidateKeys: [
       ['project-waste', projectId],
       ['co2-summary', projectId],
+      ['detailed-report', projectId],
     ],
     successMessage: 'Avfallspost oppdatert',
     errorMessage: 'Kunne ikke oppdatere avfallsposten',

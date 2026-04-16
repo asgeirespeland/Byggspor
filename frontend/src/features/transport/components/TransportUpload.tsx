@@ -40,6 +40,9 @@ export default function TransportUpload({ projectId }: Props) {
     queryClient.invalidateQueries({
       queryKey: ['project-transports', projectId],
     })
+    queryClient.invalidateQueries({
+      queryKey: ['detailed-report', projectId],
+    })
   }
 
   const handleConfirm = async (

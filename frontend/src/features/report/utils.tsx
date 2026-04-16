@@ -1,0 +1,48 @@
+const SOURCE_LABELS: Record<string, string> = {
+  ehf_invoice: 'EHF-faktura',
+  manual: 'Manuell',
+  csv_import: 'CSV-import',
+  abax_xml: 'Abax XML',
+  waste_report: 'Avfallsrapport',
+  file: 'Fil',
+}
+
+export function fmt(value: number | null | undefined, decimals = 1): string {
+  if (value == null || value === 0) return '—'
+  return value.toLocaleString('nb-NO', { maximumFractionDigits: decimals })
+}
+
+export function co2Label(value: number | null | undefined) {
+  if (value == null || value === 0)
+    return <span className="text-gray-400">—</span>
+  if (value < 0) {
+    return (
+      <span className="text-emerald-600 font-medium">
+        {fmt(Math.abs(value))} kg{' '}
+        <span className="text-xs font-normal">(karbonbinding)</span>
+      </span>
+    )
+  }
+  return <span className="font-medium">{fmt(value)} kg</span>
+}
+
+export function sourceLabel(type: string | null): string {
+  return (type && SOURCE_LABELS[type]) ?? type ?? '—'
+}
+
+export function confidenceBadge(score: number | null) {
+  if (score == null) return <span className="text-gray-300">—</span>
+  const color =
+    score >= 80
+      ? 'bg-emerald-50 text-emerald-700'
+      : score >= 50
+        ? 'bg-yellow-50 text-yellow-700'
+        : 'bg-red-50 text-red-700'
+  return (
+    <span
+      className={`inline-flex rounded-full px-2 py-0.5 text-xs font-medium ${color}`}
+    >
+      {score}%
+    </span>
+  )
+}

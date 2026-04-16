@@ -10,6 +10,7 @@ interface FullscreenDialogProps {
   onOpenChange: (open: boolean) => void
   title: React.ReactNode
   children: React.ReactNode
+  className?: string
 }
 
 export default function FullscreenDialog({
@@ -17,10 +18,13 @@ export default function FullscreenDialog({
   onOpenChange,
   title,
   children,
+  className,
 }: FullscreenDialogProps) {
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-[80vw] max-h-[85vh] overflow-y-auto">
+      <DialogContent
+        className={className ?? 'sm:max-w-[80vw] max-h-[85vh] overflow-y-auto'}
+      >
         <DialogHeader>
           <DialogTitle>{title}</DialogTitle>
         </DialogHeader>

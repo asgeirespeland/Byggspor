@@ -1,9 +1,0 @@
-{
-  "permissions": {
-    "allow": [
-      "Bash(pnpm install:*)",
-      "Bash(python -m pytest tests/test_routes/test_export.py -v)",
-      "Bash(python -m pytest tests/test_ehf_generator.py tests/test_routes/test_export.py -v)"
-    ]
-  }
-}

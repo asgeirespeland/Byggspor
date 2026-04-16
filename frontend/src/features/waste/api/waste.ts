@@ -18,11 +18,17 @@ export async function confirmWaste(
   projectId: number,
   items: WasteLineItem[],
   fileName: string | null,
+  supplierName: string | null,
   token?: string,
 ): Promise<{ waste_invoice_id: number; project_waste_count: number }> {
   return apiRequest('/waste/confirm', {
     method: 'POST',
-    body: { project_id: projectId, items, file_name: fileName },
+    body: {
+      project_id: projectId,
+      items,
+      file_name: fileName,
+      supplier_name: supplierName,
+    },
     token,
   })
 }

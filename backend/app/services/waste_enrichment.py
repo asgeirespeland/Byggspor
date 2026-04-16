@@ -26,58 +26,11 @@ import logging
 
 from sqlalchemy.orm import Session
 
+from app.config.project_defaults import NS9431_EMISSION_FACTORS
 from app.services.nobb_client import lookup
 from app.utils.confidence import waste_confidence
 
 logger = logging.getLogger(__name__)
-
-# ---------------------------------------------------------------------------
-# NS 9431 fraction emission factors (kg CO₂e per tonne)
-#
-# Sources: SSB avfallsregnskap, DEFRA 2023 emission factors for waste,
-# and Asplan Viak / Byggemiljø guidance documents.
-# These are representative estimates — replace with authoritative values
-# when available from Miljødirektoratet or sector agreements.
-# ---------------------------------------------------------------------------
-NS9431_EMISSION_FACTORS: dict[str, float] = {
-    # Trevirke (wood)
-    "1141": 43.0,  # Rent trevirke (clean wood)
-    "1142": 43.0,  # Behandlet trevirke (treated wood)
-    "1149": 43.0,  # Blandet bearbeidet trevirke
-    # Papir/papp
-    "1222": 21.0,  # Ren papp
-    "1299": 21.0,  # Papir, papp og kartong
-    # Glass
-    "1331": 8.0,  # Vindusglass, ikke laminert
-    "1341": 8.0,  # Laminert glass
-    # Metall
-    "1447": 12.0,  # Rent magnetisk metall
-    "1450": 12.0,  # Klipp jern
-    "1451": 12.0,  # Rent umagnetisk metall
-    "1452": 12.0,  # Metall, blandet
-    # EE-avfall
-    "1500": 50.0,  # EE-avfall
-    "1599": 50.0,  # Blandet EE-avfall
-    # Betong/tegl/mineraler
-    "1601": 3.0,  # Rene masser
-    "1611": 3.0,  # Betong uten armeringsjern
-    "1612": 5.0,  # Betong med armeringsjern
-    "1613": 3.0,  # Tegl og takstein
-    "1615": 8.0,  # Gipsbaserte materialer
-    "1617": 15.0,  # Mineralull
-    "1618": 3.0,  # Keramikk og porselen
-    "1619": 5.0,  # Asfalt
-    # Plast
-    "1711": 65.0,  # Folieplast, emballasje
-    "1712": 65.0,  # Folieplast, annen
-    "1721": 65.0,  # Hardplast, emballasje
-    "1722": 65.0,  # Hardplast, annen
-    "1723": 80.0,  # PVC
-    "1731": 75.0,  # Ekspandert/ekstrudert plast (EPS/XPS)
-    "1799": 65.0,  # Blandet plast
-    # Takbelegg
-    "1621": 30.0,  # Takpapp
-}
 
 
 def _extract_c3c4_co2(epd: dict | None, quantity_tons: float) -> float | None:

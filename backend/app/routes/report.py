@@ -8,6 +8,7 @@ from app.models.project_material import ProjectMaterial
 from app.models.project_member import ProjectRole
 from app.models.project_transport import ProjectTransport
 from app.models.project_waste_item import ProjectWasteItem
+from app.services.report_generator import get_detailed_report
 
 report_bp = Blueprint("report", __name__, url_prefix="/report")
 
@@ -74,3 +75,11 @@ def co2_summary(project_id):
             },
         }
     )
+
+
+@report_bp.route("/project/<int:project_id>/detailed")
+@require_auth
+@require_project_role((ProjectRole.OWNER, ProjectRole.EDITOR, ProjectRole.VIEWER))
+def detailed_report(project_id):
+    report = get_detailed_report(g.db, project_id)
+    return jsonify(report)

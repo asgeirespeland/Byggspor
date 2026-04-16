@@ -3,12 +3,14 @@ import { useState } from 'react'
 import { useDeferredLoading } from '@/shared/hooks/useDeferredLoading'
 import {
   ArrowLeft,
+  HelpCircle,
   Loader2,
   Package,
   Truck,
   Trash2,
   Zap,
   Leaf,
+  FileText,
 } from 'lucide-react'
 import { useProject } from '@/features/project/hooks/useProject'
 import { STATUS_CONFIG } from '@/features/project/constants'
@@ -18,15 +20,17 @@ import { TransportUpload } from '@/features/transport'
 import { useCo2Summary } from '../hooks/useCo2Summary'
 import WasteTab from './tabs/WasteTab'
 import EnergyTab from './tabs/EnergyTab'
+import ReportTab from './tabs/ReportTab'
 import KpiCard from './KpiCard'
 import ProjectSidebar from './ProjectSidebar'
+import { ClimateTabTour, useClimateTabTour } from '@/features/onboarding'
 
 function formatKg(value: number | undefined): string {
   if (value == null || value === 0) return '—'
   return value.toLocaleString('nb-NO', { maximumFractionDigits: 1 })
 }
 
-type Tab = 'materials' | 'transport' | 'waste' | 'energy'
+type Tab = 'materials' | 'transport' | 'waste' | 'energy' | 'report'
 
 const TABS: TabDef<Tab>[] = [
   {
@@ -37,6 +41,7 @@ const TABS: TabDef<Tab>[] = [
   { id: 'transport', label: 'Transport', icon: <Truck className="h-4 w-4" /> },
   { id: 'waste', label: 'Avfall', icon: <Trash2 className="h-4 w-4" /> },
   { id: 'energy', label: 'Energi', icon: <Zap className="h-4 w-4" /> },
+  { id: 'report', label: 'Rapport', icon: <FileText className="h-4 w-4" /> },
 ]
 
 const KPI_CONFIG = [
@@ -88,6 +93,7 @@ export default function ProjectDashboard() {
   const { data: project, isLoading, error } = useProject(Number(projectId))
   const { data: co2 } = useCo2Summary(Number(projectId))
   const showLoading = useDeferredLoading(isLoading)
+  const tour = useClimateTabTour()
 
   if (showLoading) {
     return (
@@ -141,6 +147,16 @@ export default function ProjectDashboard() {
           <span className={`h-1.5 w-1.5 rounded-full ${status.dot}`} />
           {status.label}
         </span>
+
+        <button
+          type="button"
+          onClick={tour.restart}
+          title="Vis omvisning"
+          className="ml-auto flex items-center gap-1 rounded-md px-2 py-1 text-xs text-gray-400 transition-colors hover:bg-gray-100 hover:text-gray-600"
+        >
+          <HelpCircle className="h-3.5 w-3.5" />
+          Omvisning
+        </button>
       </div>
 
       {/* Main layout: left content + right sidebar */}
@@ -178,6 +194,7 @@ export default function ProjectDashboard() {
               )}
               {activeTab === 'waste' && <WasteTab projectId={project.id} />}
               {activeTab === 'energy' && <EnergyTab projectId={project.id} />}
+              {activeTab === 'report' && <ReportTab projectId={project.id} />}
             </div>
           </div>
         </div>
@@ -192,6 +209,14 @@ export default function ProjectDashboard() {
           />
         </div>
       </div>
+
+      <ClimateTabTour
+        open={tour.open}
+        step={tour.step}
+        onNext={tour.next}
+        onPrev={tour.prev}
+        onClose={tour.close}
+      />
     </div>
   )
 }

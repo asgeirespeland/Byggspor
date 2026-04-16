@@ -33,6 +33,7 @@ export function useCalculateEnergy(projectId: number) {
     invalidateKeys: [
       ['energies', projectId],
       ['co2-summary', projectId],
+      ['detailed-report', projectId],
     ],
     successMessage: 'Energidata lagret',
     errorMessage: 'Kunne ikke lagre energidata',
@@ -46,6 +47,7 @@ export function useUpdateEnergy(projectId: number) {
     invalidateKeys: [
       ['energies', projectId],
       ['co2-summary', projectId],
+      ['detailed-report', projectId],
     ],
     successMessage: 'Energidata oppdatert',
     errorMessage: 'Kunne ikke oppdatere energidata',
