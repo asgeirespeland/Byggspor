@@ -78,6 +78,22 @@ Unit tests for the NOBB API client. All HTTP calls are mocked.
 | `TestExtractEpd` | Detailed EPD format (Total/Fossil/Biogenic), simple format (combined value), empty/missing EPD, absent stages |
 | `TestLookup` | Full lookup flow (search → details → EPD); GTIN preferred over NOBB when both provided; `None` returns |
 
+#### Settings Resolver (`test_settings_resolver.py`)
+
+Unit tests for the 3-tier settings resolution chain. No HTTP calls, tests the resolver functions directly with in-memory SQLite.
+
+| Test Class | What it tests |
+|-----------|---------------|
+| `TestValidateSettings` | Valid overrides accepted; unknown keys rejected; type mismatches rejected |
+| `TestCleanOverrides` | Matching values stripped; different values kept; empty result returns None |
+| `TestResolveSettings` | Default-only resolution; org overrides; project overrides; project-over-org precedence |
+| `TestResolveWithSources` | Source tracking (default/organization/project) for each setting |
+| `TestResolveForSnapshot` | Nested output format for report methodology section |
+
+#### Energy Routes (`test_routes/test_energy.py`)
+
+Integration tests for the `/energy` HTTP endpoints using the Flask test client.
+
 #### Invoice Routes (`test_routes/test_invoice.py`)
 
 Integration tests for the `/invoice` HTTP endpoints using the Flask test client.
@@ -206,8 +222,8 @@ Both jobs must pass before a PR can be merged.
 
 As of the current state, notable areas without test coverage include:
 
-- **Backend**: Organization, project, energy, transport, and report route handlers
-- **Backend**: Transport parser, transport service, vehicle lookup, invoice enrichment, material service
+- **Backend**: Organization, project, transport, waste, and report route handlers
+- **Backend**: Transport parser, transport service, vehicle lookup, invoice enrichment, recalculation service
 - **Frontend**: Component rendering tests (all current tests are hook/utility-level)
 - **Frontend**: Energy hooks and API calls
 - **Integration**: No end-to-end tests covering the full frontend → backend flow

@@ -1,3 +1,5 @@
+import os
+
 from dotenv import load_dotenv
 from flask import Flask, g, jsonify
 from flask_cors import CORS
@@ -6,10 +8,12 @@ from app.database import SessionLocal
 from app.errors import register_error_handlers
 from app.middleware.auth import authenticate_request
 
+# Load backend/.env first, then project root .env (won't overwrite existing keys)
 load_dotenv()
+load_dotenv(os.path.join(os.path.dirname(__file__), "..", "..", ".env"))
 
 app = Flask(__name__)
-CORS(app)
+CORS(app, expose_headers=["Content-Disposition"])
 register_error_handlers(app)
 
 
@@ -41,6 +45,7 @@ def health_check():
 
 
 from app.routes.energy import energy_bp  # noqa: E402
+from app.routes.export import export_bp  # noqa: E402
 from app.routes.invoice import invoice_bp  # noqa: E402
 from app.routes.nobb import nobb_bp  # noqa: E402
 from app.routes.organization import organization_bp  # noqa: E402
@@ -51,6 +56,7 @@ from app.routes.user import user_bp  # noqa: E402
 from app.routes.waste import waste_bp  # noqa: E402
 
 app.register_blueprint(energy_bp)
+app.register_blueprint(export_bp)
 app.register_blueprint(nobb_bp)
 app.register_blueprint(invoice_bp)
 app.register_blueprint(report_bp)

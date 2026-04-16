@@ -30,6 +30,7 @@ export default function WasteUpload({ projectId }: Props) {
         projectId,
         wasteData.line_items,
         wasteData.report_id,
+        wasteData.receiver?.name ?? null,
         token,
       )
       queryClient.invalidateQueries({
@@ -37,6 +38,9 @@ export default function WasteUpload({ projectId }: Props) {
       })
       queryClient.invalidateQueries({
         queryKey: ['co2-summary', projectId],
+      })
+      queryClient.invalidateQueries({
+        queryKey: ['detailed-report', projectId],
       })
       clear()
       toast.success('Avfallsrapport bekreftet og lagret')

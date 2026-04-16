@@ -3,6 +3,7 @@ from __future__ import annotations
 from datetime import datetime
 
 from sqlalchemy import (
+    JSON,
     Boolean,
     DateTime,
     Integer,
@@ -33,6 +34,7 @@ class Material(Base):
     recycled_content_percent: Mapped[float | None] = mapped_column(Numeric(5, 2))
     has_epd: Mapped[bool] = mapped_column(Boolean, default=False, nullable=False)
     epd_id: Mapped[str | None] = mapped_column(String(100))
+    epd_gwp: Mapped[dict | None] = mapped_column(JSON, nullable=True)
     cached_at: Mapped[datetime] = mapped_column(
         DateTime, server_default=func.now(), nullable=False
     )

@@ -70,9 +70,11 @@ byggspor/
 │   │   ├── main.py                # Flask app factory, blueprint registration
 │   │   ├── database.py            # SQLAlchemy engine and session
 │   │   ├── middleware/             # Auth (Clerk JWT) and role-checking decorators
+│   │   ├── config/                # Settings resolver, project defaults, settings snapshot
 │   │   ├── models/                # SQLAlchemy ORM models (16 models)
 │   │   ├── routes/                # Flask blueprints (9 route modules)
-│   │   └── services/              # Business logic and external API clients
+│   │   ├── services/              # Business logic and external API clients
+│   │   └── utils/                 # Shared utilities (confidence, parsing, DB helpers)
 │   ├── alembic/                   # Database migration files
 │   └── tests/                     # pytest test suite
 │
@@ -98,7 +100,8 @@ features/
 ├── onboarding/     # New user onboarding flow
 ├── organization/   # Organization settings, member management
 ├── project/        # Project CRUD, project hooks
-├── settings/       # App settings page
+├── report/         # Detailed CO₂ report with per-category breakdown
+├── settings/       # Calculation settings (org/project level)
 ├── transport/      # Transport report upload (Abax XML), manual input, trip table
 ├── waste/          # Waste report upload (XML), manual input, waste tracking
 └── user/           # User profile
@@ -161,13 +164,15 @@ Business logic is separated from route handlers into service modules:
 | `vegvesen_client.py` | Statens vegvesen API: vehicle lookup by registration number, CO₂/km extraction |
 | `ehf_parser.py` | Parses EHF (Electronic Handelsformat) XML invoices into structured line items |
 | `transport_parser.py` | Parses Abax Turrapport XML into individual transport trips |
-| `material_service.py` | Material enrichment: NOBB lookup, CO₂ calculation, caching |
+| `material_service.py` | Material enrichment: NOBB lookup, CO₂ calculation, EPD stage-aware GWP computation |
 | `transport_service.py` | Transport enrichment: vehicle lookup, emission calculation |
 | `invoice_enrichment.py` | Enriches parsed invoice data with CO₂ values from NOBB/EPD lookups |
 | `waste_report_parser.py` | Parses waste report XML, extracts items with GTIN/NOBB or NS 9431 fraction codes |
 | `waste_enrichment.py` | Enriches waste items with CO₂ via NOBB C3/C4 stages or generic fraction factors |
 | `waste_parser.py` | Manual waste entry logic: type validation, CO₂ calculation, CSV parsing |
 | `vehicle_lookup.py` | Vehicle data lookup and caching logic |
+| `report_generator.py` | Builds detailed CO₂ report with per-category line items, summaries, and settings snapshot |
+| `recalculation.py` | Selective CO₂ recalculation when settings change (energy, materials, waste) |
 | `user_sync.py` | Syncs Clerk user claims to local User model on first login |
 
 ### Role-Based Access Control
@@ -219,14 +224,18 @@ Each project tracks emissions across four categories:
 
 | Category | Data Source | CO₂ Calculation |
 |----------|-----------|-----------------|
-| **Materials** | EHF invoices (XML) | NOBB lookup → EPD → GWP per unit × quantity |
+| **Materials** | EHF invoices (XML) | NOBB lookup → EPD → GWP per unit × quantity. GWP summed across configurable lifecycle stages (default A1-A3) with optional A4 transport and biogenic carbon toggles. |
 | **Transport** | Abax trip reports (XML) or manual entry | Vehicle CO₂/km (Vegvesen API) × distance |
-| **Energy** | Manual entry | kWh × national grid emission factor (single value for all of Norway; price zone stored for future use) |
-| **Waste** | Waste report XML or manual entry | NOBB EPD C3/C4 GWP stages per product, or NS 9431 generic emission factors per waste fraction × tonnage |
+| **Energy** | Manual entry | kWh × configurable grid emission factor (default 0.0119 kg CO₂eq/kWh from NVE 2024). Price zone stored for future regional factors. |
+| **Waste** | Waste report XML or manual entry | NOBB EPD C3/C4 GWP stages per product, or configurable generic emission factors per waste fraction × tonnage |
+
+### Calculation Settings
+
+Calculation parameters (emission factors, GWP stages, confidence weighting) are configurable at three levels with cascading resolution: **project → organization → defaults**. Settings are stored as sparse JSON on the `organizations` and `projects` tables. Only overrides are stored; missing keys inherit from the parent level. Changing a setting triggers automatic recalculation of affected CO₂ values across the project.
 
 ### Confidence Scores
 
-Most project data records include a `confidence_score` (integer) indicating how reliable the CO₂ estimate is. This propagates up to the `GeneratedInvoice` as an `overall_confidence_score`. The frontend displays these as confidence gauges on the dashboard KPI cards.
+Most project data records include a `confidence_score` (integer) indicating how reliable the CO₂ estimate is. The overall project confidence is aggregated using a configurable weighting strategy: CO₂-weighted (default, weights by emission contribution) or simple average. The frontend displays these as confidence gauges on the dashboard KPI cards.
 
 ## External API Integrations
 

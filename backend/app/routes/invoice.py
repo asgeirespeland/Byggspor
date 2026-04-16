@@ -174,11 +174,20 @@ def upload_invoice_route():
     project_id = require_int(dict(request.form), "project_id")
     xml_content = validate_xml_upload(EHF_XML_SUGGESTION)
 
+    from app.config.settings_resolver import resolve_settings
     from app.services.material_service import process_invoice_for_project
 
     session = g.db
+    settings = resolve_settings(session, project_id)
     try:
-        result = process_invoice_for_project(session, project_id, xml_content)
+        result = process_invoice_for_project(
+            session,
+            project_id,
+            xml_content,
+            gwp_stages=settings["material_gwp_stages"],
+            include_a4=settings["material_include_a4"],
+            include_biogenic=settings["material_include_biogenic"],
+        )
     except ET.ParseError:
         session.rollback()
         raise ApiError(
@@ -238,6 +247,7 @@ def list_project_materials(project_id: int):
             "nobb_number": pm.material.nobb_number if pm.material else None,
             "quantity": float(pm.quantity) if pm.quantity else None,
             "unit": pm.unit,
+            "price_per_unit": float(pm.price_per_unit) if pm.price_per_unit else None,
             "total_price": float(pm.total_price) if pm.total_price else None,
             "total_co2_kg": float(pm.total_co2_kg) if pm.total_co2_kg else None,
             "confidence_score": pm.confidence_score,

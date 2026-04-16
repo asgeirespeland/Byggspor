@@ -37,3 +37,28 @@ def waste_confidence(*, has_emission_factor: bool) -> int:
 
 
 ENERGY_CONFIDENCE = 100
+
+
+def aggregate_confidence(
+    entries: list[tuple[float | None, int | None]],
+    weighting: str = "average",
+) -> float | None:
+    """Compute aggregate confidence from (co2, score) pairs.
+
+    weighting="average"      → simple mean of scores
+    weighting="co2_weighted" → weighted by abs(co2) contribution
+    """
+    scored = [(co2, score) for co2, score in entries if score is not None]
+    if not scored:
+        return None
+
+    if weighting == "co2_weighted":
+        weight_sum = sum(abs(co2 or 0) for co2, _ in scored)
+        if weight_sum:
+            return round(
+                sum(abs(co2 or 0) * score for co2, score in scored) / weight_sum,
+                1,
+            )
+
+    # Fallback: simple average
+    return round(sum(s for _, s in scored) / len(scored), 1)

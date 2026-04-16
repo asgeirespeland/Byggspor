@@ -2,11 +2,20 @@ from __future__ import annotations
 
 from flask import Blueprint, g, jsonify, request
 
+from app.config.settings_resolver import (
+    clean_overrides,
+    resolve_org_settings,
+    resolve_settings_with_sources,
+    validate_settings,
+)
 from app.errors import ApiError
 from app.middleware.auth import require_auth
+from app.middleware.roles import require_project_role
 from app.models.organization import Organization, OrgType
 from app.models.organization_member import OrganizationMember
 from app.models.project import Project, ProjectStatus
+from app.models.project_member import ProjectRole
+from app.services.recalculation import recalculate_project
 from app.utils.db import db_commit
 
 project_bp = Blueprint("projects", __name__, url_prefix="/projects")
@@ -140,3 +149,102 @@ def get_project(project_id: int):
         raise ApiError("Prosjektet ble ikke funnet.", code="NOT_FOUND", status=404)
 
     return jsonify(project.to_dict())
+
+
+# ---------------------------------------------------------------------------
+# Project calculation settings
+# ---------------------------------------------------------------------------
+
+
+@project_bp.route("/<int:project_id>/settings", methods=["GET"])
+@require_auth
+@require_project_role((ProjectRole.OWNER, ProjectRole.EDITOR, ProjectRole.VIEWER))
+def get_project_settings(project_id: int):
+    """Return fully resolved calculation settings for the project."""
+    session = g.db
+    project = session.get(Project, project_id)
+    if not project:
+        raise ApiError("Prosjektet ble ikke funnet.", code="NOT_FOUND", status=404)
+
+    return jsonify({"settings": resolve_settings_with_sources(session, project_id)})
+
+
+@project_bp.route("/<int:project_id>/settings", methods=["PATCH"])
+@require_auth
+@require_project_role((ProjectRole.OWNER, ProjectRole.EDITOR))
+def update_project_settings(project_id: int):
+    """Update calculation settings for the project (partial merge)."""
+    payload = request.get_json(silent=True) or {}
+    if not payload:
+        raise ApiError("Ingen innstillinger oppgitt.", code="MISSING_FIELD")
+
+    validated = validate_settings(payload)
+
+    session = g.db
+    project = session.get(Project, project_id)
+    if not project:
+        raise ApiError("Prosjektet ble ikke funnet.", code="NOT_FOUND", status=404)
+
+    merged = {**(project.settings or {}), **validated}
+    inherited = resolve_org_settings(session, project.organization_id)
+    project.settings = clean_overrides(merged, inherited)
+
+    recalculate_project(session, project_id, changed_keys=set(validated.keys()))
+
+    with db_commit(session, "Kunne ikke oppdatere innstillingene.", "SAVE_FAILED"):
+        pass
+
+    session.refresh(project)
+    return jsonify({"settings": resolve_settings_with_sources(session, project_id)})
+
+
+@project_bp.route("/<int:project_id>/settings", methods=["DELETE"])
+@require_auth
+@require_project_role((ProjectRole.OWNER, ProjectRole.EDITOR))
+def reset_project_settings(project_id: int):
+    """Clear all project-level overrides (revert to inherited values)."""
+    session = g.db
+    project = session.get(Project, project_id)
+    if not project:
+        raise ApiError("Prosjektet ble ikke funnet.", code="NOT_FOUND", status=404)
+
+    old_keys = set(project.settings.keys()) if project.settings else set()
+    project.settings = None
+
+    if old_keys:
+        recalculate_project(session, project_id, changed_keys=old_keys)
+
+    with db_commit(session, "Kunne ikke tilbakestille innstillingene.", "SAVE_FAILED"):
+        pass
+
+    session.refresh(project)
+    return jsonify({"settings": resolve_settings_with_sources(session, project_id)})
+
+
+@project_bp.route("/<int:project_id>/settings/<string:key>", methods=["DELETE"])
+@require_auth
+@require_project_role((ProjectRole.OWNER, ProjectRole.EDITOR))
+def delete_project_setting(project_id: int, key: str):
+    """Remove a single project-level override (reverts to inherited value)."""
+    session = g.db
+    project = session.get(Project, project_id)
+    if not project:
+        raise ApiError("Prosjektet ble ikke funnet.", code="NOT_FOUND", status=404)
+
+    if not project.settings or key not in project.settings:
+        raise ApiError(
+            f"Innstillingen '{key}' er ikke overstyrt på prosjektnivå.",
+            code="NOT_FOUND",
+            status=404,
+        )
+
+    updated = {k: v for k, v in project.settings.items() if k != key}
+    project.settings = updated or None
+
+    recalculate_project(session, project_id, changed_keys={key})
+
+    with db_commit(session, "Kunne ikke fjerne innstillingen.", "SAVE_FAILED"):
+        pass
+
+    session.refresh(project)
+    return jsonify({"settings": resolve_settings_with_sources(session, project_id)})

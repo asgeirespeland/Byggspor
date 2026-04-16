@@ -3,20 +3,18 @@ from __future__ import annotations
 import csv
 import io
 
+from app.config.project_defaults import WASTE_MANUAL_EMISSION_FACTORS
 from app.errors import ApiError
 from app.utils.confidence import waste_confidence
 
-# Placeholder factors in kg CO2e per ton.
-# TODO: replace when the team agrees on final emission factors.
-WASTE_EMISSION_FACTORS = {
-    "metall": 50.0,
-    "treverk": 30.0,
-    "betong": 10.0,
-}
+WASTE_EMISSION_FACTORS = WASTE_MANUAL_EMISSION_FACTORS
 
 
-def normalize_waste_type(value: str | None) -> str:
+def normalize_waste_type(
+    value: str | None, emission_factors: dict[str, float] | None = None
+) -> str:
     """Normalize and validate supported waste types."""
+    factors = emission_factors or WASTE_EMISSION_FACTORS
     if not value:
         raise ApiError(
             "waste_type er påkrevd.",
@@ -25,8 +23,8 @@ def normalize_waste_type(value: str | None) -> str:
         )
 
     normalized = value.strip().lower()
-    if normalized not in WASTE_EMISSION_FACTORS:
-        valid = ", ".join(WASTE_EMISSION_FACTORS.keys())
+    if normalized not in factors:
+        valid = ", ".join(factors.keys())
         raise ApiError(
             f"Ugyldig avfallstype: {value}.",
             code="INVALID_FIELD",
@@ -64,10 +62,15 @@ def parse_quantity_tons(value: object) -> float:
     return quantity
 
 
-def calculate_waste_co2(waste_type: str, quantity_tons: float) -> float:
+def calculate_waste_co2(
+    waste_type: str,
+    quantity_tons: float,
+    emission_factors: dict[str, float] | None = None,
+) -> float:
     """Calculate CO2 in kg from waste type and quantity in tons."""
-    normalized_type = normalize_waste_type(waste_type)
-    factor = WASTE_EMISSION_FACTORS[normalized_type]
+    factors = emission_factors or WASTE_EMISSION_FACTORS
+    normalized_type = normalize_waste_type(waste_type, factors)
+    factor = factors[normalized_type]
     return round(quantity_tons * factor, 4)
 
 
@@ -76,12 +79,14 @@ def build_waste_item_data(
     quantity_tons: float,
     *,
     notes: str | None = None,
+    emission_factors: dict[str, float] | None = None,
 ) -> dict:
     """Build normalized waste item payload for persistence."""
-    normalized_type = normalize_waste_type(waste_type)
+    factors = emission_factors or WASTE_EMISSION_FACTORS
+    normalized_type = normalize_waste_type(waste_type, factors)
     parsed_quantity = parse_quantity_tons(quantity_tons)
-    has_factor = normalized_type in WASTE_EMISSION_FACTORS
-    calculated_co2_kg = calculate_waste_co2(normalized_type, parsed_quantity)
+    has_factor = normalized_type in factors
+    calculated_co2_kg = calculate_waste_co2(normalized_type, parsed_quantity, factors)
 
     return {
         "waste_type": normalized_type,
@@ -94,7 +99,10 @@ def build_waste_item_data(
     }
 
 
-def parse_waste_csv(file_content: str | bytes) -> list[dict]:
+def parse_waste_csv(
+    file_content: str | bytes,
+    emission_factors: dict[str, float] | None = None,
+) -> list[dict]:
     """Parse waste CSV with columns: waste_type, quantity_tons."""
     if isinstance(file_content, bytes):
         text = file_content.decode("utf-8-sig")
@@ -125,6 +133,7 @@ def parse_waste_csv(file_content: str | bytes) -> list[dict]:
             item = build_waste_item_data(
                 waste_type=row.get("waste_type"),
                 quantity_tons=row.get("quantity_tons"),
+                emission_factors=emission_factors,
             )
             items.append(item)
         except ApiError as exc:

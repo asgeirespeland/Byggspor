@@ -92,6 +92,7 @@ export function useUpdateTrip(projectId: number) {
     invalidateKeys: [
       ['project-transports', projectId],
       ['co2-summary', projectId],
+      ['detailed-report', projectId],
     ],
     successMessage: 'Tur oppdatert',
     errorMessage: 'Kunne ikke oppdatere tur',
