@@ -169,7 +169,7 @@ export default function ProjectDashboard() {
               onTabChange={setActiveTab}
               scrollDeps={[isLoading]}
             />
-            <div className="p-6">
+            <div className="p-6 min-h-120">
               {activeTab === 'materials' && (
                 <InvoiceUpload projectId={project.id} />
               )}

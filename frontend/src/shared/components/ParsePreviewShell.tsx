@@ -7,6 +7,7 @@ import RowActions from './RowActions'
 export interface Column<T> {
   header: string
   align?: 'left' | 'right'
+  width?: string
   render: (row: T, index: number) => React.ReactNode
   /** Render an editable input when the row is in edit mode. If omitted the normal render is used. */
   editRender?: (
@@ -94,8 +95,17 @@ export default function ParsePreviewShell<T>({
     setEditValues({})
   }
 
+  const colgroup = (
+    <colgroup>
+      {columns.map((col, i) => (
+        <col key={i} style={col.width ? { width: col.width } : undefined} />
+      ))}
+      {hasActions && <col style={{ width: '8%' }} />}
+    </colgroup>
+  )
+
   const thead = (
-    <thead className="border-b border-gray-200 bg-gray-50">
+    <thead className="border-b border-gray-200 bg-gray-50 sticky top-0 z-10">
       <tr>
         {columns.map((col, i) => (
           <th
@@ -186,11 +196,14 @@ export default function ParsePreviewShell<T>({
           </button>
         </div>
 
-        <div className="overflow-x-auto rounded-xl border border-gray-200">
-          <table className="w-full text-left text-sm">
-            {thead}
-            {renderRows(true)}
-          </table>
+        <div className="rounded-xl border border-gray-200 overflow-hidden">
+          <div className="max-h-[60vh] overflow-y-auto overflow-x-auto">
+            <table className="w-full text-left text-sm table-fixed">
+              {colgroup}
+              {thead}
+              {renderRows(true)}
+            </table>
+          </div>
         </div>
 
         {afterTable}
@@ -224,7 +237,8 @@ export default function ParsePreviewShell<T>({
         onOpenChange={setFullscreen}
         title={fullscreenTitle}
       >
-        <table className="w-full text-left text-sm">
+        <table className="w-full text-left text-sm table-fixed">
+          {colgroup}
           {thead}
           {renderRows(false)}
         </table>

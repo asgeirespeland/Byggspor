@@ -16,6 +16,7 @@ import TransportManualInput from './TransportManualInput'
 import TransportPreview from './TransportPreview'
 import TransportGroupCard from './TransportGroupCard'
 import type { TransportParseResponse } from '../types/transport'
+import ManualEntry from '@/shared/components/ManualEntry'
 
 type Props = {
   projectId: number
@@ -33,7 +34,6 @@ export default function TransportUpload({ projectId }: Props) {
     useDeleteTrip(projectId)
   const updateTripMutation = useUpdateTrip(projectId)
   const [confirming, setConfirming] = useState(false)
-  const [showManual, setShowManual] = useState(false)
 
   const invalidateTransportData = () => {
     queryClient.invalidateQueries({ queryKey: ['co2-summary', projectId] })
@@ -94,22 +94,15 @@ export default function TransportUpload({ projectId }: Props) {
         )}
       </FileUploadShell>
 
-      <div className="border-t border-gray-100 pt-4">
-        <button
-          onClick={() => setShowManual(!showManual)}
-          className="text-sm font-medium text-gray-500 hover:text-gray-700 transition-colors"
-        >
-          {showManual
-            ? '↑ Skjul manuell registrering'
-            : '+ Registrer tur manuelt'}
-        </button>
-        {showManual && (
-          <TransportManualInput
-            projectId={projectId}
-            onTripCreated={invalidateTransportData}
-          />
-        )}
-      </div>
+      <ManualEntry
+        showLabel="Registrer tur manuelt"
+        hideLabel="Skjul manuell registrering"
+      >
+        <TransportManualInput
+          projectId={projectId}
+          onTripCreated={invalidateTransportData}
+        />
+      </ManualEntry>
 
       {showReportsLoading && (
         <p className="text-sm text-gray-400 text-center py-4">

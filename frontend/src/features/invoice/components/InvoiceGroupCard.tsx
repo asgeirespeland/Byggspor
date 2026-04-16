@@ -19,7 +19,8 @@ interface Props {
   isDeleting: boolean
 }
 
-const INPUT = 'w-full rounded border border-gray-300 px-2 py-1 text-sm'
+const INPUT =
+  'w-full rounded border border-gray-300 px-2 py-0.5 text-sm focus:outline-none focus:ring-1 focus:ring-gray-400'
 
 const columns: GroupColumn<ProjectMaterialItem>[] = [
   {
@@ -75,7 +76,7 @@ const columns: GroupColumn<ProjectMaterialItem>[] = [
         placeholder="kg CO₂"
         value={value}
         onChange={(e) => onChange(e.target.value)}
-        className={`${INPUT} w-24 text-right`}
+        className={`${INPUT} text-right`}
         autoFocus
       />
     ),
@@ -137,7 +138,15 @@ export default function InvoiceGroupCard({
       onDelete={onDelete}
       isDeleting={isDeleting}
     >
-      <table className="w-full text-sm">
+      <table className="w-full text-sm table-fixed">
+        <colgroup>
+          <col className="w-[35%]" />
+          <col className="w-[15%]" />
+          <col className="w-[15%]" />
+          <col className="w-[15%]" />
+          <col className="w-[10%]" />
+          <col className="w-[10%]" />
+        </colgroup>
         <thead className={GROUP_THEAD}>
           <tr>
             {columns.map((col, i) => (

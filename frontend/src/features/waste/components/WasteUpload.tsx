@@ -6,6 +6,8 @@ import { confirmWaste } from '../api/waste'
 import { useWasteParse } from '../hooks/useWasteParse'
 import type { WasteParseResponse } from '../types/waste'
 import WastePreview from './WastePreview'
+import ManualEntry from '@/shared/components/ManualEntry'
+import WasteManualInput from './WasteManualInput'
 
 type Props = {
   projectId: number
@@ -46,30 +48,38 @@ export default function WasteUpload({ projectId }: Props) {
   }
 
   return (
-    <FileUploadShell<WasteParseResponse>
-      title="Avfallsrapport"
-      description="Last opp en avfallsrapport (XML) for å beregne CO₂-utslipp fra avfall, eller registrer avfall manuelt."
-      accept=".xml"
-      dropDescription="Dra og slipp avfallsrapporten her"
-      fileErrorMessage="Filen må være i XML-format."
-      analyzeLabel="Analyser"
-      analyzingLabel="Analyserer…"
-      parse={parse}
-      reset={reset}
-      data={data}
-      loading={loading}
-      error={error}
-      errorFallback="Kunne ikke analysere avfallsrapport"
-    >
-      {({ data: wasteData, clear, requireToken }) => (
-        <WastePreview
-          data={wasteData}
-          setData={setData}
-          onConfirm={() => handleConfirm(wasteData, clear, requireToken)}
-          confirming={confirming}
-          onCancel={clear}
-        />
-      )}
-    </FileUploadShell>
+    <div className="space-y-4">
+      <FileUploadShell<WasteParseResponse>
+        title="Avfallsrapport"
+        description="Last opp en avfallsrapport (XML) for å beregne CO₂-utslipp fra avfall, eller registrer avfall manuelt."
+        accept=".xml"
+        dropDescription="Dra og slipp avfallsrapporten her"
+        fileErrorMessage="Filen må være i XML-format."
+        analyzeLabel="Analyser"
+        analyzingLabel="Analyserer…"
+        parse={parse}
+        reset={reset}
+        data={data}
+        loading={loading}
+        error={error}
+        errorFallback="Kunne ikke analysere avfallsrapport"
+      >
+        {({ data: wasteData, clear, requireToken }) => (
+          <WastePreview
+            data={wasteData}
+            setData={setData}
+            onConfirm={() => handleConfirm(wasteData, clear, requireToken)}
+            confirming={confirming}
+            onCancel={clear}
+          />
+        )}
+      </FileUploadShell>
+      <ManualEntry
+        showLabel="Registrer avfall manuelt"
+        hideLabel="Skjul manuell registrering"
+      >
+        <WasteManualInput projectId={projectId} />
+      </ManualEntry>
+    </div>
   )
 }

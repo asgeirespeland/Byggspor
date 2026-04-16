@@ -14,11 +14,13 @@ interface Props {
   onCancel: () => void
 }
 
-const INPUT = 'w-full rounded border border-gray-300 px-2 py-1 text-sm'
+const INPUT =
+  'w-full rounded border border-gray-300 px-2 text-sm h-7 focus:outline-none focus:ring-1 focus:ring-gray-400'
 
 const columns: Column<LineItem>[] = [
   {
     header: 'Navn',
+    width: '28%',
     render: (item) => (
       <span className="text-gray-800">
         {item.name ?? '—'}
@@ -32,6 +34,7 @@ const columns: Column<LineItem>[] = [
   },
   {
     header: 'GTIN',
+    width: '12%',
     render: (item) => (
       <span className="text-gray-600 font-mono text-xs">
         {item.gtin ?? '—'}
@@ -40,6 +43,7 @@ const columns: Column<LineItem>[] = [
   },
   {
     header: 'NOBB',
+    width: '10%',
     render: (item) => (
       <span className="text-gray-600 font-mono text-xs">
         {item.nobb_number ?? '—'}
@@ -48,6 +52,7 @@ const columns: Column<LineItem>[] = [
   },
   {
     header: 'Antall',
+    width: '8%',
     align: 'right',
     render: (item) => (
       <span className="text-gray-800">{item.quantity ?? '—'}</span>
@@ -59,16 +64,18 @@ const columns: Column<LineItem>[] = [
         step="any"
         value={value}
         onChange={(e) => onChange(e.target.value)}
-        className={`${INPUT} w-20 text-right`}
+        className={`${INPUT} text-right`}
       />
     ),
   },
   {
     header: 'Enhet',
+    width: '7%',
     render: (item) => <span className="text-gray-600">{item.unit ?? '—'}</span>,
   },
   {
     header: 'Sum',
+    width: '9%',
     align: 'right',
     render: (item) => (
       <span className="text-gray-800">
@@ -78,6 +85,7 @@ const columns: Column<LineItem>[] = [
   },
   {
     header: 'CO₂ (kg)',
+    width: '10%',
     align: 'right',
     render: (item) => {
       const gwp = getGwpA1A3(item)
@@ -94,12 +102,13 @@ const columns: Column<LineItem>[] = [
         step="any"
         value={value}
         onChange={(e) => onChange(e.target.value)}
-        className={`${INPUT} w-24 text-right`}
+        className={`${INPUT} text-right`}
       />
     ),
   },
   {
     header: 'EPD',
+    width: '8%',
     render: (item) => (
       <EpdBadge
         enriched={item.enriched}

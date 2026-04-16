@@ -17,11 +17,13 @@ const CO2_SOURCE_LABELS: Record<string, string> = {
   fraction_factor: 'Generisk',
 }
 
-const INPUT = 'w-full rounded border border-gray-300 px-2 py-1 text-sm'
+const INPUT =
+  'w-full rounded border border-gray-300 px-2 text-sm h-7 focus:outline-none focus:ring-1 focus:ring-gray-400'
 
 const columns: Column<WasteLineItem>[] = [
   {
     header: 'Materiale',
+    width: '35%',
     render: (item) => (
       <span className="text-gray-800">
         {item.name ?? '—'}
@@ -44,6 +46,7 @@ const columns: Column<WasteLineItem>[] = [
   },
   {
     header: 'Tonn',
+    width: '15%',
     align: 'right',
     render: (item) => (
       <span className="text-gray-800">
@@ -57,12 +60,13 @@ const columns: Column<WasteLineItem>[] = [
         step="any"
         value={value}
         onChange={(e) => onChange(e.target.value)}
-        className={`${INPUT} w-24 text-right`}
+        className={`${INPUT} text-right`}
       />
     ),
   },
   {
     header: 'CO₂ (kg)',
+    width: '15%',
     align: 'right',
     render: (item) => (
       <span className={item.co2_kg == null ? 'text-gray-400' : 'text-gray-800'}>
@@ -76,12 +80,13 @@ const columns: Column<WasteLineItem>[] = [
         step="any"
         value={value}
         onChange={(e) => onChange(e.target.value)}
-        className={`${INPUT} w-24 text-right`}
+        className={`${INPUT} text-right`}
       />
     ),
   },
   {
     header: 'Kilde',
+    width: '27%',
     render: (item) => (
       <span className="text-gray-600">
         {item.co2_source

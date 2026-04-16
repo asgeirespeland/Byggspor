@@ -60,7 +60,7 @@ export default function FileUploadShell<TData>({
   }
 
   return (
-    <>
+    <div className="space-y-4">
       <div>
         <h3 className="text-base font-semibold text-gray-900">{title}</h3>
         <p className="mt-0.5 text-sm text-gray-500">{description}</p>
@@ -107,6 +107,6 @@ export default function FileUploadShell<TData>({
           </div>
         </>
       )}
-    </>
+    </div>
   )
 }

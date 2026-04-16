@@ -12,11 +12,13 @@ interface Props {
   onCancel: () => void
 }
 
-const INPUT = 'w-full rounded border border-gray-300 px-2 py-1 text-sm'
+const INPUT =
+  'w-full rounded border border-gray-300 px-2 text-sm h-7 focus:outline-none focus:ring-1 focus:ring-gray-400'
 
 const columns: Column<Trip>[] = [
   {
     header: 'Sjåfør',
+    width: '15%',
     render: (t) => (
       <span className="text-gray-800">{t.driver_name ?? '—'}</span>
     ),
@@ -32,6 +34,7 @@ const columns: Column<Trip>[] = [
   },
   {
     header: 'Rute',
+    width: '37%',
     render: (t) => (
       <span className="text-gray-600">
         {t.start_address && t.end_address
@@ -42,6 +45,7 @@ const columns: Column<Trip>[] = [
   },
   {
     header: 'Reg.nr',
+    width: '10%',
     render: (t) => (
       <span className="font-mono text-xs text-gray-600">
         {t.registration_number}
@@ -50,6 +54,7 @@ const columns: Column<Trip>[] = [
   },
   {
     header: 'Km',
+    width: '8%',
     align: 'right',
     render: (t) => (
       <span className="text-gray-800">
@@ -63,12 +68,13 @@ const columns: Column<Trip>[] = [
         step="any"
         value={value}
         onChange={(e) => onChange(e.target.value)}
-        className={`${INPUT} w-24 text-right`}
+        className={`${INPUT} text-right`}
       />
     ),
   },
   {
     header: 'CO₂ (kg)',
+    width: '10%',
     align: 'right',
     render: (t) => (
       <span className="text-gray-800">
@@ -78,6 +84,7 @@ const columns: Column<Trip>[] = [
   },
   {
     header: 'Status',
+    width: '12%',
     render: (t) => (
       <span
         className={`inline-block rounded-full px-2.5 py-0.5 text-xs font-medium ${

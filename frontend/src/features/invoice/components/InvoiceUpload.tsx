@@ -32,7 +32,7 @@ export default function InvoiceUpload({ projectId }: Props) {
         title="Materialfaktura"
         description="Last opp EHF-fakturaer for å se materialer med NOBB-data og EPD-status. Du kan korrigere CO₂-verdier før du bekrefter."
         accept=".xml"
-        dropDescription="Dra og slipp filen din her"
+        dropDescription="Dra og slipp materialfakturaen din her"
         fileErrorMessage="Filen må være i XML-format."
         parse={parse}
         reset={reset}
