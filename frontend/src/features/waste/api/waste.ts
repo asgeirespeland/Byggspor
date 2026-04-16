@@ -42,7 +42,7 @@ export async function getProjectWaste(
 
 export async function updateWasteItem(
   itemId: number,
-  data: { waste_type?: string; quantity_tons?: number; total_co2_kg?: number },
+  data: { waste_type?: string; quantity?: number; total_co2_kg?: number },
   token?: string,
 ): Promise<WasteItem> {
   return apiRequest(`/waste/items/${itemId}`, {

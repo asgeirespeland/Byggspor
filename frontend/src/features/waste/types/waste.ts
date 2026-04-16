@@ -6,7 +6,8 @@ export interface WasteItem {
   source_id: number | null
   source_type: WasteSourceType | null
   waste_type: string
-  quantity_tons: number | null
+  quantity: number | null
+  unit: string | null
   co2_from_report_kg: number | null
   calculated_co2_kg: number | null
   total_co2_kg: number | null
@@ -18,7 +19,7 @@ export interface WasteItem {
 export interface CreateManualWastePayload {
   project_id: number
   waste_type: string
-  quantity_tons: number
+  quantity: number
   notes?: string
 }
 
@@ -30,7 +31,6 @@ export interface WasteLineItem {
   fraction_code: string | null
   quantity: number | null
   unit: string | null
-  quantity_tons: number | null
   flagged: boolean
   enriched: boolean
   co2_kg: number | null

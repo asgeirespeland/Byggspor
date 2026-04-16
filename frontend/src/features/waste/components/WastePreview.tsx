@@ -43,12 +43,10 @@ const columns: Column<WasteLineItem>[] = [
     ),
   },
   {
-    header: 'Tonn',
+    header: 'Antall',
     align: 'right',
     render: (item) => (
-      <span className="text-gray-800">
-        {item.quantity_tons?.toFixed(3) ?? '—'}
-      </span>
+      <span className="text-gray-800">{item.quantity ?? '—'}</span>
     ),
     editRender: (_row, _i, value, onChange) => (
       <input
@@ -57,9 +55,13 @@ const columns: Column<WasteLineItem>[] = [
         step="any"
         value={value}
         onChange={(e) => onChange(e.target.value)}
-        className={`${INPUT} w-24 text-right`}
+        className={`${INPUT} w-20 text-right`}
       />
     ),
+  },
+  {
+    header: 'Enhet',
+    render: (item) => <span className="text-gray-600">{item.unit ?? '—'}</span>,
   },
   {
     header: 'CO₂ (kg)',
@@ -126,16 +128,16 @@ export default function WastePreview({
       rowClassName={(item) => (item.flagged ? 'bg-amber-50' : '')}
       getEditValues={(item) => ({
         0: item.name ?? '',
-        1: item.quantity_tons != null ? String(item.quantity_tons) : '',
-        2: item.co2_kg != null ? String(item.co2_kg) : '',
+        1: item.quantity != null ? String(item.quantity) : '',
+        3: item.co2_kg != null ? String(item.co2_kg) : '',
       })}
       onSaveEdit={(_row, i, values) => {
         const items = [...data.line_items]
         items[i] = {
           ...items[i],
           name: values[0] || null,
-          quantity_tons: values[1] ? parseFloat(values[1]) : null,
-          co2_kg: values[2] ? parseFloat(values[2]) : null,
+          quantity: values[1] ? parseFloat(values[1]) : null,
+          co2_kg: values[3] ? parseFloat(values[3]) : null,
         }
         setData({ ...data, line_items: items })
       }}

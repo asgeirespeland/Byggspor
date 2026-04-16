@@ -36,15 +36,11 @@ const columns: GroupColumn<WasteItem>[] = [
     ),
   },
   {
-    header: 'Tonn',
+    header: 'Antall',
     align: 'right',
     render: (item) => (
       <span className="text-gray-800">
-        {item.quantity_tons != null
-          ? item.quantity_tons.toLocaleString('nb-NO', {
-              maximumFractionDigits: 3,
-            })
-          : '—'}
+        {item.quantity ?? '—'} {item.unit ?? ''}
       </span>
     ),
     editRender: (value, onChange) => (
@@ -105,8 +101,8 @@ function WasteCard({
     0,
   )
 
-  const totalTons = group.items.reduce(
-    (sum, item) => sum + (item.quantity_tons ?? 0),
+  const totalQty = group.items.reduce(
+    (sum, item) => sum + (item.quantity ?? 0),
     0,
   )
 
@@ -116,10 +112,10 @@ function WasteCard({
       summary={
         <>
           <span>{group.items.length} poster</span>
-          {totalTons > 0 && (
+          {totalQty > 0 && (
             <span>
-              {totalTons.toLocaleString('nb-NO', { maximumFractionDigits: 2 })}{' '}
-              tonn
+              {totalQty.toLocaleString('nb-NO', { maximumFractionDigits: 2 })}{' '}
+              enheter
             </span>
           )}
           {totalCo2 > 0 && (
@@ -148,7 +144,7 @@ function WasteCard({
         <thead className={GROUP_THEAD}>
           <tr>
             <th className={GROUP_TH}>Type</th>
-            <th className={`${GROUP_TH} text-right`}>Tonn</th>
+            <th className={`${GROUP_TH} text-right`}>Antall</th>
             <th className={`${GROUP_TH} text-right`}>CO₂ (kg)</th>
             <th className={GROUP_TH} />
           </tr>
@@ -161,7 +157,7 @@ function WasteCard({
               columns={columns}
               getEditValues={(it) => ({
                 0: it.waste_type ?? '',
-                1: it.quantity_tons != null ? String(it.quantity_tons) : '',
+                1: it.quantity != null ? String(it.quantity) : '',
                 2: it.total_co2_kg != null ? String(it.total_co2_kg) : '',
               })}
               onSave={(values) => {
@@ -169,9 +165,7 @@ function WasteCard({
                   itemId: item.id,
                   data: {
                     waste_type: values[0] || undefined,
-                    quantity_tons: values[1]
-                      ? parseFloat(values[1])
-                      : undefined,
+                    quantity: values[1] ? parseFloat(values[1]) : undefined,
                     total_co2_kg: values[2] ? parseFloat(values[2]) : undefined,
                   },
                 })
