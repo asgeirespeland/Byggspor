@@ -1,5 +1,7 @@
+import { useMemo } from 'react'
 import { Zap, Loader2 } from 'lucide-react'
 import InlineUndoBar from '@/shared/components/InlineUndoBar'
+import DataTable, { type Column } from '@/shared/components/DataTable'
 import { useDeferredLoading } from '@/shared/hooks/useDeferredLoading'
 import {
   useEnergies,
@@ -8,12 +10,83 @@ import {
   useUpdateEnergy,
   useDeleteEnergy,
 } from '../hooks/useEnergies'
+import type { EnergyEntry, PriceZone } from '../types/energy'
 import EnergyForm from './EnergyForm'
 import EnergySummary from './EnergySummary'
-import EnergyRow from './EnergyRow'
+
+const INPUT =
+  'w-full rounded border border-gray-300 px-2 text-sm h-7 focus:outline-none focus:ring-1 focus:ring-gray-400 [appearance:textfield] [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none'
+
+function getColumns(
+  zones: { value: string; label: string }[] | undefined,
+): Column<EnergyEntry>[] {
+  return [
+    {
+      header: 'kWh',
+      render: (e) => (
+        <span className="font-medium text-gray-900">
+          {e.kwh_used?.toLocaleString('nb-NO', { maximumFractionDigits: 1 })}
+        </span>
+      ),
+      editable: {
+        type: 'number',
+        getValue: (e) => (e.kwh_used != null ? String(e.kwh_used) : ''),
+      },
+    },
+    {
+      header: 'Prisområde',
+      render: (e) => (
+        <span className="text-gray-600">{e.price_zone ?? '—'}</span>
+      ),
+      editable: {
+        getValue: (e) => e.price_zone ?? '',
+        render: (value, onChange) => (
+          <select
+            value={value}
+            onChange={(e) => onChange(e.target.value)}
+            className={INPUT}
+          >
+            <option value="">—</option>
+            {zones?.map((z) => (
+              <option key={z.value} value={z.value}>
+                {z.value}
+              </option>
+            ))}
+          </select>
+        ),
+      },
+    },
+    {
+      header: 'CO₂ (kg)',
+      render: (e) => (
+        <span className="text-gray-600">
+          {e.total_co2_kg?.toLocaleString('nb-NO', {
+            maximumFractionDigits: 2,
+          })}
+        </span>
+      ),
+    },
+    {
+      header: 'Dato',
+      render: (e) => (
+        <span className="text-gray-500">
+          {e.recorded_date
+            ? new Date(e.recorded_date + 'T00:00:00').toLocaleDateString(
+                'nb-NO',
+              )
+            : '—'}
+        </span>
+      ),
+      editable: {
+        type: 'date',
+        getValue: (e) => e.recorded_date ?? '',
+      },
+    },
+  ]
+}
 
 const MAX_VISIBLE_ROWS = 10
-const ROW_HEIGHT_PX = 41
+const ROW_HEIGHT_PX = 44
 
 interface EnergyInputProps {
   projectId: number
@@ -27,6 +100,8 @@ export default function EnergyInput({ projectId }: EnergyInputProps) {
   const updateMutation = useUpdateEnergy(projectId)
   const { deleteEnergy, pendingEnergyId, undoEnergyDelete } =
     useDeleteEnergy(projectId)
+
+  const columns = useMemo(() => getColumns(zones), [zones])
 
   const totalKwh = entries?.reduce((sum, e) => sum + (e.kwh_used ?? 0), 0) ?? 0
   const totalCo2 =
@@ -79,31 +154,26 @@ export default function EnergyInput({ projectId }: EnergyInputProps) {
                 : undefined
             }
           >
-            <table className="w-full text-sm table-fixed">
-              <thead className="bg-gray-50 text-left text-xs font-medium text-gray-500 sticky top-0 z-10">
-                <tr>
-                  <th className="px-4 py-2.5 w-[20%]">kWh</th>
-                  <th className="px-4 py-2.5 w-[20%]">Prisområde</th>
-                  <th className="px-4 py-2.5 w-[20%]">CO₂ (kg)</th>
-                  <th className="px-4 py-2.5 w-[25%]">Dato</th>
-                  <th className="px-4 py-2.5 w-[15%]" />
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-gray-100">
-                {entries.map((entry) => (
-                  <EnergyRow
-                    key={entry.id}
-                    entry={entry}
-                    zones={zones}
-                    onUpdate={(data) =>
-                      updateMutation.mutate({ energyId: entry.id, data })
-                    }
-                    onDelete={() => void deleteEnergy(entry.id)}
-                    isUpdating={updateMutation.isPending}
-                  />
-                ))}
-              </tbody>
-            </table>
+            <DataTable
+              columns={columns}
+              rows={entries}
+              rowKey={(e) => e.id}
+              onSaveEdit={(row, _i, values) => {
+                const kwh = parseFloat(values[0])
+                if (isNaN(kwh) || kwh < 0) return
+                updateMutation.mutate({
+                  energyId: row.id,
+                  data: {
+                    kwh_used: kwh,
+                    price_zone: (values[1] as PriceZone) || null,
+                    recorded_date: values[3] || null,
+                  },
+                })
+              }}
+              onDeleteRow={(row) => void deleteEnergy(row.id)}
+              isSaving={() => updateMutation.isPending}
+              stickyHeader
+            />
           </div>
           {needsScroll && (
             <div className="border-t border-gray-100 bg-gray-50 px-4 py-1.5 text-center text-xs text-gray-400">

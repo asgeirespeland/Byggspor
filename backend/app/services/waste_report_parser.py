@@ -64,26 +64,11 @@ def _parse_quantity(line_el):
     return quantity, unit
 
 
-def _normalize_quantity_to_tons(quantity, unit):
-    """Convert quantity to tonnes for consistent storage."""
-    if quantity is None:
-        return None
-
-    unit_upper = (unit or "").upper()
-    if unit_upper == "TON":
-        return quantity
-    if unit_upper == "KG":
-        return round(quantity / 1000.0, 6)
-    # Unknown unit — return as-is, flag for review
-    return quantity
-
-
 def _parse_waste_line(line_el):
     """Extract data from a single WasteLine element."""
     line_id = _text(line_el, "cbc:ID")
 
     quantity, unit = _parse_quantity(line_el)
-    quantity_tons = _normalize_quantity_to_tons(quantity, unit)
 
     item_el = line_el.find("cac:Item", NS)
     name = _text(item_el, "cbc:Name") if item_el is not None else None
@@ -123,7 +108,6 @@ def _parse_waste_line(line_el):
         "fraction_code": fraction_code,
         "quantity": quantity,
         "unit": unit,
-        "quantity_tons": quantity_tons,
         "flagged": flagged,
     }
 

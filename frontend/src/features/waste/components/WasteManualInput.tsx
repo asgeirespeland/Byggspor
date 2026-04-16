@@ -22,7 +22,7 @@ export default function WasteManualInput({ projectId }: Props) {
       {
         project_id: projectId,
         waste_type: wasteType,
-        quantity_tons: Number(quantityTons),
+        quantity: Number(quantityTons),
         notes,
       },
       {

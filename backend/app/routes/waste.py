@@ -11,6 +11,7 @@ from app.middleware.roles import require_project_role
 from app.models.project_member import ProjectRole
 from app.models.project_waste_item import ProjectWasteItem, WasteSourceType
 from app.models.waste_invoice import WasteInvoice
+from app.services.material_service import upsert_catalog_entry
 from app.services.waste_enrichment import enrich_waste_report
 from app.services.waste_parser import build_waste_item_data
 from app.services.waste_report_parser import parse_waste_report
@@ -35,9 +36,8 @@ def _serialize_waste_item(item: ProjectWasteItem) -> dict:
         "source_id": item.source_id,
         "source_type": item.source_type.value if item.source_type else None,
         "waste_type": item.waste_type,
-        "quantity_tons": (
-            float(item.quantity_tons) if item.quantity_tons is not None else None
-        ),
+        "quantity": (float(item.quantity) if item.quantity is not None else None),
+        "unit": item.unit,
         "co2_from_report_kg": (
             float(item.co2_from_report_kg)
             if item.co2_from_report_kg is not None
@@ -74,13 +74,13 @@ def create_manual_waste():
 
     project_id = require_int(payload, "project_id")
     waste_type = payload.get("waste_type")
-    quantity_tons = payload.get("quantity_tons")
+    quantity = payload.get("quantity")
     notes = payload.get("notes")
 
     settings = resolve_settings(g.db, project_id)
     item_data = build_waste_item_data(
         waste_type=waste_type,
-        quantity_tons=quantity_tons,
+        quantity=quantity,
         notes=notes,
         emission_factors=settings["waste_manual_emission_factors"],
     )
@@ -91,7 +91,8 @@ def create_manual_waste():
         source_id=None,
         source_type=WasteSourceType.MANUAL,
         waste_type=item_data["waste_type"],
-        quantity_tons=item_data["quantity_tons"],
+        quantity=item_data["quantity"],
+        unit=item_data.get("unit", "TON"),
         co2_from_report_kg=item_data["co2_from_report_kg"],
         calculated_co2_kg=item_data["calculated_co2_kg"],
         total_co2_kg=item_data["total_co2_kg"],
@@ -139,6 +140,12 @@ def parse_waste():
     session = g.db
     enriched = enrich_waste_report(parsed, session=session)
 
+    # Cache NOBB lookups to material catalog (same as invoice parse)
+    with db_commit(session, "Kunne ikke cache materialdata.", "SAVE_FAILED"):
+        for item in enriched.get("line_items", []):
+            if item.get("nobb_data") and not item["nobb_data"].get("_from_catalog"):
+                upsert_catalog_entry(session, item)
+
     return jsonify(enriched)
 
 
@@ -181,7 +188,8 @@ def confirm_waste():
                 source_id=source.id,
                 source_type=WasteSourceType.WASTE_REPORT,
                 waste_type=item_data.get("name") or item_data.get("waste_type"),
-                quantity_tons=item_data.get("quantity_tons"),
+                quantity=item_data.get("quantity"),
+                unit=item_data.get("unit"),
                 co2_from_report_kg=None,
                 calculated_co2_kg=co2_kg,
                 total_co2_kg=co2_kg,
@@ -260,12 +268,15 @@ def update_waste_item(item_id: int):
     if "waste_type" in body:
         item.waste_type = body["waste_type"] or None
 
-    if "quantity_tons" in body:
-        item.quantity_tons = parse_float(
+    if "quantity" in body:
+        item.quantity = parse_float(
             body,
-            "quantity_tons",
-            suggestion="Oppgi mengde i tonn som et tall.",
+            "quantity",
+            suggestion="Oppgi mengde som et tall.",
         )
+
+    if "unit" in body:
+        item.unit = body["unit"] or None
 
     if "total_co2_kg" in body:
         item.total_co2_kg = parse_float(

@@ -1,13 +1,16 @@
 import { useState } from 'react'
 import { useQueryClient } from '@tanstack/react-query'
 import { toast } from 'sonner'
+import InlineUndoBar from '@/shared/components/InlineUndoBar'
 import FileUploadShell from '@/shared/components/FileUploadShell'
+import DataTabShell from '@/shared/components/DataTabShell'
 import { confirmWaste } from '../api/waste'
 import { useWasteParse } from '../hooks/useWasteParse'
+import { useProjectWaste, useDeleteWasteReport } from '../hooks/useWaste'
 import type { WasteParseResponse } from '../types/waste'
 import WastePreview from './WastePreview'
-import ManualEntry from '@/shared/components/ManualEntry'
 import WasteManualInput from './WasteManualInput'
+import WasteGroupCard from './WasteGroupCard'
 
 type Props = {
   projectId: number
@@ -16,6 +19,9 @@ type Props = {
 export default function WasteUpload({ projectId }: Props) {
   const queryClient = useQueryClient()
   const { parse, reset, data, setData, loading, error } = useWasteParse()
+  const wasteQuery = useProjectWaste(projectId)
+  const { pendingWasteReportId, undoWasteReportDelete } =
+    useDeleteWasteReport(projectId)
   const [confirming, setConfirming] = useState(false)
 
   const handleConfirm = async (
@@ -52,38 +58,55 @@ export default function WasteUpload({ projectId }: Props) {
   }
 
   return (
-    <div className="space-y-4">
-      <FileUploadShell<WasteParseResponse>
-        title="Avfallsrapport"
-        description="Last opp en avfallsrapport (XML) for å beregne CO₂-utslipp fra avfall, eller registrer avfall manuelt."
-        accept=".xml"
-        dropDescription="Dra og slipp avfallsrapporten her"
-        fileErrorMessage="Filen må være i XML-format."
-        analyzeLabel="Analyser"
-        analyzingLabel="Analyserer…"
-        parse={parse}
-        reset={reset}
-        data={data}
-        loading={loading}
-        error={error}
-        errorFallback="Kunne ikke analysere avfallsrapport"
-      >
-        {({ data: wasteData, clear, requireToken }) => (
-          <WastePreview
-            data={wasteData}
-            setData={setData}
-            onConfirm={() => handleConfirm(wasteData, clear, requireToken)}
-            confirming={confirming}
-            onCancel={clear}
+    <DataTabShell
+      upload={
+        <FileUploadShell<WasteParseResponse>
+          title="Avfallsrapport"
+          description="Last opp en avfallsrapport (XML) for å beregne CO₂-utslipp fra avfall, eller registrer avfall manuelt."
+          accept=".xml"
+          dropDescription="Dra og slipp avfallsrapporten her"
+          fileErrorMessage="Filen må være i XML-format."
+          analyzeLabel="Analyser"
+          analyzingLabel="Analyserer…"
+          parse={parse}
+          reset={reset}
+          data={data}
+          loading={loading}
+          error={error}
+          errorFallback="Kunne ikke analysere avfallsrapport"
+        >
+          {({ data: wasteData, clear, requireToken }) => (
+            <WastePreview
+              data={wasteData}
+              setData={setData}
+              onConfirm={() => handleConfirm(wasteData, clear, requireToken)}
+              confirming={confirming}
+              onCancel={clear}
+            />
+          )}
+        </FileUploadShell>
+      }
+      manualEntryForm={<WasteManualInput projectId={projectId} />}
+      isLoading={wasteQuery.isLoading}
+      loadingText="Laster avfallsdata…"
+      sectionHeading="Registrert avfall"
+      itemCount={wasteQuery.data?.length ?? 0}
+      undoBar={
+        pendingWasteReportId != null ? (
+          <InlineUndoBar
+            message="Avfallsrapport slettet"
+            onUndo={undoWasteReportDelete}
           />
-        )}
-      </FileUploadShell>
-      <ManualEntry
-        showLabel="Registrer avfall manuelt"
-        hideLabel="Skjul manuell registrering"
-      >
-        <WasteManualInput projectId={projectId} />
-      </ManualEntry>
-    </div>
+        ) : undefined
+      }
+    >
+      {wasteQuery.data?.map((group) => (
+        <WasteGroupCard
+          key={group.source_id ?? 'manual'}
+          group={group}
+          projectId={projectId}
+        />
+      ))}
+    </DataTabShell>
   )
 }

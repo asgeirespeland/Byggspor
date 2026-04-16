@@ -1,99 +1,39 @@
-import { useDeferredLoading } from '@/shared/hooks/useDeferredLoading'
+import { useMemo } from 'react'
 import CollapsibleGroupCard from '@/shared/components/CollapsibleGroupCard'
-import {
-  GROUP_TH,
-  GROUP_THEAD,
-  GROUP_TBODY,
-} from '@/shared/components/ParsePreviewShell'
-import EditableRow, { type GroupColumn } from '@/shared/components/EditableRow'
+import DataTable from '@/shared/components/DataTable'
 import InlineUndoBar from '@/shared/components/InlineUndoBar'
 import {
-  useProjectWaste,
   useUpdateWasteItem,
   useDeleteWasteItem,
   useDeleteWasteReport,
 } from '../hooks/useWaste'
-import type { WasteGroup, WasteItem } from '../types/waste'
+import type { WasteGroup } from '../types/waste'
+import { wasteColumns, type WasteRow } from '../wasteColumns'
 
-type Props = {
+interface Props {
+  group: WasteGroup
   projectId: number
 }
 
-const INPUT = 'w-full rounded border border-gray-300 px-2 py-1 text-sm'
-
-const columns: GroupColumn<WasteItem>[] = [
-  {
-    header: 'Type',
-    render: (item) => <span className="text-gray-800">{item.waste_type}</span>,
-    editRender: (value, onChange) => (
-      <input
-        type="text"
-        value={value}
-        onChange={(e) => onChange(e.target.value)}
-        className={INPUT}
-        autoFocus
-      />
-    ),
-  },
-  {
-    header: 'Tonn',
-    align: 'right',
-    render: (item) => (
-      <span className="text-gray-800">
-        {item.quantity_tons != null
-          ? item.quantity_tons.toLocaleString('nb-NO', {
-              maximumFractionDigits: 3,
-            })
-          : '—'}
-      </span>
-    ),
-    editRender: (value, onChange) => (
-      <input
-        type="number"
-        min="0"
-        step="any"
-        value={value}
-        onChange={(e) => onChange(e.target.value)}
-        className={`${INPUT} w-24 text-right`}
-      />
-    ),
-  },
-  {
-    header: 'CO₂ (kg)',
-    align: 'right',
-    render: (item) => (
-      <span className="text-gray-800">
-        {item.total_co2_kg != null
-          ? item.total_co2_kg.toLocaleString('nb-NO', {
-              maximumFractionDigits: 2,
-            })
-          : '—'}
-      </span>
-    ),
-    editRender: (value, onChange) => (
-      <input
-        type="number"
-        min="0"
-        step="any"
-        value={value}
-        onChange={(e) => onChange(e.target.value)}
-        className={`${INPUT} w-24 text-right`}
-      />
-    ),
-  },
-]
-
-function WasteCard({
-  group,
-  projectId,
-}: {
-  group: WasteGroup
-  projectId: number
-}) {
+export default function WasteGroupCard({ group, projectId }: Props) {
   const updateMutation = useUpdateWasteItem(projectId)
   const { deleteWasteItem, pendingWasteItemId, undoWasteItemDelete } =
     useDeleteWasteItem(projectId)
   const { deleteWasteReport } = useDeleteWasteReport(projectId)
+
+  const rows: WasteRow[] = useMemo(
+    () =>
+      group.items.map((item) => ({
+        name: item.waste_type,
+        fraction_code: null,
+        quantity: item.quantity,
+        unit: item.unit,
+        co2_kg: item.total_co2_kg,
+        co2_source: null,
+        flagged: false,
+      })),
+    [group.items],
+  )
 
   const label =
     group.source_type === 'WASTE_REPORT'
@@ -105,8 +45,8 @@ function WasteCard({
     0,
   )
 
-  const totalTons = group.items.reduce(
-    (sum, item) => sum + (item.quantity_tons ?? 0),
+  const totalQty = group.items.reduce(
+    (sum, item) => sum + (item.quantity ?? 0),
     0,
   )
 
@@ -116,10 +56,10 @@ function WasteCard({
       summary={
         <>
           <span>{group.items.length} poster</span>
-          {totalTons > 0 && (
+          {totalQty > 0 && (
             <span>
-              {totalTons.toLocaleString('nb-NO', { maximumFractionDigits: 2 })}{' '}
-              tonn
+              {totalQty.toLocaleString('nb-NO', { maximumFractionDigits: 2 })}{' '}
+              enheter
             </span>
           )}
           {totalCo2 > 0 && (
@@ -144,47 +84,27 @@ function WasteCard({
       }}
       isDeleting={false}
     >
-      <table className="w-full text-sm">
-        <thead className={GROUP_THEAD}>
-          <tr>
-            <th className={GROUP_TH}>Type</th>
-            <th className={`${GROUP_TH} text-right`}>Tonn</th>
-            <th className={`${GROUP_TH} text-right`}>CO₂ (kg)</th>
-            <th className={GROUP_TH} />
-          </tr>
-        </thead>
-        <tbody className={GROUP_TBODY}>
-          {group.items.map((item) => (
-            <EditableRow
-              key={item.id}
-              row={item}
-              columns={columns}
-              getEditValues={(it) => ({
-                0: it.waste_type ?? '',
-                1: it.quantity_tons != null ? String(it.quantity_tons) : '',
-                2: it.total_co2_kg != null ? String(it.total_co2_kg) : '',
-              })}
-              onSave={(values) => {
-                updateMutation.mutate({
-                  itemId: item.id,
-                  data: {
-                    waste_type: values[0] || undefined,
-                    quantity_tons: values[1]
-                      ? parseFloat(values[1])
-                      : undefined,
-                    total_co2_kg: values[2] ? parseFloat(values[2]) : undefined,
-                  },
-                })
-              }}
-              onDelete={() => void deleteWasteItem(item.id)}
-              isSaving={
-                updateMutation.isPending &&
-                updateMutation.variables?.itemId === item.id
-              }
-            />
-          ))}
-        </tbody>
-      </table>
+      <DataTable
+        columns={wasteColumns}
+        rows={rows}
+        rowKey={(_, i) => group.items[i].id}
+        onSaveEdit={(_row, i, values) => {
+          const item = group.items[i]
+          updateMutation.mutate({
+            itemId: item.id,
+            data: {
+              waste_type: values[0] || undefined,
+              quantity: values[1] ? parseFloat(values[1]) : undefined,
+              total_co2_kg: values[3] ? parseFloat(values[3]) : undefined,
+            },
+          })
+        }}
+        onDeleteRow={(_row, i) => void deleteWasteItem(group.items[i].id)}
+        isSaving={(_row, i) =>
+          updateMutation.isPending &&
+          updateMutation.variables?.itemId === group.items[i].id
+        }
+      />
       {pendingWasteItemId != null && (
         <InlineUndoBar
           message="Avfallspost slettet"
@@ -192,48 +112,5 @@ function WasteCard({
         />
       )}
     </CollapsibleGroupCard>
-  )
-}
-
-export default function WasteList({ projectId }: Props) {
-  const wasteQuery = useProjectWaste(projectId)
-  const showLoading = useDeferredLoading(wasteQuery.isLoading)
-  const { pendingWasteReportId, undoWasteReportDelete } =
-    useDeleteWasteReport(projectId)
-
-  return (
-    <div className="space-y-3">
-      {showLoading && (
-        <p className="py-4 text-center text-sm text-gray-400">
-          Laster avfallsdata…
-        </p>
-      )}
-
-      {wasteQuery.isError && (
-        <p className="text-sm text-red-600">Kunne ikke hente avfallsdata.</p>
-      )}
-
-      {wasteQuery.data && wasteQuery.data.length > 0 && (
-        <>
-          <p className="text-xs font-semibold uppercase tracking-wide text-gray-400">
-            Registrert avfall ({wasteQuery.data.length})
-          </p>
-          {wasteQuery.data.map((group) => (
-            <WasteCard
-              key={group.source_id ?? 'manual'}
-              group={group}
-              projectId={projectId}
-            />
-          ))}
-        </>
-      )}
-
-      {pendingWasteReportId != null && (
-        <InlineUndoBar
-          message="Avfallsrapport slettet"
-          onUndo={undoWasteReportDelete}
-        />
-      )}
-    </div>
   )
 }

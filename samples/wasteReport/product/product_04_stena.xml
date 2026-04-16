@@ -1,0 +1,1513 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<WasteReport xmlns="urn:byggspor:waste:report:1.0"
+             xmlns:cbc="urn:byggspor:waste:CommonBasic:1.0"
+             xmlns:cac="urn:byggspor:waste:CommonAggregate:1.0">
+  <cbc:ID>WR-P-2025-004</cbc:ID>
+  <cbc:IssueDate>2025-03-22</cbc:IssueDate>
+
+  <cac:WasteReceiverParty>
+    <cac:Party>
+      <cac:PartyName><cbc:Name>Stena Recycling AS</cbc:Name></cac:PartyName>
+    </cac:Party>
+  </cac:WasteReceiverParty>
+
+  <cac:WasteLine>
+    <cbc:ID>1</cbc:ID>
+    <cbc:Quantity unitCode="MTK">2.4</cbc:Quantity>
+    <cac:Item>
+      <cbc:Name>KRYSSF FURU II/IV 12X2440X1220</cbc:Name>
+      <cac:StandardItemIdentification>
+        <cbc:ID schemeID="0160">7043610001701</cbc:ID>
+      </cac:StandardItemIdentification>
+      <cac:AdditionalItemProperty>
+        <cbc:Name>NOBB</cbc:Name>
+        <cbc:Value>22147409</cbc:Value>
+      </cac:AdditionalItemProperty>
+    </cac:Item>
+  </cac:WasteLine>
+
+  <cac:WasteLine>
+    <cbc:ID>2</cbc:ID>
+    <cbc:Quantity unitCode="EA">15</cbc:Quantity>
+    <cac:Item>
+      <cbc:Name>BORDTAKBESLAG 0,9 MM HVIT</cbc:Name>
+      <cac:StandardItemIdentification>
+        <cbc:ID schemeID="0160">7071528006280</cbc:ID>
+      </cac:StandardItemIdentification>
+      <cac:AdditionalItemProperty>
+        <cbc:Name>NOBB</cbc:Name>
+        <cbc:Value>22433106</cbc:Value>
+      </cac:AdditionalItemProperty>
+    </cac:Item>
+  </cac:WasteLine>
+
+  <cac:WasteLine>
+    <cbc:ID>3</cbc:ID>
+    <cbc:Quantity unitCode="EA">9</cbc:Quantity>
+    <cac:Item>
+      <cbc:Name>RENNEKROK KONSOLLJERN 10 GALV</cbc:Name>
+      <cac:StandardItemIdentification>
+        <cbc:ID schemeID="0160">5702771660401</cbc:ID>
+      </cac:StandardItemIdentification>
+      <cac:AdditionalItemProperty>
+        <cbc:Name>NOBB</cbc:Name>
+        <cbc:Value>21012869</cbc:Value>
+      </cac:AdditionalItemProperty>
+    </cac:Item>
+  </cac:WasteLine>
+
+  <cac:WasteLine>
+    <cbc:ID>4</cbc:ID>
+    <cbc:Quantity unitCode="EA">1</cbc:Quantity>
+    <cac:Item>
+      <cbc:Name>DØRSETT STØLEN I30 9X21H UBH</cbc:Name>
+      <cac:StandardItemIdentification>
+        <cbc:ID schemeID="0160">7393993098554</cbc:ID>
+      </cac:StandardItemIdentification>
+      <cac:AdditionalItemProperty>
+        <cbc:Name>NOBB</cbc:Name>
+        <cbc:Value>22306377</cbc:Value>
+      </cac:AdditionalItemProperty>
+    </cac:Item>
+  </cac:WasteLine>
+
+  <cac:WasteLine>
+    <cbc:ID>5</cbc:ID>
+    <cbc:Quantity unitCode="LMT">42.7</cbc:Quantity>
+    <cac:Item>
+      <cbc:Name>FURU 09X045 FEIELIST UBEHANDLET</cbc:Name>
+      <cac:StandardItemIdentification>
+        <cbc:ID schemeID="0160">7059420021082</cbc:ID>
+      </cac:StandardItemIdentification>
+      <cac:AdditionalItemProperty>
+        <cbc:Name>NOBB</cbc:Name>
+        <cbc:Value>21700422</cbc:Value>
+      </cac:AdditionalItemProperty>
+    </cac:Item>
+  </cac:WasteLine>
+
+  <cac:WasteLine>
+    <cbc:ID>6</cbc:ID>
+    <cbc:Quantity unitCode="EA">1</cbc:Quantity>
+    <cac:Item>
+      <cbc:Name>VINKELBESLAG 70 UTEN RIBBE EAN</cbc:Name>
+      <cac:StandardItemIdentification>
+        <cbc:ID schemeID="0160">5701953356507</cbc:ID>
+      </cac:StandardItemIdentification>
+      <cac:AdditionalItemProperty>
+        <cbc:Name>NOBB</cbc:Name>
+        <cbc:Value>21744552</cbc:Value>
+      </cac:AdditionalItemProperty>
+    </cac:Item>
+  </cac:WasteLine>
+
+  <cac:WasteLine>
+    <cbc:ID>7</cbc:ID>
+    <cbc:Quantity unitCode="EA">25</cbc:Quantity>
+    <cac:Item>
+      <cbc:Name>POLERSVAMP 130MM GEX/PEX</cbc:Name>
+      <cac:StandardItemIdentification>
+        <cbc:ID schemeID="0160">3165140014854</cbc:ID>
+      </cac:StandardItemIdentification>
+      <cac:AdditionalItemProperty>
+        <cbc:Name>NOBB</cbc:Name>
+        <cbc:Value>21463625</cbc:Value>
+      </cac:AdditionalItemProperty>
+    </cac:Item>
+  </cac:WasteLine>
+
+  <cac:WasteLine>
+    <cbc:ID>8</cbc:ID>
+    <cbc:Quantity unitCode="LMT">46.9</cbc:Quantity>
+    <cac:Item>
+      <cbc:Name>STÅLPR ER70 STENDER 35X70X2985</cbc:Name>
+      <cac:StandardItemIdentification>
+        <cbc:ID schemeID="0160">7318931928540</cbc:ID>
+      </cac:StandardItemIdentification>
+      <cac:AdditionalItemProperty>
+        <cbc:Name>NOBB</cbc:Name>
+        <cbc:Value>21413984</cbc:Value>
+      </cac:AdditionalItemProperty>
+    </cac:Item>
+  </cac:WasteLine>
+
+  <cac:WasteLine>
+    <cbc:ID>9</cbc:ID>
+    <cbc:Quantity unitCode="EA">25</cbc:Quantity>
+    <cac:Item>
+      <cbc:Name>DØRSETT STØLEN I30 10X20V UBH</cbc:Name>
+      <cac:StandardItemIdentification>
+        <cbc:ID schemeID="0160">7393993098509</cbc:ID>
+      </cac:StandardItemIdentification>
+      <cac:AdditionalItemProperty>
+        <cbc:Name>NOBB</cbc:Name>
+        <cbc:Value>22306385</cbc:Value>
+      </cac:AdditionalItemProperty>
+    </cac:Item>
+  </cac:WasteLine>
+
+  <cac:WasteLine>
+    <cbc:ID>10</cbc:ID>
+    <cbc:Quantity unitCode="MTK">7.2</cbc:Quantity>
+    <cac:Item>
+      <cbc:Name>HUNTON STUBBELOFT 12X540X1200</cbc:Name>
+      <cac:StandardItemIdentification>
+        <cbc:ID schemeID="0160">7022611057009</cbc:ID>
+      </cac:StandardItemIdentification>
+      <cac:AdditionalItemProperty>
+        <cbc:Name>NOBB</cbc:Name>
+        <cbc:Value>10541225</cbc:Value>
+      </cac:AdditionalItemProperty>
+    </cac:Item>
+  </cac:WasteLine>
+
+  <cac:WasteLine>
+    <cbc:ID>11</cbc:ID>
+    <cbc:Quantity unitCode="XRO">18</cbc:Quantity>
+    <cac:Item>
+      <cbc:Name>SLIPERULL 9047 115MM X 2,5M P240</cbc:Name>
+      <cac:StandardItemIdentification>
+        <cbc:ID schemeID="0160">7055160008116</cbc:ID>
+      </cac:StandardItemIdentification>
+      <cac:AdditionalItemProperty>
+        <cbc:Name>NOBB</cbc:Name>
+        <cbc:Value>21822184</cbc:Value>
+      </cac:AdditionalItemProperty>
+    </cac:Item>
+  </cac:WasteLine>
+
+  <cac:WasteLine>
+    <cbc:ID>12</cbc:ID>
+    <cbc:Quantity unitCode="LMT">14.3</cbc:Quantity>
+    <cac:Item>
+      <cbc:Name>FURU 21X120 KARM ANTIKK UBEH</cbc:Name>
+      <cac:StandardItemIdentification>
+        <cbc:ID schemeID="0160">7059420022539</cbc:ID>
+      </cac:StandardItemIdentification>
+      <cac:AdditionalItemProperty>
+        <cbc:Name>NOBB</cbc:Name>
+        <cbc:Value>21685995</cbc:Value>
+      </cac:AdditionalItemProperty>
+    </cac:Item>
+  </cac:WasteLine>
+
+  <cac:WasteLine>
+    <cbc:ID>13</cbc:ID>
+    <cbc:Quantity unitCode="EA">3</cbc:Quantity>
+    <cac:Item>
+      <cbc:Name>EKSPANSJONSTAPPSTYKKE 12/75 SORT</cbc:Name>
+      <cac:StandardItemIdentification>
+        <cbc:ID schemeID="0160">5702751225422</cbc:ID>
+      </cac:StandardItemIdentification>
+      <cac:AdditionalItemProperty>
+        <cbc:Name>NOBB</cbc:Name>
+        <cbc:Value>21016464</cbc:Value>
+      </cac:AdditionalItemProperty>
+    </cac:Item>
+  </cac:WasteLine>
+
+  <cac:WasteLine>
+    <cbc:ID>14</cbc:ID>
+    <cbc:Quantity unitCode="EA">5</cbc:Quantity>
+    <cac:Item>
+      <cbc:Name>INNDEKN EKW 55X98 0007E</cbc:Name>
+      <cac:StandardItemIdentification>
+        <cbc:ID schemeID="0160">5702321626604</cbc:ID>
+      </cac:StandardItemIdentification>
+      <cac:AdditionalItemProperty>
+        <cbc:Name>NOBB</cbc:Name>
+        <cbc:Value>22463814</cbc:Value>
+      </cac:AdditionalItemProperty>
+    </cac:Item>
+  </cac:WasteLine>
+
+  <cac:WasteLine>
+    <cbc:ID>15</cbc:ID>
+    <cbc:Quantity unitCode="LMT">20.1</cbc:Quantity>
+    <cac:Item>
+      <cbc:Name>FURU 21X044 TAKLIST M600 UBEH</cbc:Name>
+      <cac:StandardItemIdentification>
+        <cbc:ID schemeID="0160">7040434102508</cbc:ID>
+      </cac:StandardItemIdentification>
+      <cac:AdditionalItemProperty>
+        <cbc:Name>NOBB</cbc:Name>
+        <cbc:Value>21348701</cbc:Value>
+      </cac:AdditionalItemProperty>
+    </cac:Item>
+  </cac:WasteLine>
+
+  <cac:WasteLine>
+    <cbc:ID>16</cbc:ID>
+    <cbc:Quantity unitCode="EA">17</cbc:Quantity>
+    <cac:Item>
+      <cbc:Name>TRAKT T120 M/BEND 60 GR RØD</cbc:Name>
+      <cac:StandardItemIdentification>
+        <cbc:ID schemeID="0160">7071528001315</cbc:ID>
+      </cac:StandardItemIdentification>
+      <cac:AdditionalItemProperty>
+        <cbc:Name>NOBB</cbc:Name>
+        <cbc:Value>22430375</cbc:Value>
+      </cac:AdditionalItemProperty>
+    </cac:Item>
+  </cac:WasteLine>
+
+  <cac:WasteLine>
+    <cbc:ID>17</cbc:ID>
+    <cbc:Quantity unitCode="LMT">42.5</cbc:Quantity>
+    <cac:Item>
+      <cbc:Name>GRAN 22X120 FASPANEL INT</cbc:Name>
+      <cac:StandardItemIdentification>
+        <cbc:ID schemeID="0160">7042753338903</cbc:ID>
+      </cac:StandardItemIdentification>
+      <cac:AdditionalItemProperty>
+        <cbc:Name>NOBB</cbc:Name>
+        <cbc:Value>22206601</cbc:Value>
+      </cac:AdditionalItemProperty>
+    </cac:Item>
+  </cac:WasteLine>
+
+  <cac:WasteLine>
+    <cbc:ID>18</cbc:ID>
+    <cbc:Quantity unitCode="LMT">30.7</cbc:Quantity>
+    <cac:Item>
+      <cbc:Name>FURU 09X045 KARM ENKEL 1002</cbc:Name>
+      <cac:StandardItemIdentification>
+        <cbc:ID schemeID="0160">7070276041499</cbc:ID>
+      </cac:StandardItemIdentification>
+      <cac:AdditionalItemProperty>
+        <cbc:Name>NOBB</cbc:Name>
+        <cbc:Value>21693114</cbc:Value>
+      </cac:AdditionalItemProperty>
+    </cac:Item>
+  </cac:WasteLine>
+
+  <cac:WasteLine>
+    <cbc:ID>19</cbc:ID>
+    <cbc:Quantity unitCode="EA">18</cbc:Quantity>
+    <cac:Item>
+      <cbc:Name>STIKKSAGBL T244D 74MM A3 TRE/GROV</cbc:Name>
+      <cac:StandardItemIdentification>
+        <cbc:ID schemeID="0160">3165140007221</cbc:ID>
+      </cac:StandardItemIdentification>
+      <cac:AdditionalItemProperty>
+        <cbc:Name>NOBB</cbc:Name>
+        <cbc:Value>21441704</cbc:Value>
+      </cac:AdditionalItemProperty>
+    </cac:Item>
+  </cac:WasteLine>
+
+  <cac:WasteLine>
+    <cbc:ID>20</cbc:ID>
+    <cbc:Quantity unitCode="EA">12</cbc:Quantity>
+    <cac:Item>
+      <cbc:Name>SLANGE Ø19/5M SUGFIX/STIKKSAG PAS10</cbc:Name>
+      <cac:StandardItemIdentification>
+        <cbc:ID schemeID="0160">3165140006149</cbc:ID>
+      </cac:StandardItemIdentification>
+      <cac:AdditionalItemProperty>
+        <cbc:Name>NOBB</cbc:Name>
+        <cbc:Value>21472972</cbc:Value>
+      </cac:AdditionalItemProperty>
+    </cac:Item>
+  </cac:WasteLine>
+
+  <cac:WasteLine>
+    <cbc:ID>21</cbc:ID>
+    <cbc:Quantity unitCode="MTK">10.5</cbc:Quantity>
+    <cac:Item>
+      <cbc:Name>HIML CONTUR REGULA 12,5X600X600MM</cbc:Name>
+      <cac:StandardItemIdentification>
+        <cbc:ID schemeID="0160">5709636052593</cbc:ID>
+      </cac:StandardItemIdentification>
+      <cac:AdditionalItemProperty>
+        <cbc:Name>NOBB</cbc:Name>
+        <cbc:Value>21310388</cbc:Value>
+      </cac:AdditionalItemProperty>
+    </cac:Item>
+  </cac:WasteLine>
+
+  <cac:WasteLine>
+    <cbc:ID>22</cbc:ID>
+    <cbc:Quantity unitCode="EA">27</cbc:Quantity>
+    <cac:Item>
+      <cbc:Name>VINDU SIDESV 2-RAMS 10X12 ,UV 1,2</cbc:Name>
+      <cac:StandardItemIdentification>
+        <cbc:ID schemeID="0160">7071895011962</cbc:ID>
+      </cac:StandardItemIdentification>
+      <cac:AdditionalItemProperty>
+        <cbc:Name>NOBB</cbc:Name>
+        <cbc:Value>22085088</cbc:Value>
+      </cac:AdditionalItemProperty>
+    </cac:Item>
+  </cac:WasteLine>
+
+  <cac:WasteLine>
+    <cbc:ID>23</cbc:ID>
+    <cbc:Quantity unitCode="MTR">2.2</cbc:Quantity>
+    <cac:Item>
+      <cbc:Name>GLAVA LAFTESTRIMMEL M/PL B=140MM</cbc:Name>
+      <cac:StandardItemIdentification>
+        <cbc:ID schemeID="0160">7032464011400</cbc:ID>
+      </cac:StandardItemIdentification>
+      <cac:AdditionalItemProperty>
+        <cbc:Name>NOBB</cbc:Name>
+        <cbc:Value>11092921</cbc:Value>
+      </cac:AdditionalItemProperty>
+    </cac:Item>
+  </cac:WasteLine>
+
+  <cac:WasteLine>
+    <cbc:ID>24</cbc:ID>
+    <cbc:Quantity unitCode="EA">17</cbc:Quantity>
+    <cac:Item>
+      <cbc:Name>OVERGANG 110/75MM BRUN</cbc:Name>
+      <cac:StandardItemIdentification>
+        <cbc:ID schemeID="0160">5702752494742</cbc:ID>
+      </cac:StandardItemIdentification>
+      <cac:AdditionalItemProperty>
+        <cbc:Name>NOBB</cbc:Name>
+        <cbc:Value>21021001</cbc:Value>
+      </cac:AdditionalItemProperty>
+    </cac:Item>
+  </cac:WasteLine>
+
+  <cac:WasteLine>
+    <cbc:ID>25</cbc:ID>
+    <cbc:Quantity unitCode="XBG">4</cbc:Quantity>
+    <cac:Item>
+      <cbc:Name>SKJERMRING HVIT E27</cbc:Name>
+      <cac:StandardItemIdentification>
+        <cbc:ID schemeID="0160">7318270009115</cbc:ID>
+      </cac:StandardItemIdentification>
+      <cac:AdditionalItemProperty>
+        <cbc:Name>NOBB</cbc:Name>
+        <cbc:Value>21790209</cbc:Value>
+      </cac:AdditionalItemProperty>
+    </cac:Item>
+  </cac:WasteLine>
+
+  <cac:WasteLine>
+    <cbc:ID>26</cbc:ID>
+    <cbc:Quantity unitCode="LMT">24.6</cbc:Quantity>
+    <cac:Item>
+      <cbc:Name>STÅLPR ER100 STENDER 35X100X3500</cbc:Name>
+      <cac:StandardItemIdentification>
+        <cbc:ID schemeID="0160">7318931927529</cbc:ID>
+      </cac:StandardItemIdentification>
+      <cac:AdditionalItemProperty>
+        <cbc:Name>NOBB</cbc:Name>
+        <cbc:Value>21413927</cbc:Value>
+      </cac:AdditionalItemProperty>
+    </cac:Item>
+  </cac:WasteLine>
+
+  <cac:WasteLine>
+    <cbc:ID>27</cbc:ID>
+    <cbc:Quantity unitCode="LMT">30.7</cbc:Quantity>
+    <cac:Item>
+      <cbc:Name>STÅLPR ER95 STENDER 35X95X3500</cbc:Name>
+      <cac:StandardItemIdentification>
+        <cbc:ID schemeID="0160">7318931930031</cbc:ID>
+      </cac:StandardItemIdentification>
+      <cac:AdditionalItemProperty>
+        <cbc:Name>NOBB</cbc:Name>
+        <cbc:Value>21414032</cbc:Value>
+      </cac:AdditionalItemProperty>
+    </cac:Item>
+  </cac:WasteLine>
+
+  <cac:WasteLine>
+    <cbc:ID>28</cbc:ID>
+    <cbc:Quantity unitCode="XPA">14</cbc:Quantity>
+    <cac:Item>
+      <cbc:Name>SPERREVINKEL 200 SETT</cbc:Name>
+      <cac:StandardItemIdentification>
+        <cbc:ID schemeID="0160">5701953727109</cbc:ID>
+      </cac:StandardItemIdentification>
+      <cac:AdditionalItemProperty>
+        <cbc:Name>NOBB</cbc:Name>
+        <cbc:Value>21218813</cbc:Value>
+      </cac:AdditionalItemProperty>
+    </cac:Item>
+  </cac:WasteLine>
+
+  <cac:WasteLine>
+    <cbc:ID>29</cbc:ID>
+    <cbc:Quantity unitCode="EA">10</cbc:Quantity>
+    <cac:Item>
+      <cbc:Name>DØR EASY GW 7X20 HVIT</cbc:Name>
+      <cac:StandardItemIdentification>
+        <cbc:ID schemeID="0160">5700360100000</cbc:ID>
+      </cac:StandardItemIdentification>
+      <cac:AdditionalItemProperty>
+        <cbc:Name>NOBB</cbc:Name>
+        <cbc:Value>21414818</cbc:Value>
+      </cac:AdditionalItemProperty>
+    </cac:Item>
+  </cac:WasteLine>
+
+  <cac:WasteLine>
+    <cbc:ID>30</cbc:ID>
+    <cbc:Quantity unitCode="EA">22</cbc:Quantity>
+    <cac:Item>
+      <cbc:Name>DØRSETT SOLBO I40 10X21V UBH</cbc:Name>
+      <cac:StandardItemIdentification>
+        <cbc:ID schemeID="0160">7393993098844</cbc:ID>
+      </cac:StandardItemIdentification>
+      <cac:AdditionalItemProperty>
+        <cbc:Name>NOBB</cbc:Name>
+        <cbc:Value>22306120</cbc:Value>
+      </cac:AdditionalItemProperty>
+    </cac:Item>
+  </cac:WasteLine>
+
+  <cac:WasteLine>
+    <cbc:ID>31</cbc:ID>
+    <cbc:Quantity unitCode="EA">17</cbc:Quantity>
+    <cac:Item>
+      <cbc:Name>VINKEL 90GR INNV 12 GRAFITT</cbc:Name>
+      <cac:StandardItemIdentification>
+        <cbc:ID schemeID="0160">5702751692026</cbc:ID>
+      </cac:StandardItemIdentification>
+      <cac:AdditionalItemProperty>
+        <cbc:Name>NOBB</cbc:Name>
+        <cbc:Value>21015276</cbc:Value>
+      </cac:AdditionalItemProperty>
+    </cac:Item>
+  </cac:WasteLine>
+
+  <cac:WasteLine>
+    <cbc:ID>32</cbc:ID>
+    <cbc:Quantity unitCode="LMT">47.2</cbc:Quantity>
+    <cac:Item>
+      <cbc:Name>STÅLPR HR60/60 STENDER 60X60X3000</cbc:Name>
+      <cac:StandardItemIdentification>
+        <cbc:ID schemeID="0160">7318931933469</cbc:ID>
+      </cac:StandardItemIdentification>
+      <cac:AdditionalItemProperty>
+        <cbc:Name>NOBB</cbc:Name>
+        <cbc:Value>21414198</cbc:Value>
+      </cac:AdditionalItemProperty>
+    </cac:Item>
+  </cac:WasteLine>
+
+  <cac:WasteLine>
+    <cbc:ID>33</cbc:ID>
+    <cbc:Quantity unitCode="LMT">20.5</cbc:Quantity>
+    <cac:Item>
+      <cbc:Name>FURU 28X028 GLATTKANT UBEHANDLET</cbc:Name>
+      <cac:StandardItemIdentification>
+        <cbc:ID schemeID="0160">7059420026537</cbc:ID>
+      </cac:StandardItemIdentification>
+      <cac:AdditionalItemProperty>
+        <cbc:Name>NOBB</cbc:Name>
+        <cbc:Value>21700307</cbc:Value>
+      </cac:AdditionalItemProperty>
+    </cac:Item>
+  </cac:WasteLine>
+
+  <cac:WasteLine>
+    <cbc:ID>34</cbc:ID>
+    <cbc:Quantity unitCode="LMT">29.6</cbc:Quantity>
+    <cac:Item>
+      <cbc:Name>STÅLPR SKP70/55 SKINNE 2500</cbc:Name>
+      <cac:StandardItemIdentification>
+        <cbc:ID schemeID="0160">7318931926652</cbc:ID>
+      </cac:StandardItemIdentification>
+      <cac:AdditionalItemProperty>
+        <cbc:Name>NOBB</cbc:Name>
+        <cbc:Value>21413802</cbc:Value>
+      </cac:AdditionalItemProperty>
+    </cac:Item>
+  </cac:WasteLine>
+
+  <cac:WasteLine>
+    <cbc:ID>35</cbc:ID>
+    <cbc:Quantity unitCode="EA">17</cbc:Quantity>
+    <cac:Item>
+      <cbc:Name>DØR SF  ANNE LAKK 8X21</cbc:Name>
+      <cac:StandardItemIdentification>
+        <cbc:ID schemeID="0160">7070664124209</cbc:ID>
+      </cac:StandardItemIdentification>
+      <cac:AdditionalItemProperty>
+        <cbc:Name>NOBB</cbc:Name>
+        <cbc:Value>21492293</cbc:Value>
+      </cac:AdditionalItemProperty>
+    </cac:Item>
+  </cac:WasteLine>
+
+  <cac:WasteLine>
+    <cbc:ID>36</cbc:ID>
+    <cbc:Quantity unitCode="EA">24</cbc:Quantity>
+    <cac:Item>
+      <cbc:Name>BORDTAKBESLAG 0,6 MM H 140 MM HVIT</cbc:Name>
+      <cac:StandardItemIdentification>
+        <cbc:ID schemeID="0160">7071528006310</cbc:ID>
+      </cac:StandardItemIdentification>
+      <cac:AdditionalItemProperty>
+        <cbc:Name>NOBB</cbc:Name>
+        <cbc:Value>22433130</cbc:Value>
+      </cac:AdditionalItemProperty>
+    </cac:Item>
+  </cac:WasteLine>
+
+  <cac:WasteLine>
+    <cbc:ID>37</cbc:ID>
+    <cbc:Quantity unitCode="LMT">24.8</cbc:Quantity>
+    <cac:Item>
+      <cbc:Name>STÅLPR SKP100/40 SKINNE 2500</cbc:Name>
+      <cac:StandardItemIdentification>
+        <cbc:ID schemeID="0160">7318931927062</cbc:ID>
+      </cac:StandardItemIdentification>
+      <cac:AdditionalItemProperty>
+        <cbc:Name>NOBB</cbc:Name>
+        <cbc:Value>21413828</cbc:Value>
+      </cac:AdditionalItemProperty>
+    </cac:Item>
+  </cac:WasteLine>
+
+  <cac:WasteLine>
+    <cbc:ID>38</cbc:ID>
+    <cbc:Quantity unitCode="XPK">1</cbc:Quantity>
+    <cac:Item>
+      <cbc:Name>GIPSSKRUE STÅL B 3,5X41 FZB -1000</cbc:Name>
+      <cac:StandardItemIdentification>
+        <cbc:ID schemeID="0160">7317761103523</cbc:ID>
+      </cac:StandardItemIdentification>
+      <cac:AdditionalItemProperty>
+        <cbc:Name>NOBB</cbc:Name>
+        <cbc:Value>21803671</cbc:Value>
+      </cac:AdditionalItemProperty>
+    </cac:Item>
+  </cac:WasteLine>
+
+  <cac:WasteLine>
+    <cbc:ID>39</cbc:ID>
+    <cbc:Quantity unitCode="MTK">31.0</cbc:Quantity>
+    <cac:Item>
+      <cbc:Name>SUNDOLITT EPS S80 60X600X1200</cbc:Name>
+      <cac:StandardItemIdentification>
+        <cbc:ID schemeID="0160">7033340000150</cbc:ID>
+      </cac:StandardItemIdentification>
+      <cac:AdditionalItemProperty>
+        <cbc:Name>NOBB</cbc:Name>
+        <cbc:Value>22248645</cbc:Value>
+      </cac:AdditionalItemProperty>
+    </cac:Item>
+  </cac:WasteLine>
+
+  <cac:WasteLine>
+    <cbc:ID>40</cbc:ID>
+    <cbc:Quantity unitCode="XBG">15</cbc:Quantity>
+    <cac:Item>
+      <cbc:Name>WEBER MIX M5 SS MURMØRTEL 1000KG</cbc:Name>
+      <cac:StandardItemIdentification>
+        <cbc:ID schemeID="0160">7040021720917</cbc:ID>
+      </cac:StandardItemIdentification>
+      <cac:AdditionalItemProperty>
+        <cbc:Name>NOBB</cbc:Name>
+        <cbc:Value>21326640</cbc:Value>
+      </cac:AdditionalItemProperty>
+    </cac:Item>
+  </cac:WasteLine>
+
+  <cac:WasteLine>
+    <cbc:ID>41</cbc:ID>
+    <cbc:Quantity unitCode="EA">19</cbc:Quantity>
+    <cac:Item>
+      <cbc:Name>VINDU SIDESV 1-RAMS 6X12-H,UV 1,2</cbc:Name>
+      <cac:StandardItemIdentification>
+        <cbc:ID schemeID="0160">7071895012358</cbc:ID>
+      </cac:StandardItemIdentification>
+      <cac:AdditionalItemProperty>
+        <cbc:Name>NOBB</cbc:Name>
+        <cbc:Value>22082317</cbc:Value>
+      </cac:AdditionalItemProperty>
+    </cac:Item>
+  </cac:WasteLine>
+
+  <cac:WasteLine>
+    <cbc:ID>42</cbc:ID>
+    <cbc:Quantity unitCode="LMT">43.2</cbc:Quantity>
+    <cac:Item>
+      <cbc:Name>FURU 28X028 GLATTKANT 2555</cbc:Name>
+      <cac:StandardItemIdentification>
+        <cbc:ID schemeID="0160">7070276041321</cbc:ID>
+      </cac:StandardItemIdentification>
+      <cac:AdditionalItemProperty>
+        <cbc:Name>NOBB</cbc:Name>
+        <cbc:Value>21694443</cbc:Value>
+      </cac:AdditionalItemProperty>
+    </cac:Item>
+  </cac:WasteLine>
+
+  <cac:WasteLine>
+    <cbc:ID>43</cbc:ID>
+    <cbc:Quantity unitCode="EA">20</cbc:Quantity>
+    <cac:Item>
+      <cbc:Name>T-RØR M/PAKNING 125/125MM</cbc:Name>
+      <cac:StandardItemIdentification>
+        <cbc:ID schemeID="0160">7023670125494</cbc:ID>
+      </cac:StandardItemIdentification>
+      <cac:AdditionalItemProperty>
+        <cbc:Name>NOBB</cbc:Name>
+        <cbc:Value>11496155</cbc:Value>
+      </cac:AdditionalItemProperty>
+    </cac:Item>
+  </cac:WasteLine>
+
+  <cac:WasteLine>
+    <cbc:ID>44</cbc:ID>
+    <cbc:Quantity unitCode="EA">12</cbc:Quantity>
+    <cac:Item>
+      <cbc:Name>EKSPANSJONSTAPPSTYKKE 12/90 GRAFITT</cbc:Name>
+      <cac:StandardItemIdentification>
+        <cbc:ID schemeID="0160">5702751222520</cbc:ID>
+      </cac:StandardItemIdentification>
+      <cac:AdditionalItemProperty>
+        <cbc:Name>NOBB</cbc:Name>
+        <cbc:Value>21016480</cbc:Value>
+      </cac:AdditionalItemProperty>
+    </cac:Item>
+  </cac:WasteLine>
+
+  <cac:WasteLine>
+    <cbc:ID>45</cbc:ID>
+    <cbc:Quantity unitCode="LMT">13.0</cbc:Quantity>
+    <cac:Item>
+      <cbc:Name>EIK 21X170 GLATTKANT UBEHANDLET</cbc:Name>
+      <cac:StandardItemIdentification>
+        <cbc:ID schemeID="0160">7059420016521</cbc:ID>
+      </cac:StandardItemIdentification>
+      <cac:AdditionalItemProperty>
+        <cbc:Name>NOBB</cbc:Name>
+        <cbc:Value>21685706</cbc:Value>
+      </cac:AdditionalItemProperty>
+    </cac:Item>
+  </cac:WasteLine>
+
+  <cac:WasteLine>
+    <cbc:ID>46</cbc:ID>
+    <cbc:Quantity unitCode="LMT">16.9</cbc:Quantity>
+    <cac:Item>
+      <cbc:Name>STÅLPR ER70 STENDER 35X70X2385</cbc:Name>
+      <cac:StandardItemIdentification>
+        <cbc:ID schemeID="0160">7318931928076</cbc:ID>
+      </cac:StandardItemIdentification>
+      <cac:AdditionalItemProperty>
+        <cbc:Name>NOBB</cbc:Name>
+        <cbc:Value>21413950</cbc:Value>
+      </cac:AdditionalItemProperty>
+    </cac:Item>
+  </cac:WasteLine>
+
+  <cac:WasteLine>
+    <cbc:ID>47</cbc:ID>
+    <cbc:Quantity unitCode="EA">23</cbc:Quantity>
+    <cac:Item>
+      <cbc:Name>EL-BOKS PEILER M/MAGNET NORSK</cbc:Name>
+      <cac:StandardItemIdentification>
+        <cbc:ID schemeID="0160">7028950061950</cbc:ID>
+      </cac:StandardItemIdentification>
+      <cac:AdditionalItemProperty>
+        <cbc:Name>NOBB</cbc:Name>
+        <cbc:Value>21103262</cbc:Value>
+      </cac:AdditionalItemProperty>
+    </cac:Item>
+  </cac:WasteLine>
+
+  <cac:WasteLine>
+    <cbc:ID>48</cbc:ID>
+    <cbc:Quantity unitCode="XBX">22</cbc:Quantity>
+    <cac:Item>
+      <cbc:Name>SEKSKANTSKRUE ELF 8,8 M6X80D A100</cbc:Name>
+      <cac:StandardItemIdentification>
+        <cbc:ID schemeID="0160">7034355300587</cbc:ID>
+      </cac:StandardItemIdentification>
+      <cac:AdditionalItemProperty>
+        <cbc:Name>NOBB</cbc:Name>
+        <cbc:Value>11468931</cbc:Value>
+      </cac:AdditionalItemProperty>
+    </cac:Item>
+  </cac:WasteLine>
+
+  <cac:WasteLine>
+    <cbc:ID>49</cbc:ID>
+    <cbc:Quantity unitCode="EA">1</cbc:Quantity>
+    <cac:Item>
+      <cbc:Name>STÅLPLATE DC01AM 1,25X1000X2000MM</cbc:Name>
+      <cac:StandardItemIdentification>
+        <cbc:ID schemeID="0160">7070743003265</cbc:ID>
+      </cac:StandardItemIdentification>
+      <cac:AdditionalItemProperty>
+        <cbc:Name>NOBB</cbc:Name>
+        <cbc:Value>21158761</cbc:Value>
+      </cac:AdditionalItemProperty>
+    </cac:Item>
+  </cac:WasteLine>
+
+  <cac:WasteLine>
+    <cbc:ID>50</cbc:ID>
+    <cbc:Quantity unitCode="XPK">21</cbc:Quantity>
+    <cac:Item>
+      <cbc:Name>SPONPLATESKRUE B 4,2X42 FZB -1000</cbc:Name>
+      <cac:StandardItemIdentification>
+        <cbc:ID schemeID="0160">7317761101895</cbc:ID>
+      </cac:StandardItemIdentification>
+      <cac:AdditionalItemProperty>
+        <cbc:Name>NOBB</cbc:Name>
+        <cbc:Value>21234943</cbc:Value>
+      </cac:AdditionalItemProperty>
+    </cac:Item>
+  </cac:WasteLine>
+
+  <cac:WasteLine>
+    <cbc:ID>51</cbc:ID>
+    <cbc:Quantity unitCode="XPK">4</cbc:Quantity>
+    <cac:Item>
+      <cbc:Name>TAKPL SPIK KAMGJ 60-37 RØD A 100</cbc:Name>
+      <cac:StandardItemIdentification>
+        <cbc:ID schemeID="0160">7318472713353</cbc:ID>
+      </cac:StandardItemIdentification>
+      <cac:AdditionalItemProperty>
+        <cbc:Name>NOBB</cbc:Name>
+        <cbc:Value>21805619</cbc:Value>
+      </cac:AdditionalItemProperty>
+    </cac:Item>
+  </cac:WasteLine>
+
+  <cac:WasteLine>
+    <cbc:ID>52</cbc:ID>
+    <cbc:Quantity unitCode="EA">26</cbc:Quantity>
+    <cac:Item>
+      <cbc:Name>DØR KOTT 55X 70CM FURU POCKET</cbc:Name>
+      <cac:StandardItemIdentification>
+        <cbc:ID schemeID="0160">7090009380169</cbc:ID>
+      </cac:StandardItemIdentification>
+      <cac:AdditionalItemProperty>
+        <cbc:Name>NOBB</cbc:Name>
+        <cbc:Value>22434591</cbc:Value>
+      </cac:AdditionalItemProperty>
+    </cac:Item>
+  </cac:WasteLine>
+
+  <cac:WasteLine>
+    <cbc:ID>53</cbc:ID>
+    <cbc:Quantity unitCode="MTK">8.9</cbc:Quantity>
+    <cac:Item>
+      <cbc:Name>SILENCIO TRINNLYDSPLATE FALS 36MM</cbc:Name>
+      <cac:StandardItemIdentification>
+        <cbc:ID schemeID="0160">7022611060610</cbc:ID>
+      </cac:StandardItemIdentification>
+      <cac:AdditionalItemProperty>
+        <cbc:Name>NOBB</cbc:Name>
+        <cbc:Value>22064174</cbc:Value>
+      </cac:AdditionalItemProperty>
+    </cac:Item>
+  </cac:WasteLine>
+
+  <cac:WasteLine>
+    <cbc:ID>54</cbc:ID>
+    <cbc:Quantity unitCode="MTK">13.0</cbc:Quantity>
+    <cac:Item>
+      <cbc:Name>GIPSPL STD 900X2700X12,5 NORGIPS</cbc:Name>
+      <cac:StandardItemIdentification>
+        <cbc:ID schemeID="0160">7046638888057</cbc:ID>
+      </cac:StandardItemIdentification>
+      <cac:AdditionalItemProperty>
+        <cbc:Name>NOBB</cbc:Name>
+        <cbc:Value>21770946</cbc:Value>
+      </cac:AdditionalItemProperty>
+    </cac:Item>
+  </cac:WasteLine>
+
+  <cac:WasteLine>
+    <cbc:ID>55</cbc:ID>
+    <cbc:Quantity unitCode="XST">10</cbc:Quantity>
+    <cac:Item>
+      <cbc:Name>SKRUTRK SETT 5 VDE BE9882S</cbc:Name>
+      <cac:StandardItemIdentification>
+        <cbc:ID schemeID="0160">7314151839314</cbc:ID>
+      </cac:StandardItemIdentification>
+      <cac:AdditionalItemProperty>
+        <cbc:Name>NOBB</cbc:Name>
+        <cbc:Value>21848007</cbc:Value>
+      </cac:AdditionalItemProperty>
+    </cac:Item>
+  </cac:WasteLine>
+
+  <cac:WasteLine>
+    <cbc:ID>56</cbc:ID>
+    <cbc:Quantity unitCode="EA">29</cbc:Quantity>
+    <cac:Item>
+      <cbc:Name>VINDU SIDESV 2-RAMS 17X5 ,UV 1,2</cbc:Name>
+      <cac:StandardItemIdentification>
+        <cbc:ID schemeID="0160">7071895011894</cbc:ID>
+      </cac:StandardItemIdentification>
+      <cac:AdditionalItemProperty>
+        <cbc:Name>NOBB</cbc:Name>
+        <cbc:Value>22084594</cbc:Value>
+      </cac:AdditionalItemProperty>
+    </cac:Item>
+  </cac:WasteLine>
+
+  <cac:WasteLine>
+    <cbc:ID>57</cbc:ID>
+    <cbc:Quantity unitCode="EA">19</cbc:Quantity>
+    <cac:Item>
+      <cbc:Name>THERMOMUR 250 L-BLOKK</cbc:Name>
+      <cac:StandardItemIdentification>
+        <cbc:ID schemeID="0160">7032298681305</cbc:ID>
+      </cac:StandardItemIdentification>
+      <cac:AdditionalItemProperty>
+        <cbc:Name>NOBB</cbc:Name>
+        <cbc:Value>21397641</cbc:Value>
+      </cac:AdditionalItemProperty>
+    </cac:Item>
+  </cac:WasteLine>
+
+  <cac:WasteLine>
+    <cbc:ID>58</cbc:ID>
+    <cbc:Quantity unitCode="LMT">11.2</cbc:Quantity>
+    <cac:Item>
+      <cbc:Name>GRAN 19X120 FASPANEL INT</cbc:Name>
+      <cac:StandardItemIdentification>
+        <cbc:ID schemeID="0160">7042753323909</cbc:ID>
+      </cac:StandardItemIdentification>
+      <cac:AdditionalItemProperty>
+        <cbc:Name>NOBB</cbc:Name>
+        <cbc:Value>22206551</cbc:Value>
+      </cac:AdditionalItemProperty>
+    </cac:Item>
+  </cac:WasteLine>
+
+  <cac:WasteLine>
+    <cbc:ID>59</cbc:ID>
+    <cbc:Quantity unitCode="LMT">12.2</cbc:Quantity>
+    <cac:Item>
+      <cbc:Name>STÅLPR ER75 STENDER 35X75X2685</cbc:Name>
+      <cac:StandardItemIdentification>
+        <cbc:ID schemeID="0160">7318931927253</cbc:ID>
+      </cac:StandardItemIdentification>
+      <cac:AdditionalItemProperty>
+        <cbc:Name>NOBB</cbc:Name>
+        <cbc:Value>21413869</cbc:Value>
+      </cac:AdditionalItemProperty>
+    </cac:Item>
+  </cac:WasteLine>
+
+  <cac:WasteLine>
+    <cbc:ID>60</cbc:ID>
+    <cbc:Quantity unitCode="EA">16</cbc:Quantity>
+    <cac:Item>
+      <cbc:Name>TAPPSTYKKE JUSTERBART 12/90 HVIT</cbc:Name>
+      <cac:StandardItemIdentification>
+        <cbc:ID schemeID="0160">5702751153527</cbc:ID>
+      </cac:StandardItemIdentification>
+      <cac:AdditionalItemProperty>
+        <cbc:Name>NOBB</cbc:Name>
+        <cbc:Value>21016407</cbc:Value>
+      </cac:AdditionalItemProperty>
+    </cac:Item>
+  </cac:WasteLine>
+
+  <cac:WasteLine>
+    <cbc:ID>61</cbc:ID>
+    <cbc:Quantity unitCode="EA">26</cbc:Quantity>
+    <cac:Item>
+      <cbc:Name>SISTERNEKOBLER M/SLANGE 75MM GRÅ</cbc:Name>
+      <cac:StandardItemIdentification>
+        <cbc:ID schemeID="0160">5702752581404</cbc:ID>
+      </cac:StandardItemIdentification>
+      <cac:AdditionalItemProperty>
+        <cbc:Name>NOBB</cbc:Name>
+        <cbc:Value>21513353</cbc:Value>
+      </cac:AdditionalItemProperty>
+    </cac:Item>
+  </cac:WasteLine>
+
+  <cac:WasteLine>
+    <cbc:ID>62</cbc:ID>
+    <cbc:Quantity unitCode="EA">2</cbc:Quantity>
+    <cac:Item>
+      <cbc:Name>DØR KOTT 55X 55CM HVIT POCKET</cbc:Name>
+      <cac:StandardItemIdentification>
+        <cbc:ID schemeID="0160">7090009380077</cbc:ID>
+      </cac:StandardItemIdentification>
+      <cac:AdditionalItemProperty>
+        <cbc:Name>NOBB</cbc:Name>
+        <cbc:Value>22434666</cbc:Value>
+      </cac:AdditionalItemProperty>
+    </cac:Item>
+  </cac:WasteLine>
+
+  <cac:WasteLine>
+    <cbc:ID>63</cbc:ID>
+    <cbc:Quantity unitCode="EA">10</cbc:Quantity>
+    <cac:Item>
+      <cbc:Name>BÅNDSLIPER 9031 30MM</cbc:Name>
+      <cac:StandardItemIdentification>
+        <cbc:ID schemeID="0160">088381016254</cbc:ID>
+      </cac:StandardItemIdentification>
+      <cac:AdditionalItemProperty>
+        <cbc:Name>NOBB</cbc:Name>
+        <cbc:Value>21109004</cbc:Value>
+      </cac:AdditionalItemProperty>
+    </cac:Item>
+  </cac:WasteLine>
+
+  <cac:WasteLine>
+    <cbc:ID>64</cbc:ID>
+    <cbc:Quantity unitCode="MTK">11.7</cbc:Quantity>
+    <cac:Item>
+      <cbc:Name>FORESTIA SPONPL RK P2 28X1250X2500</cbc:Name>
+      <cac:StandardItemIdentification>
+        <cbc:ID schemeID="0160">7029560001527</cbc:ID>
+      </cac:StandardItemIdentification>
+      <cac:AdditionalItemProperty>
+        <cbc:Name>NOBB</cbc:Name>
+        <cbc:Value>10544864</cbc:Value>
+      </cac:AdditionalItemProperty>
+    </cac:Item>
+  </cac:WasteLine>
+
+  <cac:WasteLine>
+    <cbc:ID>65</cbc:ID>
+    <cbc:Quantity unitCode="LMT">41.1</cbc:Quantity>
+    <cac:Item>
+      <cbc:Name>STÅLPR BØYD PRIMÆR HB40/30 2500</cbc:Name>
+      <cac:StandardItemIdentification>
+        <cbc:ID schemeID="0160">7318935062202</cbc:ID>
+      </cac:StandardItemIdentification>
+      <cac:AdditionalItemProperty>
+        <cbc:Name>NOBB</cbc:Name>
+        <cbc:Value>10912749</cbc:Value>
+      </cac:AdditionalItemProperty>
+    </cac:Item>
+  </cac:WasteLine>
+
+  <cac:WasteLine>
+    <cbc:ID>66</cbc:ID>
+    <cbc:Quantity unitCode="EA">15</cbc:Quantity>
+    <cac:Item>
+      <cbc:Name>DØRSETT STØLEN I30 10X21H UBH</cbc:Name>
+      <cac:StandardItemIdentification>
+        <cbc:ID schemeID="0160">7393993098578</cbc:ID>
+      </cac:StandardItemIdentification>
+      <cac:AdditionalItemProperty>
+        <cbc:Name>NOBB</cbc:Name>
+        <cbc:Value>22306419</cbc:Value>
+      </cac:AdditionalItemProperty>
+    </cac:Item>
+  </cac:WasteLine>
+
+  <cac:WasteLine>
+    <cbc:ID>67</cbc:ID>
+    <cbc:Quantity unitCode="MTK">42.1</cbc:Quantity>
+    <cac:Item>
+      <cbc:Name>GIPSPL STD 900X2500X12,5 NORGIPS</cbc:Name>
+      <cac:StandardItemIdentification>
+        <cbc:ID schemeID="0160">7046638888033</cbc:ID>
+      </cac:StandardItemIdentification>
+      <cac:AdditionalItemProperty>
+        <cbc:Name>NOBB</cbc:Name>
+        <cbc:Value>21770938</cbc:Value>
+      </cac:AdditionalItemProperty>
+    </cac:Item>
+  </cac:WasteLine>
+
+  <cac:WasteLine>
+    <cbc:ID>68</cbc:ID>
+    <cbc:Quantity unitCode="LMT">45.8</cbc:Quantity>
+    <cac:Item>
+      <cbc:Name>GRAN 14X120 VEKSEL SKRÅ INT</cbc:Name>
+      <cac:StandardItemIdentification>
+        <cbc:ID schemeID="0160">7042757210908</cbc:ID>
+      </cac:StandardItemIdentification>
+      <cac:AdditionalItemProperty>
+        <cbc:Name>NOBB</cbc:Name>
+        <cbc:Value>22207450</cbc:Value>
+      </cac:AdditionalItemProperty>
+    </cac:Item>
+  </cac:WasteLine>
+
+  <cac:WasteLine>
+    <cbc:ID>69</cbc:ID>
+    <cbc:Quantity unitCode="EA">24</cbc:Quantity>
+    <cac:Item>
+      <cbc:Name>VINKELBESLAG 70 UTEN RIBBE RUSTFRI</cbc:Name>
+      <cac:StandardItemIdentification>
+        <cbc:ID schemeID="0160">5701953290306</cbc:ID>
+      </cac:StandardItemIdentification>
+      <cac:AdditionalItemProperty>
+        <cbc:Name>NOBB</cbc:Name>
+        <cbc:Value>22062855</cbc:Value>
+      </cac:AdditionalItemProperty>
+    </cac:Item>
+  </cac:WasteLine>
+
+  <cac:WasteLine>
+    <cbc:ID>70</cbc:ID>
+    <cbc:Quantity unitCode="MTK">3.8</cbc:Quantity>
+    <cac:Item>
+      <cbc:Name>GIPSPL STD 1200X2400X12,5  NORGIPS</cbc:Name>
+      <cac:StandardItemIdentification>
+        <cbc:ID schemeID="0160">5709636009917</cbc:ID>
+      </cac:StandardItemIdentification>
+      <cac:AdditionalItemProperty>
+        <cbc:Name>NOBB</cbc:Name>
+        <cbc:Value>10397701</cbc:Value>
+      </cac:AdditionalItemProperty>
+    </cac:Item>
+  </cac:WasteLine>
+
+  <cac:WasteLine>
+    <cbc:ID>71</cbc:ID>
+    <cbc:Quantity unitCode="EA">7</cbc:Quantity>
+    <cac:Item>
+      <cbc:Name>TALLERKENVENTIL RUND PLAST 4"</cbc:Name>
+      <cac:StandardItemIdentification>
+        <cbc:ID schemeID="0160">7023670022007</cbc:ID>
+      </cac:StandardItemIdentification>
+      <cac:AdditionalItemProperty>
+        <cbc:Name>NOBB</cbc:Name>
+        <cbc:Value>11498698</cbc:Value>
+      </cac:AdditionalItemProperty>
+    </cac:Item>
+  </cac:WasteLine>
+
+  <cac:WasteLine>
+    <cbc:ID>72</cbc:ID>
+    <cbc:Quantity unitCode="EA">19</cbc:Quantity>
+    <cac:Item>
+      <cbc:Name>HULLPLATE 160X240X1,5MM EAN</cbc:Name>
+      <cac:StandardItemIdentification>
+        <cbc:ID schemeID="0160">5701953004583</cbc:ID>
+      </cac:StandardItemIdentification>
+      <cac:AdditionalItemProperty>
+        <cbc:Name>NOBB</cbc:Name>
+        <cbc:Value>21593975</cbc:Value>
+      </cac:AdditionalItemProperty>
+    </cac:Item>
+  </cac:WasteLine>
+
+  <cac:WasteLine>
+    <cbc:ID>73</cbc:ID>
+    <cbc:Quantity unitCode="EA">3</cbc:Quantity>
+    <cac:Item>
+      <cbc:Name>VÅTROMSSPARKEL LV 10L   BOSTIK</cbc:Name>
+      <cac:StandardItemIdentification>
+        <cbc:ID schemeID="0160">7311020029470</cbc:ID>
+      </cac:StandardItemIdentification>
+      <cac:AdditionalItemProperty>
+        <cbc:Name>NOBB</cbc:Name>
+        <cbc:Value>21520994</cbc:Value>
+      </cac:AdditionalItemProperty>
+    </cac:Item>
+  </cac:WasteLine>
+
+  <cac:WasteLine>
+    <cbc:ID>74</cbc:ID>
+    <cbc:Quantity unitCode="LMT">5.1</cbc:Quantity>
+    <cac:Item>
+      <cbc:Name>GRAN 12X070 SKYGGE SKRÅ INT</cbc:Name>
+      <cac:StandardItemIdentification>
+        <cbc:ID schemeID="0160">7042753905907</cbc:ID>
+      </cac:StandardItemIdentification>
+      <cac:AdditionalItemProperty>
+        <cbc:Name>NOBB</cbc:Name>
+        <cbc:Value>22206775</cbc:Value>
+      </cac:AdditionalItemProperty>
+    </cac:Item>
+  </cac:WasteLine>
+
+  <cac:WasteLine>
+    <cbc:ID>75</cbc:ID>
+    <cbc:Quantity unitCode="MTQ">10.0</cbc:Quantity>
+    <cac:Item>
+      <cbc:Name>LECA LETTKLINKER 4/10 BULK</cbc:Name>
+      <cac:StandardItemIdentification>
+        <cbc:ID schemeID="0160">7040021002006</cbc:ID>
+      </cac:StandardItemIdentification>
+      <cac:AdditionalItemProperty>
+        <cbc:Name>NOBB</cbc:Name>
+        <cbc:Value>11088838</cbc:Value>
+      </cac:AdditionalItemProperty>
+    </cac:Item>
+  </cac:WasteLine>
+
+  <cac:WasteLine>
+    <cbc:ID>76</cbc:ID>
+    <cbc:Quantity unitCode="XPA">14</cbc:Quantity>
+    <cac:Item>
+      <cbc:Name>SOILKRAGEBEND N70 SORT</cbc:Name>
+      <cac:StandardItemIdentification>
+        <cbc:ID schemeID="0160">7071528005320</cbc:ID>
+      </cac:StandardItemIdentification>
+      <cac:AdditionalItemProperty>
+        <cbc:Name>NOBB</cbc:Name>
+        <cbc:Value>22432041</cbc:Value>
+      </cac:AdditionalItemProperty>
+    </cac:Item>
+  </cac:WasteLine>
+
+  <cac:WasteLine>
+    <cbc:ID>77</cbc:ID>
+    <cbc:Quantity unitCode="EA">23</cbc:Quantity>
+    <cac:Item>
+      <cbc:Name>DØR SF ANNE HVIT 4X21</cbc:Name>
+      <cac:StandardItemIdentification>
+        <cbc:ID schemeID="0160">7070664119847</cbc:ID>
+      </cac:StandardItemIdentification>
+      <cac:AdditionalItemProperty>
+        <cbc:Name>NOBB</cbc:Name>
+        <cbc:Value>22063390</cbc:Value>
+      </cac:AdditionalItemProperty>
+    </cac:Item>
+  </cac:WasteLine>
+
+  <cac:WasteLine>
+    <cbc:ID>78</cbc:ID>
+    <cbc:Quantity unitCode="MTK">31.6</cbc:Quantity>
+    <cac:Item>
+      <cbc:Name>ROCKFON SAMSON A24 40X600X1200</cbc:Name>
+      <cac:StandardItemIdentification>
+        <cbc:ID schemeID="0160">5708045053757</cbc:ID>
+      </cac:StandardItemIdentification>
+      <cac:AdditionalItemProperty>
+        <cbc:Name>NOBB</cbc:Name>
+        <cbc:Value>22222996</cbc:Value>
+      </cac:AdditionalItemProperty>
+    </cac:Item>
+  </cac:WasteLine>
+
+  <cac:WasteLine>
+    <cbc:ID>79</cbc:ID>
+    <cbc:Quantity unitCode="XBX">7</cbc:Quantity>
+    <cac:Item>
+      <cbc:Name>KOMBINASJONSNØKKEL SB111M 19</cbc:Name>
+      <cac:StandardItemIdentification>
+        <cbc:ID schemeID="0160">7314151839956</cbc:ID>
+      </cac:StandardItemIdentification>
+      <cac:AdditionalItemProperty>
+        <cbc:Name>NOBB</cbc:Name>
+        <cbc:Value>21845938</cbc:Value>
+      </cac:AdditionalItemProperty>
+    </cac:Item>
+  </cac:WasteLine>
+
+  <cac:WasteLine>
+    <cbc:ID>80</cbc:ID>
+    <cbc:Quantity unitCode="XPK">19</cbc:Quantity>
+    <cac:Item>
+      <cbc:Name>GIPSSKRUE STÅL INV 3,5X25 FZB -1000</cbc:Name>
+      <cac:StandardItemIdentification>
+        <cbc:ID schemeID="0160">7317761100133</cbc:ID>
+      </cac:StandardItemIdentification>
+      <cac:AdditionalItemProperty>
+        <cbc:Name>NOBB</cbc:Name>
+        <cbc:Value>11351954</cbc:Value>
+      </cac:AdditionalItemProperty>
+    </cac:Item>
+  </cac:WasteLine>
+
+  <cac:WasteLine>
+    <cbc:ID>81</cbc:ID>
+    <cbc:Quantity unitCode="EA">14</cbc:Quantity>
+    <cac:Item>
+      <cbc:Name>VINDU SIDESV 1-RAMS 5X13-H,UV 1,2</cbc:Name>
+      <cac:StandardItemIdentification>
+        <cbc:ID schemeID="0160">7071895012235</cbc:ID>
+      </cac:StandardItemIdentification>
+      <cac:AdditionalItemProperty>
+        <cbc:Name>NOBB</cbc:Name>
+        <cbc:Value>22082366</cbc:Value>
+      </cac:AdditionalItemProperty>
+    </cac:Item>
+  </cac:WasteLine>
+
+  <cac:WasteLine>
+    <cbc:ID>82</cbc:ID>
+    <cbc:Quantity unitCode="XBG">29</cbc:Quantity>
+    <cac:Item>
+      <cbc:Name>HURTIGPUSS ARDEX AM 100 25 KG</cbc:Name>
+      <cac:StandardItemIdentification>
+        <cbc:ID schemeID="0160">5703193001254</cbc:ID>
+      </cac:StandardItemIdentification>
+      <cac:AdditionalItemProperty>
+        <cbc:Name>NOBB</cbc:Name>
+        <cbc:Value>22346746</cbc:Value>
+      </cac:AdditionalItemProperty>
+    </cac:Item>
+  </cac:WasteLine>
+
+  <cac:WasteLine>
+    <cbc:ID>83</cbc:ID>
+    <cbc:Quantity unitCode="XPK">10</cbc:Quantity>
+    <cac:Item>
+      <cbc:Name>GIPSSKRUE KOMBI B 3,9X30 FZB -1000</cbc:Name>
+      <cac:StandardItemIdentification>
+        <cbc:ID schemeID="0160">7317761103288</cbc:ID>
+      </cac:StandardItemIdentification>
+      <cac:AdditionalItemProperty>
+        <cbc:Name>NOBB</cbc:Name>
+        <cbc:Value>21967997</cbc:Value>
+      </cac:AdditionalItemProperty>
+    </cac:Item>
+  </cac:WasteLine>
+
+  <cac:WasteLine>
+    <cbc:ID>84</cbc:ID>
+    <cbc:Quantity unitCode="LMT">40.7</cbc:Quantity>
+    <cac:Item>
+      <cbc:Name>STÅLPR AC100/40 KANT 40X102X3000</cbc:Name>
+      <cac:StandardItemIdentification>
+        <cbc:ID schemeID="0160">7318931938297</cbc:ID>
+      </cac:StandardItemIdentification>
+      <cac:AdditionalItemProperty>
+        <cbc:Name>NOBB</cbc:Name>
+        <cbc:Value>21238100</cbc:Value>
+      </cac:AdditionalItemProperty>
+    </cac:Item>
+  </cac:WasteLine>
+
+  <cac:WasteLine>
+    <cbc:ID>85</cbc:ID>
+    <cbc:Quantity unitCode="XPK">3</cbc:Quantity>
+    <cac:Item>
+      <cbc:Name>MONTASJESKRUE BOR 4,2X13 FZB -1000</cbc:Name>
+      <cac:StandardItemIdentification>
+        <cbc:ID schemeID="0160">7317761100621</cbc:ID>
+      </cac:StandardItemIdentification>
+      <cac:AdditionalItemProperty>
+        <cbc:Name>NOBB</cbc:Name>
+        <cbc:Value>11351707</cbc:Value>
+      </cac:AdditionalItemProperty>
+    </cac:Item>
+  </cac:WasteLine>
+
+  <cac:WasteLine>
+    <cbc:ID>86</cbc:ID>
+    <cbc:Quantity unitCode="LMT">44.6</cbc:Quantity>
+    <cac:Item>
+      <cbc:Name>FURU 21X120 KOMBI CW105 PROF UBH</cbc:Name>
+      <cac:StandardItemIdentification>
+        <cbc:ID schemeID="0160">7059420022669</cbc:ID>
+      </cac:StandardItemIdentification>
+      <cac:AdditionalItemProperty>
+        <cbc:Name>NOBB</cbc:Name>
+        <cbc:Value>21686043</cbc:Value>
+      </cac:AdditionalItemProperty>
+    </cac:Item>
+  </cac:WasteLine>
+
+  <cac:WasteLine>
+    <cbc:ID>87</cbc:ID>
+    <cbc:Quantity unitCode="EA">27</cbc:Quantity>
+    <cac:Item>
+      <cbc:Name>NIVÅLIST GULL 2000X45X14-15MM</cbc:Name>
+      <cac:StandardItemIdentification>
+        <cbc:ID schemeID="0160">7392118801321</cbc:ID>
+      </cac:StandardItemIdentification>
+      <cac:AdditionalItemProperty>
+        <cbc:Name>NOBB</cbc:Name>
+        <cbc:Value>22121727</cbc:Value>
+      </cac:AdditionalItemProperty>
+    </cac:Item>
+  </cac:WasteLine>
+
+  <cac:WasteLine>
+    <cbc:ID>88</cbc:ID>
+    <cbc:Quantity unitCode="XBX">11</cbc:Quantity>
+    <cac:Item>
+      <cbc:Name>KNIVBLAD ROTERENDE RB45-1 Ø45 A1</cbc:Name>
+      <cac:StandardItemIdentification>
+        <cbc:ID schemeID="0160">091511500424</cbc:ID>
+      </cac:StandardItemIdentification>
+      <cac:AdditionalItemProperty>
+        <cbc:Name>NOBB</cbc:Name>
+        <cbc:Value>11334422</cbc:Value>
+      </cac:AdditionalItemProperty>
+    </cac:Item>
+  </cac:WasteLine>
+
+  <cac:WasteLine>
+    <cbc:ID>89</cbc:ID>
+    <cbc:Quantity unitCode="EA">26</cbc:Quantity>
+    <cac:Item>
+      <cbc:Name>INNDEKN EKL 94X160 0007E</cbc:Name>
+      <cac:StandardItemIdentification>
+        <cbc:ID schemeID="0160">5702321581071</cbc:ID>
+      </cac:StandardItemIdentification>
+      <cac:AdditionalItemProperty>
+        <cbc:Name>NOBB</cbc:Name>
+        <cbc:Value>22463632</cbc:Value>
+      </cac:AdditionalItemProperty>
+    </cac:Item>
+  </cac:WasteLine>
+
+  <cac:WasteLine>
+    <cbc:ID>90</cbc:ID>
+    <cbc:Quantity unitCode="LMT">24.9</cbc:Quantity>
+    <cac:Item>
+      <cbc:Name>STÅLPR AKUSTIKK AP 25X86X3644</cbc:Name>
+      <cac:StandardItemIdentification>
+        <cbc:ID schemeID="0160">7318931933490</cbc:ID>
+      </cac:StandardItemIdentification>
+      <cac:AdditionalItemProperty>
+        <cbc:Name>NOBB</cbc:Name>
+        <cbc:Value>10912731</cbc:Value>
+      </cac:AdditionalItemProperty>
+    </cac:Item>
+  </cac:WasteLine>
+
+  <cac:WasteLine>
+    <cbc:ID>91</cbc:ID>
+    <cbc:Quantity unitCode="EA">8</cbc:Quantity>
+    <cac:Item>
+      <cbc:Name>OVERDEL BRØNNKRAGE Ø75MM SORT</cbc:Name>
+      <cac:StandardItemIdentification>
+        <cbc:ID schemeID="0160">7319660684080</cbc:ID>
+      </cac:StandardItemIdentification>
+      <cac:AdditionalItemProperty>
+        <cbc:Name>NOBB</cbc:Name>
+        <cbc:Value>22154165</cbc:Value>
+      </cac:AdditionalItemProperty>
+    </cac:Item>
+  </cac:WasteLine>
+
+  <cac:WasteLine>
+    <cbc:ID>92</cbc:ID>
+    <cbc:Quantity unitCode="EA">27</cbc:Quantity>
+    <cac:Item>
+      <cbc:Name>VINDU SIDESV 2-RAMS 17X12 ,UV 1,2</cbc:Name>
+      <cac:StandardItemIdentification>
+        <cbc:ID schemeID="0160">7071895011832</cbc:ID>
+      </cac:StandardItemIdentification>
+      <cac:AdditionalItemProperty>
+        <cbc:Name>NOBB</cbc:Name>
+        <cbc:Value>22085153</cbc:Value>
+      </cac:AdditionalItemProperty>
+    </cac:Item>
+  </cac:WasteLine>
+
+  <cac:WasteLine>
+    <cbc:ID>93</cbc:ID>
+    <cbc:Quantity unitCode="MTK">25.7</cbc:Quantity>
+    <cac:Item>
+      <cbc:Name>SUNDOLITT EPS S80 120X600X1200</cbc:Name>
+      <cac:StandardItemIdentification>
+        <cbc:ID schemeID="0160">7033340000242</cbc:ID>
+      </cac:StandardItemIdentification>
+      <cac:AdditionalItemProperty>
+        <cbc:Name>NOBB</cbc:Name>
+        <cbc:Value>22248678</cbc:Value>
+      </cac:AdditionalItemProperty>
+    </cac:Item>
+  </cac:WasteLine>
+
+  <cac:WasteLine>
+    <cbc:ID>94</cbc:ID>
+    <cbc:Quantity unitCode="EA">3</cbc:Quantity>
+    <cac:Item>
+      <cbc:Name>NEDLØPSRØR 70 MM LGD 6M SORT</cbc:Name>
+      <cac:StandardItemIdentification>
+        <cbc:ID schemeID="0160">7071528006754</cbc:ID>
+      </cac:StandardItemIdentification>
+      <cac:AdditionalItemProperty>
+        <cbc:Name>NOBB</cbc:Name>
+        <cbc:Value>22431886</cbc:Value>
+      </cac:AdditionalItemProperty>
+    </cac:Item>
+  </cac:WasteLine>
+
+  <cac:WasteLine>
+    <cbc:ID>95</cbc:ID>
+    <cbc:Quantity unitCode="EA">3</cbc:Quantity>
+    <cac:Item>
+      <cbc:Name>AVSTANDSKLIPS VK25 25X25 GYPROC</cbc:Name>
+      <cac:StandardItemIdentification>
+        <cbc:ID schemeID="0160">7318935060550</cbc:ID>
+      </cac:StandardItemIdentification>
+      <cac:AdditionalItemProperty>
+        <cbc:Name>NOBB</cbc:Name>
+        <cbc:Value>10545135</cbc:Value>
+      </cac:AdditionalItemProperty>
+    </cac:Item>
+  </cac:WasteLine>
+
+  <cac:WasteLine>
+    <cbc:ID>96</cbc:ID>
+    <cbc:Quantity unitCode="MTK">20.6</cbc:Quantity>
+    <cac:Item>
+      <cbc:Name>ARBOR SPONPL VEGG 2740 FALS SVANEN</cbc:Name>
+      <cac:StandardItemIdentification>
+        <cbc:ID schemeID="0160">7038840005902</cbc:ID>
+      </cac:StandardItemIdentification>
+      <cac:AdditionalItemProperty>
+        <cbc:Name>NOBB</cbc:Name>
+        <cbc:Value>20005023</cbc:Value>
+      </cac:AdditionalItemProperty>
+    </cac:Item>
+  </cac:WasteLine>
+
+  <cac:WasteLine>
+    <cbc:ID>97</cbc:ID>
+    <cbc:Quantity unitCode="EA">17</cbc:Quantity>
+    <cac:Item>
+      <cbc:Name>VINDU SIDESV 1-RAMS 4X10-H,UV 1,2</cbc:Name>
+      <cac:StandardItemIdentification>
+        <cbc:ID schemeID="0160">7071895012204</cbc:ID>
+      </cac:StandardItemIdentification>
+      <cac:AdditionalItemProperty>
+        <cbc:Name>NOBB</cbc:Name>
+        <cbc:Value>22082176</cbc:Value>
+      </cac:AdditionalItemProperty>
+    </cac:Item>
+  </cac:WasteLine>
+
+  <cac:WasteLine>
+    <cbc:ID>98</cbc:ID>
+    <cbc:Quantity unitCode="LMT">15.3</cbc:Quantity>
+    <cac:Item>
+      <cbc:Name>FURU 09X045 UNDERLIGGER 1.S</cbc:Name>
+      <cac:StandardItemIdentification>
+        <cbc:ID schemeID="0160">7042756401109</cbc:ID>
+      </cac:StandardItemIdentification>
+      <cac:AdditionalItemProperty>
+        <cbc:Name>NOBB</cbc:Name>
+        <cbc:Value>22207302</cbc:Value>
+      </cac:AdditionalItemProperty>
+    </cac:Item>
+  </cac:WasteLine>
+
+  <cac:WasteLine>
+    <cbc:ID>99</cbc:ID>
+    <cbc:Quantity unitCode="MTK">10.8</cbc:Quantity>
+    <cac:Item>
+      <cbc:Name>HUNTON VINDT TREFIB PL 12X1200X2440</cbc:Name>
+      <cac:StandardItemIdentification>
+        <cbc:ID schemeID="0160">7022611050055</cbc:ID>
+      </cac:StandardItemIdentification>
+      <cac:AdditionalItemProperty>
+        <cbc:Name>NOBB</cbc:Name>
+        <cbc:Value>10541282</cbc:Value>
+      </cac:AdditionalItemProperty>
+    </cac:Item>
+  </cac:WasteLine>
+
+  <cac:WasteLine>
+    <cbc:ID>100</cbc:ID>
+    <cbc:Quantity unitCode="MTK">28.4</cbc:Quantity>
+    <cac:Item>
+      <cbc:Name>GIPSPL HARD 1200X2700X12,5</cbc:Name>
+      <cac:StandardItemIdentification>
+        <cbc:ID schemeID="0160">7046630120810</cbc:ID>
+      </cac:StandardItemIdentification>
+      <cac:AdditionalItemProperty>
+        <cbc:Name>NOBB</cbc:Name>
+        <cbc:Value>10386936</cbc:Value>
+      </cac:AdditionalItemProperty>
+    </cac:Item>
+  </cac:WasteLine>
+</WasteReport>

@@ -41,7 +41,12 @@ const TABS: TabDef<Tab>[] = [
   { id: 'transport', label: 'Transport', icon: <Truck className="h-4 w-4" /> },
   { id: 'waste', label: 'Avfall', icon: <Trash2 className="h-4 w-4" /> },
   { id: 'energy', label: 'Energi', icon: <Zap className="h-4 w-4" /> },
-  { id: 'report', label: 'Rapport', icon: <FileText className="h-4 w-4" /> },
+  {
+    id: 'report',
+    label: 'Rapport',
+    icon: <FileText className="h-4 w-4" />,
+    className: 'bg-emerald-50',
+  },
 ]
 
 const KPI_CONFIG = [
@@ -185,7 +190,7 @@ export default function ProjectDashboard() {
               onTabChange={setActiveTab}
               scrollDeps={[isLoading]}
             />
-            <div className="p-6 min-h-120">
+            <div className="p-6 min-h-[30rem]">
               {activeTab === 'materials' && (
                 <InvoiceUpload projectId={project.id} />
               )}

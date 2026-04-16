@@ -1,7 +1,7 @@
 """add vehicles, transport_reports, and project_transports tables
 
 Revision ID: d368b28568dc
-Revises: 28f746489e3c
+Revises: b3e7a9f12d45
 Create Date: 2026-03-04 14:51:18.427167
 
 """
@@ -13,7 +13,7 @@ import sqlalchemy as sa
 
 # revision identifiers, used by Alembic.
 revision: str = 'd368b28568dc'
-down_revision: Union[str, Sequence[str], None] = '28f746489e3c'
+down_revision: Union[str, Sequence[str], None] = 'b3e7a9f12d45'
 branch_labels: Union[str, Sequence[str], None] = None
 depends_on: Union[str, Sequence[str], None] = None
 

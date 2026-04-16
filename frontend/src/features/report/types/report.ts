@@ -40,7 +40,8 @@ export interface TransportLineItem {
 export interface WasteLineItem {
   id: number
   waste_type: string | null
-  quantity_tons: number | null
+  quantity: number | null
+  unit: string | null
   total_co2_kg: number | null
   confidence_score: number | null
   source_type: string | null

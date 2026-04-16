@@ -1,16 +1,13 @@
+import { useMemo } from 'react'
 import CollapsibleGroupCard from '@/shared/components/CollapsibleGroupCard'
-import {
-  GROUP_TH,
-  GROUP_THEAD,
-  GROUP_TBODY,
-} from '@/shared/components/ParsePreviewShell'
-import EditableRow, { type GroupColumn } from '@/shared/components/EditableRow'
-import type { ProjectInvoiceGroup, ProjectMaterialItem } from '../api/invoice'
+import DataTable from '@/shared/components/DataTable'
+import InlineUndoBar from '@/shared/components/InlineUndoBar'
+import type { ProjectInvoiceGroup } from '../api/invoice'
 import {
   useUpdateMaterial,
   useDeleteMaterial,
 } from '../hooks/useProjectMaterials'
-import InlineUndoBar from '@/shared/components/InlineUndoBar'
+import { materialColumns, type MaterialRow } from '../materialColumns'
 
 interface Props {
   group: ProjectInvoiceGroup
@@ -18,84 +15,6 @@ interface Props {
   onDelete: () => void
   isDeleting: boolean
 }
-
-const INPUT =
-  'w-full rounded border border-gray-300 px-2 py-0.5 text-sm focus:outline-none focus:ring-1 focus:ring-gray-400'
-
-const columns: GroupColumn<ProjectMaterialItem>[] = [
-  {
-    header: 'Materiale',
-    render: (item) => (
-      <span className="text-gray-800 truncate max-w-48 block">
-        {item.material_name ?? '—'}
-        {item.manual_override && (
-          <span className="ml-2 inline-block rounded bg-blue-200 px-1.5 py-0.5 text-xs font-medium text-blue-800">
-            Korrigert
-          </span>
-        )}
-      </span>
-    ),
-  },
-  {
-    header: 'NOBB',
-    render: (item) => (
-      <span className="text-gray-500 font-mono text-xs">
-        {item.nobb_number ?? '—'}
-      </span>
-    ),
-  },
-  {
-    header: 'Antall',
-    align: 'right',
-    render: (item) => (
-      <span className="text-gray-800">
-        {item.quantity ?? '—'} {item.unit ?? ''}
-      </span>
-    ),
-  },
-  {
-    header: 'CO₂ (kg)',
-    align: 'right',
-    render: (item) => (
-      <span
-        className={
-          item.total_co2_kg == null ? 'text-gray-400' : 'text-gray-800'
-        }
-      >
-        {item.total_co2_kg != null
-          ? item.total_co2_kg.toLocaleString('nb-NO', {
-              maximumFractionDigits: 2,
-            })
-          : '—'}
-      </span>
-    ),
-    editRender: (value, onChange) => (
-      <input
-        type="number"
-        step="any"
-        placeholder="kg CO₂"
-        value={value}
-        onChange={(e) => onChange(e.target.value)}
-        className={`${INPUT} text-right`}
-        autoFocus
-      />
-    ),
-  },
-  {
-    header: 'EPD',
-    render: (item) => (
-      <span
-        className={`inline-flex rounded-full px-2 py-0.5 text-xs font-medium ${
-          item.has_epd
-            ? 'bg-emerald-100 text-emerald-700'
-            : 'bg-gray-100 text-gray-500'
-        }`}
-      >
-        {item.has_epd ? 'Ja' : 'Nei'}
-      </span>
-    ),
-  },
-]
 
 export default function InvoiceGroupCard({
   group,
@@ -106,6 +25,25 @@ export default function InvoiceGroupCard({
   const updateMutation = useUpdateMaterial(projectId)
   const { deleteMaterial, pendingMaterialId, undoMaterialDelete } =
     useDeleteMaterial(projectId)
+
+  const rows: MaterialRow[] = useMemo(
+    () =>
+      group.items.map((item) => ({
+        name: item.material_name,
+        nobb_number: item.nobb_number,
+        gtin: item.gtin,
+        quantity: item.quantity,
+        unit: item.unit,
+        line_total: item.total_price,
+        co2_kg: item.total_co2_kg,
+        flagged: item.flagged,
+        enriched: true,
+        has_epd: item.has_epd,
+        manual_override: item.manual_override,
+      })),
+    [group.items],
+  )
+
   const totalCo2 = group.items.reduce(
     (sum, item) => sum + (item.total_co2_kg ?? 0),
     0,
@@ -138,63 +76,29 @@ export default function InvoiceGroupCard({
       onDelete={onDelete}
       isDeleting={isDeleting}
     >
-      <table className="w-full text-sm table-fixed">
-        <colgroup>
-          <col className="w-[35%]" />
-          <col className="w-[15%]" />
-          <col className="w-[15%]" />
-          <col className="w-[15%]" />
-          <col className="w-[10%]" />
-          <col className="w-[10%]" />
-        </colgroup>
-        <thead className={GROUP_THEAD}>
-          <tr>
-            {columns.map((col, i) => (
-              <th
-                key={i}
-                className={
-                  col.align === 'right' ? `${GROUP_TH} text-right` : GROUP_TH
-                }
-              >
-                {col.header}
-              </th>
-            ))}
-            <th className={GROUP_TH} />
-          </tr>
-        </thead>
-        <tbody className={GROUP_TBODY}>
-          {group.items.map((item) => (
-            <EditableRow
-              key={item.id}
-              row={item}
-              columns={columns}
-              rowClassName={
-                item.manual_override
-                  ? 'bg-blue-50/50'
-                  : item.flagged
-                    ? 'bg-amber-50/50'
-                    : 'hover:bg-gray-50'
-              }
-              getEditValues={(it) => ({
-                3: it.total_co2_kg != null ? String(it.total_co2_kg) : '',
-              })}
-              onSave={(values) => {
-                const val = parseFloat(values[3])
-                if (isNaN(val)) return
-                updateMutation.mutate({
-                  materialId: item.id,
-                  total_co2_kg: val,
-                })
-              }}
-              onDelete={() => void deleteMaterial(item.id)}
-              isSaving={
-                updateMutation.isPending &&
-                updateMutation.variables?.materialId === item.id
-              }
-            />
-          ))}
-        </tbody>
-      </table>
+      <DataTable
+        columns={materialColumns}
+        rows={rows}
+        rowKey={(_, i) => group.items[i].id}
+        rowClassName={(row) =>
+          row.manual_override
+            ? 'bg-blue-50/50'
+            : row.flagged
+              ? 'bg-amber-50/50'
+              : 'hover:bg-gray-50'
+        }
+        onSaveEdit={(_row, i, values) => {
+          const item = group.items[i]
+          const co2 = parseFloat(values[4])
+          if (isNaN(co2)) return
+          updateMutation.mutate({ materialId: item.id, total_co2_kg: co2 })
+        }}
+        onDeleteRow={(_row, i) => void deleteMaterial(group.items[i].id)}
+        isSaving={(_row, i) =>
+          updateMutation.isPending &&
+          updateMutation.variables?.materialId === group.items[i].id
+        }
+      />
       {pendingMaterialId != null && (
         <InlineUndoBar
           message="Materialpost slettet"

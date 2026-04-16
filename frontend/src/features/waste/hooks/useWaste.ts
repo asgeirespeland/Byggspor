@@ -36,7 +36,7 @@ export function useUpdateWasteItem(projectId: number) {
       itemId: number
       data: {
         waste_type?: string
-        quantity_tons?: number
+        quantity?: number
         total_co2_kg?: number
       }
     },

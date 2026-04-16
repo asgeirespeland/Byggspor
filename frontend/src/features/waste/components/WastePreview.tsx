@@ -1,8 +1,8 @@
-import ParsePreviewShell, {
-  type Column,
-} from '@/shared/components/ParsePreviewShell'
+import { useMemo } from 'react'
+import ParsePreviewShell from '@/shared/components/ParsePreviewShell'
 import Co2TotalBadge from '@/shared/components/Co2TotalBadge'
-import type { WasteParseResponse, WasteLineItem } from '../types/waste'
+import type { WasteParseResponse } from '../types/waste'
+import { wasteColumns, type WasteRow } from '../wasteColumns'
 
 interface Props {
   data: WasteParseResponse
@@ -12,91 +12,6 @@ interface Props {
   onCancel: () => void
 }
 
-const CO2_SOURCE_LABELS: Record<string, string> = {
-  epd_c3c4: 'EPD',
-  fraction_factor: 'Generisk',
-}
-
-const INPUT =
-  'w-full rounded border border-gray-300 px-2 text-sm h-7 focus:outline-none focus:ring-1 focus:ring-gray-400'
-
-const columns: Column<WasteLineItem>[] = [
-  {
-    header: 'Materiale',
-    width: '35%',
-    render: (item) => (
-      <span className="text-gray-800">
-        {item.name ?? '—'}
-        {item.fraction_code && (
-          <span className="ml-1 text-xs text-gray-400">
-            ({item.fraction_code})
-          </span>
-        )}
-      </span>
-    ),
-    editRender: (_row, _i, value, onChange) => (
-      <input
-        type="text"
-        value={value}
-        onChange={(e) => onChange(e.target.value)}
-        className={INPUT}
-        autoFocus
-      />
-    ),
-  },
-  {
-    header: 'Tonn',
-    width: '15%',
-    align: 'right',
-    render: (item) => (
-      <span className="text-gray-800">
-        {item.quantity_tons?.toFixed(3) ?? '—'}
-      </span>
-    ),
-    editRender: (_row, _i, value, onChange) => (
-      <input
-        type="number"
-        min="0"
-        step="any"
-        value={value}
-        onChange={(e) => onChange(e.target.value)}
-        className={`${INPUT} text-right`}
-      />
-    ),
-  },
-  {
-    header: 'CO₂ (kg)',
-    width: '15%',
-    align: 'right',
-    render: (item) => (
-      <span className={item.co2_kg == null ? 'text-gray-400' : 'text-gray-800'}>
-        {item.co2_kg != null ? item.co2_kg.toFixed(2) : '—'}
-      </span>
-    ),
-    editRender: (_row, _i, value, onChange) => (
-      <input
-        type="number"
-        min="0"
-        step="any"
-        value={value}
-        onChange={(e) => onChange(e.target.value)}
-        className={`${INPUT} text-right`}
-      />
-    ),
-  },
-  {
-    header: 'Kilde',
-    width: '27%',
-    render: (item) => (
-      <span className="text-gray-600">
-        {item.co2_source
-          ? (CO2_SOURCE_LABELS[item.co2_source] ?? item.co2_source)
-          : '—'}
-      </span>
-    ),
-  },
-]
-
 export default function WastePreview({
   data,
   setData,
@@ -104,13 +19,27 @@ export default function WastePreview({
   confirming,
   onCancel,
 }: Props) {
-  const flaggedCount = data.line_items.filter((i) => i.flagged).length
+  const rows: WasteRow[] = useMemo(
+    () =>
+      data.line_items.map((item) => ({
+        name: item.name,
+        fraction_code: item.fraction_code,
+        quantity: item.quantity,
+        unit: item.unit,
+        co2_kg: item.co2_kg,
+        co2_source: item.co2_source,
+        flagged: item.flagged,
+      })),
+    [data.line_items],
+  )
+
+  const flaggedCount = rows.filter((r) => r.flagged).length
 
   let co2Total = 0
   let co2Count = 0
-  for (const item of data.line_items) {
-    if (item.co2_kg != null) {
-      co2Total += item.co2_kg
+  for (const row of rows) {
+    if (row.co2_kg != null) {
+      co2Total += row.co2_kg
       co2Count++
     }
   }
@@ -125,22 +54,17 @@ export default function WastePreview({
 
   return (
     <ParsePreviewShell
-      columns={columns}
-      rows={data.line_items}
+      columns={wasteColumns}
+      rows={rows}
       rowKey={(_, i) => i}
-      rowClassName={(item) => (item.flagged ? 'bg-amber-50' : '')}
-      getEditValues={(item) => ({
-        0: item.name ?? '',
-        1: item.quantity_tons != null ? String(item.quantity_tons) : '',
-        2: item.co2_kg != null ? String(item.co2_kg) : '',
-      })}
+      rowClassName={(row) => (row.flagged ? 'bg-amber-50' : '')}
       onSaveEdit={(_row, i, values) => {
         const items = [...data.line_items]
         items[i] = {
           ...items[i],
           name: values[0] || null,
-          quantity_tons: values[1] ? parseFloat(values[1]) : null,
-          co2_kg: values[2] ? parseFloat(values[2]) : null,
+          quantity: values[1] ? parseFloat(values[1]) : null,
+          co2_kg: values[3] ? parseFloat(values[3]) : null,
         }
         setData({ ...data, line_items: items })
       }}
@@ -175,7 +99,7 @@ export default function WastePreview({
       badges={
         <>
           <span className="rounded-full bg-gray-100 px-3 py-1 text-xs font-medium text-gray-600">
-            {data.line_items.length} poster
+            {rows.length} poster
           </span>
           {flaggedCount > 0 && (
             <span className="rounded-full bg-amber-100 px-3 py-1 text-xs font-medium text-amber-700">
