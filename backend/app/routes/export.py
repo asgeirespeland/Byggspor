@@ -160,7 +160,7 @@ def _lines_from_waste(session, project_id: int) -> list[InvoiceLine]:
     lines = []
     for w in waste_items:
         desc = f"Avfall — {w.waste_type or 'ukjent type'}"
-        qty = float(w.quantity_tons or 0)
+        qty = float(w.quantity or 0)
         cost_per_ton = float(getattr(w, "cost_per_ton", None) or 0)
         line_total = round(qty * cost_per_ton, 2)
         lines.append(
@@ -168,7 +168,7 @@ def _lines_from_waste(session, project_id: int) -> list[InvoiceLine]:
                 category=InvoiceLineCategory.WASTE,
                 description=desc,
                 quantity=qty,
-                unit="TNE",
+                unit=w.unit or "TNE",
                 unit_price_kr=cost_per_ton,
                 vat_rate=0.25,
                 line_total_kr=line_total,

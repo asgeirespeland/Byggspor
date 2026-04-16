@@ -98,11 +98,11 @@ def _recalc_waste(session: Session, project_id: int, settings: dict) -> int:
 
     count = 0
     for item in items:
-        if item.waste_type and item.quantity_tons is not None:
+        if item.waste_type and item.quantity is not None:
             normalized = item.waste_type.strip().lower()
             factor = emission_factors.get(normalized)
             if factor is not None:
-                new_co2 = round(float(item.quantity_tons) * factor, 4)
+                new_co2 = round(float(item.quantity) * factor, 4)
                 item.calculated_co2_kg = new_co2
                 item.total_co2_kg = new_co2
                 count += 1

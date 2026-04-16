@@ -120,7 +120,8 @@ def _waste_items(session: Session, project_id: int) -> list[dict]:
             {
                 "id": pw.id,
                 "waste_type": pw.waste_type,
-                "quantity_tons": _float(pw.quantity_tons),
+                "quantity": _float(pw.quantity),
+                "unit": pw.unit,
                 "total_co2_kg": _float(pw.total_co2_kg),
                 "confidence_score": pw.confidence_score,
                 "source_type": pw.source_type.value if pw.source_type else None,
