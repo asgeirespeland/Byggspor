@@ -142,4 +142,4 @@ CONFIDENCE_THRESHOLDS = {
 
 # Weighting strategy for the overall project confidence score.
 # "average" = simple mean across entries, "co2_weighted" = weighted by CO₂ contribution.
-CONFIDENCE_WEIGHTING = "average"
+CONFIDENCE_WEIGHTING = "co2_weighted"

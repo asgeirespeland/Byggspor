@@ -6,8 +6,11 @@ import {
   Building2,
   User,
   Receipt,
+  Settings,
 } from 'lucide-react'
 import type { Project } from '@/features/project/hooks/useProjects'
+import ProjectSettingsPanel from '@/features/settings/components/ProjectSettingsPanel'
+import FullscreenDialog from '@/shared/components/FullscreenDialog'
 import ConfidenceGauge from './ConfidenceGauge'
 import ConfidenceInfo from './ConfidenceInfo'
 import FlaggedItems from './FlaggedItems'
@@ -25,6 +28,7 @@ export default function ProjectSidebar({
   ) => void
 }) {
   const [invoiceOpen, setInvoiceOpen] = useState(false)
+  const [settingsOpen, setSettingsOpen] = useState(false)
 
   return (
     <div className="flex w-full lg:w-60 shrink-0 flex-col gap-3 self-stretch">
@@ -91,6 +95,27 @@ export default function ProjectSidebar({
 
       {/* Flexible spacer */}
       <div className="flex-1" />
+
+      {/* Project settings */}
+      <button
+        type="button"
+        onClick={() => setSettingsOpen(true)}
+        className="flex w-full items-center gap-3 rounded-xl border border-gray-200 bg-white px-4 py-3 shadow-sm text-left hover:bg-gray-50 transition-colors cursor-pointer"
+      >
+        <Settings className="h-4 w-4 text-gray-400" />
+        <span className="text-sm font-medium text-gray-700">
+          Beregningsinnstillinger
+        </span>
+      </button>
+
+      <FullscreenDialog
+        open={settingsOpen}
+        onOpenChange={setSettingsOpen}
+        title="Beregningsinnstillinger"
+        className="sm:max-w-[80vw] max-h-[85vh] overflow-y-auto"
+      >
+        <ProjectSettingsPanel projectId={project.id} />
+      </FullscreenDialog>
 
       {/* Generate climate report button */}
       <button

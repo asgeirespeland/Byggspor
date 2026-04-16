@@ -2,12 +2,20 @@ from __future__ import annotations
 
 from flask import Blueprint, g, jsonify, request
 
+from app.config.settings_resolver import (
+    SETTINGS_DEFAULTS,
+    clean_overrides,
+    resolve_org_settings_with_sources,
+    validate_settings,
+)
 from app.errors import ApiError
 from app.middleware.auth import require_auth
 from app.middleware.roles import require_org_role
 from app.models.organization import Organization, OrgType
 from app.models.organization_member import OrganizationMember, OrgRole
+from app.models.project import Project
 from app.models.user import User
+from app.services.recalculation import recalculate_project
 from app.utils.db import db_commit
 from app.utils.parsing import parse_enum
 
@@ -240,3 +248,96 @@ def remove_organization_member(organization_id: int, user_id: int):
     with db_commit(session, "Kunne ikke fjerne medlemskapet.", "DELETE_FAILED"):
         session.delete(membership)
     return "", 204
+
+
+# ---------------------------------------------------------------------------
+# Organization calculation settings
+# ---------------------------------------------------------------------------
+
+
+@organization_bp.route("/<int:organization_id>/settings", methods=["GET"])
+@require_org_role((OrgRole.OWNER, OrgRole.ADMIN, OrgRole.MEMBER, OrgRole.VIEWER))
+def get_organization_settings(organization_id: int):
+    """Return resolved calculation settings for the organization."""
+    session = g.db
+    org = session.get(Organization, organization_id)
+    if not org:
+        raise ApiError("Organisasjonen ble ikke funnet.", code="NOT_FOUND", status=404)
+
+    return jsonify(
+        {"settings": resolve_org_settings_with_sources(session, organization_id)}
+    )
+
+
+@organization_bp.route("/<int:organization_id>/settings", methods=["PATCH"])
+@require_org_role((OrgRole.OWNER, OrgRole.ADMIN))
+def update_organization_settings(organization_id: int):
+    """Update calculation settings for the organization (partial merge)."""
+    payload = request.get_json(silent=True) or {}
+    if not payload:
+        raise ApiError("Ingen innstillinger oppgitt.", code="MISSING_FIELD")
+
+    validated = validate_settings(payload)
+
+    session = g.db
+    org = session.get(Organization, organization_id)
+    if not org:
+        raise ApiError("Organisasjonen ble ikke funnet.", code="NOT_FOUND", status=404)
+
+    merged = {**(org.settings or {}), **validated}
+    org.settings = clean_overrides(merged, SETTINGS_DEFAULTS)
+
+    # Recalculate all projects in this org for the changed settings
+    changed = set(validated.keys())
+    projects = (
+        session.query(Project).filter(Project.organization_id == organization_id).all()
+    )
+    for project in projects:
+        # Only recalc keys not overridden at project level
+        project_overrides = set(project.settings.keys()) if project.settings else set()
+        keys_to_recalc = changed - project_overrides
+        if keys_to_recalc:
+            recalculate_project(session, project.id, changed_keys=keys_to_recalc)
+
+    with db_commit(session, "Kunne ikke oppdatere innstillingene.", "SAVE_FAILED"):
+        pass
+
+    session.refresh(org)
+    return jsonify(
+        {"settings": resolve_org_settings_with_sources(session, organization_id)}
+    )
+
+
+@organization_bp.route("/<int:organization_id>/settings", methods=["DELETE"])
+@require_org_role((OrgRole.OWNER, OrgRole.ADMIN))
+def reset_organization_settings(organization_id: int):
+    """Clear all organization-level overrides (revert to defaults)."""
+    session = g.db
+    org = session.get(Organization, organization_id)
+    if not org:
+        raise ApiError("Organisasjonen ble ikke funnet.", code="NOT_FOUND", status=404)
+
+    old_keys = set(org.settings.keys()) if org.settings else set()
+    org.settings = None
+
+    if old_keys:
+        projects = (
+            session.query(Project)
+            .filter(Project.organization_id == organization_id)
+            .all()
+        )
+        for project in projects:
+            project_overrides = (
+                set(project.settings.keys()) if project.settings else set()
+            )
+            keys_to_recalc = old_keys - project_overrides
+            if keys_to_recalc:
+                recalculate_project(session, project.id, changed_keys=keys_to_recalc)
+
+    with db_commit(session, "Kunne ikke tilbakestille innstillingene.", "SAVE_FAILED"):
+        pass
+
+    session.refresh(org)
+    return jsonify(
+        {"settings": resolve_org_settings_with_sources(session, organization_id)}
+    )
