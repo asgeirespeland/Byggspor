@@ -33,10 +33,12 @@ from app.utils.confidence import waste_confidence
 logger = logging.getLogger(__name__)
 
 
-def _extract_c3c4_co2(epd: dict | None, quantity_tons: float) -> float | None:
-    """Calculate end-of-life CO₂ from EPD C3 + C4 GWP stages.
+def _extract_c3c4_gwp_per_unit(epd: dict | None) -> float | None:
+    """Extract end-of-life GWP per unit (C3 + C4) from EPD data.
 
-    Returns total CO₂ in kg, or None if stages are missing.
+    Returns GWP per declared unit, or None if stages are missing.
+    Same approach as material_service.compute_gwp_from_stages but
+    limited to C3/C4 stages.
     """
     if epd is None:
         return None
@@ -51,20 +53,7 @@ def _extract_c3c4_co2(epd: dict | None, quantity_tons: float) -> float | None:
     if c3_total is None and c4_total is None:
         return None
 
-    # GWP values in EPD are per declared unit. We need the conversion factor
-    # to get per-kg, then multiply by quantity.
-    conversion_factor = epd.get("conversion_factor_kg")
-
-    gwp_per_unit = (c3_total or 0.0) + (c4_total or 0.0)
-
-    if conversion_factor and conversion_factor > 0:
-        gwp_per_kg = gwp_per_unit / conversion_factor
-    else:
-        # Assume declared unit is already per kg if no conversion factor
-        gwp_per_kg = gwp_per_unit
-
-    quantity_kg = quantity_tons * 1000.0
-    return round(gwp_per_kg * quantity_kg, 4)
+    return (c3_total or 0.0) + (c4_total or 0.0)
 
 
 def _check_catalog(
@@ -123,18 +112,26 @@ def _check_catalog(
     }
 
 
+def _calc_product_co2(epd: dict | None, quantity: float) -> float | None:
+    """Calculate product waste CO2: gwp_per_unit * quantity."""
+    gwp = _extract_c3c4_gwp_per_unit(epd)
+    if gwp is None or not quantity:
+        return None
+    return round(gwp * quantity, 4)
+
+
 def _enrich_product_item(item: dict, session: Session | None) -> None:
     """Enrich a line item that has GTIN or NOBB via NOBB API / catalog."""
     gtin = item.get("gtin")
     nobb_number = item.get("nobb_number")
-    quantity_tons = item.get("quantity_tons") or 0.0
+    quantity = item.get("quantity") or 0.0
 
     # Check catalog first
     if session is not None:
         catalog_result = _check_catalog(session, gtin, nobb_number)
         if catalog_result is not None:
             epd = catalog_result.get("epd")
-            co2_kg = _extract_c3c4_co2(epd, quantity_tons)
+            co2_kg = _calc_product_co2(epd, quantity)
             item["enriched"] = True
             item["nobb_data"] = catalog_result
             item["co2_kg"] = co2_kg
@@ -180,7 +177,7 @@ def _enrich_product_item(item: dict, session: Session | None) -> None:
         item["nobb_data"] = None
     else:
         epd = result.get("epd")
-        co2_kg = _extract_c3c4_co2(epd, quantity_tons)
+        co2_kg = _calc_product_co2(epd, quantity)
         item["enriched"] = True
         item["nobb_data"] = result
         item["co2_kg"] = co2_kg
@@ -189,13 +186,22 @@ def _enrich_product_item(item: dict, session: Session | None) -> None:
         item["confidence"] = waste_confidence(has_emission_factor=co2_kg is not None)
 
 
+def _quantity_in_tons(quantity: float, unit: str | None) -> float:
+    """Convert quantity to tons based on unit. Fractions use weight units."""
+    if unit and unit.upper() == "KG":
+        return quantity / 1000.0
+    return quantity  # TON or unspecified defaults to tons
+
+
 def _enrich_fraction_item(
     item: dict, ns9431_factors: dict[str, float] | None = None
 ) -> None:
     """Enrich a line item using NS 9431 fraction code + generic factors."""
     factors = ns9431_factors or NS9431_EMISSION_FACTORS
     fraction_code = item.get("fraction_code")
-    quantity_tons = item.get("quantity_tons") or 0.0
+    quantity = item.get("quantity") or 0.0
+    unit = item.get("unit")
+    quantity_tons = _quantity_in_tons(quantity, unit)
 
     factor = factors.get(fraction_code) if fraction_code else None
 

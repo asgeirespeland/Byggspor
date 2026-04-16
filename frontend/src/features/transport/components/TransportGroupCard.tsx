@@ -1,15 +1,12 @@
+import { useMemo } from 'react'
 import CollapsibleGroupCard from '@/shared/components/CollapsibleGroupCard'
-import {
-  GROUP_TH,
-  GROUP_THEAD,
-  GROUP_TBODY,
-} from '@/shared/components/ParsePreviewShell'
+import DataTable from '@/shared/components/DataTable'
 import InlineUndoBar from '@/shared/components/InlineUndoBar'
 import type {
   ProjectReportGroup,
   TripUpdateInput,
 } from '../api/projectTransports'
-import TransportRow from './TransportRow'
+import { tripColumns, type TripRow } from '../tripColumns'
 
 interface Props {
   group: ProjectReportGroup
@@ -30,6 +27,22 @@ export default function TransportGroupCard({
   pendingTripId,
   onUndoTripDelete,
 }: Props) {
+  const rows: TripRow[] = useMemo(
+    () =>
+      group.trips.map((t) => ({
+        driver_name: t.driver_name,
+        trip_date: t.trip_date,
+        start_address: t.start_address,
+        end_address: t.end_address,
+        registration_number: t.vehicle?.registration_number ?? null,
+        vehicle_make: t.vehicle?.make ?? null,
+        distance_km: t.distance_km,
+        total_co2_kg: t.total_co2_kg,
+        flagged: t.flagged,
+      })),
+    [group.trips],
+  )
+
   const totalCo2 = group.trips.reduce(
     (sum, t) => sum + (t.total_co2_kg ?? 0),
     0,
@@ -56,29 +69,26 @@ export default function TransportGroupCard({
       onDelete={onDelete}
       isDeleting={false}
     >
-      <table className="w-full text-sm">
-        <thead className={GROUP_THEAD}>
-          <tr>
-            <th className={GROUP_TH}>Sjåfør</th>
-            <th className={GROUP_TH}>Dato</th>
-            <th className={GROUP_TH}>Kjøretøy</th>
-            <th className={`${GROUP_TH} text-right`}>Km</th>
-            <th className={`${GROUP_TH} text-right`}>CO₂ (kg)</th>
-            <th className={GROUP_TH} />
-          </tr>
-        </thead>
-        <tbody className={GROUP_TBODY}>
-          {group.trips.map((trip) => (
-            <TransportRow
-              key={trip.id}
-              trip={trip}
-              onDelete={() => onDeleteTrip(trip.id)}
-              onUpdate={(data) => onUpdateTrip(trip.id, data)}
-              isUpdating={updatingTripId === trip.id}
-            />
-          ))}
-        </tbody>
-      </table>
+      <DataTable
+        columns={tripColumns}
+        rows={rows}
+        rowKey={(_, i) => group.trips[i].id}
+        rowClassName={(row) =>
+          row.flagged ? 'bg-amber-50/50 hover:bg-amber-50' : 'hover:bg-gray-50'
+        }
+        onSaveEdit={(_row, i, values) => {
+          const trip = group.trips[i]
+          const distance = parseFloat(values[4])
+          if (isNaN(distance) || distance < 0) return
+          onUpdateTrip(trip.id, {
+            driver_name: values[0] || undefined,
+            trip_date: values[1] || undefined,
+            distance_km: distance,
+          })
+        }}
+        onDeleteRow={(_row, i) => onDeleteTrip(group.trips[i].id)}
+        isSaving={(_row, i) => updatingTripId === group.trips[i].id}
+      />
       {pendingTripId != null && (
         <InlineUndoBar message="Tur slettet" onUndo={onUndoTripDelete} />
       )}

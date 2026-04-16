@@ -1,0 +1,145 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<WasteReport xmlns="urn:byggspor:waste:report:1.0"
+             xmlns:cbc="urn:byggspor:waste:CommonBasic:1.0"
+             xmlns:cac="urn:byggspor:waste:CommonAggregate:1.0">
+  <cbc:ID>WR-F-2025-007</cbc:ID>
+  <cbc:IssueDate>2025-04-26</cbc:IssueDate>
+
+  <cac:WasteReceiverParty>
+    <cac:Party>
+      <cac:PartyName><cbc:Name>Franzefoss Gjenvinning AS</cbc:Name></cac:PartyName>
+    </cac:Party>
+  </cac:WasteReceiverParty>
+
+  <cac:WasteLine>
+    <cbc:ID>1</cbc:ID>
+    <cbc:Quantity unitCode="KG">62.0</cbc:Quantity>
+    <cac:Item>
+      <cbc:Name>Maling, lim og lakk</cbc:Name>
+      <cac:WasteFraction>
+        <cbc:ID schemeID="NS9431">7051</cbc:ID>
+      </cac:WasteFraction>
+    </cac:Item>
+  </cac:WasteLine>
+
+  <cac:WasteLine>
+    <cbc:ID>2</cbc:ID>
+    <cbc:Quantity unitCode="TON">10.1</cbc:Quantity>
+    <cac:Item>
+      <cbc:Name>Asfalt</cbc:Name>
+      <cac:WasteFraction>
+        <cbc:ID schemeID="NS9431">1619</cbc:ID>
+      </cac:WasteFraction>
+    </cac:Item>
+  </cac:WasteLine>
+
+  <cac:WasteLine>
+    <cbc:ID>3</cbc:ID>
+    <cbc:Quantity unitCode="TON">0.7</cbc:Quantity>
+    <cac:Item>
+      <cbc:Name>Blandet bearbeidet trevirke</cbc:Name>
+      <cac:WasteFraction>
+        <cbc:ID schemeID="NS9431">1149</cbc:ID>
+      </cac:WasteFraction>
+    </cac:Item>
+  </cac:WasteLine>
+
+  <cac:WasteLine>
+    <cbc:ID>4</cbc:ID>
+    <cbc:Quantity unitCode="KG">264.0</cbc:Quantity>
+    <cac:Item>
+      <cbc:Name>Blandet plast</cbc:Name>
+      <cac:WasteFraction>
+        <cbc:ID schemeID="NS9431">1799</cbc:ID>
+      </cac:WasteFraction>
+    </cac:Item>
+  </cac:WasteLine>
+
+  <cac:WasteLine>
+    <cbc:ID>5</cbc:ID>
+    <cbc:Quantity unitCode="KG">73.0</cbc:Quantity>
+    <cac:Item>
+      <cbc:Name>PVC</cbc:Name>
+      <cac:WasteFraction>
+        <cbc:ID schemeID="NS9431">1723</cbc:ID>
+      </cac:WasteFraction>
+    </cac:Item>
+  </cac:WasteLine>
+
+  <cac:WasteLine>
+    <cbc:ID>6</cbc:ID>
+    <cbc:Quantity unitCode="KG">327.0</cbc:Quantity>
+    <cac:Item>
+      <cbc:Name>Blandet papir, papp og kartong</cbc:Name>
+      <cac:WasteFraction>
+        <cbc:ID schemeID="NS9431">1299</cbc:ID>
+      </cac:WasteFraction>
+    </cac:Item>
+  </cac:WasteLine>
+
+  <cac:WasteLine>
+    <cbc:ID>7</cbc:ID>
+    <cbc:Quantity unitCode="KG">235.0</cbc:Quantity>
+    <cac:Item>
+      <cbc:Name>Vindusglass, ikke laminert</cbc:Name>
+      <cac:WasteFraction>
+        <cbc:ID schemeID="NS9431">1331</cbc:ID>
+      </cac:WasteFraction>
+    </cac:Item>
+  </cac:WasteLine>
+
+  <cac:WasteLine>
+    <cbc:ID>8</cbc:ID>
+    <cbc:Quantity unitCode="TON">3.2</cbc:Quantity>
+    <cac:Item>
+      <cbc:Name>Blandet næringsavfall</cbc:Name>
+      <cac:WasteFraction>
+        <cbc:ID schemeID="NS9431">9912</cbc:ID>
+      </cac:WasteFraction>
+    </cac:Item>
+  </cac:WasteLine>
+
+  <cac:WasteLine>
+    <cbc:ID>9</cbc:ID>
+    <cbc:Quantity unitCode="KG">58.0</cbc:Quantity>
+    <cac:Item>
+      <cbc:Name>Hardplast, emballasje</cbc:Name>
+      <cac:WasteFraction>
+        <cbc:ID schemeID="NS9431">1721</cbc:ID>
+      </cac:WasteFraction>
+    </cac:Item>
+  </cac:WasteLine>
+
+  <cac:WasteLine>
+    <cbc:ID>10</cbc:ID>
+    <cbc:Quantity unitCode="KG">3.0</cbc:Quantity>
+    <cac:Item>
+      <cbc:Name>Spraybokser</cbc:Name>
+      <cac:WasteFraction>
+        <cbc:ID schemeID="NS9431">7055</cbc:ID>
+      </cac:WasteFraction>
+    </cac:Item>
+  </cac:WasteLine>
+
+  <cac:WasteLine>
+    <cbc:ID>11</cbc:ID>
+    <cbc:Quantity unitCode="KG">579.0</cbc:Quantity>
+    <cac:Item>
+      <cbc:Name>Utsortert brennbart avfall</cbc:Name>
+      <cac:WasteFraction>
+        <cbc:ID schemeID="NS9431">9913</cbc:ID>
+      </cac:WasteFraction>
+    </cac:Item>
+  </cac:WasteLine>
+
+  <cac:WasteLine>
+    <cbc:ID>12</cbc:ID>
+    <cbc:Quantity unitCode="TON">3.2</cbc:Quantity>
+    <cac:Item>
+      <cbc:Name>Behandlet trevirke</cbc:Name>
+      <cac:WasteFraction>
+        <cbc:ID schemeID="NS9431">1142</cbc:ID>
+      </cac:WasteFraction>
+    </cac:Item>
+  </cac:WasteLine>
+</WasteReport>

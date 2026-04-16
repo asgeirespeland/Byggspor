@@ -34,29 +34,29 @@ def normalize_waste_type(
     return normalized
 
 
-def parse_quantity_tons(value: object) -> float:
-    """Parse quantity in tons and ensure it is non-negative."""
+def parse_quantity(value: object) -> float:
+    """Parse quantity and ensure it is non-negative."""
     if value is None or value == "":
         raise ApiError(
-            "quantity_tons er påkrevd.",
+            "quantity er påkrevd.",
             code="MISSING_FIELD",
-            suggestion="Oppgi mengde i tonn, for eksempel 1.5.",
+            suggestion="Oppgi mengde, for eksempel 1.5.",
         )
 
     try:
         quantity = float(value)
     except (TypeError, ValueError):
         raise ApiError(
-            "quantity_tons må være et tall.",
+            "quantity må være et tall.",
             code="INVALID_FIELD",
-            suggestion="Oppgi mengde i tonn som tall, for eksempel 1.5.",
+            suggestion="Oppgi mengde som tall, for eksempel 1.5.",
         )
 
     if quantity < 0:
         raise ApiError(
-            "quantity_tons kan ikke være negativt.",
+            "quantity kan ikke være negativt.",
             code="INVALID_FIELD",
-            suggestion="Oppgi en positiv mengde i tonn.",
+            suggestion="Oppgi en positiv mengde.",
         )
 
     return quantity
@@ -64,19 +64,19 @@ def parse_quantity_tons(value: object) -> float:
 
 def calculate_waste_co2(
     waste_type: str,
-    quantity_tons: float,
+    quantity: float,
     emission_factors: dict[str, float] | None = None,
 ) -> float:
     """Calculate CO2 in kg from waste type and quantity in tons."""
     factors = emission_factors or WASTE_EMISSION_FACTORS
     normalized_type = normalize_waste_type(waste_type, factors)
     factor = factors[normalized_type]
-    return round(quantity_tons * factor, 4)
+    return round(quantity * factor, 4)
 
 
 def build_waste_item_data(
     waste_type: str,
-    quantity_tons: float,
+    quantity: float,
     *,
     notes: str | None = None,
     emission_factors: dict[str, float] | None = None,
@@ -84,13 +84,14 @@ def build_waste_item_data(
     """Build normalized waste item payload for persistence."""
     factors = emission_factors or WASTE_EMISSION_FACTORS
     normalized_type = normalize_waste_type(waste_type, factors)
-    parsed_quantity = parse_quantity_tons(quantity_tons)
+    parsed_quantity = parse_quantity(quantity)
     has_factor = normalized_type in factors
     calculated_co2_kg = calculate_waste_co2(normalized_type, parsed_quantity, factors)
 
     return {
         "waste_type": normalized_type,
-        "quantity_tons": parsed_quantity,
+        "quantity": parsed_quantity,
+        "unit": "TON",
         "co2_from_report_kg": None,
         "calculated_co2_kg": calculated_co2_kg,
         "total_co2_kg": calculated_co2_kg,
@@ -103,20 +104,20 @@ def parse_waste_csv(
     file_content: str | bytes,
     emission_factors: dict[str, float] | None = None,
 ) -> list[dict]:
-    """Parse waste CSV with columns: waste_type, quantity_tons."""
+    """Parse waste CSV with columns: waste_type, quantity."""
     if isinstance(file_content, bytes):
         text = file_content.decode("utf-8-sig")
     else:
         text = file_content
 
     reader = csv.DictReader(io.StringIO(text))
-    required_columns = {"waste_type", "quantity_tons"}
+    required_columns = {"waste_type", "quantity"}
 
     if not reader.fieldnames:
         raise ApiError(
             "CSV-filen er tom eller mangler kolonneoverskrifter.",
             code="INVALID_FILE_FORMAT",
-            suggestion="Bruk CSV med kolonnene waste_type og quantity_tons.",
+            suggestion="Bruk CSV med kolonnene waste_type og quantity.",
         )
 
     actual_columns = {name.strip() for name in reader.fieldnames if name}
@@ -124,7 +125,7 @@ def parse_waste_csv(
         raise ApiError(
             "CSV-filen mangler nødvendige kolonner.",
             code="INVALID_FILE_FORMAT",
-            suggestion="Bruk kolonnene waste_type og quantity_tons.",
+            suggestion="Bruk kolonnene waste_type og quantity.",
         )
 
     items: list[dict] = []
@@ -132,7 +133,7 @@ def parse_waste_csv(
         try:
             item = build_waste_item_data(
                 waste_type=row.get("waste_type"),
-                quantity_tons=row.get("quantity_tons"),
+                quantity=row.get("quantity"),
                 emission_factors=emission_factors,
             )
             items.append(item)
@@ -147,7 +148,7 @@ def parse_waste_csv(
         raise ApiError(
             "CSV-filen inneholder ingen avfallsrader.",
             code="INVALID_FILE_FORMAT",
-            suggestion="Legg inn minst én rad med waste_type og quantity_tons.",
+            suggestion="Legg inn minst én rad med waste_type og quantity.",
         )
 
     return items

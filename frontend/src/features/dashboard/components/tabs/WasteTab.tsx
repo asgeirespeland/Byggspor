@@ -1,9 +1,9 @@
-import WasteInput from '@/features/waste/components/WasteInput'
+import WasteUpload from '@/features/waste/components/WasteUpload'
 
 type WasteTabProps = {
   projectId: number
 }
 
 export default function WasteTab({ projectId }: WasteTabProps) {
-  return <WasteInput projectId={projectId} />
+  return <WasteUpload projectId={projectId} />
 }

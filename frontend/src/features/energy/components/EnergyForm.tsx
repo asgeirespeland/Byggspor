@@ -57,7 +57,7 @@ export default function EnergyForm({
             id="zone"
             value={priceZone}
             onChange={(e) => setPriceZone(e.target.value as PriceZone | '')}
-            className="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-xs transition-colors placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
+            className="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm transition-colors placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
           >
             <option value="">Velg prisområde…</option>
             {zones?.map((z) => (

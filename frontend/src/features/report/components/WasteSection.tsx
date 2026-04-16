@@ -7,9 +7,9 @@ import { fmt, sourceLabel, confidenceBadge } from '../utils'
 const COLUMNS: Column<WasteLineItem>[] = [
   { header: 'Avfallstype', render: (i) => i.waste_type ?? '—' },
   {
-    header: 'Tonn',
+    header: 'Antall',
     align: 'right',
-    render: (i) => fmt(i.quantity_tons, 3),
+    render: (i) => `${fmt(i.quantity, 3)} ${i.unit ?? ''}`.trim(),
   },
   {
     header: 'CO₂ (kg)',

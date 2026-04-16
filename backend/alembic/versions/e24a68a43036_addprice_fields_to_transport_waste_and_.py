@@ -1,7 +1,7 @@
 """Add price fields to transport, waste and energy models
 
 Revision ID: e24a68a43036
-Revises: ae6726008837
+Revises: c4a1e7f23b91
 Create Date: 2026-04-14 12:23:52.672299
 
 """
@@ -13,7 +13,7 @@ from alembic import op
 
 # revision identifiers, used by Alembic.
 revision: str = "e24a68a43036"
-down_revision: Union[str, Sequence[str], None] = "ae6726008837"
+down_revision: Union[str, Sequence[str], None] = "c4a1e7f23b91"
 branch_labels: Union[str, Sequence[str], None] = None
 depends_on: Union[str, Sequence[str], None] = None
 
