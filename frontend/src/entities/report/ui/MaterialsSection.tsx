@@ -8,6 +8,7 @@ import {
   sourceLabel,
   confidenceBadge,
 } from '@/entities/report/utils'
+import { groupBy, sumBy } from '@/shared/utils/collections'
 
 const COLUMNS: Column<MaterialLineItem>[] = [
   { header: 'Produkt', render: (i) => i.product_name ?? '—' },
@@ -46,20 +47,8 @@ const COLUMNS: Column<MaterialLineItem>[] = [
   },
 ]
 
-function groupBy<T>(items: T[], key: (item: T) => string): Map<string, T[]> {
-  const map = new Map<string, T[]>()
-  for (const item of items) {
-    const k = key(item)
-    const list = map.get(k)
-    if (list) list.push(item)
-    else map.set(k, [item])
-  }
-  return map
-}
-
-function sumCo2(items: MaterialLineItem[]) {
-  return items.reduce((s, i) => s + (i.total_co2_kg ?? 0), 0)
-}
+const sumCo2 = (items: MaterialLineItem[]) =>
+  sumBy(items, (i) => i.total_co2_kg)
 
 export default function MaterialsSection({
   items,

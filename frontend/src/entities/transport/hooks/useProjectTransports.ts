@@ -8,6 +8,7 @@ import { useState } from 'react'
 import { useAuthQuery } from '@/shared/hooks/useAuthQuery'
 import { useAuthMutation } from '@/shared/hooks/useAuthMutation'
 import { useOptimisticDelete } from '@/widgets/data-table/useOptimisticDelete'
+import { sumBy } from '@/shared/utils/collections'
 
 import {
   listProjectTransports,
@@ -35,7 +36,7 @@ export function useDeleteTransportReport(projectId: number) {
       const trips = snapshot?.find((g) => g.report_id === id)?.trips ?? []
       return {
         updatedList: snapshot?.filter((g) => g.report_id !== id) ?? [],
-        co2Delta: trips.reduce((sum, t) => sum + (t.total_co2_kg ?? 0), 0),
+        co2Delta: sumBy(trips, (t) => t.total_co2_kg),
         entryCountDelta: trips.length,
       }
     },

@@ -8,6 +8,7 @@ import {
   useDeleteWasteReport,
 } from '../hooks/useWaste'
 import type { WasteGroup } from '../types'
+import { sumBy } from '@/shared/utils/collections'
 import { wasteColumns, type WasteRow } from '../columns'
 
 interface Props {
@@ -40,15 +41,8 @@ export default function WasteGroupCard({ group, projectId }: Props) {
       ? (group.file_name ?? 'Avfallsrapport')
       : 'Manuell registrering'
 
-  const totalCo2 = group.items.reduce(
-    (sum, item) => sum + (item.total_co2_kg ?? 0),
-    0,
-  )
-
-  const totalQty = group.items.reduce(
-    (sum, item) => sum + (item.quantity ?? 0),
-    0,
-  )
+  const totalCo2 = sumBy(group.items, (item) => item.total_co2_kg)
+  const totalQty = sumBy(group.items, (item) => item.quantity)
 
   return (
     <CollapsibleGroupCard

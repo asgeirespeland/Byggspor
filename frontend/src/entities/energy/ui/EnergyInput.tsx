@@ -12,6 +12,7 @@ import { Zap, Loader2 } from 'lucide-react'
 import InlineUndoBar from '@/widgets/data-table/InlineUndoBar'
 import DataTable, { type Column } from '@/widgets/data-table/DataTable'
 import { useDeferredLoading } from '@/shared/hooks/useDeferredLoading'
+import { sumBy } from '@/shared/utils/collections'
 import {
   useEnergies,
   usePriceZones,
@@ -112,9 +113,8 @@ export default function EnergyInput({ projectId }: EnergyInputProps) {
 
   const columns = useMemo(() => getColumns(zones), [zones])
 
-  const totalKwh = entries?.reduce((sum, e) => sum + (e.kwh_used ?? 0), 0) ?? 0
-  const totalCo2 =
-    entries?.reduce((sum, e) => sum + (e.total_co2_kg ?? 0), 0) ?? 0
+  const totalKwh = sumBy(entries ?? [], (e) => e.kwh_used)
+  const totalCo2 = sumBy(entries ?? [], (e) => e.total_co2_kg)
 
   const needsScroll = (entries?.length ?? 0) > MAX_VISIBLE_ROWS
 

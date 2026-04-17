@@ -27,6 +27,7 @@ import CategoryDonut from '@/widgets/CategoryDonut'
 import TopEmitters from '@/widgets/TopEmitters'
 import MethodologySection from './MethodologySection'
 import { fmt, sourceLabel, confidenceBadge } from '@/entities/report/utils'
+import { sumBy } from '@/shared/utils/collections'
 
 type ReportTab = 'overview' | 'methodology'
 
@@ -103,12 +104,14 @@ export default function ReportView({ projectId }: { projectId: number }) {
   const { categories } = report
 
   const materialItems = categories.materials.items
-  const materialEmissions = materialItems
-    .filter((i) => (i.total_co2_kg ?? 0) > 0)
-    .reduce((s, i) => s + (i.total_co2_kg ?? 0), 0)
-  const materialSequestration = materialItems
-    .filter((i) => (i.total_co2_kg ?? 0) < 0)
-    .reduce((s, i) => s + (i.total_co2_kg ?? 0), 0)
+  const materialEmissions = sumBy(
+    materialItems.filter((i) => (i.total_co2_kg ?? 0) > 0),
+    (i) => i.total_co2_kg,
+  )
+  const materialSequestration = sumBy(
+    materialItems.filter((i) => (i.total_co2_kg ?? 0) < 0),
+    (i) => i.total_co2_kg,
+  )
 
   const donutCategories = [
     { key: 'materials', label: 'Materialer', co2: materialEmissions },

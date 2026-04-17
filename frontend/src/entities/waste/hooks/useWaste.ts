@@ -5,6 +5,7 @@
 import { useAuthMutation } from '@/shared/hooks/useAuthMutation'
 import { useAuthQuery } from '@/shared/hooks/useAuthQuery'
 import { useOptimisticDelete } from '@/widgets/data-table/useOptimisticDelete'
+import { sumBy } from '@/shared/utils/collections'
 
 import {
   createManualWaste,
@@ -99,11 +100,7 @@ export function useDeleteWasteReport(projectId: number) {
       const group = snapshot?.find((g) => g.source_id === sourceId)
       return {
         updatedList: snapshot?.filter((g) => g.source_id !== sourceId) ?? [],
-        co2Delta:
-          group?.items.reduce(
-            (sum, item) => sum + (item.total_co2_kg ?? 0),
-            0,
-          ) ?? 0,
+        co2Delta: sumBy(group?.items ?? [], (item) => item.total_co2_kg),
         entryCountDelta: group?.items.length ?? 0,
       }
     },

@@ -6,6 +6,7 @@ import type {
   ProjectReportGroup,
   TripUpdateInput,
 } from '../api/projectTransports'
+import { sumBy } from '@/shared/utils/collections'
 import { tripColumns, type TripRow } from '../columns'
 
 interface Props {
@@ -43,11 +44,8 @@ export default function TransportGroupCard({
     [group.trips],
   )
 
-  const totalCo2 = group.trips.reduce(
-    (sum, t) => sum + (t.total_co2_kg ?? 0),
-    0,
-  )
-  const totalKm = group.trips.reduce((sum, t) => sum + (t.distance_km ?? 0), 0)
+  const totalCo2 = sumBy(group.trips, (t) => t.total_co2_kg)
+  const totalKm = sumBy(group.trips, (t) => t.distance_km)
 
   return (
     <CollapsibleGroupCard

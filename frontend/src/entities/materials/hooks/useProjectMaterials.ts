@@ -8,6 +8,7 @@
 import { useAuthQuery } from '@/shared/hooks/useAuthQuery'
 import { useAuthMutation } from '@/shared/hooks/useAuthMutation'
 import { useOptimisticDelete } from '@/widgets/data-table/useOptimisticDelete'
+import { sumBy } from '@/shared/utils/collections'
 
 import {
   listProjectMaterials,
@@ -50,11 +51,7 @@ export function useDeleteInvoice(projectId: number) {
       const group = snapshot?.find((g) => g.invoice_id === id)
       return {
         updatedList: snapshot?.filter((g) => g.invoice_id !== id) ?? [],
-        co2Delta:
-          group?.items.reduce(
-            (sum, item) => sum + (item.total_co2_kg ?? 0),
-            0,
-          ) ?? 0,
+        co2Delta: sumBy(group?.items ?? [], (item) => item.total_co2_kg),
         entryCountDelta: group?.items.length ?? 0,
       }
     },
