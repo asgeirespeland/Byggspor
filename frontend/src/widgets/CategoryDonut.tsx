@@ -7,13 +7,14 @@ import {
   type ChartConfig,
 } from '@/components/ui/chart'
 import { fmt } from '@/entities/report/utils'
+import { CATEGORY_KEYS, CATEGORY_THEME } from '@/entities/report/theme'
 
-const CHART_CONFIG: ChartConfig = {
-  materials: { label: 'Materialer', color: 'var(--materials)' },
-  transport: { label: 'Transport', color: 'var(--transport)' },
-  waste: { label: 'Avfall', color: 'var(--waste)' },
-  energy: { label: 'Energi', color: 'var(--energy)' },
-}
+const CHART_CONFIG: ChartConfig = Object.fromEntries(
+  CATEGORY_KEYS.map((key) => [
+    key,
+    { label: CATEGORY_THEME[key].label, color: CATEGORY_THEME[key].colorVar },
+  ]),
+)
 
 interface CategoryDonutProps {
   categories: { key: string; label: string; co2: number }[]

@@ -6,17 +6,7 @@
 import { useParams, useNavigate } from 'react-router-dom'
 import { useState } from 'react'
 import { useDeferredLoading } from '@/shared/hooks/useDeferredLoading'
-import {
-  ArrowLeft,
-  HelpCircle,
-  Loader2,
-  Package,
-  Truck,
-  Trash2,
-  Zap,
-  Leaf,
-  FileText,
-} from 'lucide-react'
+import { ArrowLeft, HelpCircle, Loader2, FileText } from 'lucide-react'
 import { useProject } from '@/entities/project/hooks/useProjects'
 import { STATUS_CONFIG } from '@/entities/project/constants'
 import TabBar, { type TabDef } from '@/shared/components/TabBar'
@@ -26,6 +16,11 @@ import WasteUpload from '@/entities/waste/ui/WasteUpload'
 import EnergyInput from '@/entities/energy/ui/EnergyInput'
 import ReportView from '@/entities/report/ui/ReportView'
 import { useCo2Summary } from '@/entities/report/hooks/useCo2Summary'
+import {
+  CATEGORY_THEME,
+  CATEGORY_KEYS,
+  type CategoryOrTotal,
+} from '@/entities/report/theme'
 import KpiCard from './KpiCard'
 import ProjectSidebar from './ProjectSidebar'
 import ClimateTabTour from '@/pages/onboarding/ClimateTabTour'
@@ -38,83 +33,46 @@ function formatKg(value: number | undefined): string {
 
 type Tab = 'materials' | 'transport' | 'waste' | 'energy' | 'report'
 
+const TAB_RENDERERS: Record<
+  Exclude<Tab, 'report'>,
+  (projectId: number) => React.ReactNode
+> = {
+  materials: (id) => <InvoiceUpload projectId={id} />,
+  transport: (id) => <TransportUpload projectId={id} />,
+  waste: (id) => <WasteUpload projectId={id} />,
+  energy: (id) => <EnergyInput projectId={id} />,
+}
+
 function buildTabs(projectId: number): TabDef<Tab>[] {
+  const categoryTabs: TabDef<Tab>[] = CATEGORY_KEYS.map((key) => {
+    const theme = CATEGORY_THEME[key]
+    return {
+      id: key,
+      label: theme.label,
+      icon: <theme.Icon className="h-4 w-4" />,
+      activeClassName: `border-${key} ${theme.textStrong}`,
+      render: () => TAB_RENDERERS[key](projectId),
+    }
+  })
+  const total = CATEGORY_THEME.total
   return [
-    {
-      id: 'materials',
-      label: 'Materialer',
-      icon: <Package className="h-4 w-4" />,
-      activeClassName: 'border-materials text-materials-strong',
-      render: () => <InvoiceUpload projectId={projectId} />,
-    },
-    {
-      id: 'transport',
-      label: 'Transport',
-      icon: <Truck className="h-4 w-4" />,
-      activeClassName: 'border-transport text-transport-strong',
-      render: () => <TransportUpload projectId={projectId} />,
-    },
-    {
-      id: 'waste',
-      label: 'Avfall',
-      icon: <Trash2 className="h-4 w-4" />,
-      activeClassName: 'border-waste text-waste-strong',
-      render: () => <WasteUpload projectId={projectId} />,
-    },
-    {
-      id: 'energy',
-      label: 'Energi',
-      icon: <Zap className="h-4 w-4" />,
-      activeClassName: 'border-energy text-energy-strong',
-      render: () => <EnergyInput projectId={projectId} />,
-    },
+    ...categoryTabs,
     {
       id: 'report',
       label: 'Rapport',
       icon: <FileText className="h-4 w-4" />,
-      className: 'bg-total-soft',
-      activeClassName: 'border-total text-total-strong',
+      className: total.bgSoft,
+      activeClassName: `border-total ${total.textStrong}`,
       render: () => <ReportView projectId={projectId} />,
     },
   ]
 }
 
-const KPI_CONFIG = [
-  {
-    label: 'Totalt CO₂',
-    key: 'total' as const,
-    icon: <Leaf className="h-3.5 w-3.5 text-total-strong" />,
-    accent: 'bg-total-soft',
-  },
-  {
-    label: 'Materialer',
-    key: 'materials' as const,
-    icon: <Package className="h-3.5 w-3.5 text-materials-strong" />,
-    accent: 'bg-materials-soft',
-  },
-  {
-    label: 'Transport',
-    key: 'transport' as const,
-    icon: <Truck className="h-3.5 w-3.5 text-transport-strong" />,
-    accent: 'bg-transport-soft',
-  },
-  {
-    label: 'Avfall',
-    key: 'waste' as const,
-    icon: <Trash2 className="h-3.5 w-3.5 text-waste-strong" />,
-    accent: 'bg-waste-soft',
-  },
-  {
-    label: 'Energi',
-    key: 'energy' as const,
-    icon: <Zap className="h-3.5 w-3.5 text-energy-strong" />,
-    accent: 'bg-energy-soft',
-  },
-]
+const KPI_KEYS: readonly CategoryOrTotal[] = ['total', ...CATEGORY_KEYS]
 
 function getKpiValue(
   co2: ReturnType<typeof useCo2Summary>['data'],
-  key: (typeof KPI_CONFIG)[number]['key'],
+  key: CategoryOrTotal,
 ): string {
   if (!co2) return '—'
   if (key === 'total') return formatKg(co2.total_co2_kg)
@@ -201,16 +159,21 @@ export default function ProjectDashboard() {
         <div className="flex min-w-0 flex-1 flex-col gap-4 w-full">
           {/* KPI row */}
           <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3">
-            {KPI_CONFIG.map((kpi) => (
-              <KpiCard
-                key={kpi.key}
-                label={kpi.label}
-                value={getKpiValue(co2, kpi.key)}
-                unit="kg CO₂e"
-                icon={kpi.icon}
-                accent={kpi.accent}
-              />
-            ))}
+            {KPI_KEYS.map((key) => {
+              const theme = CATEGORY_THEME[key]
+              return (
+                <KpiCard
+                  key={key}
+                  label={theme.label}
+                  value={getKpiValue(co2, key)}
+                  unit="kg CO₂e"
+                  icon={
+                    <theme.Icon className={`h-3.5 w-3.5 ${theme.textStrong}`} />
+                  }
+                  accent={theme.bgSoft}
+                />
+              )
+            })}
           </div>
 
           {/* Tabbed panel */}

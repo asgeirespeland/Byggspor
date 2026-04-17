@@ -1,5 +1,10 @@
 import type { DetailedReport } from '@/entities/report/types'
 import { fmt } from '@/entities/report/utils'
+import {
+  CATEGORY_KEYS,
+  CATEGORY_THEME,
+  type CategoryKey,
+} from '@/entities/report/theme'
 
 interface TopEmittersProps {
   report: DetailedReport
@@ -17,7 +22,7 @@ export default function TopEmitters({
 
   type BarSegment = { color: string; pct: number }
   type BarEntry = {
-    key: string
+    key: CategoryKey
     label: string
     dot: string
     co2: number
@@ -33,38 +38,27 @@ export default function TopEmitters({
 
   const pct = (v: number) => (absTotal > 0 ? (Math.abs(v) / absTotal) * 100 : 0)
 
-  const bars: BarEntry[] = [
-    {
-      key: 'materials',
-      label: 'Materialer',
-      dot: 'bg-materials',
-      co2: categories.materials.total_co2_kg,
-      segments: [
-        { color: 'bg-materials', pct: pct(materialEmissions) },
-        ...(materialSequestration < 0
-          ? [{ color: 'bg-carbon', pct: pct(materialSequestration) }]
-          : []),
-      ],
-    },
-    {
-      key: 'transport',
-      label: 'Transport',
-      dot: 'bg-transport',
-      co2: categories.transport.total_co2_kg,
-    },
-    {
-      key: 'waste',
-      label: 'Avfall',
-      dot: 'bg-waste',
-      co2: categories.waste.total_co2_kg,
-    },
-    {
-      key: 'energy',
-      label: 'Energi',
-      dot: 'bg-energy',
-      co2: categories.energy.total_co2_kg,
-    },
-  ]
+  const bars: BarEntry[] = CATEGORY_KEYS.map((key) => {
+    const theme = CATEGORY_THEME[key]
+    const base = {
+      key,
+      label: theme.label,
+      dot: theme.bg,
+      co2: categories[key].total_co2_kg,
+    }
+    if (key === 'materials') {
+      return {
+        ...base,
+        segments: [
+          { color: theme.bg, pct: pct(materialEmissions) },
+          ...(materialSequestration < 0
+            ? [{ color: 'bg-carbon', pct: pct(materialSequestration) }]
+            : []),
+        ],
+      }
+    }
+    return base
+  })
 
   const sorted = [...bars].sort((a, b) => Math.abs(b.co2) - Math.abs(a.co2))
 

@@ -2,18 +2,7 @@
  * Five-step modal walkthrough of the CO₂ categories, mounted on the project dashboard climate tab.
  * Caller owns the step state via useClimateTabTour; this component renders one step at a time.
  */
-import {
-  AlertTriangle,
-  Info,
-  ChevronRight,
-  ChevronLeft,
-  Leaf,
-  Package,
-  Truck,
-  Trash2,
-  Zap,
-} from 'lucide-react'
-import type { LucideIcon } from 'lucide-react'
+import { AlertTriangle, Info, ChevronRight, ChevronLeft } from 'lucide-react'
 import {
   Dialog,
   DialogContent,
@@ -21,15 +10,8 @@ import {
   DialogTitle,
 } from '@/components/ui/dialog'
 import { Button } from '@/components/ui/button'
-import { TOUR_STEPS, TOUR_STEP_COUNT, type TourIcon } from './tourSteps'
-
-const ICON_MAP: Record<TourIcon, LucideIcon> = {
-  leaf: Leaf,
-  package: Package,
-  truck: Truck,
-  trash2: Trash2,
-  zap: Zap,
-}
+import { CATEGORY_THEME } from '@/entities/report/theme'
+import { TOUR_STEPS, TOUR_STEP_COUNT } from './tourSteps'
 
 interface Props {
   open: boolean
@@ -47,7 +29,8 @@ export default function ClimateTabTour({
   onClose,
 }: Props) {
   const current = TOUR_STEPS[step]
-  const Icon = ICON_MAP[current.icon]
+  const theme = CATEGORY_THEME[current.category]
+  const Icon = theme.Icon
   const isFirst = step === 0
   const isLast = step === TOUR_STEP_COUNT - 1
 
@@ -68,9 +51,9 @@ export default function ClimateTabTour({
             </span>
           </div>
           <div
-            className={`mx-auto flex h-14 w-14 items-center justify-center rounded-2xl ${current.iconBg} mb-1`}
+            className={`mx-auto flex h-14 w-14 items-center justify-center rounded-2xl ${theme.bgSoft} mb-1`}
           >
-            <Icon className={`h-7 w-7 ${current.iconColor}`} />
+            <Icon className={`h-7 w-7 ${theme.textStrong}`} />
           </div>
           <DialogTitle className="text-center text-base font-semibold text-gray-900 leading-snug">
             {current.title}

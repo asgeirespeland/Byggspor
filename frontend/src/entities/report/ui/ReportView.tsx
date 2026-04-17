@@ -1,23 +1,12 @@
 /**
  * Top-level report orchestrator. Two internal tabs (Oversikt / Metode) wrap a donut + top-emitters
  * summary and four per-category Section components (materials/transport/waste/energy); energy uses
- * a local ENERGY_COLUMNS config while the others delegate to MaterialsSection/TransportSection/
- * WasteSection. Category palette duplicates the one in ProjectDashboard, FlaggedItems, and
- * CategoryDonut — see analysis notes for unification.
+ * energyColumns from entities/energy while the others delegate to MaterialsSection/TransportSection/
+ * WasteSection.
  */
 import { useState } from 'react'
-import {
-  Loader2,
-  Package,
-  Truck,
-  Trash2,
-  Zap,
-  BarChart3,
-  Settings2,
-} from 'lucide-react'
+import { Loader2, BarChart3, Settings2 } from 'lucide-react'
 import { useDetailedReport } from '@/entities/report/hooks/useDetailedReport'
-import type { EnergyLineItem } from '@/entities/report/types'
-import type { Column } from './ReportDataTable'
 import DataTable from './ReportDataTable'
 import Section from './Section'
 import MaterialsSection from './MaterialsSection'
@@ -26,59 +15,11 @@ import WasteSection from './WasteSection'
 import CategoryDonut from '@/widgets/CategoryDonut'
 import TopEmitters from '@/widgets/TopEmitters'
 import MethodologySection from './MethodologySection'
-import { fmt, sourceLabel, confidenceBadge } from '@/entities/report/utils'
+import { energyColumns } from '@/entities/energy/columns'
+import { CATEGORY_KEYS, CATEGORY_THEME } from '@/entities/report/theme'
 import { sumBy } from '@/shared/utils/collections'
 
 type ReportTab = 'overview' | 'methodology'
-
-const ENERGY_COLUMNS: Column<EnergyLineItem>[] = [
-  { header: 'Dato', render: (i) => i.recorded_date ?? '—' },
-  { header: 'Prissone', render: (i) => i.price_zone ?? '—' },
-  { header: 'kWh', align: 'right', render: (i) => fmt(i.kwh_used) },
-  {
-    header: 'Utslippsfaktor',
-    align: 'right',
-    render: (i) => fmt(i.grid_emission_factor, 4),
-  },
-  {
-    header: 'CO₂ (kg)',
-    align: 'right',
-    render: (i) => <span className="font-medium">{fmt(i.total_co2_kg)}</span>,
-  },
-  { header: 'Kilde', render: (i) => sourceLabel(i.source) },
-  {
-    header: 'Konfidens',
-    align: 'right',
-    render: (i) => confidenceBadge(i.confidence_score),
-  },
-]
-
-const CATEGORIES = [
-  {
-    key: 'materials' as const,
-    label: 'Materialer',
-    icon: Package,
-    iconColor: 'text-materials-strong',
-  },
-  {
-    key: 'transport' as const,
-    label: 'Transport',
-    icon: Truck,
-    iconColor: 'text-transport-strong',
-  },
-  {
-    key: 'waste' as const,
-    label: 'Avfall',
-    icon: Trash2,
-    iconColor: 'text-waste-strong',
-  },
-  {
-    key: 'energy' as const,
-    label: 'Energi',
-    icon: Zap,
-    iconColor: 'text-energy-strong',
-  },
-]
 
 export default function ReportView({ projectId }: { projectId: number }) {
   const [activeTab, setActiveTab] = useState<ReportTab>('overview')
@@ -113,16 +54,11 @@ export default function ReportView({ projectId }: { projectId: number }) {
     (i) => i.total_co2_kg,
   )
 
-  const donutCategories = [
-    { key: 'materials', label: 'Materialer', co2: materialEmissions },
-    {
-      key: 'transport',
-      label: 'Transport',
-      co2: categories.transport.total_co2_kg,
-    },
-    { key: 'waste', label: 'Avfall', co2: categories.waste.total_co2_kg },
-    { key: 'energy', label: 'Energi', co2: categories.energy.total_co2_kg },
-  ]
+  const donutCategories = CATEGORY_KEYS.map((key) => ({
+    key,
+    label: CATEGORY_THEME[key].label,
+    co2: key === 'materials' ? materialEmissions : categories[key].total_co2_kg,
+  }))
 
   return (
     <div className="-mt-6 -mb-6">
@@ -173,31 +109,34 @@ export default function ReportView({ projectId }: { projectId: number }) {
           </div>
 
           {/* Category sections */}
-          {CATEGORIES.map(({ key, label, icon: Icon, iconColor }, idx) => (
-            <Section
-              key={key}
-              title={label}
-              icon={<Icon className={`h-4 w-4 ${iconColor}`} />}
-              totalCo2={categories[key].total_co2_kg}
-              entryCount={categories[key].entry_count}
-              avgConfidence={categories[key].avg_confidence}
-              defaultOpen={idx === 0}
-            >
-              {key === 'materials' ? (
-                <MaterialsSection items={categories.materials.items} />
-              ) : key === 'transport' ? (
-                <TransportSection items={categories.transport.items} />
-              ) : key === 'waste' ? (
-                <WasteSection items={categories.waste.items} />
-              ) : (
-                <DataTable
-                  items={categories.energy.items}
-                  columns={ENERGY_COLUMNS}
-                  emptyMessage="Ingen energidata registrert."
-                />
-              )}
-            </Section>
-          ))}
+          {CATEGORY_KEYS.map((key, idx) => {
+            const theme = CATEGORY_THEME[key]
+            return (
+              <Section
+                key={key}
+                title={theme.label}
+                icon={<theme.Icon className={`h-4 w-4 ${theme.textStrong}`} />}
+                totalCo2={categories[key].total_co2_kg}
+                entryCount={categories[key].entry_count}
+                avgConfidence={categories[key].avg_confidence}
+                defaultOpen={idx === 0}
+              >
+                {key === 'materials' ? (
+                  <MaterialsSection items={categories.materials.items} />
+                ) : key === 'transport' ? (
+                  <TransportSection items={categories.transport.items} />
+                ) : key === 'waste' ? (
+                  <WasteSection items={categories.waste.items} />
+                ) : (
+                  <DataTable
+                    items={categories.energy.items}
+                    columns={energyColumns}
+                    emptyMessage="Ingen energidata registrert."
+                  />
+                )}
+              </Section>
+            )
+          })}
         </div>
       ) : (
         <div className="pt-4 pb-4 max-h-[calc(100vh-20rem)] overflow-y-auto scrollbar-hide">
