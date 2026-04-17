@@ -1,6 +1,13 @@
 import { useState } from 'react'
 import { RotateCcw, Pencil, Check, X } from 'lucide-react'
 import { Switch } from '@/components/ui/switch'
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select'
 import type { ResolvedSetting } from '../api'
 import type { SettingMeta } from '../settings-meta'
 import SourceBadge from './SourceBadge'
@@ -94,17 +101,26 @@ export default function SettingRow({
         )}
 
         {meta.input === 'select' && (
-          <select
+          <Select
             value={String(displayValue)}
-            onChange={(e) => onChange(meta.key, e.target.value)}
-            className="mt-1 rounded border border-gray-300 px-2 py-1 text-sm text-gray-900"
+            onValueChange={(value) => onChange(meta.key, value ?? '')}
           >
-            {meta.options?.map((o) => (
-              <option key={o.value} value={o.value}>
-                {o.label}
-              </option>
-            ))}
-          </select>
+            <SelectTrigger size="sm" className="mt-1">
+              <SelectValue>
+                {(value) =>
+                  meta.options?.find((o) => o.value === value)?.label ??
+                  String(value ?? '')
+                }
+              </SelectValue>
+            </SelectTrigger>
+            <SelectContent>
+              {meta.options?.map((o) => (
+                <SelectItem key={o.value} value={o.value}>
+                  {o.label}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
         )}
 
         {meta.input === 'readonly' && (

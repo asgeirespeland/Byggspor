@@ -1,3 +1,5 @@
+import { Badge } from '@/components/ui/badge'
+
 export default function EpdBadge({
   enriched,
   hasEpd,
@@ -7,23 +9,23 @@ export default function EpdBadge({
 }) {
   if (!enriched) {
     return (
-      <span className="inline-block rounded bg-warning-soft px-2 py-0.5 text-xs text-warning-strong">
+      <Badge variant="warning" className="rounded">
         Ikke søkbar
-      </span>
+      </Badge>
     )
   }
 
   if (hasEpd) {
     return (
-      <span className="inline-block rounded bg-success-soft px-2 py-0.5 text-xs font-medium text-success-strong">
+      <Badge variant="success" className="rounded">
         EPD
-      </span>
+      </Badge>
     )
   }
 
   return (
-    <span className="inline-block rounded bg-danger-soft px-2 py-0.5 text-xs font-medium text-danger-strong">
+    <Badge variant="danger" className="rounded">
       Ingen EPD
-    </span>
+    </Badge>
   )
 }

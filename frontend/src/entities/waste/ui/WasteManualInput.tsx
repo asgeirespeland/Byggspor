@@ -3,9 +3,22 @@ import { useCreateManualWaste } from '../hooks/useWaste'
 import { Label } from '@/components/ui/label'
 import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select'
 
 type Props = {
   projectId: number
+}
+
+const WASTE_TYPE_LABELS: Record<string, string> = {
+  metall: 'Metall',
+  treverk: 'Treverk',
+  betong: 'Betong',
 }
 
 export default function WasteManualInput({ projectId }: Props) {
@@ -44,16 +57,23 @@ export default function WasteManualInput({ projectId }: Props) {
       <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
         <div className="space-y-1.5">
           <Label htmlFor="wasteType">Avfallstype</Label>
-          <select
-            id="wasteType"
+          <Select
             value={wasteType}
-            onChange={(e) => setWasteType(e.target.value)}
-            className="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm transition-colors focus:outline-none focus:ring-1 focus:ring-ring"
+            onValueChange={(v) => setWasteType(v ?? '')}
           >
-            <option value="metall">Metall</option>
-            <option value="treverk">Treverk</option>
-            <option value="betong">Betong</option>
-          </select>
+            <SelectTrigger id="wasteType" className="w-full">
+              <SelectValue>
+                {(v) => WASTE_TYPE_LABELS[String(v)] ?? String(v)}
+              </SelectValue>
+            </SelectTrigger>
+            <SelectContent>
+              {Object.entries(WASTE_TYPE_LABELS).map(([value, label]) => (
+                <SelectItem key={value} value={value}>
+                  {label}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
         </div>
         <div className="space-y-1.5">
           <Label htmlFor="quantityTons">Mengde (tonn) *</Label>

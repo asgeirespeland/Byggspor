@@ -1,3 +1,5 @@
+import { Badge } from '@/components/ui/badge'
+
 interface Co2TotalBadgeProps {
   total: number
   count: number
@@ -11,8 +13,8 @@ export default function Co2TotalBadge({
 }: Co2TotalBadgeProps) {
   if (count === 0) return null
   return (
-    <span className="rounded-full bg-total-soft px-3 py-1 text-xs font-medium text-total-strong">
+    <Badge variant="total" className="h-auto rounded-full px-3 py-1">
       CO₂: {total.toFixed(2)} kg ({count} {label})
-    </span>
+    </Badge>
   )
 }

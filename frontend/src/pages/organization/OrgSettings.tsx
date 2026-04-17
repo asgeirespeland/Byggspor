@@ -1,6 +1,11 @@
 import { useState } from 'react'
 import { Settings } from 'lucide-react'
 
+import {
+  Collapsible,
+  CollapsibleContent,
+  CollapsibleTrigger,
+} from '@/components/ui/collapsible'
 import { useAppContext } from '@/shared/hooks/useAppContext'
 import ItemListPanel from '@/shared/components/ItemListPanel'
 import OrgSettingsPanel from '@/entities/settings/ui/OrgSettingsPanel'
@@ -27,13 +32,12 @@ export default function OrgSettings() {
         {organization?.name ?? '\u00A0'}
       </h1>
 
-      {/* Calculation settings collapsible */}
-      <div className="rounded-xl border border-gray-200 bg-white shadow-sm overflow-hidden">
-        <button
-          type="button"
-          onClick={() => setShowCalcSettings((v) => !v)}
-          className="flex w-full items-center justify-between px-5 py-4 text-left hover:bg-gray-50 transition-colors"
-        >
+      <Collapsible
+        open={showCalcSettings}
+        onOpenChange={setShowCalcSettings}
+        className="rounded-xl border border-gray-200 bg-white shadow-sm overflow-hidden"
+      >
+        <CollapsibleTrigger className="flex w-full items-center justify-between px-5 py-4 text-left hover:bg-gray-50 transition-colors">
           <div className="flex items-center gap-3">
             <Settings className="h-4 w-4 text-gray-400" />
             <span className="text-sm font-medium text-gray-700">
@@ -43,13 +47,11 @@ export default function OrgSettings() {
           <span className="text-xs text-gray-400">
             {showCalcSettings ? 'Skjul' : 'Vis'}
           </span>
-        </button>
-        {showCalcSettings && (
-          <div className="border-t border-gray-100 p-5">
-            <OrgSettingsPanel orgId={organizationId} />
-          </div>
-        )}
-      </div>
+        </CollapsibleTrigger>
+        <CollapsibleContent className="border-t border-gray-100 p-5">
+          <OrgSettingsPanel orgId={organizationId} />
+        </CollapsibleContent>
+      </Collapsible>
 
       <ItemListPanel
         title="Medlemmer"

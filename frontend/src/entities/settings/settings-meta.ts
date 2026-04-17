@@ -121,19 +121,20 @@ export const SETTING_GROUPS: SettingGroup[] = [
 // Source badge styles
 // ---------------------------------------------------------------------------
 
-export const SOURCE_STYLES: Record<
-  SettingSource,
-  { bg: string; text: string; label: string }
-> = {
-  default: { bg: 'bg-gray-100', text: 'text-gray-500', label: 'Standard' },
-  organization: {
-    bg: 'bg-info-soft',
-    text: 'text-info-strong',
-    label: 'Organisasjon',
+import type { BadgeProps } from '@/components/ui/badge'
+
+type SourceStyle = {
+  variant: NonNullable<BadgeProps['variant']>
+  className?: string
+  label: string
+}
+
+export const SOURCE_STYLES: Record<SettingSource, SourceStyle> = {
+  default: {
+    variant: 'secondary',
+    className: 'bg-gray-100 text-gray-500',
+    label: 'Standard',
   },
-  project: {
-    bg: 'bg-success-soft',
-    text: 'text-success-strong',
-    label: 'Prosjekt',
-  },
+  organization: { variant: 'info', label: 'Organisasjon' },
+  project: { variant: 'success', label: 'Prosjekt' },
 }

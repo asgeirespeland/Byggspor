@@ -1,6 +1,13 @@
 import { useState } from 'react'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select'
 import FormDialog from '@/shared/components/FormDialog'
 
 type Props = {
@@ -8,6 +15,13 @@ type Props = {
   onOpenChange: (open: boolean) => void
   onSubmit: (userId: string, role: string) => Promise<void>
   loading: boolean
+}
+
+const ROLE_LABELS: Record<string, string> = {
+  OWNER: 'Eier',
+  ADMIN: 'Administrator',
+  MEMBER: 'Medlem',
+  VIEWER: 'Leser',
 }
 
 export default function AddMemberDialog({
@@ -56,17 +70,20 @@ export default function AddMemberDialog({
 
       <div className="space-y-1.5">
         <Label htmlFor="memberRole">Rolle</Label>
-        <select
-          id="memberRole"
-          value={role}
-          onChange={(e) => setRole(e.target.value)}
-          className="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
-        >
-          <option value="OWNER">Eier</option>
-          <option value="ADMIN">Administrator</option>
-          <option value="MEMBER">Medlem</option>
-          <option value="VIEWER">Leser</option>
-        </select>
+        <Select value={role} onValueChange={(v) => setRole(v ?? 'MEMBER')}>
+          <SelectTrigger id="memberRole" className="w-full">
+            <SelectValue>
+              {(v) => ROLE_LABELS[String(v)] ?? String(v)}
+            </SelectValue>
+          </SelectTrigger>
+          <SelectContent>
+            {Object.entries(ROLE_LABELS).map(([value, label]) => (
+              <SelectItem key={value} value={value}>
+                {label}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
       </div>
     </FormDialog>
   )

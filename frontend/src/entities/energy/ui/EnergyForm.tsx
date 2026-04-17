@@ -2,6 +2,13 @@ import { useState } from 'react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select'
 import type { PriceZone } from '../types'
 
 interface EnergyFormProps {
@@ -26,6 +33,8 @@ export default function EnergyForm({
   const [recordedDate, setRecordedDate] = useState(
     () => new Date().toISOString().split('T')[0],
   )
+
+  const shortLabel = (label: string) => label.replace(/\s*\(.*$/, '')
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
@@ -53,19 +62,28 @@ export default function EnergyForm({
         </div>
         <div className="space-y-1.5">
           <Label htmlFor="zone">Prisområde (valgfritt)</Label>
-          <select
-            id="zone"
+          <Select
             value={priceZone}
-            onChange={(e) => setPriceZone(e.target.value as PriceZone | '')}
-            className="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm transition-colors placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
+            onValueChange={(v) => setPriceZone((v ?? '') as PriceZone | '')}
           >
-            <option value="">Velg prisområde…</option>
-            {zones?.map((z) => (
-              <option key={z.value} value={z.value}>
-                {z.value} — {z.label}
-              </option>
-            ))}
-          </select>
+            <SelectTrigger id="zone" className="w-full">
+              <SelectValue placeholder="Velg prisområde…">
+                {(v) => {
+                  const z = zones?.find((zone) => zone.value === v)
+                  return z
+                    ? `${z.value} — ${shortLabel(z.label)}`
+                    : String(v ?? '')
+                }}
+              </SelectValue>
+            </SelectTrigger>
+            <SelectContent>
+              {zones?.map((z) => (
+                <SelectItem key={z.value} value={z.value}>
+                  {z.value} — {shortLabel(z.label)}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
         </div>
         <div className="space-y-1.5">
           <Label htmlFor="date">Dato (valgfritt)</Label>
