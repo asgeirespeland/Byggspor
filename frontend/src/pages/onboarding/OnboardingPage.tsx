@@ -1,21 +1,34 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
+import { useForm } from 'react-hook-form'
+import { zodResolver } from '@hookform/resolvers/zod'
+import { z } from 'zod'
 import { Building2 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
-import { Label } from '@/components/ui/label'
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from '@/components/ui/form'
 import { useAuthMutation } from '@/shared/hooks/useAuthMutation'
 import { apiRequest } from '@/shared/api/client'
 
-type OrgForm = {
-  name: string
-  org_number: string
-}
+const schema = z.object({
+  name: z.string().min(1, 'Organisasjonsnavn er påkrevd'),
+  org_number: z.string(),
+})
 
-const empty: OrgForm = { name: '', org_number: '' }
+type FormValues = z.infer<typeof schema>
 
 export default function OnboardingPage() {
-  const [form, setForm] = useState<OrgForm>(empty)
+  const form = useForm<FormValues>({
+    resolver: zodResolver(schema),
+    defaultValues: { name: '', org_number: '' },
+  })
   const [error, setError] = useState('')
   const navigate = useNavigate()
 
@@ -32,17 +45,12 @@ export default function OnboardingPage() {
       }),
   })
 
-  function handleChange(e: React.ChangeEvent<HTMLInputElement>) {
-    setForm((prev) => ({ ...prev, [e.target.name]: e.target.value }))
-  }
-
-  async function handleSubmit(e: React.FormEvent) {
-    e.preventDefault()
+  async function onSubmit(values: FormValues) {
     setError('')
     try {
       await createOrg.mutateAsync({
-        name: form.name.trim(),
-        org_number: form.org_number.trim() || undefined,
+        name: values.name.trim(),
+        org_number: values.org_number.trim() || undefined,
         org_type: 'COMPANY',
       })
       navigate('/', { replace: true })
@@ -58,7 +66,6 @@ export default function OnboardingPage() {
   return (
     <div className="min-h-screen bg-gray-50 grid place-items-center px-4">
       <div className="w-full max-w-md">
-        {/* Header */}
         <div className="mb-8 text-center">
           <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-xl bg-green-600">
             <Building2 className="h-6 w-6 text-white" />
@@ -72,47 +79,56 @@ export default function OnboardingPage() {
           </p>
         </div>
 
-        {/* Form */}
         <div className="rounded-xl border border-gray-200 bg-white p-6 shadow-sm">
-          <form onSubmit={handleSubmit} className="space-y-4">
-            <div className="space-y-1.5">
-              <Label htmlFor="name">Organisasjonsnavn *</Label>
-              <Input
-                id="name"
+          <Form {...form}>
+            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+              <FormField
+                control={form.control}
                 name="name"
-                placeholder="f.eks. Byggfirma AS"
-                value={form.name}
-                onChange={handleChange}
-                required
-                autoFocus
+                render={({ field }) => (
+                  <FormItem className="space-y-1.5">
+                    <FormLabel>Organisasjonsnavn *</FormLabel>
+                    <FormControl>
+                      <Input
+                        placeholder="f.eks. Byggfirma AS"
+                        autoFocus
+                        {...field}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
               />
-            </div>
 
-            <div className="space-y-1.5">
-              <Label htmlFor="org_number">Organisasjonsnummer</Label>
-              <Input
-                id="org_number"
+              <FormField
+                control={form.control}
                 name="org_number"
-                placeholder="f.eks. 123 456 789"
-                value={form.org_number}
-                onChange={handleChange}
+                render={({ field }) => (
+                  <FormItem className="space-y-1.5">
+                    <FormLabel>Organisasjonsnummer</FormLabel>
+                    <FormControl>
+                      <Input placeholder="f.eks. 123 456 789" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
               />
-            </div>
 
-            {error && (
-              <p className="rounded-md bg-danger-soft px-3 py-2 text-sm text-danger-strong border border-danger/20">
-                {error}
-              </p>
-            )}
+              {error && (
+                <p className="rounded-md bg-danger-soft px-3 py-2 text-sm text-danger-strong border border-danger/20">
+                  {error}
+                </p>
+              )}
 
-            <Button
-              type="submit"
-              className="w-full"
-              disabled={!form.name.trim() || createOrg.isPending}
-            >
-              {createOrg.isPending ? 'Oppretter…' : 'Kom i gang'}
-            </Button>
-          </form>
+              <Button
+                type="submit"
+                className="w-full"
+                disabled={createOrg.isPending}
+              >
+                {createOrg.isPending ? 'Oppretter…' : 'Kom i gang'}
+              </Button>
+            </form>
+          </Form>
         </div>
       </div>
     </div>

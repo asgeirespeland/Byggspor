@@ -1,7 +1,16 @@
-import { useState } from 'react'
+import { useForm } from 'react-hook-form'
+import { zodResolver } from '@hookform/resolvers/zod'
+import { z } from 'zod'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
-import { Label } from '@/components/ui/label'
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from '@/components/ui/form'
 import {
   Select,
   SelectContent,
@@ -22,89 +31,133 @@ interface EnergyFormProps {
   error: Error | null
 }
 
+const schema = z.object({
+  kwh: z
+    .string()
+    .min(1, 'Påkrevd')
+    .refine(
+      (v) => {
+        const n = Number(v)
+        return Number.isFinite(n) && n >= 0
+      },
+      { message: 'Må være et ikke-negativt tall' },
+    ),
+  priceZone: z.string(),
+  recordedDate: z.string(),
+})
+
+type FormValues = z.infer<typeof schema>
+
+const shortLabel = (label: string) => label.replace(/\s*\(.*$/, '')
+
 export default function EnergyForm({
   zones,
   onSubmit,
   isPending,
   error,
 }: EnergyFormProps) {
-  const [kwhUsed, setKwhUsed] = useState('')
-  const [priceZone, setPriceZone] = useState<PriceZone | ''>('')
-  const [recordedDate, setRecordedDate] = useState(
-    () => new Date().toISOString().split('T')[0],
-  )
+  const form = useForm<FormValues>({
+    resolver: zodResolver(schema),
+    defaultValues: {
+      kwh: '',
+      priceZone: '',
+      recordedDate: new Date().toISOString().split('T')[0],
+    },
+  })
 
-  const shortLabel = (label: string) => label.replace(/\s*\(.*$/, '')
-
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault()
-    const kwh = parseFloat(kwhUsed)
-    if (isNaN(kwh) || kwh < 0) return
-    onSubmit({ kwh, priceZone, recordedDate })
-    setKwhUsed('')
+  function handleValid(values: FormValues) {
+    onSubmit({
+      kwh: Number(values.kwh),
+      priceZone: values.priceZone as PriceZone | '',
+      recordedDate: values.recordedDate,
+    })
+    form.reset({ ...values, kwh: '' })
   }
 
+  const kwhValue = form.watch('kwh')
+
   return (
-    <form onSubmit={handleSubmit} className="space-y-4">
-      <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
-        <div className="space-y-1.5">
-          <Label htmlFor="kwh">Strømforbruk (kWh)</Label>
-          <Input
-            id="kwh"
-            type="number"
-            min="0"
-            step="any"
-            placeholder="f.eks. 15000"
-            value={kwhUsed}
-            onChange={(e) => setKwhUsed(e.target.value)}
-            required
+    <Form {...form}>
+      <form onSubmit={form.handleSubmit(handleValid)} className="space-y-4">
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
+          <FormField
+            control={form.control}
+            name="kwh"
+            render={({ field }) => (
+              <FormItem className="space-y-1.5">
+                <FormLabel>Strømforbruk (kWh)</FormLabel>
+                <FormControl>
+                  <Input
+                    type="number"
+                    min="0"
+                    step="any"
+                    placeholder="f.eks. 15000"
+                    {...field}
+                  />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+          <FormField
+            control={form.control}
+            name="priceZone"
+            render={({ field }) => (
+              <FormItem className="space-y-1.5">
+                <FormLabel>Prisområde (valgfritt)</FormLabel>
+                <Select
+                  value={field.value}
+                  onValueChange={(v) => field.onChange(v ?? '')}
+                >
+                  <FormControl>
+                    <SelectTrigger className="w-full">
+                      <SelectValue placeholder="Velg prisområde…">
+                        {(v) => {
+                          const z = zones?.find((zone) => zone.value === v)
+                          return z
+                            ? `${z.value} — ${shortLabel(z.label)}`
+                            : String(v ?? '')
+                        }}
+                      </SelectValue>
+                    </SelectTrigger>
+                  </FormControl>
+                  <SelectContent>
+                    {zones?.map((z) => (
+                      <SelectItem key={z.value} value={z.value}>
+                        {z.value} — {shortLabel(z.label)}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+          <FormField
+            control={form.control}
+            name="recordedDate"
+            render={({ field }) => (
+              <FormItem className="space-y-1.5">
+                <FormLabel>Dato (valgfritt)</FormLabel>
+                <FormControl>
+                  <Input type="date" {...field} />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
           />
         </div>
-        <div className="space-y-1.5">
-          <Label htmlFor="zone">Prisområde (valgfritt)</Label>
-          <Select
-            value={priceZone}
-            onValueChange={(v) => setPriceZone((v ?? '') as PriceZone | '')}
-          >
-            <SelectTrigger id="zone" className="w-full">
-              <SelectValue placeholder="Velg prisområde…">
-                {(v) => {
-                  const z = zones?.find((zone) => zone.value === v)
-                  return z
-                    ? `${z.value} — ${shortLabel(z.label)}`
-                    : String(v ?? '')
-                }}
-              </SelectValue>
-            </SelectTrigger>
-            <SelectContent>
-              {zones?.map((z) => (
-                <SelectItem key={z.value} value={z.value}>
-                  {z.value} — {shortLabel(z.label)}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-        </div>
-        <div className="space-y-1.5">
-          <Label htmlFor="date">Dato (valgfritt)</Label>
-          <Input
-            id="date"
-            type="date"
-            value={recordedDate}
-            onChange={(e) => setRecordedDate(e.target.value)}
-          />
-        </div>
-      </div>
 
-      {error && (
-        <p className="rounded-md border border-danger/20 bg-danger-soft px-3 py-2 text-sm text-danger-strong">
-          {error instanceof Error ? error.message : 'Noe gikk galt'}
-        </p>
-      )}
+        {error && (
+          <p className="rounded-md border border-danger/20 bg-danger-soft px-3 py-2 text-sm text-danger-strong">
+            {error instanceof Error ? error.message : 'Noe gikk galt'}
+          </p>
+        )}
 
-      <Button type="submit" size="sm" disabled={!kwhUsed || isPending}>
-        {isPending ? 'Beregner…' : 'Beregn CO₂'}
-      </Button>
-    </form>
+        <Button type="submit" size="sm" disabled={!kwhValue || isPending}>
+          {isPending ? 'Beregner…' : 'Beregn CO₂'}
+        </Button>
+      </form>
+    </Form>
   )
 }

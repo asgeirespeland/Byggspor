@@ -1,21 +1,30 @@
-import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
+import { useForm } from 'react-hook-form'
+import { zodResolver } from '@hookform/resolvers/zod'
+import { z } from 'zod'
 import { Input } from '@/components/ui/input'
-import { Label } from '@/components/ui/label'
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from '@/components/ui/form'
 import FormDialog from '@/shared/components/FormDialog'
 import { useCreateProject } from '@/entities/project/hooks/useProjects'
 
-export type BasicProjectForm = {
-  navn: string
-  kunde: string
-  lokasjon: string
-}
+const schema = z.object({
+  navn: z.string().min(1, 'Prosjektnavn er påkrevd'),
+  kunde: z.string(),
+  lokasjon: z.string(),
+})
 
-const empty: BasicProjectForm = {
-  navn: '',
-  kunde: '',
-  lokasjon: '',
-}
+type FormValues = z.infer<typeof schema>
+
+const empty: FormValues = { navn: '', kunde: '', lokasjon: '' }
+
+const FORM_ID = 'create-project-form'
 
 type Props = {
   open: boolean
@@ -23,24 +32,24 @@ type Props = {
 }
 
 export default function CreateProjectDialog({ open, onOpenChange }: Props) {
-  const [form, setForm] = useState<BasicProjectForm>(empty)
+  const form = useForm<FormValues>({
+    resolver: zodResolver(schema),
+    defaultValues: empty,
+  })
   const navigate = useNavigate()
   const { mutateAsync: create, isPending } = useCreateProject()
 
-  function handleChange(e: React.ChangeEvent<HTMLInputElement>) {
-    setForm((prev) => ({ ...prev, [e.target.name]: e.target.value }))
-  }
-
-  async function handleSubmit(e: React.SyntheticEvent<HTMLFormElement>) {
-    e.preventDefault()
+  async function handleValid(values: FormValues) {
     const result = await create({
-      name: form.navn,
-      customer_name: form.kunde || undefined,
+      name: values.navn,
+      customer_name: values.kunde || undefined,
     })
-    setForm(empty)
+    form.reset(empty)
     onOpenChange(false)
     navigate(`/projects/${result.id}`)
   }
+
+  const navn = form.watch('navn')
 
   return (
     <FormDialog
@@ -50,44 +59,64 @@ export default function CreateProjectDialog({ open, onOpenChange }: Props) {
       description="Fyll inn grunnleggende informasjon. Du kan legge til mer etter opprettelse."
       submitLabel="Opprett prosjekt"
       loadingLabel="Oppretter..."
-      submitDisabled={!form.navn.trim()}
+      submitDisabled={!navn.trim()}
       loading={isPending}
-      onSubmit={handleSubmit}
+      formId={FORM_ID}
     >
-      <div className="space-y-1.5">
-        <Label htmlFor="navn">Prosjektnavn *</Label>
-        <Input
-          id="navn"
-          name="navn"
-          placeholder="f.eks. Havnekvartalet Fase 2"
-          value={form.navn}
-          onChange={handleChange}
-          required
-          autoFocus
-        />
-      </div>
-
-      <div className="space-y-1.5">
-        <Label htmlFor="kunde">Kunde</Label>
-        <Input
-          id="kunde"
-          name="kunde"
-          placeholder="Kundenavn eller organisasjon"
-          value={form.kunde}
-          onChange={handleChange}
-        />
-      </div>
-
-      <div className="space-y-1.5">
-        <Label htmlFor="lokasjon">Lokasjon</Label>
-        <Input
-          id="lokasjon"
-          name="lokasjon"
-          placeholder="f.eks. Bergen, Norge"
-          value={form.lokasjon}
-          onChange={handleChange}
-        />
-      </div>
+      <Form {...form}>
+        <form
+          id={FORM_ID}
+          onSubmit={form.handleSubmit(handleValid)}
+          className="space-y-4"
+        >
+          <FormField
+            control={form.control}
+            name="navn"
+            render={({ field }) => (
+              <FormItem className="space-y-1.5">
+                <FormLabel>Prosjektnavn *</FormLabel>
+                <FormControl>
+                  <Input
+                    placeholder="f.eks. Havnekvartalet Fase 2"
+                    autoFocus
+                    {...field}
+                  />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+          <FormField
+            control={form.control}
+            name="kunde"
+            render={({ field }) => (
+              <FormItem className="space-y-1.5">
+                <FormLabel>Kunde</FormLabel>
+                <FormControl>
+                  <Input
+                    placeholder="Kundenavn eller organisasjon"
+                    {...field}
+                  />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+          <FormField
+            control={form.control}
+            name="lokasjon"
+            render={({ field }) => (
+              <FormItem className="space-y-1.5">
+                <FormLabel>Lokasjon</FormLabel>
+                <FormControl>
+                  <Input placeholder="f.eks. Bergen, Norge" {...field} />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+        </form>
+      </Form>
     </FormDialog>
   )
 }

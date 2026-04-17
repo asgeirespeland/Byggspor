@@ -38,3 +38,6 @@ package-lock.json
 
 # Generated invoice storage
 backend/storage/
+
+# JSON of NOBB Items
+nobb_items.json
