@@ -7,7 +7,7 @@ import type {
   TripUpdateInput,
 } from '../api/projectTransports'
 import { sumBy } from '@/shared/utils/collections'
-import { tripColumns, type TripRow } from '../columns'
+import { tripColumns, type TripRow } from './columns'
 
 interface Props {
   group: ProjectReportGroup

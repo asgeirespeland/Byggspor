@@ -1,6 +1,6 @@
 import { Badge } from '@/components/ui/badge'
 import type { SettingSource } from '../api'
-import { SOURCE_STYLES } from '../settings-meta'
+import { SOURCE_STYLES } from '../lib/settings-meta'
 
 export default function SourceBadge({ source }: { source: SettingSource }) {
   const s = SOURCE_STYLES[source]

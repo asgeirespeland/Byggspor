@@ -2,8 +2,8 @@ import { useMemo } from 'react'
 import ParsePreviewShell from '@/widgets/file-upload/ParsePreviewShell'
 import Co2TotalBadge from '@/widgets/Co2TotalBadge'
 import type { InvoiceResponse } from '../types'
-import { getGwpA1A3 } from '../utils'
-import { materialColumns, type MaterialRow } from '../columns'
+import { getGwpA1A3 } from '../lib/utils'
+import { materialColumns, type MaterialRow } from './columns'
 
 interface Props {
   data: InvoiceResponse

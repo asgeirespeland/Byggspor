@@ -2,7 +2,7 @@
  * Static content for the climate-tab tour: five category-step descriptions consumed by ClimateTabTour.
  * Icon + color theming is resolved from entities/report/theme via the `category` key.
  */
-import type { CategoryOrTotal } from '@/entities/report/theme'
+import type { CategoryOrTotal } from '@/shared/categories'
 
 export interface TourStep {
   category: CategoryOrTotal

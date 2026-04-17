@@ -2,7 +2,7 @@ import type { TransportLineItem } from '@/entities/report/types'
 import type { Column } from './ReportDataTable'
 import DataTable from './ReportDataTable'
 import ReportGroupRow from './ReportGroupRow'
-import { fmt, sourceLabel, confidenceBadge } from '@/entities/report/utils'
+import { fmt, sourceLabel, confidenceBadge } from '@/entities/report/lib/utils'
 import { groupBy, sumBy } from '@/shared/utils/collections'
 
 const COLUMNS: Column<TransportLineItem>[] = [

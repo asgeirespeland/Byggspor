@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect } from 'react'
 import { ChevronDown, ChevronRight, ShieldCheck } from 'lucide-react'
-import { fmt } from '@/entities/report/utils'
+import { fmt } from '@/entities/report/lib/utils'
 
 export default function Section({
   title,

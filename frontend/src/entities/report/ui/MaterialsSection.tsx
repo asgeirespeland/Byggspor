@@ -7,7 +7,7 @@ import {
   co2Label,
   sourceLabel,
   confidenceBadge,
-} from '@/entities/report/utils'
+} from '@/entities/report/lib/utils'
 import { groupBy, sumBy } from '@/shared/utils/collections'
 
 const COLUMNS: Column<MaterialLineItem>[] = [

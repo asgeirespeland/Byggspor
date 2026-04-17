@@ -11,7 +11,7 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from '@/components/ui/tooltip'
-import EpdBadge from './ui/EpdBadge'
+import EpdBadge from './EpdBadge'
 
 export interface MaterialRow {
   name: string | null

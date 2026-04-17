@@ -6,8 +6,8 @@ import {
   ChartTooltip,
   type ChartConfig,
 } from '@/components/ui/chart'
-import { fmt } from '@/entities/report/utils'
-import { CATEGORY_KEYS, CATEGORY_THEME } from '@/entities/report/theme'
+import { fmt } from '@/entities/report/lib/utils'
+import { CATEGORY_KEYS, CATEGORY_THEME } from '@/shared/categories'
 
 const CHART_CONFIG: ChartConfig = Object.fromEntries(
   CATEGORY_KEYS.map((key) => [

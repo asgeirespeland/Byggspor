@@ -9,7 +9,7 @@ import {
 } from '../hooks/useWaste'
 import type { WasteGroup } from '../types'
 import { sumBy } from '@/shared/utils/collections'
-import { wasteColumns, type WasteRow } from '../columns'
+import { wasteColumns, type WasteRow } from './columns'
 
 interface Props {
   group: WasteGroup

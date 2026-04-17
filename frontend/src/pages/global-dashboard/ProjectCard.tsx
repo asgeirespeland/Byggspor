@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { ChevronDown, ChevronUp, Building2, Hash } from 'lucide-react'
-import { STATUS_CONFIG } from '@/entities/project/constants'
+import { STATUS_CONFIG } from '@/entities/project/lib/constants'
 import { useCo2Summary } from '@/entities/report/hooks/useCo2Summary'
 import ProjectCardDrawer from './ProjectCardDrawer'
 import type { Project } from '@/entities/project/hooks/useProjects'

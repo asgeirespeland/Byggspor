@@ -8,7 +8,7 @@ import {
   useDeleteMaterial,
 } from '../hooks/useProjectMaterials'
 import { sumBy } from '@/shared/utils/collections'
-import { materialColumns, type MaterialRow } from '../columns'
+import { materialColumns, type MaterialRow } from './columns'
 
 interface Props {
   group: ProjectInvoiceGroup

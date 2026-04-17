@@ -3,7 +3,7 @@
  * label + input kind + render fn, grouped by category), STAGE_LABELS enum map, and SOURCE_STYLES
  * badge palette.
  */
-import type { SettingSource } from './api'
+import type { SettingSource } from '../api'
 
 export type SettingMeta = {
   key: string

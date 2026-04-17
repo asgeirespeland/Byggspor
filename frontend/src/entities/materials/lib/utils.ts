@@ -1,4 +1,4 @@
-import type { LineItem } from './types'
+import type { LineItem } from '../types'
 
 export function getGwpA1A3(item: LineItem): number | null {
   const stages = item.nobb_data?.epd?.gwp_stages

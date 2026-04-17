@@ -10,7 +10,7 @@ import {
   DialogTitle,
 } from '@/components/ui/dialog'
 import { Button } from '@/components/ui/button'
-import { CATEGORY_THEME } from '@/entities/report/theme'
+import { CATEGORY_THEME } from '@/shared/categories'
 import { TOUR_STEPS, TOUR_STEP_COUNT } from './tourSteps'
 
 interface Props {

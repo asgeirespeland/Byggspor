@@ -1,10 +1,10 @@
 import type { DetailedReport } from '@/entities/report/types'
-import { fmt } from '@/entities/report/utils'
+import { fmt } from '@/entities/report/lib/utils'
 import {
   CATEGORY_KEYS,
   CATEGORY_THEME,
   type CategoryKey,
-} from '@/entities/report/theme'
+} from '@/shared/categories'
 
 interface TopEmittersProps {
   report: DetailedReport

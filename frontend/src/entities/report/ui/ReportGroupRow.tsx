@@ -5,7 +5,7 @@ import {
   CollapsibleContent,
   CollapsibleTrigger,
 } from '@/components/ui/collapsible'
-import { fmt } from '@/entities/report/utils'
+import { fmt } from '@/entities/report/lib/utils'
 
 export default function ReportGroupRow({
   label,

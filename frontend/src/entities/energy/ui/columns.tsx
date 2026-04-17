@@ -1,6 +1,6 @@
 import type { EnergyLineItem } from '@/entities/report/types'
 import type { Column } from '@/entities/report/ui/ReportDataTable'
-import { fmt, sourceLabel, confidenceBadge } from '@/entities/report/utils'
+import { fmt, sourceLabel, confidenceBadge } from '@/entities/report/lib/utils'
 
 export const energyColumns: Column<EnergyLineItem>[] = [
   { header: 'Dato', render: (i) => i.recorded_date ?? '—' },

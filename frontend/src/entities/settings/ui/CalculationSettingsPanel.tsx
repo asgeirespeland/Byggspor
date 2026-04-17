@@ -6,7 +6,7 @@
 import { useState } from 'react'
 import { RotateCcw, Loader2, Save, Info } from 'lucide-react'
 import type { ResolvedSetting } from '../api'
-import { SETTING_GROUPS } from '../settings-meta'
+import { SETTING_GROUPS } from '../lib/settings-meta'
 import SettingRow from './SettingRow'
 
 export type SettingsPanelProps = {

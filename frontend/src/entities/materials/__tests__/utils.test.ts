@@ -5,7 +5,7 @@
  */
 
 import { describe, it, expect } from 'vitest'
-import { getGwpA1A3 } from '../utils'
+import { getGwpA1A3 } from '../lib/utils'
 import type { LineItem } from '../types'
 
 // ── Helpers ───────────────────────────────────────────────────────────────────

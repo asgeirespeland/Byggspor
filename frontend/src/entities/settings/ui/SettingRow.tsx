@@ -9,7 +9,7 @@ import {
   SelectValue,
 } from '@/components/ui/select'
 import type { ResolvedSetting } from '../api'
-import type { SettingMeta } from '../settings-meta'
+import type { SettingMeta } from '../lib/settings-meta'
 import SourceBadge from './SourceBadge'
 
 export default function SettingRow({

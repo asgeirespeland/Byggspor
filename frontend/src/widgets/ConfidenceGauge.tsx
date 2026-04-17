@@ -6,7 +6,7 @@ import {
   CONFIDENCE_TIER_COLOR,
   CONFIDENCE_TIER_LABEL,
   confidenceTier,
-} from '@/entities/report/confidence'
+} from '@/entities/report/lib/confidence'
 
 const FULL_GAUGE = {
   radius: 54,

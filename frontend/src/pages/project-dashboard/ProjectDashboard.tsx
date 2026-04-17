@@ -8,7 +8,7 @@ import { useState } from 'react'
 import { useDeferredLoading } from '@/shared/hooks/useDeferredLoading'
 import { ArrowLeft, HelpCircle, Loader2, FileText } from 'lucide-react'
 import { useProject } from '@/entities/project/hooks/useProjects'
-import { STATUS_CONFIG } from '@/entities/project/constants'
+import { STATUS_CONFIG } from '@/entities/project/lib/constants'
 import TabBar, { type TabDef } from '@/shared/components/TabBar'
 import InvoiceUpload from '@/entities/materials/ui/InvoiceUpload'
 import TransportUpload from '@/entities/transport/ui/TransportUpload'
@@ -20,7 +20,7 @@ import {
   CATEGORY_THEME,
   CATEGORY_KEYS,
   type CategoryOrTotal,
-} from '@/entities/report/theme'
+} from '@/shared/categories'
 import KpiCard from './KpiCard'
 import ProjectSidebar from './ProjectSidebar'
 import ClimateTabTour from '@/pages/onboarding/ClimateTabTour'
