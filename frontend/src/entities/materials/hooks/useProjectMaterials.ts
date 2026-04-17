@@ -9,6 +9,7 @@ import { useAuthQuery } from '@/shared/hooks/useAuthQuery'
 import { useAuthMutation } from '@/shared/hooks/useAuthMutation'
 import { useOptimisticDelete } from '@/widgets/data-table/useOptimisticDelete'
 import { sumBy } from '@/shared/utils/collections'
+import { qk, projectReportKeys } from '@/shared/api/queryKeys'
 
 import {
   listProjectMaterials,
@@ -19,7 +20,7 @@ import {
 } from '../api'
 
 export function useProjectMaterials(projectId: number) {
-  return useAuthQuery(['project-materials', projectId], (token) =>
+  return useAuthQuery(qk.materials(projectId), (token) =>
     listProjectMaterials(projectId, token),
   )
 }
@@ -30,9 +31,8 @@ export function useUpdateMaterial(projectId: number) {
       mutationFn: ({ materialId, total_co2_kg }, token) =>
         updateMaterial(materialId, { total_co2_kg }, token),
       invalidateKeys: [
-        ['project-materials', projectId],
-        ['co2-summary', projectId],
-        ['detailed-report', projectId],
+        qk.materials(projectId),
+        ...projectReportKeys(projectId),
       ],
       successMessage: 'CO₂-verdi oppdatert',
       errorMessage: 'Kunne ikke oppdatere materialposten',
@@ -45,7 +45,7 @@ export function useDeleteInvoice(projectId: number) {
     ProjectInvoiceGroup[]
   >({
     projectId,
-    listQueryKey: ['project-materials', projectId],
+    listQueryKey: qk.materials(projectId),
     co2Category: 'materials',
     prepare: (snapshot, id) => {
       const group = snapshot?.find((g) => g.invoice_id === id)
@@ -71,7 +71,7 @@ export function useDeleteMaterial(projectId: number) {
     ProjectInvoiceGroup[]
   >({
     projectId,
-    listQueryKey: ['project-materials', projectId],
+    listQueryKey: qk.materials(projectId),
     co2Category: 'materials',
     prepare: (snapshot, materialId) => {
       const item = snapshot

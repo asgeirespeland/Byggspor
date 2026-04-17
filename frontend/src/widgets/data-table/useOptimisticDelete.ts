@@ -10,6 +10,7 @@ import { useAuth } from '@clerk/react'
 import { toast } from 'sonner'
 import { useInlineUndo } from './useInlineUndo'
 import type { Co2Summary } from '@/entities/report/api/co2Summary'
+import { qk } from '@/shared/api/queryKeys'
 
 interface UseOptimisticDeleteOptions<TSnapshot> {
   projectId: number
@@ -58,10 +59,10 @@ export function useOptimisticDelete<TSnapshot>({
         try {
           await deleteFn(id, token)
           queryClient.invalidateQueries({
-            queryKey: ['co2-summary', projectId],
+            queryKey: qk.co2Summary(projectId),
           })
           queryClient.invalidateQueries({
-            queryKey: ['detailed-report', projectId],
+            queryKey: qk.detailedReport(projectId),
           })
         } catch (err) {
           if (snapshot) queryClient.setQueryData(listQueryKey, snapshot)
@@ -98,7 +99,7 @@ function adjustCo2(
   co2Delta: number,
   entryCountDelta: number,
 ) {
-  queryClient.setQueryData<Co2Summary>(['co2-summary', projectId], (old) => {
+  queryClient.setQueryData<Co2Summary>(qk.co2Summary(projectId), (old) => {
     if (!old) return old
     const cat = old.categories[category]
     return {

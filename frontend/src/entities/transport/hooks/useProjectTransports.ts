@@ -9,6 +9,7 @@ import { useAuthQuery } from '@/shared/hooks/useAuthQuery'
 import { useAuthMutation } from '@/shared/hooks/useAuthMutation'
 import { useOptimisticDelete } from '@/widgets/data-table/useOptimisticDelete'
 import { sumBy } from '@/shared/utils/collections'
+import { qk, projectReportKeys } from '@/shared/api/queryKeys'
 
 import {
   listProjectTransports,
@@ -20,7 +21,7 @@ import {
 } from '../api/projectTransports'
 
 export function useProjectTransports(projectId: number) {
-  return useAuthQuery(['project-transports', projectId], (token) =>
+  return useAuthQuery(qk.transports(projectId), (token) =>
     listProjectTransports(projectId, token),
   )
 }
@@ -30,7 +31,7 @@ export function useDeleteTransportReport(projectId: number) {
     ProjectReportGroup[]
   >({
     projectId,
-    listQueryKey: ['project-transports', projectId],
+    listQueryKey: qk.transports(projectId),
     co2Category: 'transport',
     prepare: (snapshot, id) => {
       const trips = snapshot?.find((g) => g.report_id === id)?.trips ?? []
@@ -58,7 +59,7 @@ export function useDeleteTrip(projectId: number) {
     ProjectReportGroup[]
   >({
     projectId,
-    listQueryKey: ['project-transports', projectId],
+    listQueryKey: qk.transports(projectId),
     co2Category: 'transport',
     prepare: (snapshot, tripId) => {
       const trip = snapshot
@@ -95,11 +96,7 @@ export function useDeleteTrip(projectId: number) {
 export function useUpdateTrip(projectId: number) {
   return useAuthMutation<{ tripId: number; data: TripUpdateInput }>({
     mutationFn: ({ tripId, data }, token) => updateTrip(tripId, data, token),
-    invalidateKeys: [
-      ['project-transports', projectId],
-      ['co2-summary', projectId],
-      ['detailed-report', projectId],
-    ],
+    invalidateKeys: [qk.transports(projectId), ...projectReportKeys(projectId)],
     successMessage: 'Tur oppdatert',
     errorMessage: 'Kunne ikke oppdatere tur',
   })

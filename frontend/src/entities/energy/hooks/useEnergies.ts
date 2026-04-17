@@ -8,6 +8,7 @@
 import { useAuthQuery } from '@/shared/hooks/useAuthQuery'
 import { useAuthMutation } from '@/shared/hooks/useAuthMutation'
 import { useOptimisticDelete } from '@/widgets/data-table/useOptimisticDelete'
+import { qk, projectReportKeys } from '@/shared/api/queryKeys'
 
 import {
   calculateEnergy,
@@ -23,13 +24,13 @@ import type {
 } from '../types'
 
 export function useEnergies(projectId: number) {
-  return useAuthQuery(['energies', projectId], (token) =>
+  return useAuthQuery(qk.energies(projectId), (token) =>
     listEnergies(projectId, token),
   )
 }
 
 export function usePriceZones() {
-  return useAuthQuery(['price-zones'], (token) => listPriceZones(token), {
+  return useAuthQuery(qk.priceZones(), (token) => listPriceZones(token), {
     staleTime: Infinity,
   })
 }
@@ -37,11 +38,7 @@ export function usePriceZones() {
 export function useCalculateEnergy(projectId: number) {
   return useAuthMutation<EnergyCalculateInput>({
     mutationFn: (input, token) => calculateEnergy(input, token),
-    invalidateKeys: [
-      ['energies', projectId],
-      ['co2-summary', projectId],
-      ['detailed-report', projectId],
-    ],
+    invalidateKeys: [qk.energies(projectId), ...projectReportKeys(projectId)],
     successMessage: 'Energidata lagret',
     errorMessage: 'Kunne ikke lagre energidata',
   })
@@ -51,11 +48,7 @@ export function useUpdateEnergy(projectId: number) {
   return useAuthMutation<{ energyId: number; data: EnergyUpdateInput }>({
     mutationFn: ({ energyId, data }, token) =>
       updateEnergy(energyId, data, token),
-    invalidateKeys: [
-      ['energies', projectId],
-      ['co2-summary', projectId],
-      ['detailed-report', projectId],
-    ],
+    invalidateKeys: [qk.energies(projectId), ...projectReportKeys(projectId)],
     successMessage: 'Energidata oppdatert',
     errorMessage: 'Kunne ikke oppdatere energidata',
   })
@@ -64,7 +57,7 @@ export function useUpdateEnergy(projectId: number) {
 export function useDeleteEnergy(projectId: number) {
   const { handleDelete, pendingId, undo } = useOptimisticDelete<EnergyEntry[]>({
     projectId,
-    listQueryKey: ['energies', projectId],
+    listQueryKey: qk.energies(projectId),
     co2Category: 'energy',
     prepare: (snapshot, id) => ({
       updatedList: snapshot?.filter((e) => e.id !== id) ?? [],

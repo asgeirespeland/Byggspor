@@ -1,8 +1,9 @@
 import { useAuthQuery } from '@/shared/hooks/useAuthQuery'
+import { qk } from '@/shared/api/queryKeys'
 import { getDetailedReport } from '../api/detailedReport'
 
 export function useDetailedReport(projectId: number) {
-  return useAuthQuery(['detailed-report', projectId], (token) =>
+  return useAuthQuery(qk.detailedReport(projectId), (token) =>
     getDetailedReport(projectId, token),
   )
 }

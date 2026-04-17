@@ -5,11 +5,12 @@
  */
 import { useAuthQuery } from '@/shared/hooks/useAuthQuery'
 import { useAuthMutation } from '@/shared/hooks/useAuthMutation'
+import { qk, qkPrefix } from '@/shared/api/queryKeys'
 import { getOrgSettings, patchOrgSettings, resetOrgSettings } from '../api'
 
 export function useOrgSettings(orgId: number | undefined) {
   return useAuthQuery(
-    ['org-settings', orgId],
+    qk.orgSettings(orgId),
     (token) => getOrgSettings(orgId!, token),
     { enabled: orgId != null },
   )
@@ -17,13 +18,13 @@ export function useOrgSettings(orgId: number | undefined) {
 
 /** Query keys that inherit from org settings */
 const ORG_DOWNSTREAM_KEYS = [
-  ['org-settings'],
-  ['project-settings'],
-  ['energies'],
-  ['project-materials'],
-  ['project-waste'],
-  ['co2-summary'],
-  ['detailed-report'],
+  qkPrefix.orgSettings(),
+  qkPrefix.projectSettings(),
+  qkPrefix.energies(),
+  qkPrefix.materials(),
+  qkPrefix.waste(),
+  qkPrefix.co2Summary(),
+  qkPrefix.detailedReport(),
 ]
 
 export function useUpdateOrgSettings(orgId: number | undefined) {

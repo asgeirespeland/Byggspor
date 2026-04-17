@@ -1,5 +1,6 @@
 import { useAuthQuery } from '@/shared/hooks/useAuthQuery'
 import { useAuthMutation } from '@/shared/hooks/useAuthMutation'
+import { qk } from '@/shared/api/queryKeys'
 import {
   createProject,
   getProject,
@@ -11,11 +12,11 @@ import {
 export type { Project } from '../api'
 
 export function useProjects() {
-  return useAuthQuery(['projects'], (token) => listProjects(token))
+  return useAuthQuery(qk.projects(), (token) => listProjects(token))
 }
 
 export function useProject(projectId: number) {
-  return useAuthQuery(['projects', projectId], (token) =>
+  return useAuthQuery(qk.project(projectId), (token) =>
     getProject(projectId, token),
   )
 }
@@ -23,7 +24,7 @@ export function useProject(projectId: number) {
 export function useCreateProject() {
   return useAuthMutation<CreateProjectPayload, Project>({
     mutationFn: (payload, token) => createProject(payload, token),
-    invalidateKeys: [['projects']],
+    invalidateKeys: [qk.projects()],
     successMessage: 'Prosjekt opprettet',
     errorMessage: 'Kunne ikke opprette prosjekt',
   })

@@ -6,6 +6,7 @@ import { useAuthMutation } from '@/shared/hooks/useAuthMutation'
 import { useAuthQuery } from '@/shared/hooks/useAuthQuery'
 import { useOptimisticDelete } from '@/widgets/data-table/useOptimisticDelete'
 import { sumBy } from '@/shared/utils/collections'
+import { qk, projectReportKeys } from '@/shared/api/queryKeys'
 
 import {
   createManualWaste,
@@ -17,7 +18,7 @@ import {
 import type { CreateManualWastePayload, WasteGroup } from '../types'
 
 export function useProjectWaste(projectId: number) {
-  return useAuthQuery(['project-waste', projectId], (token) =>
+  return useAuthQuery(qk.waste(projectId), (token) =>
     getProjectWaste(projectId, token),
   )
 }
@@ -25,11 +26,7 @@ export function useProjectWaste(projectId: number) {
 export function useCreateManualWaste(projectId: number) {
   return useAuthMutation<CreateManualWastePayload>({
     mutationFn: (input, token) => createManualWaste(input, token),
-    invalidateKeys: [
-      ['project-waste', projectId],
-      ['co2-summary', projectId],
-      ['detailed-report', projectId],
-    ],
+    invalidateKeys: [qk.waste(projectId), ...projectReportKeys(projectId)],
     successMessage: 'Avfallsdata lagret',
     errorMessage: 'Kunne ikke lagre avfallsdata',
   })
@@ -49,11 +46,7 @@ export function useUpdateWasteItem(projectId: number) {
   >({
     mutationFn: ({ itemId, data }, token) =>
       updateWasteItem(itemId, data, token),
-    invalidateKeys: [
-      ['project-waste', projectId],
-      ['co2-summary', projectId],
-      ['detailed-report', projectId],
-    ],
+    invalidateKeys: [qk.waste(projectId), ...projectReportKeys(projectId)],
     successMessage: 'Avfallspost oppdatert',
     errorMessage: 'Kunne ikke oppdatere avfallsposten',
   })
@@ -62,7 +55,7 @@ export function useUpdateWasteItem(projectId: number) {
 export function useDeleteWasteItem(projectId: number) {
   const { handleDelete, pendingId, undo } = useOptimisticDelete<WasteGroup[]>({
     projectId,
-    listQueryKey: ['project-waste', projectId],
+    listQueryKey: qk.waste(projectId),
     co2Category: 'waste',
     prepare: (snapshot, itemId) => {
       const item = snapshot
@@ -94,7 +87,7 @@ export function useDeleteWasteItem(projectId: number) {
 export function useDeleteWasteReport(projectId: number) {
   const { handleDelete, pendingId, undo } = useOptimisticDelete<WasteGroup[]>({
     projectId,
-    listQueryKey: ['project-waste', projectId],
+    listQueryKey: qk.waste(projectId),
     co2Category: 'waste',
     prepare: (snapshot, sourceId) => {
       const group = snapshot?.find((g) => g.source_id === sourceId)

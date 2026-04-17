@@ -10,6 +10,7 @@ import { toast } from 'sonner'
 import InlineUndoBar from '@/widgets/data-table/InlineUndoBar'
 import FileUploadShell from '@/widgets/file-upload/FileUploadShell'
 import DataTabShell from '@/widgets/data-table/DataTabShell'
+import { qk } from '@/shared/api/queryKeys'
 import { confirmInvoice } from '../api'
 import { useInvoiceParse } from '../hooks/useInvoiceParse'
 import {
@@ -57,13 +58,13 @@ export default function InvoiceUpload({ projectId }: Props) {
                   const token = await requireToken()
                   await confirmInvoice(projectId, invoiceData, {}, token)
                   queryClient.invalidateQueries({
-                    queryKey: ['project-materials', projectId],
+                    queryKey: qk.materials(projectId),
                   })
                   queryClient.invalidateQueries({
-                    queryKey: ['co2-summary', projectId],
+                    queryKey: qk.co2Summary(projectId),
                   })
                   queryClient.invalidateQueries({
-                    queryKey: ['detailed-report', projectId],
+                    queryKey: qk.detailedReport(projectId),
                   })
                   clear()
                   toast.success('Faktura bekreftet og lagret')

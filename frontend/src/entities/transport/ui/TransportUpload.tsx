@@ -9,6 +9,7 @@ import { toast } from 'sonner'
 import InlineUndoBar from '@/widgets/data-table/InlineUndoBar'
 import FileUploadShell from '@/widgets/file-upload/FileUploadShell'
 import DataTabShell from '@/widgets/data-table/DataTabShell'
+import { qk } from '@/shared/api/queryKeys'
 import { confirmTrips } from '../api/transport'
 import { useTransportParse } from '../hooks/useTransportParse'
 import {
@@ -39,13 +40,9 @@ export default function TransportUpload({ projectId }: Props) {
   const [confirming, setConfirming] = useState(false)
 
   const invalidateTransportData = () => {
-    queryClient.invalidateQueries({ queryKey: ['co2-summary', projectId] })
-    queryClient.invalidateQueries({
-      queryKey: ['project-transports', projectId],
-    })
-    queryClient.invalidateQueries({
-      queryKey: ['detailed-report', projectId],
-    })
+    queryClient.invalidateQueries({ queryKey: qk.co2Summary(projectId) })
+    queryClient.invalidateQueries({ queryKey: qk.transports(projectId) })
+    queryClient.invalidateQueries({ queryKey: qk.detailedReport(projectId) })
   }
 
   const handleConfirm = async (

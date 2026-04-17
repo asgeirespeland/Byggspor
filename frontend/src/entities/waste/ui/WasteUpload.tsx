@@ -8,6 +8,7 @@ import { toast } from 'sonner'
 import InlineUndoBar from '@/widgets/data-table/InlineUndoBar'
 import FileUploadShell from '@/widgets/file-upload/FileUploadShell'
 import DataTabShell from '@/widgets/data-table/DataTabShell'
+import { qk } from '@/shared/api/queryKeys'
 import { confirmWaste } from '../api'
 import { useWasteParse } from '../hooks/useWasteParse'
 import { useProjectWaste, useDeleteWasteReport } from '../hooks/useWaste'
@@ -43,15 +44,9 @@ export default function WasteUpload({ projectId }: Props) {
         wasteData.receiver?.name ?? null,
         token,
       )
-      queryClient.invalidateQueries({
-        queryKey: ['project-waste', projectId],
-      })
-      queryClient.invalidateQueries({
-        queryKey: ['co2-summary', projectId],
-      })
-      queryClient.invalidateQueries({
-        queryKey: ['detailed-report', projectId],
-      })
+      queryClient.invalidateQueries({ queryKey: qk.waste(projectId) })
+      queryClient.invalidateQueries({ queryKey: qk.co2Summary(projectId) })
+      queryClient.invalidateQueries({ queryKey: qk.detailedReport(projectId) })
       clear()
       toast.success('Avfallsrapport bekreftet og lagret')
     } catch {

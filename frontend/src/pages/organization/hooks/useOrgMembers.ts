@@ -1,15 +1,14 @@
 import { useAuthQuery } from '@/shared/hooks/useAuthQuery'
 import { useAuthMutation } from '@/shared/hooks/useAuthMutation'
 import { apiRequest } from '@/shared/api/client'
+import { qk } from '@/shared/api/queryKeys'
 import type { OrgMemberDto } from '@/shared/types'
 
 export function useOrgMembers(organizationId: number) {
-  return useAuthQuery<OrgMemberDto[]>(
-    ['organizations', organizationId, 'members'],
-    (token) =>
-      apiRequest<OrgMemberDto[]>(`/organizations/${organizationId}/members`, {
-        token,
-      }),
+  return useAuthQuery<OrgMemberDto[]>(qk.orgMembers(organizationId), (token) =>
+    apiRequest<OrgMemberDto[]>(`/organizations/${organizationId}/members`, {
+      token,
+    }),
   )
 }
 
@@ -21,6 +20,6 @@ export function useAddMember(organizationId: number) {
         token,
         body: { user_id: Number(userId), role },
       }),
-    invalidateKeys: [['organizations', organizationId, 'members']],
+    invalidateKeys: [qk.orgMembers(organizationId)],
   })
 }
