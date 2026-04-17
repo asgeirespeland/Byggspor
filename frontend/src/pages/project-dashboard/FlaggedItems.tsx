@@ -9,17 +9,10 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from '@/components/ui/tooltip'
-import { useProjectMaterials } from '@/entities/materials/hooks/useProjectMaterials'
-import { useProjectTransports } from '@/entities/transport/hooks/useProjectTransports'
+import { useFlaggedEntries } from '@/entities/report/hooks/useFlaggedEntries'
 import { useDismiss } from '@/shared/hooks/useDismiss'
-import type { ProjectMaterialItem } from '@/entities/materials/api'
-import type { ProjectTripItem } from '@/entities/transport/api/projectTransports'
 import FlaggedMaterialRow from './FlaggedMaterialRow'
 import FlaggedTripRow from './FlaggedTripRow'
-
-type FlaggedMaterial = ProjectMaterialItem & { kind: 'material' }
-type FlaggedTrip = ProjectTripItem & { kind: 'transport' }
-type FlaggedEntry = FlaggedMaterial | FlaggedTrip
 
 interface Props {
   projectId: number
@@ -32,24 +25,7 @@ export default function FlaggedItems({ projectId, onNavigateToTab }: Props) {
   const { isDismissed, dismissSession, dismissForever } = useDismiss(
     `${STORAGE_KEY_PREFIX}${projectId}`,
   )
-  const { data: invoiceGroups } = useProjectMaterials(projectId)
-  const { data: reportGroups } = useProjectTransports(projectId)
-
-  const flaggedMaterials: FlaggedMaterial[] =
-    invoiceGroups?.flatMap((g) =>
-      g.items
-        .filter((item) => item.flagged)
-        .map((item) => ({ ...item, kind: 'material' as const })),
-    ) ?? []
-
-  const flaggedTrips: FlaggedTrip[] =
-    reportGroups?.flatMap((g) =>
-      g.trips
-        .filter((t) => t.flagged)
-        .map((t) => ({ ...t, kind: 'transport' as const })),
-    ) ?? []
-
-  const flagged: FlaggedEntry[] = [...flaggedMaterials, ...flaggedTrips]
+  const flagged = useFlaggedEntries(projectId)
 
   if (flagged.length === 0 || isDismissed) return null
 
