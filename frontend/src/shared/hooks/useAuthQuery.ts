@@ -1,5 +1,6 @@
 import { useQuery, type QueryKey } from '@tanstack/react-query'
 import { useAuth } from '@clerk/react'
+import { getTokenOrThrow } from '@/shared/auth/getToken'
 
 export function useAuthQuery<T>(
   queryKey: QueryKey,
@@ -10,11 +11,7 @@ export function useAuthQuery<T>(
 
   return useQuery({
     queryKey,
-    queryFn: async () => {
-      const token = await getToken()
-      if (!token) throw new Error('Ikke autentisert')
-      return fn(token)
-    },
+    queryFn: async () => fn(await getTokenOrThrow(getToken)),
     ...opts,
   })
 }

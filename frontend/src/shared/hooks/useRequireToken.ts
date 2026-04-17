@@ -1,16 +1,13 @@
 import { useAuth } from '@clerk/react'
 import { useCallback } from 'react'
+import { getTokenOrThrow } from '@/shared/auth/getToken'
 
 export function useRequireToken() {
   const { isLoaded, isSignedIn, getToken } = useAuth()
 
   const authReady = isLoaded && isSignedIn
 
-  const requireToken = useCallback(async (): Promise<string> => {
-    const token = await getToken()
-    if (!token) throw new Error('Ikke autentisert')
-    return token
-  }, [getToken])
+  const requireToken = useCallback(() => getTokenOrThrow(getToken), [getToken])
 
   return { authReady, requireToken }
 }

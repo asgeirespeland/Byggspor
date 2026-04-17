@@ -1,6 +1,7 @@
 import { useAuth } from '@clerk/react'
 import { useState } from 'react'
 import { toast } from 'sonner'
+import { getTokenOrThrow } from '@/shared/auth/getToken'
 import { generateInvoice, downloadEhfBlob, triggerDownload } from '../api'
 import type { GenerateInvoiceInput, GeneratedInvoice } from '../types'
 
@@ -25,9 +26,7 @@ export function useGenerateInvoice(): UseGenerateInvoiceResult {
     setIsPending(true)
     setError(null)
     try {
-      const token = await getToken()
-      if (!token) throw new Error('Ikke autentisert')
-
+      const token = await getTokenOrThrow(getToken)
       const invoice = await generateInvoice(projectId, input, token)
       toast.success('Faktura generert — laster ned EHF-fil…')
 
