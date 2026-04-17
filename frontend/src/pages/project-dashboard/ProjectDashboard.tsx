@@ -144,7 +144,7 @@ export default function ProjectDashboard() {
   if (error || !project) {
     return (
       <div className="flex flex-col items-center justify-center py-24 text-center">
-        <p className="text-sm text-red-500">
+        <p className="text-sm text-danger">
           {error?.message ?? 'Kunne ikke laste prosjekt'}
         </p>
         <button

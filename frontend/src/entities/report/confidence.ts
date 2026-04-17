@@ -20,18 +20,18 @@ export const CONFIDENCE_TIER_LABEL: Record<ConfidenceTier, string> = {
   low: 'Lav',
 }
 
-/** Hex colours used by the SVG gauge. */
+/** Design-token CSS variables used by the SVG gauge. */
 export const CONFIDENCE_TIER_COLOR: Record<ConfidenceTier, string> = {
-  high: '#10b981',
-  medium: '#f59e0b',
-  low: '#ef4444',
+  high: 'var(--success)',
+  medium: 'var(--warning)',
+  low: 'var(--danger)',
 }
 
 /** Tailwind classes for pill-style badges. */
 export const CONFIDENCE_TIER_BADGE_CLASS: Record<ConfidenceTier, string> = {
-  high: 'bg-emerald-50 text-emerald-700',
-  medium: 'bg-yellow-50 text-yellow-700',
-  low: 'bg-red-50 text-red-700',
+  high: 'bg-success-soft text-success-strong',
+  medium: 'bg-warning-soft text-warning-strong',
+  low: 'bg-danger-soft text-danger-strong',
 }
 
 /** Human-readable score ranges used by the info dialog. */

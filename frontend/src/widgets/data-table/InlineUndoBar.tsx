@@ -10,7 +10,7 @@ export default function InlineUndoBar({ message, onUndo }: InlineUndoBarProps) {
       <button
         type="button"
         onClick={onUndo}
-        className="font-medium text-blue-600 hover:text-blue-800 transition-colors cursor-pointer"
+        className="font-medium text-info-strong hover:text-info transition-colors cursor-pointer"
       >
         Angre
       </button>

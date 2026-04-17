@@ -121,13 +121,13 @@ export const SOURCE_STYLES: Record<
 > = {
   default: { bg: 'bg-gray-100', text: 'text-gray-500', label: 'Standard' },
   organization: {
-    bg: 'bg-blue-50',
-    text: 'text-blue-600',
+    bg: 'bg-info-soft',
+    text: 'text-info-strong',
     label: 'Organisasjon',
   },
   project: {
-    bg: 'bg-emerald-50',
-    text: 'text-emerald-600',
+    bg: 'bg-success-soft',
+    text: 'text-success-strong',
     label: 'Prosjekt',
   },
 }

@@ -25,7 +25,7 @@ export function co2Label(value: number | null | undefined) {
     return <span className="text-gray-400">—</span>
   if (value < 0) {
     return (
-      <span className="text-emerald-600 font-medium">
+      <span className="text-carbon-strong font-medium">
         {fmt(Math.abs(value))} kg{' '}
         <span className="text-xs font-normal">(karbonbinding)</span>
       </span>

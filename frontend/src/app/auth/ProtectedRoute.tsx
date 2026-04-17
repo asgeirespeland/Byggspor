@@ -46,7 +46,7 @@ export default function ProtectedRoute() {
   if (sync.status === 'error') {
     return (
       <div className="min-h-screen grid place-items-center px-4">
-        <div className="max-w-md rounded border border-red-300 bg-red-50 p-4 text-red-800">
+        <div className="max-w-md rounded border border-danger/30 bg-danger-soft p-4 text-danger-strong">
           <p className="text-sm">{sync.message}</p>
         </div>
       </div>

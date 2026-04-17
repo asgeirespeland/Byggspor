@@ -65,7 +65,7 @@ export default function InvoicePreview({
       columns={materialColumns}
       rows={rows}
       rowKey={(_, i) => data.line_items[i].line_number ?? i}
-      rowClassName={(row) => (row.flagged ? 'bg-amber-50' : '')}
+      rowClassName={(row) => (row.flagged ? 'bg-warning-soft' : '')}
       onSaveEdit={(_row, i, values) => {
         const items = [...data.line_items]
         items[i] = {
@@ -108,7 +108,7 @@ export default function InvoicePreview({
             {rows.length} linjer
           </span>
           {flaggedCount > 0 && (
-            <span className="rounded-full bg-amber-100 px-3 py-1 text-xs font-medium text-amber-700">
+            <span className="rounded-full bg-warning-soft px-3 py-1 text-xs font-medium text-warning-strong">
               {flaggedCount} uten CO₂-data
             </span>
           )}

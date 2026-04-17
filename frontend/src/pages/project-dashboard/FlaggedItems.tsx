@@ -54,17 +54,17 @@ export default function FlaggedItems({ projectId, onNavigateToTab }: Props) {
   if (flagged.length === 0 || isDismissed) return null
 
   return (
-    <div className="rounded-xl border border-amber-200 bg-amber-50/50 p-4 shadow-sm">
+    <div className="rounded-xl border border-warning/20 bg-warning-soft/50 p-4 shadow-sm">
       <div className="mb-3 flex items-center gap-2">
-        <AlertTriangle className="h-3.5 w-3.5 text-amber-500" />
-        <p className="text-xs font-semibold uppercase tracking-wide text-amber-700">
+        <AlertTriangle className="h-3.5 w-3.5 text-warning" />
+        <p className="text-xs font-semibold uppercase tracking-wide text-warning-strong">
           Trenger oppmerksomhet ({flagged.length})
         </p>
         <TooltipProvider>
           <span className="ml-auto inline-flex items-center gap-1.5">
             <Tooltip>
               <TooltipTrigger
-                className="text-[10px] text-amber-400 hover:text-amber-600 cursor-pointer"
+                className="text-[10px] text-warning/70 hover:text-warning-strong cursor-pointer"
                 onClick={dismissSession}
               >
                 Skjul
@@ -75,7 +75,7 @@ export default function FlaggedItems({ projectId, onNavigateToTab }: Props) {
             </Tooltip>
             <Tooltip>
               <TooltipTrigger
-                className="text-amber-300 hover:text-amber-500 cursor-pointer"
+                className="text-warning/60 hover:text-warning cursor-pointer"
                 onClick={dismissForever}
               >
                 <X className="h-3.5 w-3.5" />
@@ -107,7 +107,7 @@ export default function FlaggedItems({ projectId, onNavigateToTab }: Props) {
             ),
           )}
         {flagged.length > 8 && (
-          <p className="text-xs text-amber-600">
+          <p className="text-xs text-warning-strong">
             + {flagged.length - 8} flere poster
           </p>
         )}

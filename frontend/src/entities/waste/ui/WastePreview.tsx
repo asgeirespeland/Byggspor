@@ -57,7 +57,7 @@ export default function WastePreview({
       columns={wasteColumns}
       rows={rows}
       rowKey={(_, i) => i}
-      rowClassName={(row) => (row.flagged ? 'bg-amber-50' : '')}
+      rowClassName={(row) => (row.flagged ? 'bg-warning-soft' : '')}
       onSaveEdit={(_row, i, values) => {
         const items = [...data.line_items]
         items[i] = {
@@ -102,7 +102,7 @@ export default function WastePreview({
             {rows.length} poster
           </span>
           {flaggedCount > 0 && (
-            <span className="rounded-full bg-amber-100 px-3 py-1 text-xs font-medium text-amber-700">
+            <span className="rounded-full bg-warning-soft px-3 py-1 text-xs font-medium text-warning-strong">
               {flaggedCount} mangler CO₂-data
             </span>
           )}
@@ -117,7 +117,7 @@ export default function WastePreview({
       confirming={confirming}
       afterTable={
         flaggedCount > 0 ? (
-          <p className="text-xs text-amber-600">
+          <p className="text-xs text-warning-strong">
             Poster markert med gul bakgrunn mangler CO₂-data og trenger manuell
             gjennomgang.
           </p>

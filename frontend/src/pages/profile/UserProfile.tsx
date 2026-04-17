@@ -14,7 +14,9 @@ export default function UserProfile() {
 
       {user && <ProfileForm user={user} />}
 
-      {error && <p className="mt-3 text-sm text-red-700">{error.message}</p>}
+      {error && (
+        <p className="mt-3 text-sm text-danger-strong">{error.message}</p>
+      )}
     </section>
   )
 }

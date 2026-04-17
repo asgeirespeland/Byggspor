@@ -90,7 +90,7 @@ export default function ItemListPanel<T>({
       )}
 
       {error && (
-        <p className="py-12 text-center text-sm text-red-500">{error}</p>
+        <p className="py-12 text-center text-sm text-danger">{error}</p>
       )}
 
       {!loading && !error && filtered.length === 0 && (

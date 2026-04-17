@@ -79,7 +79,7 @@ export default function EnergyForm({
       </div>
 
       {error && (
-        <p className="rounded-md border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-600">
+        <p className="rounded-md border border-danger/20 bg-danger-soft px-3 py-2 text-sm text-danger-strong">
           {error instanceof Error ? error.message : 'Noe gikk galt'}
         </p>
       )}

@@ -37,12 +37,12 @@ export const materialColumns: Column<MaterialRow>[] = [
         <span className="text-gray-800">
           {row.name ?? '—'}
           {row.flagged && !row.manual_override && (
-            <span className="ml-2 inline-block rounded bg-amber-200 px-1.5 py-0.5 text-xs font-medium text-amber-800">
+            <span className="ml-2 inline-block rounded bg-warning-soft px-1.5 py-0.5 text-xs font-medium text-warning-strong">
               {row.enriched ? 'Mangler EPD' : 'Mangler ID'}
             </span>
           )}
           {row.manual_override && (
-            <span className="ml-2 inline-block rounded bg-blue-200 px-1.5 py-0.5 text-xs font-medium text-blue-800">
+            <span className="ml-2 inline-block rounded bg-info-soft px-1.5 py-0.5 text-xs font-medium text-info-strong">
               Korrigert
             </span>
           )}

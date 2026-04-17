@@ -43,13 +43,13 @@ export default function FlaggedMaterialRow({ item, projectId }: Props) {
             placeholder="kg CO₂"
             value={value}
             onChange={(e) => setValue(e.target.value)}
-            className="h-7 w-full rounded border border-gray-200 px-2 text-xs focus:border-amber-400 focus:outline-none focus:ring-1 focus:ring-amber-400"
+            className="h-7 w-full rounded border border-gray-200 px-2 text-xs focus:border-warning focus:outline-none focus:ring-1 focus:ring-warning"
             autoFocus
           />
           <button
             type="submit"
             disabled={updateMutation.isPending || !value}
-            className="flex h-7 w-7 shrink-0 items-center justify-center rounded bg-amber-500 text-white transition-colors hover:bg-amber-600 disabled:opacity-50"
+            className="flex h-7 w-7 shrink-0 items-center justify-center rounded bg-warning text-white transition-colors hover:bg-warning-strong disabled:opacity-50"
           >
             {updateMutation.isPending ? (
               <Loader2 className="h-3 w-3 animate-spin" />
@@ -71,18 +71,18 @@ export default function FlaggedMaterialRow({ item, projectId }: Props) {
 
   return (
     <div className="flex items-start gap-2">
-      <Package className="mt-0.5 h-3.5 w-3.5 shrink-0 text-amber-400" />
+      <Package className="mt-0.5 h-3.5 w-3.5 shrink-0 text-warning" />
       <div className="min-w-0 flex-1">
         <p className="truncate text-xs font-medium text-gray-700">
           {item.material_name ?? 'Ukjent materiale'}
         </p>
-        <p className="text-[11px] text-amber-600">
+        <p className="text-[11px] text-warning-strong">
           {item.has_epd ? 'Mangler ID' : 'Mangler EPD / CO₂-data'}
         </p>
       </div>
       <button
         onClick={() => startEdit('')}
-        className="shrink-0 text-[11px] font-medium text-amber-600 hover:text-amber-800"
+        className="shrink-0 text-[11px] font-medium text-warning-strong hover:text-warning-strong/80"
       >
         Korriger
       </button>

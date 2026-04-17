@@ -92,20 +92,20 @@ export default function ClimateTabTour({
             <div
               className={`flex gap-2.5 rounded-lg px-3 py-2.5 ${
                 current.note.type === 'warning'
-                  ? 'bg-amber-50 border border-amber-100'
-                  : 'bg-blue-50 border border-blue-100'
+                  ? 'bg-warning-soft border border-warning/20'
+                  : 'bg-info-soft border border-info/20'
               }`}
             >
               {current.note.type === 'warning' ? (
-                <AlertTriangle className="h-4 w-4 shrink-0 mt-0.5 text-amber-500" />
+                <AlertTriangle className="h-4 w-4 shrink-0 mt-0.5 text-warning" />
               ) : (
-                <Info className="h-4 w-4 shrink-0 mt-0.5 text-blue-400" />
+                <Info className="h-4 w-4 shrink-0 mt-0.5 text-info" />
               )}
               <p
                 className={`text-xs leading-relaxed ${
                   current.note.type === 'warning'
-                    ? 'text-amber-800'
-                    : 'text-blue-800'
+                    ? 'text-warning-strong'
+                    : 'text-info-strong'
                 }`}
               >
                 {current.note.text}

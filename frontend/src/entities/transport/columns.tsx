@@ -101,8 +101,8 @@ export const tripColumns: Column<TripRow>[] = [
       <span
         className={`inline-block rounded-full px-2.5 py-0.5 text-xs font-medium ${
           row.flagged
-            ? 'bg-amber-100 text-amber-700'
-            : 'bg-emerald-100 text-emerald-700'
+            ? 'bg-warning-soft text-warning-strong'
+            : 'bg-success-soft text-success-strong'
         }`}
       >
         {row.flagged ? 'Flagget' : 'OK'}

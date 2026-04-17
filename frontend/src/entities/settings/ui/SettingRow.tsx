@@ -73,7 +73,7 @@ export default function SettingRow({
             <button
               type="button"
               onClick={commitEdit}
-              className="rounded p-1 text-emerald-600 hover:bg-emerald-50"
+              className="rounded p-1 text-success-strong hover:bg-success-soft"
             >
               <Check className="h-4 w-4" />
             </button>
@@ -138,7 +138,7 @@ export default function SettingRow({
           <button
             type="button"
             onClick={() => onReset(meta.key)}
-            className="rounded p-1.5 text-gray-400 hover:bg-amber-50 hover:text-amber-600"
+            className="rounded p-1.5 text-gray-400 hover:bg-warning-soft hover:text-warning-strong"
             title="Tilbakestill til arvet verdi"
           >
             <RotateCcw className="h-3.5 w-3.5" />

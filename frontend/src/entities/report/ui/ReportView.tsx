@@ -94,7 +94,7 @@ export default function ReportView({ projectId }: { projectId: number }) {
 
   if (error || !report) {
     return (
-      <p className="py-12 text-center text-sm text-red-500">
+      <p className="py-12 text-center text-sm text-danger">
         {error?.message ?? 'Kunne ikke laste rapport'}
       </p>
     )

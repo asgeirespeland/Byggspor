@@ -1,13 +1,13 @@
 export const STATUS_CONFIG = {
   active: {
     label: 'Aktiv',
-    className: 'bg-emerald-50 text-emerald-700 ring-1 ring-emerald-200',
-    dot: 'bg-emerald-500',
+    className: 'bg-success-soft text-success-strong ring-1 ring-success/20',
+    dot: 'bg-success',
   },
   completed: {
     label: 'Fullført',
-    className: 'bg-blue-50 text-blue-700 ring-1 ring-blue-200',
-    dot: 'bg-blue-500',
+    className: 'bg-info-soft text-info-strong ring-1 ring-info/20',
+    dot: 'bg-info',
   },
   archived: {
     label: 'Arkivert',

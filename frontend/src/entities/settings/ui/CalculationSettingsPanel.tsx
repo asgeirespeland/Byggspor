@@ -54,16 +54,16 @@ function PanelContent({
 
   return (
     <div className="space-y-4">
-      <div className="flex items-start gap-3 rounded-lg border border-blue-200 bg-blue-50 px-4 py-3">
-        <Info className="mt-0.5 h-4 w-4 shrink-0 text-blue-500" />
-        <p className="text-sm text-blue-700">
+      <div className="flex items-start gap-3 rounded-lg border border-info/30 bg-info-soft px-4 py-3">
+        <Info className="mt-0.5 h-4 w-4 shrink-0 text-info" />
+        <p className="text-sm text-info-strong">
           Disse innstillingene påvirker hvordan CO₂-utslipp beregnes. Hvis du er
           usikker, anbefaler vi at du lar standardverdiene stå.
         </p>
       </div>
       <div className="flex items-center justify-end gap-2">
         {hasDraftChanges && (
-          <p className="mr-auto text-sm text-amber-600">
+          <p className="mr-auto text-sm text-warning-strong">
             Du har ulagrede endringer.
           </p>
         )}

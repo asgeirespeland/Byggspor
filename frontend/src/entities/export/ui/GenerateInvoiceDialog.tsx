@@ -166,7 +166,7 @@ export default function GenerateInvoiceDialog({
                   <Label className="text-xs text-gray-600">Dato</Label>
                   <div className="flex items-center h-9 px-3 rounded-md border border-gray-200 bg-gray-50 text-sm text-gray-500">
                     {todayFormatted()}
-                    <span className="ml-1 text-xs text-blue-500 cursor-pointer">
+                    <span className="ml-1 text-xs text-info-strong cursor-pointer">
                       (endre)
                     </span>
                   </div>
@@ -176,7 +176,7 @@ export default function GenerateInvoiceDialog({
               <div className="space-y-1.5">
                 <Label className="text-xs text-gray-600">
                   Kontonummer{' '}
-                  <span className="text-blue-500 cursor-pointer">
+                  <span className="text-info-strong cursor-pointer">
                     endre standard
                   </span>
                 </Label>
@@ -194,7 +194,7 @@ export default function GenerateInvoiceDialog({
                   </Button>
                 </div>
                 {!bankAccount && (
-                  <span className="inline-block text-xs bg-red-500 text-white rounded px-1.5 py-0.5">
+                  <span className="inline-block text-xs bg-danger text-white rounded px-1.5 py-0.5">
                     Påkrevd
                   </span>
                 )}
@@ -203,7 +203,7 @@ export default function GenerateInvoiceDialog({
               <div className="space-y-1.5">
                 <Label className="text-xs text-gray-600">
                   Kommentar{' '}
-                  <span className="text-blue-500 cursor-pointer">
+                  <span className="text-info-strong cursor-pointer">
                     endre standard
                   </span>
                 </Label>
@@ -232,7 +232,7 @@ export default function GenerateInvoiceDialog({
                   <ChevronDown className="absolute right-2 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400 pointer-events-none" />
                 </div>
                 {!customerName && (
-                  <span className="inline-block text-xs bg-red-500 text-white rounded px-1.5 py-0.5">
+                  <span className="inline-block text-xs bg-danger text-white rounded px-1.5 py-0.5">
                     Påkrevd
                   </span>
                 )}
@@ -394,7 +394,7 @@ export default function GenerateInvoiceDialog({
                       <Button
                         variant="ghost"
                         size="icon"
-                        className="h-8 w-8 text-gray-300 hover:text-red-500"
+                        className="h-8 w-8 text-gray-300 hover:text-danger"
                         onClick={() => removeLineItem(item.id)}
                       >
                         <Trash2 className="h-4 w-4" />
@@ -489,7 +489,7 @@ export default function GenerateInvoiceDialog({
                   >
                     <span>{f.name}</span>
                     <button
-                      className="text-gray-400 hover:text-red-500 ml-2"
+                      className="text-gray-400 hover:text-danger ml-2"
                       onClick={() =>
                         setAttachments((prev) => prev.filter((_, j) => j !== i))
                       }
@@ -504,7 +504,7 @@ export default function GenerateInvoiceDialog({
 
           {/* Error */}
           {error && (
-            <p className="rounded-lg bg-red-50 px-4 py-2.5 text-sm text-red-600">
+            <p className="rounded-lg bg-danger-soft px-4 py-2.5 text-sm text-danger-strong">
               {error}
             </p>
           )}
@@ -520,12 +520,12 @@ export default function GenerateInvoiceDialog({
               variant="outline"
               size="sm"
               disabled={isPending}
-              className="text-red-500 hover:text-red-600 hover:border-red-300"
+              className="text-danger hover:text-danger-strong hover:border-danger/30"
             >
               Slett utkast
             </Button>
             <button
-              className="text-sm text-blue-500 hover:underline ml-1"
+              className="text-sm text-info-strong hover:underline ml-1"
               onClick={() => onOpenChange(false)}
             >
               Fakturaoversikten
@@ -539,7 +539,7 @@ export default function GenerateInvoiceDialog({
             <Button
               onClick={handleGenerate}
               disabled={isPending}
-              className="gap-2 bg-emerald-600 hover:bg-emerald-700 text-white"
+              className="gap-2 bg-success hover:bg-success-strong text-white"
             >
               {isPending ? (
                 <>

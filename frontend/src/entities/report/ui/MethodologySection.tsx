@@ -40,9 +40,9 @@ export default function MethodologySection({
   return (
     <div className="space-y-4">
       {/* Intro */}
-      <div className="flex items-start gap-3 rounded-lg border border-blue-100 bg-blue-50/50 p-4">
-        <Info className="h-4 w-4 text-blue-500 mt-0.5 shrink-0" />
-        <p className="text-sm text-blue-800">
+      <div className="flex items-start gap-3 rounded-lg border border-info/20 bg-info-soft/50 p-4">
+        <Info className="h-4 w-4 text-info mt-0.5 shrink-0" />
+        <p className="text-sm text-info-strong">
           Denne oversikten viser hvilke beregningsinnstillinger og
           utslippsfaktorer som ble brukt i rapporten. Innstillingene er felles
           standardverdier og kan i fremtiden tilpasses per organisasjon og
@@ -72,7 +72,7 @@ export default function MethodologySection({
                 href={settings.energy.source_url}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="inline-flex items-center gap-1 text-blue-600 hover:underline"
+                className="inline-flex items-center gap-1 text-info-strong hover:underline"
               >
                 {settings.energy.source}
                 <ExternalLink className="h-3 w-3" />
@@ -134,7 +134,7 @@ export default function MethodologySection({
             <button
               type="button"
               onClick={() => setFactorsModal('ns9431')}
-              className="inline-flex items-center gap-1 text-sm font-medium text-blue-600 hover:underline"
+              className="inline-flex items-center gap-1 text-sm font-medium text-info-strong hover:underline"
             >
               <TableProperties className="h-3.5 w-3.5" />
               Se NS 9431-faktorer
@@ -147,7 +147,7 @@ export default function MethodologySection({
             <button
               type="button"
               onClick={() => setFactorsModal('manual')}
-              className="inline-flex items-center gap-1 text-sm font-medium text-blue-600 hover:underline"
+              className="inline-flex items-center gap-1 text-sm font-medium text-info-strong hover:underline"
             >
               <TableProperties className="h-3.5 w-3.5" />
               Se faktorer ({manualCount})

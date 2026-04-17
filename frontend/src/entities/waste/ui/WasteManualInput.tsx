@@ -80,7 +80,7 @@ export default function WasteManualInput({ projectId }: Props) {
       </div>
 
       {createWasteMutation.isError && (
-        <p className="rounded-md border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-600">
+        <p className="rounded-md border border-danger/20 bg-danger-soft px-3 py-2 text-sm text-danger-strong">
           Kunne ikke lagre avfallsposten.
         </p>
       )}

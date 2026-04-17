@@ -21,9 +21,9 @@ export default function ErrorMessage({
   const suggestion = error instanceof ApiError ? error.suggestion : null
 
   return (
-    <div className="rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm">
-      <p className="font-medium text-red-700">{message}</p>
-      {suggestion && <p className="mt-1 text-red-600">{suggestion}</p>}
+    <div className="rounded-xl border border-danger/20 bg-danger-soft px-4 py-3 text-sm">
+      <p className="font-medium text-danger-strong">{message}</p>
+      {suggestion && <p className="mt-1 text-danger-strong">{suggestion}</p>}
     </div>
   )
 }

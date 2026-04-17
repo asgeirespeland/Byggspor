@@ -53,7 +53,7 @@ export default function ProfileForm({ user }: { user: UserDto }) {
       </div>
 
       {updateProfile.error && (
-        <p className="mt-3 text-sm text-red-700">
+        <p className="mt-3 text-sm text-danger-strong">
           {updateProfile.error.message}
         </p>
       )}

@@ -7,7 +7,7 @@ export default function EpdBadge({
 }) {
   if (!enriched) {
     return (
-      <span className="inline-block rounded bg-amber-100 px-2 py-0.5 text-xs text-amber-600">
+      <span className="inline-block rounded bg-warning-soft px-2 py-0.5 text-xs text-warning-strong">
         Ikke søkbar
       </span>
     )
@@ -15,14 +15,14 @@ export default function EpdBadge({
 
   if (hasEpd) {
     return (
-      <span className="inline-block rounded bg-green-100 px-2 py-0.5 text-xs font-medium text-green-700">
+      <span className="inline-block rounded bg-success-soft px-2 py-0.5 text-xs font-medium text-success-strong">
         EPD
       </span>
     )
   }
 
   return (
-    <span className="inline-block rounded bg-red-100 px-2 py-0.5 text-xs font-medium text-red-700">
+    <span className="inline-block rounded bg-danger-soft px-2 py-0.5 text-xs font-medium text-danger-strong">
       Ingen EPD
     </span>
   )

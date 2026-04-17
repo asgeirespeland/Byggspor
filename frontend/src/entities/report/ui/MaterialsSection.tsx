@@ -31,7 +31,7 @@ const COLUMNS: Column<MaterialLineItem>[] = [
     header: 'EPD',
     render: (i) =>
       i.has_epd ? (
-        <span className="text-emerald-600" title={i.epd_id ?? undefined}>
+        <span className="text-success-strong" title={i.epd_id ?? undefined}>
           {i.epd_id ?? 'Ja'}
         </span>
       ) : (

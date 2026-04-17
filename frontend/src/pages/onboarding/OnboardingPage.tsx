@@ -100,7 +100,7 @@ export default function OnboardingPage() {
             </div>
 
             {error && (
-              <p className="rounded-md bg-red-50 px-3 py-2 text-sm text-red-700 border border-red-200">
+              <p className="rounded-md bg-danger-soft px-3 py-2 text-sm text-danger-strong border border-danger/20">
                 {error}
               </p>
             )}

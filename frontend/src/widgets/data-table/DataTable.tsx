@@ -184,7 +184,7 @@ export default function DataTable<T>({
             <tr
               key={rowKey(row, i)}
               className={
-                isEditing ? 'bg-blue-50/40' : (rowClassName?.(row, i) ?? '')
+                isEditing ? 'bg-info-soft/60' : (rowClassName?.(row, i) ?? '')
               }
             >
               {columns.map((col, ci) => (
@@ -222,7 +222,7 @@ export default function DataTable<T>({
                       type="button"
                       onClick={() => saveEdit(row, i)}
                       disabled={isSaving?.(row, i)}
-                      className="text-emerald-600 hover:text-emerald-800 disabled:opacity-40"
+                      className="text-success-strong hover:text-success disabled:opacity-40"
                     >
                       <Check className="h-3.5 w-3.5" />
                     </button>

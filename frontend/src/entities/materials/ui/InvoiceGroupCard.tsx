@@ -82,9 +82,9 @@ export default function InvoiceGroupCard({
         rowKey={(_, i) => group.items[i].id}
         rowClassName={(row) =>
           row.manual_override
-            ? 'bg-blue-50/50'
+            ? 'bg-info-soft/50'
             : row.flagged
-              ? 'bg-amber-50/50'
+              ? 'bg-warning-soft/50'
               : 'hover:bg-gray-50'
         }
         onSaveEdit={(_row, i, values) => {
