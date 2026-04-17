@@ -95,32 +95,29 @@ Only change this if your backend runs on a different host or port.
 
 ## 3. Database
 
-Start PostgreSQL via Docker Compose:
+Start PostgreSQL and run migrations:
 
 ```bash
-docker compose up -d
+docker compose up -d db
+docker compose run --rm migrate
 ```
 
-This starts a PostgreSQL 16 container with:
+`docker compose up -d db` starts the PostgreSQL container and waits until it passes a health check. `docker compose run --rm migrate` then applies all pending Alembic migrations and exits. **You never need to run `alembic upgrade head` manually.**
+
+PostgreSQL details:
 - **User:** `postgres`
 - **Password:** `postgres`
 - **Database:** `byggspor`
 - **Port:** `5432`
 - **Data:** Persisted in a Docker volume (`pgdata`)
 
-Verify it's running:
-
-```bash
-docker compose ps
-# Should show byggspor-db-1 as "running"
-```
-
 ### Useful Database Commands
 
 ```bash
-docker compose down          # Stop the container
-docker compose down -v       # Stop and delete all data (fresh start)
-docker compose logs db       # View database logs
+docker compose down              # Stop containers
+docker compose down -v           # Stop and wipe all data (fresh start)
+docker compose run --rm migrate  # Apply any new migrations (run after git pull)
+docker compose logs db           # View database logs
 ```
 
 To connect directly with psql:
@@ -147,14 +144,6 @@ pip install -r requirements.txt
 ```
 
 This installs Flask, SQLAlchemy, Alembic, PyJWT, requests, and other dependencies.
-
-### Run database migrations
-
-```bash
-alembic upgrade head
-```
-
-Alembic reads `DATABASE_URL` from the `.env` file (via the custom `env.py` loader). This creates all tables in the PostgreSQL database.
 
 ### Start the server
 
@@ -214,8 +203,9 @@ If a hook fails, the commit is blocked. Fix the issues (many are auto-fixed) and
 Once everything is set up, this is the daily workflow:
 
 ```bash
-# 1. Start the database (if not already running)
-docker compose up -d
+# 1. Start the database and apply any pending migrations
+docker compose up -d db
+docker compose run --rm migrate
 
 # 2. Start the backend
 cd backend
@@ -233,7 +223,7 @@ Alternatively, run everything with a single command from the project root:
 pnpm run dev
 ```
 
-This starts Docker (PostgreSQL), the backend, and the frontend concurrently. Backend output is shown in blue, frontend in green.
+This starts PostgreSQL, waits for it to be healthy, runs migrations, then starts the backend and frontend concurrently. Backend output is shown in blue, frontend in green.
 
 | Service | URL | What to expect |
 |---------|-----|---------------|
@@ -252,11 +242,11 @@ docker compose ps
 docker compose up -d    # restart if needed
 ```
 
-### `alembic upgrade head` fails
+### Migrations fail
 
-- Ensure the database container is running first
-- Check that `DATABASE_URL` in `.env` matches your Docker Compose config
-- If the database is in a broken state, reset it: `docker compose down -v && docker compose up -d && alembic upgrade head`
+- Ensure the database container is running: `docker compose up -d db`
+- If the database is in a broken state, reset it completely: `docker compose down -v && docker compose up -d db && docker compose run --rm migrate`
+- Rebuild the migrate image if dependencies changed: `docker compose build migrate`
 
 ### Backend returns 401 on all routes
 

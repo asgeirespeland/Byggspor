@@ -2,7 +2,7 @@
   "name": "byggspor",
   "private": true,
   "scripts": {
-    "dev": "docker compose up -d && concurrently -n backend,frontend -c blue,green \"pnpm run dev:backend\" \"pnpm run dev:frontend\"",
+    "dev": "docker compose up -d db && docker compose run --rm migrate && concurrently -n backend,frontend -c blue,green \"pnpm run dev:backend\" \"pnpm run dev:frontend\"",
     "dev:backend": "node scripts/dev-backend.js",
     "dev:frontend": "cd frontend && pnpm dev"
   },
