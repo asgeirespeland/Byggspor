@@ -1,4 +1,4 @@
-import { useCurrentUser } from './hooks/useUserProfile'
+import { useCurrentUser } from '@/entities/user/hooks/useCurrentUser'
 import ProfileForm from './ProfileForm'
 
 export default function UserProfile() {

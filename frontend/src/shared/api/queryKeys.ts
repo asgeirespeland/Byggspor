@@ -13,6 +13,7 @@ export const qk = {
   projectSettings: (id: number | undefined) =>
     ['project-settings', id] as const,
   currentUser: () => ['users', 'me'] as const,
+  organization: (id: number) => ['organizations', id] as const,
 }
 
 export const qkPrefix = {

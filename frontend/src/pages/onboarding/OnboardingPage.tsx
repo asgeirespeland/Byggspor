@@ -14,8 +14,7 @@ import {
   FormLabel,
   FormMessage,
 } from '@/components/ui/form'
-import { useAuthMutation } from '@/shared/hooks/useAuthMutation'
-import { apiRequest } from '@/shared/api/client'
+import { useCreateOrganization } from '@/entities/organization/hooks/useOrganization'
 
 const schema = z.object({
   name: z.string().min(1, 'Organisasjonsnavn er påkrevd'),
@@ -32,18 +31,7 @@ export default function OnboardingPage() {
   const [error, setError] = useState('')
   const navigate = useNavigate()
 
-  const createOrg = useAuthMutation<{
-    name: string
-    org_number?: string
-    org_type: string
-  }>({
-    mutationFn: (input, token) =>
-      apiRequest('/organizations', {
-        method: 'POST',
-        token,
-        body: input,
-      }),
-  })
+  const createOrg = useCreateOrganization()
 
   async function onSubmit(values: FormValues) {
     setError('')

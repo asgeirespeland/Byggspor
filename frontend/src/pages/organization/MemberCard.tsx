@@ -1,5 +1,5 @@
 import { User } from 'lucide-react'
-import type { OrgMemberDto } from '@/shared/types'
+import type { OrgMemberDto } from '@/entities/organization/api'
 
 const ROLE_LABELS: Record<string, string> = {
   OWNER: 'Eier',

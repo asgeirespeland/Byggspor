@@ -1,5 +1,5 @@
 import { createContext } from 'react'
-import type { OrgDto } from '@/shared/types'
+import type { OrgDto } from '@/entities/organization/api'
 
 export type AppContextValue = {
   organizationId: number

@@ -7,11 +7,15 @@
 import { useEffect, useState } from 'react'
 import { useAuth } from '@clerk/react'
 import { apiRequest } from '@/shared/api/client'
-import type { OrgDto } from '@/shared/types'
+import { getOrganization, type OrgDto } from '@/entities/organization/api'
 
 type UserMe = {
   id: number
   organization_id: number | null
+}
+
+function getUserMe(token: string): Promise<UserMe> {
+  return apiRequest<UserMe>('/users/me', { token })
 }
 
 export type SyncState =
@@ -47,15 +51,12 @@ export function useUserSync(): SyncState {
         const token = await getToken()
         if (!token) throw new Error('Ikke autentisert')
 
-        const user = await apiRequest<UserMe>('/users/me', { token })
+        const user = await getUserMe(token)
         if (cancelled) return
 
         let organization: OrgDto | null = null
         if (user.organization_id) {
-          organization = await apiRequest<OrgDto>(
-            `/organizations/${user.organization_id}`,
-            { token },
-          )
+          organization = await getOrganization(user.organization_id, token)
           if (cancelled) return
         }
 
