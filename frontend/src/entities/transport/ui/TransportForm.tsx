@@ -12,7 +12,7 @@ import {
   FormLabel,
   FormMessage,
 } from '@/components/ui/form'
-import { useRequireToken } from '@/shared/hooks/useRequireToken'
+import { useRequireToken } from '@/shared/auth/useRequireToken'
 import { createManualTrip } from '../api/transport'
 
 interface TransportFormProps {

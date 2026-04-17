@@ -5,8 +5,8 @@
  * (optimistic delete of a single row). Both deletes use features/inline-edit/useOptimisticDelete
  * with co2Category 'materials' so global KPIs update optimistically.
  */
-import { useAuthQuery } from '@/shared/hooks/useAuthQuery'
-import { useAuthMutation } from '@/shared/hooks/useAuthMutation'
+import { useAuthQuery } from '@/shared/auth/useAuthQuery'
+import { useAuthMutation } from '@/shared/auth/useAuthMutation'
 import { useOptimisticDelete } from '@/widgets/data-table/useOptimisticDelete'
 import { sumBy } from '@/shared/utils/collections'
 import { qk, projectReportKeys } from '@/shared/api/queryKeys'

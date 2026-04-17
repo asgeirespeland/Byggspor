@@ -7,12 +7,12 @@
  *   4. Otherwise provide AppContext (organizationId/organization) to children.
  *
  * Exports: default ProtectedRoute. Local Loader is a small full-screen status helper.
- * Coupling: Clerk useAuth, shared/hooks/useUserSync, shared/context/AppContext.
+ * Coupling: Clerk useAuth, shared/auth/useUserSync, shared/context/AppContext.
  */
 import { useAuth } from '@clerk/react'
 import { Navigate, Outlet, useLocation } from 'react-router-dom'
 import { AppProvider } from '@/shared/context/AppContext'
-import { useUserSync } from '@/shared/hooks/useUserSync'
+import { useUserSync } from '@/shared/auth/useUserSync'
 
 export default function ProtectedRoute() {
   const { isLoaded, isSignedIn } = useAuth()

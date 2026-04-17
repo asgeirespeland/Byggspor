@@ -7,7 +7,7 @@ import ErrorMessage from '@/shared/components/ErrorMessage'
 import FileDropZone from './FileDropZone'
 import SelectedFileBar from './SelectedFileBar'
 import { useFileSelect } from './useFileSelect'
-import { useRequireToken } from '@/shared/hooks/useRequireToken'
+import { useRequireToken } from '@/shared/auth/useRequireToken'
 
 interface FileUploadShellProps<TData> {
   title: string

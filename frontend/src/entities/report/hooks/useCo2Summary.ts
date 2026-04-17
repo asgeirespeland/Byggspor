@@ -1,4 +1,4 @@
-import { useAuthQuery } from '@/shared/hooks/useAuthQuery'
+import { useAuthQuery } from '@/shared/auth/useAuthQuery'
 import { qk } from '@/shared/api/queryKeys'
 import { getCo2Summary } from '../api/co2Summary'
 

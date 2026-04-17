@@ -3,8 +3,8 @@
  * The invalidateKeys list fans out to every CO₂-dependent query because a settings change
  * recomputes derived values server-side.
  */
-import { useAuthQuery } from '@/shared/hooks/useAuthQuery'
-import { useAuthMutation } from '@/shared/hooks/useAuthMutation'
+import { useAuthQuery } from '@/shared/auth/useAuthQuery'
+import { useAuthMutation } from '@/shared/auth/useAuthMutation'
 import { qk } from '@/shared/api/queryKeys'
 import {
   getProjectSettings,
