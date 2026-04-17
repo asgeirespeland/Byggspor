@@ -1,7 +1,7 @@
 /**
  * Project detail page. Owns tab state and wires breadcrumb, KPI row, tabbed content
- * (materials/transport/waste/energy/report), right sidebar, and first-visit climate-tab tour. Tab
- * components come from entities/* (materials, transport) and ./tabs/* (waste, energy, report).
+ * (materials/transport/waste/energy/report), right sidebar, and first-visit climate-tab tour.
+ * Each tab's content is declared inline on the TABS array via the render field on TabDef.
  */
 import { useParams, useNavigate } from 'react-router-dom'
 import { useState } from 'react'
@@ -22,10 +22,10 @@ import { STATUS_CONFIG } from '@/entities/project/constants'
 import TabBar, { type TabDef } from '@/shared/components/TabBar'
 import InvoiceUpload from '@/entities/materials/components/InvoiceUpload'
 import TransportUpload from '@/entities/transport/components/TransportUpload'
+import WasteUpload from '@/entities/waste/components/WasteUpload'
+import EnergyInput from '@/entities/energy/components/EnergyInput'
+import ReportView from '@/entities/report/ui/ReportView'
 import { useCo2Summary } from '@/entities/report/hooks/useCo2Summary'
-import WasteTab from './tabs/WasteTab'
-import EnergyTab from './tabs/EnergyTab'
-import ReportTab from './tabs/ReportTab'
 import KpiCard from './KpiCard'
 import ProjectSidebar from './ProjectSidebar'
 import ClimateTabTour from '@/pages/onboarding/ClimateTabTour'
@@ -38,22 +38,41 @@ function formatKg(value: number | undefined): string {
 
 type Tab = 'materials' | 'transport' | 'waste' | 'energy' | 'report'
 
-const TABS: TabDef<Tab>[] = [
-  {
-    id: 'materials',
-    label: 'Materialer',
-    icon: <Package className="h-4 w-4" />,
-  },
-  { id: 'transport', label: 'Transport', icon: <Truck className="h-4 w-4" /> },
-  { id: 'waste', label: 'Avfall', icon: <Trash2 className="h-4 w-4" /> },
-  { id: 'energy', label: 'Energi', icon: <Zap className="h-4 w-4" /> },
-  {
-    id: 'report',
-    label: 'Rapport',
-    icon: <FileText className="h-4 w-4" />,
-    className: 'bg-emerald-50',
-  },
-]
+function buildTabs(projectId: number): TabDef<Tab>[] {
+  return [
+    {
+      id: 'materials',
+      label: 'Materialer',
+      icon: <Package className="h-4 w-4" />,
+      render: () => <InvoiceUpload projectId={projectId} />,
+    },
+    {
+      id: 'transport',
+      label: 'Transport',
+      icon: <Truck className="h-4 w-4" />,
+      render: () => <TransportUpload projectId={projectId} />,
+    },
+    {
+      id: 'waste',
+      label: 'Avfall',
+      icon: <Trash2 className="h-4 w-4" />,
+      render: () => <WasteUpload projectId={projectId} />,
+    },
+    {
+      id: 'energy',
+      label: 'Energi',
+      icon: <Zap className="h-4 w-4" />,
+      render: () => <EnergyInput projectId={projectId} />,
+    },
+    {
+      id: 'report',
+      label: 'Rapport',
+      icon: <FileText className="h-4 w-4" />,
+      className: 'bg-emerald-50',
+      render: () => <ReportView projectId={projectId} />,
+    },
+  ]
+}
 
 const KPI_CONFIG = [
   {
@@ -135,6 +154,7 @@ export default function ProjectDashboard() {
   }
 
   const status = STATUS_CONFIG[project.status] ?? STATUS_CONFIG.active
+  const tabs = buildTabs(project.id)
 
   return (
     <div className="space-y-4">
@@ -191,21 +211,13 @@ export default function ProjectDashboard() {
           {/* Tabbed panel */}
           <div className="rounded-xl border border-gray-200 bg-white shadow-sm overflow-hidden">
             <TabBar
-              tabs={TABS}
+              tabs={tabs}
               activeTab={activeTab}
               onTabChange={setActiveTab}
               scrollDeps={[isLoading]}
             />
             <div className="p-6 min-h-[30rem]">
-              {activeTab === 'materials' && (
-                <InvoiceUpload projectId={project.id} />
-              )}
-              {activeTab === 'transport' && (
-                <TransportUpload projectId={project.id} />
-              )}
-              {activeTab === 'waste' && <WasteTab projectId={project.id} />}
-              {activeTab === 'energy' && <EnergyTab projectId={project.id} />}
-              {activeTab === 'report' && <ReportTab projectId={project.id} />}
+              {tabs.find((t) => t.id === activeTab)?.render?.()}
             </div>
           </div>
         </div>

@@ -11,6 +11,8 @@ export interface TabDef<T extends string> {
   label: string
   icon: React.ReactNode
   className?: string
+  /** Optional content renderer; callers can look it up by activeTab and render it. */
+  render?: () => React.ReactNode
 }
 
 interface TabBarProps<T extends string> {
