@@ -53,7 +53,7 @@ const defaults: FormValues = {
   notes: '',
 }
 
-export default function WasteManualInput({ projectId }: Props) {
+export default function WasteForm({ projectId }: Props) {
   const form = useForm<FormValues>({
     resolver: zodResolver(schema),
     defaultValues: defaults,

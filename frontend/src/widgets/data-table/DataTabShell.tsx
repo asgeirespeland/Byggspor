@@ -1,11 +1,11 @@
 /**
  * Composition shell shared by every data tab (materials/transport/waste): slot for the upload
- * flow, optional ManualEntry reveal, deferred loading message, headed section for persisted
- * items, and an optional undo bar. Pure layout — all data ownership stays with the caller.
+ * flow, optional collapsible manual-entry section, deferred loading message, headed section for
+ * persisted items, and an optional undo bar. Pure layout — all data ownership stays with the caller.
  */
 import type { ReactNode } from 'react'
 import { useDeferredLoading } from '@/shared/hooks/useDeferredLoading'
-import ManualEntry from '../ManualEntry'
+import CollapsibleSection from '../CollapsibleSection'
 
 interface DataTabShellProps {
   /** The FileUploadShell (with preview render child) */
@@ -50,12 +50,12 @@ export default function DataTabShell({
       {upload}
 
       {manualEntryForm && (
-        <ManualEntry
+        <CollapsibleSection
           showLabel="Registrer manuelt"
           hideLabel="Skjul manuell registrering"
         >
           {manualEntryForm}
-        </ManualEntry>
+        </CollapsibleSection>
       )}
 
       {showLoading && (

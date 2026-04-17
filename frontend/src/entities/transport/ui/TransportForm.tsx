@@ -15,7 +15,7 @@ import {
 import { useRequireToken } from '@/shared/hooks/useRequireToken'
 import { createManualTrip } from '../api/transport'
 
-interface TransportManualInputProps {
+interface TransportFormProps {
   projectId: number
   onTripCreated: () => void
 }
@@ -49,10 +49,10 @@ const defaults: FormValues = {
   tripDate: '',
 }
 
-export default function TransportManualInput({
+export default function TransportForm({
   projectId,
   onTripCreated,
-}: TransportManualInputProps) {
+}: TransportFormProps) {
   const { authReady, requireToken } = useRequireToken()
   const form = useForm<FormValues>({
     resolver: zodResolver(schema),

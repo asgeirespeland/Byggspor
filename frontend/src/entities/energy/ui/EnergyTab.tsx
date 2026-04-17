@@ -2,10 +2,6 @@
  * Energy tab composer.
  * Renders EnergyForm, EnergySummary, and an editable DataTable of entries
  * with optimistic delete + undo bar. Wires all energy hooks together.
- *
- * Exports: default EnergyInput. Local getColumns() builds DataTable columns.
- * Coupling: widgets/DataTable, features/inline-edit/InlineUndoBar,
- * hooks/useEnergies (calculate, update, delete, list, zones).
  */
 import { useMemo } from 'react'
 import { Zap, Loader2 } from 'lucide-react'
@@ -98,11 +94,11 @@ function getColumns(
 const MAX_VISIBLE_ROWS = 10
 const ROW_HEIGHT_PX = 44
 
-interface EnergyInputProps {
+interface EnergyTabProps {
   projectId: number
 }
 
-export default function EnergyInput({ projectId }: EnergyInputProps) {
+export default function EnergyTab({ projectId }: EnergyTabProps) {
   const { data: entries, isLoading: entriesLoading } = useEnergies(projectId)
   const showEntriesLoading = useDeferredLoading(entriesLoading)
   const { data: zones } = usePriceZones()

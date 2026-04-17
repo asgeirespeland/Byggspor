@@ -6,7 +6,11 @@ type Props = {
   children: ReactNode
 }
 
-export default function ManualEntry({ showLabel, hideLabel, children }: Props) {
+export default function CollapsibleSection({
+  showLabel,
+  hideLabel,
+  children,
+}: Props) {
   const [open, setOpen] = useState(false)
 
   return (

@@ -1,5 +1,5 @@
 /**
- * Transport tab composer: wires FileUploadShell + TransportPreview (upload flow), TransportManualInput
+ * Transport tab composer: wires FileUploadShell + TransportPreview (upload flow), TransportForm
  * (manual entry), TransportGroupCard (saved reports), and InlineUndoBar. Owns confirm-trips + manual
  * invalidation of co2-summary / project-transports / detailed-report after writes.
  */
@@ -18,7 +18,7 @@ import {
   useDeleteTrip,
   useUpdateTrip,
 } from '../hooks/useProjectTransports'
-import TransportManualInput from './TransportManualInput'
+import TransportForm from './TransportForm'
 import TransportPreview from './TransportPreview'
 import TransportGroupCard from './TransportGroupCard'
 import type { TransportParseResponse } from '../types'
@@ -99,7 +99,7 @@ export default function TransportUpload({ projectId }: Props) {
         </FileUploadShell>
       }
       manualEntryForm={
-        <TransportManualInput
+        <TransportForm
           projectId={projectId}
           onTripCreated={invalidateTransportData}
         />

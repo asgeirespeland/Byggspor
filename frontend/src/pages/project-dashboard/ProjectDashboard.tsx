@@ -13,7 +13,7 @@ import TabBar, { type TabDef } from '@/shared/components/TabBar'
 import InvoiceUpload from '@/entities/materials/ui/InvoiceUpload'
 import TransportUpload from '@/entities/transport/ui/TransportUpload'
 import WasteUpload from '@/entities/waste/ui/WasteUpload'
-import EnergyInput from '@/entities/energy/ui/EnergyInput'
+import EnergyTab from '@/entities/energy/ui/EnergyTab'
 import ReportView from '@/entities/report/ui/ReportView'
 import { useCo2Summary } from '@/entities/report/hooks/useCo2Summary'
 import {
@@ -40,7 +40,7 @@ const TAB_RENDERERS: Record<
   materials: (id) => <InvoiceUpload projectId={id} />,
   transport: (id) => <TransportUpload projectId={id} />,
   waste: (id) => <WasteUpload projectId={id} />,
-  energy: (id) => <EnergyInput projectId={id} />,
+  energy: (id) => <EnergyTab projectId={id} />,
 }
 
 function buildTabs(projectId: number): TabDef<Tab>[] {

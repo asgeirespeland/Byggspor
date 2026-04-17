@@ -1,5 +1,5 @@
 /**
- * Waste tab composer: FileUploadShell + WastePreview for XML upload, WasteManualInput for manual entry,
+ * Waste tab composer: FileUploadShell + WastePreview for XML upload, WasteForm for manual entry,
  * WasteGroupCard list for saved waste, and inline undo bar for deleted reports.
  */
 import { useState } from 'react'
@@ -14,7 +14,7 @@ import { useWasteParse } from '../hooks/useWasteParse'
 import { useProjectWaste, useDeleteWasteReport } from '../hooks/useWaste'
 import type { WasteParseResponse } from '../types'
 import WastePreview from './WastePreview'
-import WasteManualInput from './WasteManualInput'
+import WasteForm from './WasteForm'
 import WasteGroupCard from './WasteGroupCard'
 
 type Props = {
@@ -85,7 +85,7 @@ export default function WasteUpload({ projectId }: Props) {
           )}
         </FileUploadShell>
       }
-      manualEntryForm={<WasteManualInput projectId={projectId} />}
+      manualEntryForm={<WasteForm projectId={projectId} />}
       isLoading={wasteQuery.isLoading}
       loadingText="Laster avfallsdata…"
       sectionHeading="Registrert avfall"
