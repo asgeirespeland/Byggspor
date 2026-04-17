@@ -1,4 +1,4 @@
-import ReportView from './report/ReportView'
+import ReportView from '@/entities/report/ui/ReportView'
 
 interface ReportTabProps {
   projectId: number

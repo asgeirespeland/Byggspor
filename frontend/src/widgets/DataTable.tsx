@@ -1,7 +1,7 @@
 /**
  * Rich generic table with optional per-column inline edit and per-row delete. Exports Column<T>
  * (re-exported by ParsePreviewShell). Locks column widths via getBoundingClientRect on edit to
- * prevent layout shift. Distinct from the simpler tabs/report/ReportDataTable.
+ * prevent layout shift. Distinct from the simpler entities/report/ui/ReportDataTable.
  */
 import { useRef, useState } from 'react'
 import { Check, X } from 'lucide-react'
