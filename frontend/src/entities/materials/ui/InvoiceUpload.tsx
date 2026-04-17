@@ -7,9 +7,9 @@
 import { useState } from 'react'
 import { useQueryClient } from '@tanstack/react-query'
 import { toast } from 'sonner'
-import InlineUndoBar from '@/features/inline-edit/InlineUndoBar'
-import FileUploadShell from '@/features/file-upload/FileUploadShell'
-import DataTabShell from '@/widgets/DataTabShell'
+import InlineUndoBar from '@/widgets/data-table/InlineUndoBar'
+import FileUploadShell from '@/widgets/file-upload/FileUploadShell'
+import DataTabShell from '@/widgets/data-table/DataTabShell'
 import { confirmInvoice } from '../api'
 import { useInvoiceParse } from '../hooks/useInvoiceParse'
 import {

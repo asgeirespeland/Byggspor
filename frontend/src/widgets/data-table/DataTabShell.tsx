@@ -5,7 +5,7 @@
  */
 import type { ReactNode } from 'react'
 import { useDeferredLoading } from '@/shared/hooks/useDeferredLoading'
-import ManualEntry from './ManualEntry'
+import ManualEntry from '../ManualEntry'
 
 interface DataTabShellProps {
   /** The FileUploadShell (with preview render child) */

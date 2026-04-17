@@ -5,7 +5,7 @@
  */
 import { useRef, useState } from 'react'
 import { Check, X } from 'lucide-react'
-import RowActions from '@/features/inline-edit/RowActions'
+import RowActions from '@/widgets/data-table/RowActions'
 
 export interface Column<T> {
   header: string

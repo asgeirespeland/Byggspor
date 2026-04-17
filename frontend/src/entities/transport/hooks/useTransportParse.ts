@@ -1,4 +1,4 @@
-import { useFileParse } from '@/features/file-upload/useFileParse'
+import { useFileParse } from '@/widgets/file-upload/useFileParse'
 import { parseTransportFile } from '../api/transport'
 
 export function useTransportParse() {

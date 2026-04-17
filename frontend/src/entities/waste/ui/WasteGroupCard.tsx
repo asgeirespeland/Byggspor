@@ -1,7 +1,7 @@
 import { useMemo } from 'react'
 import CollapsibleGroupCard from '@/widgets/CollapsibleGroupCard'
-import DataTable from '@/widgets/DataTable'
-import InlineUndoBar from '@/features/inline-edit/InlineUndoBar'
+import DataTable from '@/widgets/data-table/DataTable'
+import InlineUndoBar from '@/widgets/data-table/InlineUndoBar'
 import {
   useUpdateWasteItem,
   useDeleteWasteItem,

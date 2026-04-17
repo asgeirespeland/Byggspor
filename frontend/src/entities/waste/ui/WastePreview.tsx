@@ -1,43 +1,35 @@
 import { useMemo } from 'react'
-import ParsePreviewShell from '@/widgets/ParsePreviewShell'
+import ParsePreviewShell from '@/widgets/file-upload/ParsePreviewShell'
 import Co2TotalBadge from '@/widgets/Co2TotalBadge'
-import type { InvoiceResponse } from '../types'
-import { getGwpA1A3 } from '../utils'
-import { materialColumns, type MaterialRow } from '../columns'
+import type { WasteParseResponse } from '../types'
+import { wasteColumns, type WasteRow } from '../columns'
 
 interface Props {
-  data: InvoiceResponse
-  setData: (data: InvoiceResponse) => void
+  data: WasteParseResponse
+  setData: (data: WasteParseResponse) => void
   onConfirm: () => void
   confirming: boolean
   onCancel: () => void
 }
 
-export default function InvoicePreview({
+export default function WastePreview({
   data,
   setData,
   onConfirm,
   confirming,
   onCancel,
 }: Props) {
-  const rows: MaterialRow[] = useMemo(
+  const rows: WasteRow[] = useMemo(
     () =>
-      data.line_items.map((item) => {
-        const gwp = getGwpA1A3(item)
-        return {
-          name: item.name,
-          nobb_number: item.nobb_number,
-          gtin: item.gtin,
-          quantity: item.quantity,
-          unit: item.unit,
-          line_total: item.line_total,
-          co2_kg: gwp != null ? gwp * (item.quantity ?? 1) : null,
-          flagged: item.flagged,
-          enriched: item.enriched,
-          has_epd: item.nobb_data?.has_epd ?? false,
-          manual_override: false,
-        }
-      }),
+      data.line_items.map((item) => ({
+        name: item.name,
+        fraction_code: item.fraction_code,
+        quantity: item.quantity,
+        unit: item.unit,
+        co2_kg: item.co2_kg,
+        co2_source: item.co2_source,
+        flagged: item.flagged,
+      })),
     [data.line_items],
   )
 
@@ -53,24 +45,26 @@ export default function InvoicePreview({
   }
 
   const fullscreenTitle = [
-    'Forhåndsvisning',
-    data.supplier?.name && ` — ${data.supplier.name}`,
-    data.invoice_number && ` #${data.invoice_number}`,
+    'Avfallsrapport',
+    data.receiver?.name && ` — ${data.receiver.name}`,
+    data.report_id && ` #${data.report_id}`,
   ]
     .filter(Boolean)
     .join('')
 
   return (
     <ParsePreviewShell
-      columns={materialColumns}
+      columns={wasteColumns}
       rows={rows}
-      rowKey={(_, i) => data.line_items[i].line_number ?? i}
+      rowKey={(_, i) => i}
       rowClassName={(row) => (row.flagged ? 'bg-amber-50' : '')}
       onSaveEdit={(_row, i, values) => {
         const items = [...data.line_items]
         items[i] = {
           ...items[i],
+          name: values[0] || null,
           quantity: values[1] ? parseFloat(values[1]) : null,
+          co2_kg: values[3] ? parseFloat(values[3]) : null,
         }
         setData({ ...data, line_items: items })
       }}
@@ -82,10 +76,10 @@ export default function InvoicePreview({
       }}
       metadata={
         <div className="flex flex-wrap gap-x-6 gap-y-1 text-sm text-gray-600">
-          {data.invoice_number && (
+          {data.receiver?.name && (
             <span>
-              <span className="font-medium text-gray-800">Faktura:</span>{' '}
-              {data.invoice_number}
+              <span className="font-medium text-gray-800">Mottaker:</span>{' '}
+              {data.receiver.name}
             </span>
           )}
           {data.issue_date && (
@@ -94,10 +88,10 @@ export default function InvoicePreview({
               {data.issue_date}
             </span>
           )}
-          {data.supplier?.name && (
+          {data.report_id && (
             <span>
-              <span className="font-medium text-gray-800">Leverandør:</span>{' '}
-              {data.supplier.name}
+              <span className="font-medium text-gray-800">Rapport:</span>{' '}
+              {data.report_id}
             </span>
           )}
         </div>
@@ -105,22 +99,30 @@ export default function InvoicePreview({
       badges={
         <>
           <span className="rounded-full bg-gray-100 px-3 py-1 text-xs font-medium text-gray-600">
-            {rows.length} linjer
+            {rows.length} poster
           </span>
           {flaggedCount > 0 && (
             <span className="rounded-full bg-amber-100 px-3 py-1 text-xs font-medium text-amber-700">
-              {flaggedCount} uten CO₂-data
+              {flaggedCount} mangler CO₂-data
             </span>
           )}
         </>
       }
       fullscreenTitle={fullscreenTitle}
       co2Summary={
-        <Co2TotalBadge total={co2Total} count={co2Count} label="linjer" />
+        <Co2TotalBadge total={co2Total} count={co2Count} label="poster" />
       }
       onConfirm={onConfirm}
       onCancel={onCancel}
       confirming={confirming}
+      afterTable={
+        flaggedCount > 0 ? (
+          <p className="text-xs text-amber-600">
+            Poster markert med gul bakgrunn mangler CO₂-data og trenger manuell
+            gjennomgang.
+          </p>
+        ) : undefined
+      }
     />
   )
 }

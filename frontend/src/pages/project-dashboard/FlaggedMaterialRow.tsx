@@ -1,5 +1,5 @@
 import { Package, Check, Loader2 } from 'lucide-react'
-import { useInlineEdit } from '@/features/inline-edit/useInlineEdit'
+import { useInlineEdit } from '@/widgets/data-table/useInlineEdit'
 import { useUpdateMaterial } from '@/entities/materials/hooks/useProjectMaterials'
 import type { ProjectMaterialItem } from '@/entities/materials/api'
 

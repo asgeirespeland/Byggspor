@@ -9,8 +9,8 @@
  */
 import { useMemo } from 'react'
 import { Zap, Loader2 } from 'lucide-react'
-import InlineUndoBar from '@/features/inline-edit/InlineUndoBar'
-import DataTable, { type Column } from '@/widgets/DataTable'
+import InlineUndoBar from '@/widgets/data-table/InlineUndoBar'
+import DataTable, { type Column } from '@/widgets/data-table/DataTable'
 import { useDeferredLoading } from '@/shared/hooks/useDeferredLoading'
 import {
   useEnergies,

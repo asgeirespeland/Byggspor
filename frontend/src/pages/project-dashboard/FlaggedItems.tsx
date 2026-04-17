@@ -11,7 +11,7 @@ import {
 } from '@/components/ui/tooltip'
 import { useProjectMaterials } from '@/entities/materials/hooks/useProjectMaterials'
 import { useProjectTransports } from '@/entities/transport/hooks/useProjectTransports'
-import { useDismiss } from '@/features/inline-edit/useDismiss'
+import { useDismiss } from '@/shared/hooks/useDismiss'
 import type { ProjectMaterialItem } from '@/entities/materials/api'
 import type { ProjectTripItem } from '@/entities/transport/api/projectTransports'
 import FlaggedMaterialRow from './FlaggedMaterialRow'

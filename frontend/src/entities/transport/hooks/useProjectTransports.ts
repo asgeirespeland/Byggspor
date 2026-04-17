@@ -7,7 +7,7 @@ import { useState } from 'react'
 
 import { useAuthQuery } from '@/shared/hooks/useAuthQuery'
 import { useAuthMutation } from '@/shared/hooks/useAuthMutation'
-import { useOptimisticDelete } from '@/features/inline-edit/useOptimisticDelete'
+import { useOptimisticDelete } from '@/widgets/data-table/useOptimisticDelete'
 
 import {
   listProjectTransports,

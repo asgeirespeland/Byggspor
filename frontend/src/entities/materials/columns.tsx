@@ -4,14 +4,14 @@
  * (post-confirm) and InvoicePreview (pre-confirm) map their domain rows into
  * MaterialRow and feed this same column array.
  */
-import { type Column } from '@/widgets/DataTable'
+import { type Column } from '@/widgets/data-table/DataTable'
 import {
   Tooltip,
   TooltipContent,
   TooltipProvider,
   TooltipTrigger,
 } from '@/components/ui/tooltip'
-import EpdBadge from './components/EpdBadge'
+import EpdBadge from './ui/EpdBadge'
 
 export interface MaterialRow {
   name: string | null

@@ -2,7 +2,7 @@
  * Waste DataTable columns + WasteRow view-model; shared by WastePreview and WasteGroupCard.
  * Holds a local CO2_SOURCE_LABELS map (epd_c3c4 → 'EPD', fraction_factor → 'Generisk').
  */
-import { type Column } from '@/widgets/DataTable'
+import { type Column } from '@/widgets/data-table/DataTable'
 
 const CO2_SOURCE_LABELS: Record<string, string> = {
   epd_c3c4: 'EPD',
