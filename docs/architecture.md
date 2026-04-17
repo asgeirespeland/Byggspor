@@ -58,11 +58,13 @@ graph TD
 byggspor/
 ├── frontend/
 │   └── src/
-│       ├── app/                    # App shell, routes, root component
-│       ├── components/ui/          # shadcn/ui primitives (Button, Dialog, etc.)
-│       ├── features/               # Feature modules (see below)
-│       ├── shared/                 # Cross-cutting: API client, hooks, context, types
-│       ├── lib/                    # General utilities
+│       ├── app/                    # Provider tree + routes
+│       ├── pages/                  # Route-level screens
+│       ├── widgets/                # Cross-slice UI clusters (data-table, file-upload, charts)
+│       ├── entities/               # Business domain slices (see below)
+│       ├── shared/                 # API client, auth, hooks, context, design tokens
+│       ├── components/ui/          # shadcn/ui primitives (vendor)
+│       ├── lib/                    # shadcn cn() helper
 │       └── test/                   # Test setup
 │
 ├── backend/
@@ -87,32 +89,32 @@ byggspor/
 
 ## Frontend Architecture
 
-### Feature-Based Module Structure
+### Feature-Sliced Design
 
-The frontend is organized by **feature modules** rather than by file type. Each feature encapsulates its own components, hooks, API calls, and types:
+The frontend follows [Feature-Sliced Design](https://feature-sliced.design/) (FSD). Code is organized into horizontal layers that may only depend on layers below them, plus vertical slices within each layer that own a single business concept.
 
 ```
-features/
-├── auth/           # Clerk sign-in/sign-up, route protection
-├── dashboard/      # Global dashboard, project dashboard, KPI cards, CO₂ summary
-├── energy/         # Energy consumption input and display
-├── invoice/        # EHF invoice upload, parsing, material table, CO₂ display
-├── onboarding/     # New user onboarding flow
-├── organization/   # Organization settings, member management
-├── project/        # Project CRUD, project hooks
-├── report/         # Detailed CO₂ report with per-category breakdown
-├── settings/       # Calculation settings (org/project level)
-├── transport/      # Transport report upload (Abax XML), manual input, trip table
-├── waste/          # Waste report upload (XML), manual input, waste tracking
-└── user/           # User profile
+app        → providers, router
+pages      → route-level screens
+widgets    → cross-slice UI clusters (data-table, file-upload, charts, gauges)
+entities   → domain slices (materials, transport, waste, energy, report, export,
+                            settings, project, organization, user)
+shared     → domain-free infrastructure (api client, auth, hooks, design tokens)
 ```
+
+Within each entity slice: `api.ts`, `hooks/`, `ui/` (components + `columns.tsx` cell renderers), `lib/` (pure helpers + config), and `types.ts`.
+
+See [frontend.md](frontend.md) for the full layer cheat sheet, slice responsibilities, and widget clusters.
 
 ### Key Patterns
 
-- **API client** ([shared/api/client.ts](../frontend/src/shared/api/client.ts)): A thin `fetch` wrapper (`apiRequest` and `postFile`) that handles JSON serialization, Bearer token injection, and error extraction. All feature API modules build on this.
-- **TanStack Query**: Server state is managed through `useQuery` and `useMutation` hooks. The query client is configured with a 30-second stale time and no refetch-on-focus.
-- **AppContext**: Provides the current `organizationId` and organization data to all authenticated components via React Context.
-- **Protected routes**: The `ProtectedRoute` component wraps all authenticated pages, redirecting unauthenticated users to `/sign-in`.
+- **API client** ([shared/api/client.ts](../frontend/src/shared/api/client.ts)): `apiRequest` + `postFile` wrap `fetch` with JSON serialization, Bearer token injection, and `ApiError` extraction.
+- **Centralized query keys** ([shared/api/queryKeys.ts](../frontend/src/shared/api/queryKeys.ts)): a `qk` factory every slice imports from to keep cache invalidation consistent.
+- **Auth wrappers** ([shared/auth/](../frontend/src/shared/auth/)): `useAuthQuery` / `useAuthMutation` inject Clerk tokens automatically so slice hooks don't each re-implement that.
+- **Design tokens**: semantic and domain colors are CSS variables in `index.css` mapped to Tailwind utilities (`bg-success`, `text-danger-strong`, `border-materials`). Raw hex values are avoided.
+- **Forms**: React Hook Form + Zod via shadcn's `Form` primitive, everywhere.
+- **AppContext**: provides the current `organizationId` and organization to authenticated components.
+- **Protected routes**: `ProtectedRoute` waits for Clerk, syncs `/users/me`, loads the organization, and redirects to `/onboarding` if the user has no org.
 
 ### Route Map
 

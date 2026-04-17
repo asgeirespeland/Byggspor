@@ -35,6 +35,10 @@ package-lock.json
 
 # Claude Code local settings
 .claude/settings.local.json
+.claude-analysis/
 
 # Generated invoice storage
 backend/storage/
+
+# JSON of NOBB Items
+nobb_items.json

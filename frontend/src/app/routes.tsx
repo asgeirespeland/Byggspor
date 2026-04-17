@@ -1,12 +1,22 @@
+/**
+ * Top-level React Router route tree.
+ * Public routes (/sign-in, /sign-up) render AuthLayout; everything else is
+ * wrapped in ProtectedRoute. Signed-in routes render inside AppShell
+ * (Sidebar + scrolling main area). Unknown paths redirect to "/".
+ *
+ * Exports: default AppRoutes. Also declares the local AppShell layout.
+ * Coupling: imports every top-level page module and the auth wrappers.
+ */
 import { Navigate, Outlet, Route, Routes } from 'react-router-dom'
 import Sidebar from '@/shared/components/layout/Sidebar'
-import { AuthLayout, ProtectedRoute } from '../features/auth'
-import { OrgSettings } from '../features/organization'
-import { UserProfile } from '../features/user'
-import GlobalDashboard from '@/features/dashboard/components/GlobalDashboard'
-import OnboardingPage from '@/features/onboarding/components/OnboardingPage'
-import ProjectDashboard from '@/features/dashboard/components/ProjectDashboard'
-import SettingsPage from '@/features/settings/components/SettingsPage'
+import AuthLayout from './auth/AuthLayout'
+import ProtectedRoute from './auth/ProtectedRoute'
+import OrgSettings from '@/pages/organization/OrgSettings'
+import UserProfile from '@/pages/profile/UserProfile'
+import GlobalDashboard from '@/pages/global-dashboard/GlobalDashboard'
+import OnboardingPage from '@/pages/onboarding/OnboardingPage'
+import ProjectDashboard from '@/pages/project-dashboard/ProjectDashboard'
+import SettingsPage from '@/pages/settings/SettingsPage'
 
 function AppShell() {
   return (

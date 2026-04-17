@@ -6,6 +6,50 @@
 @custom-variant dark (&:is(.dark *));
 
 :root {
+  /* Domain colors — one hue per emissions category.
+     Each domain has three shades: base (500, dots/charts),
+     soft (50, surfaces), strong (600, text/icons on light). */
+  --materials: #3b82f6;
+  --materials-soft: #eff6ff;
+  --materials-strong: #2563eb;
+
+  --transport: #f97316;
+  --transport-soft: #fff7ed;
+  --transport-strong: #ea580c;
+
+  --waste: #d946ef;
+  --waste-soft: #fdf4ff;
+  --waste-strong: #c026d6;
+
+  --energy: #eab308;
+  --energy-soft: #fefce8;
+  --energy-strong: #ca8a04;
+
+  --total: #10b981;
+  --total-soft: #ecfdf5;
+  --total-strong: #059669;
+
+  /* Semantic colors — status/feedback, separate from domains. */
+  --success: #10b981;
+  --success-soft: #ecfdf5;
+  --success-strong: #047857;
+
+  --warning: #f59e0b;
+  --warning-soft: #fffbeb;
+  --warning-strong: #b45309;
+
+  --danger: #ef4444;
+  --danger-soft: #fef2f2;
+  --danger-strong: #b91c1c;
+
+  --info: #3b82f6;
+  --info-soft: #eff6ff;
+  --info-strong: #1d4ed8;
+
+  /* Carbon binding — sequestration shown as lighter positive green. */
+  --carbon: #34d399;
+  --carbon-strong: #059669;
+
   --background: oklch(1 0 0);
   --foreground: oklch(0.145 0 0);
   --card: oklch(1 0 0);
@@ -76,6 +120,37 @@
 
 @theme inline {
   --font-sans: 'Geist Variable', sans-serif;
+
+  --color-materials: var(--materials);
+  --color-materials-soft: var(--materials-soft);
+  --color-materials-strong: var(--materials-strong);
+  --color-transport: var(--transport);
+  --color-transport-soft: var(--transport-soft);
+  --color-transport-strong: var(--transport-strong);
+  --color-waste: var(--waste);
+  --color-waste-soft: var(--waste-soft);
+  --color-waste-strong: var(--waste-strong);
+  --color-energy: var(--energy);
+  --color-energy-soft: var(--energy-soft);
+  --color-energy-strong: var(--energy-strong);
+  --color-total: var(--total);
+  --color-total-soft: var(--total-soft);
+  --color-total-strong: var(--total-strong);
+  --color-success: var(--success);
+  --color-success-soft: var(--success-soft);
+  --color-success-strong: var(--success-strong);
+  --color-warning: var(--warning);
+  --color-warning-soft: var(--warning-soft);
+  --color-warning-strong: var(--warning-strong);
+  --color-danger: var(--danger);
+  --color-danger-soft: var(--danger-soft);
+  --color-danger-strong: var(--danger-strong);
+  --color-info: var(--info);
+  --color-info-soft: var(--info-soft);
+  --color-info-strong: var(--info-strong);
+  --color-carbon: var(--carbon);
+  --color-carbon-strong: var(--carbon-strong);
+
   --color-sidebar-ring: var(--sidebar-ring);
   --color-sidebar-border: var(--sidebar-border);
   --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);

@@ -16,7 +16,7 @@ type Props = {
   loadingLabel: string
   submitDisabled?: boolean
   loading?: boolean
-  onSubmit: (e: React.SyntheticEvent<HTMLFormElement>) => void
+  formId: string
   children: React.ReactNode
 }
 
@@ -29,7 +29,7 @@ export default function FormDialog({
   loadingLabel,
   submitDisabled,
   loading,
-  onSubmit,
+  formId,
   children,
 }: Props) {
   return (
@@ -40,27 +40,26 @@ export default function FormDialog({
           <DialogDescription>{description}</DialogDescription>
         </DialogHeader>
 
-        <form onSubmit={onSubmit} className="space-y-4 pt-2">
-          {children}
+        <div className="space-y-4 pt-2">{children}</div>
 
-          <div className="flex justify-end gap-3 pt-2">
-            <Button
-              type="button"
-              variant="outline"
-              className="cursor-pointer"
-              onClick={() => onOpenChange(false)}
-            >
-              Avbryt
-            </Button>
-            <Button
-              type="submit"
-              className="cursor-pointer"
-              disabled={submitDisabled || loading}
-            >
-              {loading ? loadingLabel : submitLabel}
-            </Button>
-          </div>
-        </form>
+        <div className="flex justify-end gap-3 pt-2">
+          <Button
+            type="button"
+            variant="outline"
+            className="cursor-pointer"
+            onClick={() => onOpenChange(false)}
+          >
+            Avbryt
+          </Button>
+          <Button
+            type="submit"
+            form={formId}
+            className="cursor-pointer"
+            disabled={submitDisabled || loading}
+          >
+            {loading ? loadingLabel : submitLabel}
+          </Button>
+        </div>
       </DialogContent>
     </Dialog>
   )
