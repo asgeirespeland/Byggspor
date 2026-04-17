@@ -1,7 +1,7 @@
 import type { WasteLineItem } from '@/entities/report/types'
 import type { Column } from './ReportDataTable'
 import DataTable from './ReportDataTable'
-import CollapsibleGroup from './CollapsibleGroup'
+import ReportGroupRow from './ReportGroupRow'
 import { fmt, sourceLabel, confidenceBadge } from '@/entities/report/utils'
 import { groupBy, sumBy } from '@/shared/utils/collections'
 
@@ -53,7 +53,7 @@ export default function WasteSection({ items }: { items: WasteLineItem[] }) {
         const hasMultipleSources = sources.size > 1
 
         return (
-          <CollapsibleGroup
+          <ReportGroupRow
             key={supplier}
             label={supplier}
             itemCount={supplierItems.length}
@@ -62,7 +62,7 @@ export default function WasteSection({ items }: { items: WasteLineItem[] }) {
             {hasMultipleSources ? (
               <div className="divide-y divide-gray-50">
                 {[...sources.entries()].map(([source, sourceItems]) => (
-                  <CollapsibleGroup
+                  <ReportGroupRow
                     key={source}
                     label={source}
                     itemCount={sourceItems.length}
@@ -74,7 +74,7 @@ export default function WasteSection({ items }: { items: WasteLineItem[] }) {
                       columns={COLUMNS}
                       emptyMessage=""
                     />
-                  </CollapsibleGroup>
+                  </ReportGroupRow>
                 ))}
               </div>
             ) : (
@@ -84,7 +84,7 @@ export default function WasteSection({ items }: { items: WasteLineItem[] }) {
                 emptyMessage=""
               />
             )}
-          </CollapsibleGroup>
+          </ReportGroupRow>
         )
       })}
     </div>

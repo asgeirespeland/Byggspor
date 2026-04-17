@@ -7,7 +7,7 @@ import {
 } from '@/components/ui/collapsible'
 import { fmt } from '@/entities/report/utils'
 
-export default function CollapsibleGroup({
+export default function ReportGroupRow({
   label,
   itemCount,
   totalCo2,

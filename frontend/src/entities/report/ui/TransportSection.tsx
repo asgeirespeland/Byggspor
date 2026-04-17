@@ -1,7 +1,7 @@
 import type { TransportLineItem } from '@/entities/report/types'
 import type { Column } from './ReportDataTable'
 import DataTable from './ReportDataTable'
-import CollapsibleGroup from './CollapsibleGroup'
+import ReportGroupRow from './ReportGroupRow'
 import { fmt, sourceLabel, confidenceBadge } from '@/entities/report/utils'
 import { groupBy, sumBy } from '@/shared/utils/collections'
 
@@ -60,14 +60,14 @@ export default function TransportSection({
   return (
     <div className="divide-y divide-gray-100">
       {[...sources.entries()].map(([source, sourceItems]) => (
-        <CollapsibleGroup
+        <ReportGroupRow
           key={source}
           label={source}
           itemCount={sourceItems.length}
           totalCo2={sumCo2(sourceItems)}
         >
           <DataTable items={sourceItems} columns={COLUMNS} emptyMessage="" />
-        </CollapsibleGroup>
+        </ReportGroupRow>
       ))}
     </div>
   )

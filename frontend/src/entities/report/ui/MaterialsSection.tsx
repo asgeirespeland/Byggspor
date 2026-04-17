@@ -1,7 +1,7 @@
 import type { MaterialLineItem } from '@/entities/report/types'
 import type { Column } from './ReportDataTable'
 import DataTable from './ReportDataTable'
-import CollapsibleGroup from './CollapsibleGroup'
+import ReportGroupRow from './ReportGroupRow'
 import {
   fmt,
   co2Label,
@@ -78,7 +78,7 @@ export default function MaterialsSection({
         const hasMultipleInvoices = invoices.size > 1
 
         return (
-          <CollapsibleGroup
+          <ReportGroupRow
             key={supplier}
             label={supplier}
             itemCount={supplierItems.length}
@@ -87,7 +87,7 @@ export default function MaterialsSection({
             {hasMultipleInvoices ? (
               <div className="divide-y divide-gray-50">
                 {[...invoices.entries()].map(([invoice, invoiceItems]) => (
-                  <CollapsibleGroup
+                  <ReportGroupRow
                     key={invoice}
                     label={`Faktura ${invoice}`}
                     itemCount={invoiceItems.length}
@@ -99,7 +99,7 @@ export default function MaterialsSection({
                       columns={COLUMNS}
                       emptyMessage=""
                     />
-                  </CollapsibleGroup>
+                  </ReportGroupRow>
                 ))}
               </div>
             ) : (
@@ -109,7 +109,7 @@ export default function MaterialsSection({
                 emptyMessage=""
               />
             )}
-          </CollapsibleGroup>
+          </ReportGroupRow>
         )
       })}
     </div>
