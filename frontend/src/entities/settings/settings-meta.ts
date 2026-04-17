@@ -16,10 +16,20 @@ export type SettingMeta = {
 
 export const STAGE_LABELS: Record<string, string> = {
   a1_a3: 'A1–A3 (produksjon)',
-  a4: 'A4 (transport)',
+  a4: 'A4 (transport til byggeplass)',
   a5: 'A5 (montering)',
   c3: 'C3 (avfallsbehandling)',
   c4: 'C4 (deponering)',
+}
+
+export const MIX_LABELS: Record<string, string> = {
+  physical: 'Fysisk miks (NVE)',
+  residual: 'Residualmiks (AIB)',
+}
+
+export const WEIGHTING_LABELS: Record<string, string> = {
+  average: 'Gjennomsnitt per post',
+  co2_weighted: 'Vektet etter CO\u2082-bidrag',
 }
 
 export type SettingGroup = {
@@ -40,13 +50,12 @@ export const SETTING_GROUPS: SettingGroup[] = [
       {
         key: 'energy_grid_mix_type',
         label: 'Str\u00f8mmiks',
-        render: (v) =>
-          v === 'physical' ? 'Fysisk miks (NVE)' : 'Residualmiks (AIB)',
+        render: (v) => MIX_LABELS[v as string] ?? String(v),
         input: 'select',
-        options: [
-          { value: 'physical', label: 'Fysisk miks (NVE)' },
-          { value: 'residual', label: 'Residualmiks (AIB)' },
-        ],
+        options: Object.entries(MIX_LABELS).map(([value, label]) => ({
+          value,
+          label,
+        })),
       },
     ],
   },
@@ -97,15 +106,12 @@ export const SETTING_GROUPS: SettingGroup[] = [
       {
         key: 'confidence_weighting',
         label: 'Vektingsstrategi',
-        render: (v) =>
-          v === 'average'
-            ? 'Gjennomsnitt per post'
-            : 'Vektet etter CO\u2082-bidrag',
+        render: (v) => WEIGHTING_LABELS[v as string] ?? String(v),
         input: 'select',
-        options: [
-          { value: 'average', label: 'Gjennomsnitt per post' },
-          { value: 'co2_weighted', label: 'Vektet etter CO\u2082-bidrag' },
-        ],
+        options: Object.entries(WEIGHTING_LABELS).map(([value, label]) => ({
+          value,
+          label,
+        })),
       },
     ],
   },

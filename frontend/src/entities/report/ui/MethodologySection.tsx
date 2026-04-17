@@ -3,26 +3,13 @@ import { ExternalLink, Info, TableProperties } from 'lucide-react'
 import FullscreenDialog from '@/shared/components/FullscreenDialog'
 import type { ReportSettings } from '@/entities/report/types'
 import { sourceLabel } from '@/entities/report/utils'
+import {
+  STAGE_LABELS,
+  MIX_LABELS,
+  WEIGHTING_LABELS,
+} from '@/entities/settings/settings-meta'
 import { InfoRow, InfoCard } from './InfoCard'
 import { Ns9431Table, ManualFactorsTable } from './WasteFactorsTables'
-
-const STAGE_LABELS: Record<string, string> = {
-  a1_a3: 'A1–A3 (produksjon)',
-  a4: 'A4 (transport til byggeplass)',
-  a5: 'A5 (montering)',
-  c3: 'C3 (avfallsbehandling)',
-  c4: 'C4 (deponering)',
-}
-
-const MIX_LABELS: Record<string, string> = {
-  physical: 'Fysisk miks (NVE)',
-  residual: 'Residualmiks (AIB)',
-}
-
-const WEIGHTING_LABELS: Record<string, string> = {
-  average: 'Gjennomsnitt per post',
-  co2_weighted: 'Vektet etter CO₂-bidrag',
-}
 
 export default function MethodologySection({
   settings,
