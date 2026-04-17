@@ -1,12 +1,13 @@
 import { Navigate, Outlet, Route, Routes } from 'react-router-dom'
 import Sidebar from '@/shared/components/layout/Sidebar'
-import { AuthLayout, ProtectedRoute } from '../features/auth'
-import { OrgSettings } from '../features/organization'
-import { UserProfile } from '../features/user'
-import GlobalDashboard from '@/features/dashboard/components/GlobalDashboard'
-import OnboardingPage from '@/features/onboarding/components/OnboardingPage'
-import ProjectDashboard from '@/features/dashboard/components/ProjectDashboard'
-import SettingsPage from '@/features/settings/components/SettingsPage'
+import AuthLayout from './auth/AuthLayout'
+import ProtectedRoute from './auth/ProtectedRoute'
+import OrgSettings from '@/pages/organization/OrgSettings'
+import UserProfile from '@/pages/profile/UserProfile'
+import GlobalDashboard from '@/pages/global-dashboard/GlobalDashboard'
+import OnboardingPage from '@/pages/onboarding/OnboardingPage'
+import ProjectDashboard from '@/pages/project-dashboard/ProjectDashboard'
+import SettingsPage from '@/pages/settings/SettingsPage'
 
 function AppShell() {
   return (

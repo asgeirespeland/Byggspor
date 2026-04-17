@@ -1,124 +1,32 @@
-# Frontend File Tree Refactor Plan
+# Frontend Architecture Migration: Feature-Sliced Design
 
 ## Context
-The app was built with per-domain feature folders (invoice, transport, waste, energy) when each had bespoke UI. Now that tables, columns, tab layout, and the parse-preview-confirm pipeline are unified, the feature boundaries no longer match reality. The app is more page-based than feature-based.
 
-## Phase 1: Delete Dead Code
+The app was built with per-domain feature folders (`features/invoice/`, `features/transport/`, etc.) when each domain had bespoke UI. After unifying tables, columns, tab layouts, and the parse-preview-confirm pipeline, those feature boundaries no longer match reality. Additionally, `shared/` became a catch-all dumping ground mixing pipeline components, generic UI, auth hooks, and utilities with no organizational principle.
 
-Files to delete (orphaned after DataTable/column unification):
-- `features/invoice/components/InvoiceTable.tsx` — old table, replaced by DataTable + materialColumns
-- `features/invoice/components/InvoicePreviewRow.tsx` — old row component, absorbed into DataTable
-- `features/invoice/components/Co2Value.tsx` — only used by InvoiceTable
-- `features/invoice/components/InvoiceTotalCo2.tsx` — only used by InvoiceTable
-- `features/transport/components/Co2Badge.tsx` — unused after TransportRow deletion
-- `features/transport/components/TransportTotalCo2.tsx` — unused after TransportRow deletion
-- `features/transport/components/VehicleInfoModal.tsx` — verify usage first
+After evaluating several approaches (page-based, domain-based, hybrid), we adopted **Feature-Sliced Design (FSD)** — a layered architecture with a strict one-directional dependency rule:
 
-Hooks to check for dead usage:
-- `features/invoice/hooks/useOverrides.ts` — was used by old InvoicePreview, may be dead now
-- `shared/hooks/useInlineEdit.ts` — only used by FlaggedMaterialRow (keep if so)
-- `shared/hooks/useSelection.ts` — check if anything imports it
+```
+pages → widgets → features → entities → shared
+```
 
-Index files to update after deletions:
-- `features/invoice/index.ts` — remove InvoiceTable export
-- `features/transport/index.ts` — remove VehicleInfoModal, TransportPreview, TransportManualInput if only used internally
+Each layer has a clear role. The folder name tells you what's inside. Imports only flow downward.
 
-Also: `features/report/components/DataTable.tsx` shadows the shared DataTable — should be renamed or consolidated in Phase 2.
+## Phase 1: Dead Code Cleanup ✅ (complete)
 
-## Phase 2: Restructure File Tree
+Deleted orphaned components, hooks, and barrel exports left over from the DataTable/column unification.
+
+## Phase 2: File Tree Restructure (current)
 
 ### Target structure
 
 ```
 src/
-  app/                          (unchanged)
-  components/ui/                (unchanged — shadcn primitives)
+  app/                                    (unchanged)
+  components/ui/                          (unchanged — shadcn primitives)
 
-  domains/                      lightweight per-domain data configs
-    materials/
-      api.ts                    invoice API + project materials API
-      hooks.ts                  useInvoiceParse, useProjectMaterials, useDeleteInvoice, useUpdateMaterial, useDeleteMaterial
-      columns.tsx               materialColumns + MaterialRow
-      types.ts
-    transport/
-      api.ts
-      hooks.ts
-      columns.tsx               tripColumns + TripRow
-      types.ts
-    waste/
-      api.ts
-      hooks.ts
-      columns.tsx               wasteColumns + WasteRow
-      types.ts
-    energy/
-      api.ts
-      hooks.ts
-      columns.tsx               inline columns (uses zones data)
-      types.ts
-
-  features/
-    data-pipeline/              the parse→preview→confirm→view engine
-      components/
-        DataTable.tsx
-        DataTabShell.tsx
-        ParsePreviewShell.tsx
-        FileUploadShell.tsx
-        FileDropZone.tsx
-        SelectedFileBar.tsx
-        CollapsibleGroupCard.tsx
-        Co2TotalBadge.tsx
-        ManualEntry.tsx
-        RowActions.tsx
-        InlineUndoBar.tsx
-      hooks/
-        useFileParse.ts
-        useOptimisticDelete.ts
-        useInlineUndo.ts
-        useDismiss.ts
-    project/                    project CRUD hooks + constants (unchanged)
-    auth/                       (unchanged)
-    onboarding/                 (unchanged)
-    organization/               (unchanged)
-    settings/                   (unchanged)
-    user/                       (unchanged)
-    export/                     (unchanged)
-
-  pages/
-    GlobalDashboard/
-      GlobalDashboard.tsx
-      ProjectCard.tsx
-      ProjectCardDrawer.tsx
-      CreateProjectDialog.tsx
-    ProjectDashboard/
-      ProjectDashboard.tsx
-      ProjectSidebar.tsx
-      KpiCard.tsx
-      ConfidenceGauge.tsx
-      ConfidenceInfo.tsx
-      ResponsiveConfidenceGauge.tsx
-      FlaggedItems.tsx
-      FlaggedMaterialRow.tsx
-      FlaggedTripRow.tsx
-      tabs/
-        MaterialsTab.tsx        composition: domain data + pipeline components
-        TransportTab.tsx
-        WasteTab.tsx
-        EnergyTab.tsx
-        ReportTab/              report has many sub-components
-          ReportView.tsx
-          CategoryDonut.tsx
-          CollapsibleGroup.tsx
-          ReportDataTable.tsx   renamed from report/DataTable.tsx to avoid shadowing
-          InfoCard.tsx
-          MaterialsSection.tsx
-          MethodologySection.tsx
-          Section.tsx
-          TopEmitters.tsx
-          TransportSection.tsx
-          WasteFactorsTables.tsx
-          WasteSection.tsx
-
-  shared/                       truly generic, reusable anywhere
+  ── shared/ ──────────────────────────   generic infra, no business logic
+  shared/
     api/
       client.ts
       queryClient.ts
@@ -134,39 +42,228 @@ src/
       useAuthMutation.ts
       useAuthQuery.ts
       useDeferredLoading.ts
-      useFileSelect.ts
-      useInlineEdit.ts         (if still used by FlaggedMaterialRow)
       useRequireToken.ts
       useScrollIndicators.ts
       useUserSync.ts
-    context/                    (unchanged)
-    types/                      (unchanged)
+    context/
+      AppContext.tsx
+      appContextValue.ts
+    types/
+      index.ts
+      organization.ts
+      user.ts
+
+  ── entities/ ────────────────────────   business data + domain-specific UI
+  entities/
+    materials/                            ← features/invoice/
+      api.ts
+      types.ts
+      columns.tsx                         ← materialColumns.tsx
+      utils.ts
+      hooks/
+        useInvoiceParse.ts
+        useProjectMaterials.ts
+      components/
+        InvoiceUpload.tsx
+        InvoicePreview.tsx
+        InvoiceGroupCard.tsx
+        EpdBadge.tsx
+      __tests__/
+        useInvoiceParse.test.ts
+        utils.test.ts
+
+    transport/                            ← features/transport/
+      api/
+        transport.ts
+        projectTransports.ts
+      types.ts
+      columns.tsx                         ← tripColumns.tsx
+      hooks/
+        useTransportParse.ts
+        useProjectTransports.ts
+      components/
+        TransportUpload.tsx
+        TransportPreview.tsx
+        TransportGroupCard.tsx
+        TransportManualInput.tsx
+      __tests__/
+        useTransportParse.test.ts
+
+    waste/                                ← features/waste/
+      api.ts
+      types.ts
+      columns.tsx                         ← wasteColumns.tsx
+      hooks/
+        useWasteParse.ts
+        useWaste.ts
+      components/
+        WasteUpload.tsx
+        WastePreview.tsx
+        WasteGroupCard.tsx
+        WasteManualInput.tsx
+
+    energy/                               ← features/energy/
+      api.ts
+      types.ts
+      hooks/
+        useEnergies.ts
+      components/
+        EnergyInput.tsx
+        EnergyForm.tsx
+        EnergySummary.tsx
+
+    project/                              ← features/project/
+      api.ts
+      constants.ts
+      hooks/
+        useCreateProject.ts
+        useProject.ts
+        useProjects.ts
+
+    report/                               ← features/report/ + dashboard/api/report.ts
+      api/
+        co2Summary.ts                     ← dashboard/api/report.ts
+        detailedReport.ts                 ← report/api/report.ts
+      types.ts
+      utils.tsx
+      hooks/
+        useCo2Summary.ts                  ← dashboard/hooks/useCo2Summary.ts
+        useDetailedReport.ts
+
+    export/                               ← features/export/
+      api.ts
+      types.ts
+      hooks/
+        useGenerateInvoice.ts
+        useProjectLineItems.ts
+      components/
+        GenerateInvoiceDialog.tsx
+
+  ── features/ ────────────────────────   user interaction patterns
+  features/
+    file-upload/
+      FileDropZone.tsx
+      SelectedFileBar.tsx
+      FileUploadShell.tsx
+      useFileParse.ts
+      useFileSelect.ts
+
+    inline-edit/
+      RowActions.tsx
+      InlineUndoBar.tsx
+      useInlineEdit.ts
+      useOptimisticDelete.ts
+      useInlineUndo.ts
+      useDismiss.ts
+
+  ── widgets/ ─────────────────────────   composed UI blocks (business-aware)
+  widgets/
+    DataTable.tsx
+    DataTabShell.tsx
+    ParsePreviewShell.tsx
+    CollapsibleGroupCard.tsx
+    Co2TotalBadge.tsx
+    ManualEntry.tsx
+
+  ── pages/ ───────────────────────────   user-facing compositions
+  pages/
+    auth/
+      AuthLayout.tsx
+      ProtectedRoute.tsx
+
+    global-dashboard/
+      GlobalDashboard.tsx
+      ProjectCard.tsx
+      ProjectCardDrawer.tsx
+      CreateProjectDialog.tsx
+
+    project-dashboard/
+      ProjectDashboard.tsx
+      ProjectSidebar.tsx
+      KpiCard.tsx
+      ConfidenceGauge.tsx
+      ConfidenceInfo.tsx
+      ResponsiveConfidenceGauge.tsx
+      FlaggedItems.tsx
+      FlaggedMaterialRow.tsx
+      FlaggedTripRow.tsx
+      tabs/
+        MaterialsTab.tsx
+        TransportTab.tsx
+        WasteTab.tsx
+        EnergyTab.tsx
+        report/
+          ReportView.tsx
+          ReportDataTable.tsx             ← renamed from DataTable.tsx
+          CategoryDonut.tsx
+          CollapsibleGroup.tsx
+          InfoCard.tsx
+          MaterialsSection.tsx
+          MethodologySection.tsx
+          Section.tsx
+          TopEmitters.tsx
+          TransportSection.tsx
+          WasteFactorsTables.tsx
+          WasteSection.tsx
+
+    settings/                             ← features/settings/ (colocated, page-specific)
+      SettingsPage.tsx
+      CalculationSettingsPanel.tsx
+      OrgSettingsPanel.tsx
+      ProjectSettingsPanel.tsx
+      SettingRow.tsx
+      SourceBadge.tsx
+      api/settings.ts
+      hooks/
+        useOrgSettings.ts
+        useProjectSettings.ts
+      settings-meta.ts
+
+    profile/                              ← features/user/
+      UserProfile.tsx
+      ProfileForm.tsx
+      hooks/useUserProfile.ts
+
+    organization/                         ← features/organization/
+      OrgSettings.tsx
+      MemberCard.tsx
+      AddMemberDialog.tsx
+      hooks/useOrgMembers.ts
+
+    onboarding/                           ← features/onboarding/
+      OnboardingPage.tsx
+      ClimateTabTour.tsx
+      hooks/useClimateTabTour.ts
+      tourSteps.ts
 ```
 
-### What each move accomplishes
+### Migration order
 
-1. `features/invoice/` → `domains/materials/` — name matches the domain, not the input format
-2. `features/transport/` → `domains/transport/` — thins down to just data config
-3. `features/waste/` → `domains/waste/` — same
-4. `features/energy/` → `domains/energy/` — same
-5. `shared/components/` pipeline files → `features/data-pipeline/components/` — pipeline is a feature, not generic shared code
-6. `shared/hooks/` pipeline hooks → `features/data-pipeline/hooks/` — same reasoning
-7. `features/dashboard/` → `pages/GlobalDashboard/` + `pages/ProjectDashboard/` — pages are pages
-8. Tab wrapper components become the actual composition point in `pages/ProjectDashboard/tabs/`
-9. `features/report/` → `pages/ProjectDashboard/tabs/ReportTab/` — it's a tab, not a standalone feature
+Each step: move files with `git mv`, update all `@/` import paths, run `pnpm tsc --noEmit`.
 
-### Migration approach
+1. **shared/** — remove pipeline components/hooks (moved in steps 3-4), keep only generic infra
+2. **entities/** — move `features/invoice/` → `entities/materials/`, `features/transport/` → `entities/transport/`, etc. Merge report data layers. Move `features/project/` and `features/export/`.
+3. **features/** — move pipeline interaction files from `shared/` into `features/file-upload/` and `features/inline-edit/`
+4. **widgets/** — move composed UI blocks from `shared/` into `widgets/`
+5. **pages/** — split `features/dashboard/` into `pages/global-dashboard/` + `pages/project-dashboard/`. Move `features/report/` UI into `pages/project-dashboard/tabs/report/`. Move `features/settings/`, `features/user/`, `features/organization/`, `features/onboarding/`, `features/auth/` into `pages/`.
+6. **Cleanup** — update `routes.tsx`, remove old barrel `index.ts` files, verify no orphaned imports.
 
-- Move files one folder at a time
-- Update all `@/` import paths after each move
-- Run `tsc --noEmit` after each batch to catch broken imports
-- Update barrel `index.ts` files
-- Update `routes.tsx`
+### Dependency rule
 
-## Phase 3: DRY Refactor (separate effort, after file tree is settled)
+```
+pages/        → can import from widgets, features, entities, shared
+widgets/      → can import from features, entities, shared
+features/     → can import from entities, shared
+entities/     → can import from shared
+shared/       → can import from nothing (except external packages)
+```
 
-With the new structure in place, duplication patterns will be visible:
-- Preview vs GroupCard components per domain (near-identical mapping logic)
-- Confirm handlers across tabs (same pattern: setConfirming → token → API → invalidate → toast)
-- Query invalidation patterns
-- Column definition similarities across domains
+## Phase 3: DRY Refactor (future, after file tree is settled)
+
+With the FSD structure in place, these duplication patterns are already visible and become mechanical extractions:
+
+- **Parse hooks** (`useInvoiceParse`, `useTransportParse`, `useWasteParse`) — trivial wrappers around `useFileParse` with different API functions. May not need to exist as separate hooks at all.
+- **Preview components** (`InvoicePreview`, `TransportPreview`, `WastePreview`) — all wrap `ParsePreviewShell` + `Co2TotalBadge` + domain columns + item-to-row mapping. Extractable into a generic `DataPreview` widget parameterized by columns and mapping function.
+- **GroupCard components** (`InvoiceGroupCard`, `TransportGroupCard`, `WasteGroupCard`) — all wrap `CollapsibleGroupCard` + `DataTable` + `InlineUndoBar` + optimistic delete. Extractable into a generic `DataGroupCard` widget.
+- **Upload components** (`InvoiceUpload`, `TransportUpload`, `WasteUpload`) — identical skeleton: `DataTabShell` → `FileUploadShell` → Preview → GroupCards → confirm handler. The confirm handler (`getToken → API → invalidate → toast`) is copy-pasted three times.
+- **Domain hooks** (`useProjectMaterials`, `useProjectTransports`, `useWaste`) — all follow the same shape: `useAuthQuery` for list, `useOptimisticDelete` for delete, `useAuthMutation` for update.
