@@ -7,30 +7,26 @@ import {
   DialogTrigger,
 } from '@/components/ui/dialog'
 import { HelpCircle } from 'lucide-react'
+import {
+  CONFIDENCE_TIER_BADGE_CLASS,
+  CONFIDENCE_TIER_LABEL,
+  CONFIDENCE_TIER_RANGE,
+  type ConfidenceTier,
+} from '@/entities/report/confidence'
 
-const SCORE_ROWS = [
-  {
-    range: '80–100',
-    label: 'Høy',
-    color: 'bg-emerald-100 text-emerald-700',
-    description:
-      'Produkt identifisert med EPD/GWP-data, eller manuelt korrigert.',
-  },
-  {
-    range: '50–79',
-    label: 'Middels',
-    color: 'bg-amber-100 text-amber-700',
-    description:
-      'Produkt identifisert, men mangler GWP-data. CO₂-estimat er usikkert.',
-  },
-  {
-    range: '0–49',
-    label: 'Lav',
-    color: 'bg-red-100 text-red-700',
-    description:
-      'Produkt mangler NOBB/GTIN-kobling eller kjøretøy mangler utslippsdata. Manuell korrigering anbefales.',
-  },
-]
+const SCORE_DESCRIPTIONS: Record<ConfidenceTier, string> = {
+  high: 'Produkt identifisert med EPD/GWP-data, eller manuelt korrigert.',
+  medium:
+    'Produkt identifisert, men mangler GWP-data. CO₂-estimat er usikkert.',
+  low: 'Produkt mangler NOBB/GTIN-kobling eller kjøretøy mangler utslippsdata. Manuell korrigering anbefales.',
+}
+
+const SCORE_ROWS = (['high', 'medium', 'low'] as const).map((tier) => ({
+  range: CONFIDENCE_TIER_RANGE[tier],
+  label: CONFIDENCE_TIER_LABEL[tier],
+  color: CONFIDENCE_TIER_BADGE_CLASS[tier],
+  description: SCORE_DESCRIPTIONS[tier],
+}))
 
 export default function ConfidenceInfo() {
   return (

@@ -1,10 +1,12 @@
 /**
- * Half-circle SVG confidence gauge with `size?: 'full' | 'compact'`. Tier thresholds (75/50) and
- * colours (emerald/amber/red) are duplicated in ConfidenceInfo SCORE_ROWS and entities/report/utils
- * confidenceBadge — unify via a shared tier module if it drifts further.
+ * Half-circle SVG confidence gauge with `size?: 'full' | 'compact'`.
+ * Tier thresholds, colours, and labels come from entities/report/confidence.
  */
-const CONFIDENCE_HIGH = 75
-const CONFIDENCE_MEDIUM = 50
+import {
+  CONFIDENCE_TIER_COLOR,
+  CONFIDENCE_TIER_LABEL,
+  confidenceTier,
+} from '@/entities/report/confidence'
 
 const FULL_GAUGE = {
   radius: 54,
@@ -29,19 +31,11 @@ type Props = {
 }
 
 function scoreColor(score: number) {
-  return score >= CONFIDENCE_HIGH
-    ? '#10b981'
-    : score >= CONFIDENCE_MEDIUM
-      ? '#f59e0b'
-      : '#ef4444'
+  return CONFIDENCE_TIER_COLOR[confidenceTier(score)]
 }
 
 function scoreLabel(score: number) {
-  return score >= CONFIDENCE_HIGH
-    ? 'Høy'
-    : score >= CONFIDENCE_MEDIUM
-      ? 'Middels'
-      : 'Lav'
+  return CONFIDENCE_TIER_LABEL[confidenceTier(score)]
 }
 
 function FullGauge({ score }: { score: number }) {

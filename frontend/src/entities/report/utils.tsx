@@ -4,6 +4,8 @@
  * sourceLabel (maps source_type strings to Norwegian labels), and
  * confidenceBadge (colored JSX pill). Shared across report tabs/sections.
  */
+import { CONFIDENCE_TIER_BADGE_CLASS, confidenceTier } from './confidence'
+
 const SOURCE_LABELS: Record<string, string> = {
   ehf_invoice: 'EHF-faktura',
   manual: 'Manuell',
@@ -38,12 +40,7 @@ export function sourceLabel(type: string | null): string {
 
 export function confidenceBadge(score: number | null) {
   if (score == null) return <span className="text-gray-300">—</span>
-  const color =
-    score >= 80
-      ? 'bg-emerald-50 text-emerald-700'
-      : score >= 50
-        ? 'bg-yellow-50 text-yellow-700'
-        : 'bg-red-50 text-red-700'
+  const color = CONFIDENCE_TIER_BADGE_CLASS[confidenceTier(score)]
   return (
     <span
       className={`inline-flex rounded-full px-2 py-0.5 text-xs font-medium ${color}`}
