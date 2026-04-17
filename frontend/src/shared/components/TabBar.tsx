@@ -11,6 +11,8 @@ export interface TabDef<T extends string> {
   label: string
   icon: React.ReactNode
   className?: string
+  /** Classes applied when the tab is active; overrides the default neutral styling. */
+  activeClassName?: string
   /** Optional content renderer; callers can look it up by activeTab and render it. */
   render?: () => React.ReactNode
 }
@@ -48,7 +50,7 @@ export default function TabBar<T extends string>({
             onClick={() => onTabChange(tab.id)}
             className={`flex shrink-0 items-center gap-2 px-5 py-3.5 text-sm font-medium transition-colors border-b-2 -mb-px cursor-pointer ${
               activeTab === tab.id
-                ? 'border-violet-600 text-violet-600'
+                ? (tab.activeClassName ?? 'border-gray-900 text-gray-900')
                 : 'border-transparent text-gray-400 hover:text-gray-600 hover:border-gray-300'
             } ${tab.className ?? ''}`}
           >

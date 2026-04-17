@@ -37,31 +37,31 @@ export default function TopEmitters({
     {
       key: 'materials',
       label: 'Materialer',
-      dot: 'bg-blue-500',
+      dot: 'bg-materials',
       co2: categories.materials.total_co2_kg,
       segments: [
-        { color: 'bg-blue-500', pct: pct(materialEmissions) },
+        { color: 'bg-materials', pct: pct(materialEmissions) },
         ...(materialSequestration < 0
-          ? [{ color: 'bg-emerald-400', pct: pct(materialSequestration) }]
+          ? [{ color: 'bg-carbon', pct: pct(materialSequestration) }]
           : []),
       ],
     },
     {
       key: 'transport',
       label: 'Transport',
-      dot: 'bg-orange-500',
+      dot: 'bg-transport',
       co2: categories.transport.total_co2_kg,
     },
     {
       key: 'waste',
       label: 'Avfall',
-      dot: 'bg-red-500',
+      dot: 'bg-waste',
       co2: categories.waste.total_co2_kg,
     },
     {
       key: 'energy',
       label: 'Energi',
-      dot: 'bg-yellow-500',
+      dot: 'bg-energy',
       co2: categories.energy.total_co2_kg,
     },
   ]
@@ -81,7 +81,7 @@ export default function TopEmitters({
           </div>
           <div>
             <p className="text-gray-400">Karbonbinding</p>
-            <p className="font-semibold text-emerald-600 tabular-nums">
+            <p className="font-semibold text-carbon-strong tabular-nums">
               −{fmt(Math.abs(materialSequestration))} kg
             </p>
           </div>
@@ -111,12 +111,12 @@ export default function TopEmitters({
                   <span className={`h-2 w-2 rounded-full shrink-0 ${dot}`} />
                   <span className="text-gray-600">{label}</span>
                   {isNegative && (
-                    <span className="text-[10px] text-emerald-600">
+                    <span className="text-[10px] text-carbon-strong">
                       karbonbinding
                     </span>
                   )}
                   <span
-                    className={`ml-auto font-medium tabular-nums ${isNegative ? 'text-emerald-600' : 'text-gray-800'}`}
+                    className={`ml-auto font-medium tabular-nums ${isNegative ? 'text-carbon-strong' : 'text-gray-800'}`}
                   >
                     {isNegative ? `−${fmt(Math.abs(co2))}` : fmt(co2)} kg
                   </span>
@@ -139,7 +139,7 @@ export default function TopEmitters({
                       ))
                     ) : (
                       <div
-                        className={`h-full ${isNegative ? 'bg-emerald-400' : dot}`}
+                        className={`h-full ${isNegative ? 'bg-carbon' : dot}`}
                         style={{ width: '100%' }}
                       />
                     )}

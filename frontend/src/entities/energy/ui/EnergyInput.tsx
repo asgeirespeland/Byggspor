@@ -201,8 +201,8 @@ export default function EnergyInput({ projectId }: EnergyInputProps) {
         !entriesLoading &&
         pendingEnergyId == null && (
           <div className="flex flex-col items-center justify-center py-10 text-center">
-            <div className="mx-auto mb-3 flex h-10 w-10 items-center justify-center rounded-xl bg-yellow-50">
-              <Zap className="h-5 w-5 text-yellow-500" />
+            <div className="mx-auto mb-3 flex h-10 w-10 items-center justify-center rounded-xl bg-energy-soft">
+              <Zap className="h-5 w-5 text-energy" />
             </div>
             <p className="text-sm text-gray-500">
               Ingen energiregistreringer ennå

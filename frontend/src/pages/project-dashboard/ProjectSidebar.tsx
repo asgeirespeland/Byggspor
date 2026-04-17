@@ -128,10 +128,10 @@ export default function ProjectSidebar({
         onClick={() => onNavigateToTab?.('report')}
         className="group relative w-full overflow-hidden rounded-xl bg-gray-900 px-4 py-4 text-left shadow-md transition-opacity hover:opacity-90 cursor-pointer"
       >
-        <div className="absolute inset-0 bg-gradient-to-br from-emerald-400 to-transparent opacity-20 pointer-events-none" />
+        <div className="absolute inset-0 bg-gradient-to-br from-carbon to-transparent opacity-20 pointer-events-none" />
         <div className="relative flex items-center gap-3">
-          <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-emerald-500/20">
-            <Leaf className="h-4 w-4 text-emerald-400" />
+          <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-total/20">
+            <Leaf className="h-4 w-4 text-carbon" />
           </div>
           <div className="min-w-0">
             <p className="text-sm font-semibold text-white">
@@ -139,7 +139,7 @@ export default function ProjectSidebar({
             </p>
             <p className="text-xs text-gray-400">Vis detaljert CO₂-oversikt</p>
           </div>
-          <FileBarChart2 className="ml-auto h-4 w-4 shrink-0 text-gray-500 group-hover:text-emerald-400 transition-colors" />
+          <FileBarChart2 className="ml-auto h-4 w-4 shrink-0 text-gray-500 group-hover:text-carbon transition-colors" />
         </div>
       </button>
 

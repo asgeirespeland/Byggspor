@@ -57,25 +57,25 @@ const CATEGORIES = [
     key: 'materials' as const,
     label: 'Materialer',
     icon: Package,
-    iconColor: 'text-blue-600',
+    iconColor: 'text-materials-strong',
   },
   {
     key: 'transport' as const,
     label: 'Transport',
     icon: Truck,
-    iconColor: 'text-orange-600',
+    iconColor: 'text-transport-strong',
   },
   {
     key: 'waste' as const,
     label: 'Avfall',
     icon: Trash2,
-    iconColor: 'text-red-500',
+    iconColor: 'text-waste-strong',
   },
   {
     key: 'energy' as const,
     label: 'Energi',
     icon: Zap,
-    iconColor: 'text-yellow-600',
+    iconColor: 'text-energy-strong',
   },
 ]
 

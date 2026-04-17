@@ -9,10 +9,10 @@ import {
 import { fmt } from '@/entities/report/utils'
 
 const CHART_CONFIG: ChartConfig = {
-  materials: { label: 'Materialer', color: '#3b82f6' },
-  transport: { label: 'Transport', color: '#f97316' },
-  waste: { label: 'Avfall', color: '#ef4444' },
-  energy: { label: 'Energi', color: '#eab308' },
+  materials: { label: 'Materialer', color: 'var(--materials)' },
+  transport: { label: 'Transport', color: 'var(--transport)' },
+  waste: { label: 'Avfall', color: 'var(--waste)' },
+  energy: { label: 'Energi', color: 'var(--energy)' },
 }
 
 interface CategoryDonutProps {
@@ -33,7 +33,7 @@ export default function CategoryDonut({
     name: c.key,
     label: c.label,
     value: Math.abs(c.co2),
-    fill: CHART_CONFIG[c.key]?.color ?? '#9ca3af',
+    fill: CHART_CONFIG[c.key]?.color ?? 'var(--muted-foreground)',
   }))
 
   const grossTotal = data.reduce((s, d) => s + d.value, 0)
@@ -43,7 +43,7 @@ export default function CategoryDonut({
   const overlayData =
     seqPct > 0
       ? [
-          { name: 'sequestration', value: seqAbs, fill: '#34d399' },
+          { name: 'sequestration', value: seqAbs, fill: 'var(--carbon)' },
           {
             name: 'rest',
             value: Math.max(grossTotal - seqAbs, 0),
@@ -71,7 +71,7 @@ export default function CategoryDonut({
               y1={0}
               x2={0}
               y2={5}
-              stroke="rgba(5, 150, 105, 0.8)"
+              stroke="var(--carbon-strong)"
               strokeWidth={2}
             />
           </pattern>

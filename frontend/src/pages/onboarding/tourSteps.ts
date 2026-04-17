@@ -17,8 +17,8 @@ export interface TourStep {
 export const TOUR_STEPS: TourStep[] = [
   {
     icon: 'leaf',
-    iconColor: 'text-emerald-500',
-    iconBg: 'bg-emerald-50',
+    iconColor: 'text-total',
+    iconBg: 'bg-total-soft',
     title: 'Klimasporing for prosjektet',
     what: 'Byggspor beregner CO\u2082-avtrykket til byggeprosjektet ditt fordelt p\u00e5 fire kategorier: Materialer, Transport, Avfall og Energi.',
     how: 'Vi tar deg gjennom \u00e9n kategori om gangen slik at du vet hva du skal registrere og hvilke filer du trenger.',
@@ -29,8 +29,8 @@ export const TOUR_STEPS: TourStep[] = [
   },
   {
     icon: 'package',
-    iconColor: 'text-blue-500',
-    iconBg: 'bg-blue-50',
+    iconColor: 'text-materials',
+    iconBg: 'bg-materials-soft',
     title: 'Materialer',
     what: 'Sporer CO\u2082-utslipp fra innkj\u00f8pte byggematerialer (gr\u00e5 energi). Data hentes fra EPD-databaser via NOBB-nummeret p\u00e5 fakturaen.',
     how: 'Last opp EHF-fakturaer i XML-format, eller legg inn materialer manuelt med NOBB-nummer og mengde.',
@@ -41,8 +41,8 @@ export const TOUR_STEPS: TourStep[] = [
   },
   {
     icon: 'truck',
-    iconColor: 'text-orange-500',
-    iconBg: 'bg-orange-50',
+    iconColor: 'text-transport',
+    iconBg: 'bg-transport-soft',
     title: 'Transport',
     what: 'Sporer utslipp fra kj\u00f8ret\u00f8y og maskiner brukt p\u00e5 og til byggeplassen. CO\u2082-data hentes fra Statens vegvesen basert p\u00e5 kj\u00f8ret\u00f8yets registreringsnummer.',
     how: 'Last opp Abax-rapporter i XML-format, eller legg til turer manuelt med kj\u00f8ret\u00f8ytype og kj\u00f8rt avstand.',
@@ -53,8 +53,8 @@ export const TOUR_STEPS: TourStep[] = [
   },
   {
     icon: 'trash2',
-    iconColor: 'text-red-500',
-    iconBg: 'bg-red-50',
+    iconColor: 'text-waste',
+    iconBg: 'bg-waste-soft',
     title: 'Avfall',
     what: 'Sporer CO\u2082-utslipp knyttet til avfall generert p\u00e5 byggeplassen, fordelt p\u00e5 avfallsfraksjoner med tilh\u00f8rende utslippsfaktorer.',
     how: 'Last opp avfallsrapporter i XML-format, eller logg avfallsfraksjoner manuelt med type og vekt i tonn.',
@@ -65,8 +65,8 @@ export const TOUR_STEPS: TourStep[] = [
   },
   {
     icon: 'zap',
-    iconColor: 'text-yellow-500',
-    iconBg: 'bg-yellow-50',
+    iconColor: 'text-energy',
+    iconBg: 'bg-energy-soft',
     title: 'Energi',
     what: 'Sporer utslipp fra energiforbruk p\u00e5 byggeplassen \u2014 inkludert norsk str\u00f8m, diesel og andre energikilder.',
     how: 'Registrer energiforbruk manuelt per kilde (kWh eller liter). Velg riktig prisone (NO1\u2013NO5) for norsk str\u00f8m.',
