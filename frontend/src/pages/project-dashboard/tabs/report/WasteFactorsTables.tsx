@@ -1,3 +1,7 @@
+/**
+ * Two read-only reference tables rendered inside the MethodologySection fullscreen modal:
+ * NS 9431 fraction factors and manual override factors.
+ */
 import type { ReportSettings } from '@/entities/report/types'
 
 const TH =

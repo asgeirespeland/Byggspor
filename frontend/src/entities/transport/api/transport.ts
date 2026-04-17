@@ -1,3 +1,7 @@
+/**
+ * Transport HTTP client: Abax XML parse/confirm, trip delete/patch, vehicle patch, and manual trip create.
+ * Note: removeTrip here duplicates deleteTrip in api/projectTransports.ts — same endpoint, two helpers.
+ */
 import { apiRequest, postFile } from '@/shared/api/client'
 import type { ManualTripInput, TransportParseResponse } from '../types'
 

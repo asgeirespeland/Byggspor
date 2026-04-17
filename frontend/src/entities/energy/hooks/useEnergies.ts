@@ -1,3 +1,10 @@
+/**
+ * React Query hooks for the energy entity.
+ * Exports: useEnergies (list), usePriceZones (cached), useCalculateEnergy,
+ * useUpdateEnergy, useDeleteEnergy (optimistic with undo).
+ * Coupling: every mutation invalidates ['energies'], ['co2-summary'], ['detailed-report']
+ * for the given projectId.
+ */
 import { useAuthQuery } from '@/shared/hooks/useAuthQuery'
 import { useAuthMutation } from '@/shared/hooks/useAuthMutation'
 import { useOptimisticDelete } from '@/features/inline-edit/useOptimisticDelete'

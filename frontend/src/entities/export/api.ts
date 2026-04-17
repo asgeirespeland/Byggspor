@@ -1,3 +1,11 @@
+/**
+ * EHF invoice export client.
+ * Exports:
+ *   generateInvoice — POST /export/project/:id/generate
+ *   downloadEhfBlob — direct fetch returning the generated EHF XML Blob + filename
+ *   triggerDownload — DOM helper that clicks a hidden <a> to save a Blob
+ * Note: downloadEhfBlob bypasses shared apiRequest (binary response + Content-Disposition parsing).
+ */
 import { apiRequest } from '@/shared/api/client'
 import type { GenerateInvoiceInput, GeneratedInvoice } from './types'
 

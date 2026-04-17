@@ -1,3 +1,11 @@
+/**
+ * Project entity backend client.
+ * Exports types CreateProjectPayload, ProjectResponse and functions
+ * createProject, listProjects, getProject.
+ * NOTE: hooks/useProjects.ts and hooks/useProject.ts currently call apiRequest
+ * directly instead of using listProjects/getProject — there is also a duplicate
+ * Project type there. Unifying is a known cleanup.
+ */
 import { apiRequest } from '@/shared/api/client'
 
 export type CreateProjectPayload = {

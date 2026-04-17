@@ -1,3 +1,9 @@
+/**
+ * DataTable column config for material rows.
+ * Exports MaterialRow (UI view-model) and materialColumns. Both InvoiceGroupCard
+ * (post-confirm) and InvoicePreview (pre-confirm) map their domain rows into
+ * MaterialRow and feed this same column array.
+ */
 import { type Column } from '@/widgets/DataTable'
 import {
   Tooltip,

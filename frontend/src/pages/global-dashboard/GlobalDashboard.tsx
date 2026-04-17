@@ -1,3 +1,7 @@
+/**
+ * Organization-level landing page: heading, stat-card placeholders, searchable list of projects,
+ * and the 'new project' dialog. Route: '/'.
+ */
 import { useState } from 'react'
 import CreateProjectDialog from './CreateProjectDialog'
 import ProjectCard from './ProjectCard'

@@ -1,3 +1,8 @@
+/**
+ * Project detail page. Owns tab state and wires breadcrumb, KPI row, tabbed content
+ * (materials/transport/waste/energy/report), right sidebar, and first-visit climate-tab tour. Tab
+ * components come from entities/* (materials, transport) and ./tabs/* (waste, energy, report).
+ */
 import { useParams, useNavigate } from 'react-router-dom'
 import { useState } from 'react'
 import { useDeferredLoading } from '@/shared/hooks/useDeferredLoading'

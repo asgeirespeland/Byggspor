@@ -1,3 +1,8 @@
+/**
+ * REST client for the settings API: /organizations/:id/settings and /projects/:id/settings
+ * (GET/PATCH/DELETE) plus per-key DELETE for project overrides. Exports the ResolvedSetting
+ * shape ({ value, source }) used throughout the settings UI.
+ */
 import { apiRequest } from '@/shared/api/client'
 
 export type SettingSource = 'default' | 'organization' | 'project'

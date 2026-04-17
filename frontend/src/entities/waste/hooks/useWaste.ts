@@ -1,3 +1,7 @@
+/**
+ * React Query hooks for waste: list, manual create, item patch, optimistic item delete, optimistic report
+ * delete. Invalidates the project-waste + co2-summary + detailed-report trio on every write.
+ */
 import { useAuthMutation } from '@/shared/hooks/useAuthMutation'
 import { useAuthQuery } from '@/shared/hooks/useAuthQuery'
 import { useOptimisticDelete } from '@/features/inline-edit/useOptimisticDelete'

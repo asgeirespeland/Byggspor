@@ -1,3 +1,9 @@
+/**
+ * Report-view formatting helpers.
+ * Exports: fmt (nb-NO number), co2Label (JSX, handles negative carbon-binding),
+ * sourceLabel (maps source_type strings to Norwegian labels), and
+ * confidenceBadge (colored JSX pill). Shared across report tabs/sections.
+ */
 const SOURCE_LABELS: Record<string, string> = {
   ehf_invoice: 'EHF-faktura',
   manual: 'Manuell',

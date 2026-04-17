@@ -1,3 +1,12 @@
+/**
+ * Energy tab composer.
+ * Renders EnergyForm, EnergySummary, and an editable DataTable of entries
+ * with optimistic delete + undo bar. Wires all energy hooks together.
+ *
+ * Exports: default EnergyInput. Local getColumns() builds DataTable columns.
+ * Coupling: widgets/DataTable, features/inline-edit/InlineUndoBar,
+ * hooks/useEnergies (calculate, update, delete, list, zones).
+ */
 import { useMemo } from 'react'
 import { Zap, Loader2 } from 'lucide-react'
 import InlineUndoBar from '@/features/inline-edit/InlineUndoBar'

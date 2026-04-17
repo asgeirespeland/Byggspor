@@ -1,3 +1,9 @@
+/**
+ * Local state hook for invoice line items in the generate-invoice dialog.
+ * On dialog open, prefills lines from entities/materials/api.listProjectMaterials.
+ * Exports: LineItem type and useProjectLineItems hook.
+ * Cross-slice coupling: reads entities/materials/ (FSD note — export entity depends on materials).
+ */
 import { useEffect, useRef, useState } from 'react'
 import { useAuth } from '@clerk/react'
 import { listProjectMaterials } from '@/entities/materials/api'

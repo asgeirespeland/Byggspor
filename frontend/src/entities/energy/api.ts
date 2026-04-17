@@ -1,3 +1,8 @@
+/**
+ * Energy entity backend client.
+ * Exports: calculateEnergy, listEnergies, deleteEnergy, updateEnergy, listPriceZones.
+ * All functions delegate to shared apiRequest and accept an optional Clerk token.
+ */
 import { apiRequest } from '@/shared/api/client'
 import type {
   EnergyEntry,

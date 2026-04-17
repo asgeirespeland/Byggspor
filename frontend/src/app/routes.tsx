@@ -1,3 +1,12 @@
+/**
+ * Top-level React Router route tree.
+ * Public routes (/sign-in, /sign-up) render AuthLayout; everything else is
+ * wrapped in ProtectedRoute. Signed-in routes render inside AppShell
+ * (Sidebar + scrolling main area). Unknown paths redirect to "/".
+ *
+ * Exports: default AppRoutes. Also declares the local AppShell layout.
+ * Coupling: imports every top-level page module and the auth wrappers.
+ */
 import { Navigate, Outlet, Route, Routes } from 'react-router-dom'
 import Sidebar from '@/shared/components/layout/Sidebar'
 import AuthLayout from './auth/AuthLayout'

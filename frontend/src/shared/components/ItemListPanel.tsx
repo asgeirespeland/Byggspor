@@ -1,3 +1,8 @@
+/**
+ * Generic searchable item-list panel with Add button, loading/error/empty fallbacks. Used by
+ * GlobalDashboard (projects) and OrgSettings (members). Keeps filtering local (no server
+ * round-trip) — expects filterFn to accept a pre-lowercased query.
+ */
 import { useState } from 'react'
 import { Search, Plus, Loader2 } from 'lucide-react'
 import { useDeferredLoading } from '@/shared/hooks/useDeferredLoading'

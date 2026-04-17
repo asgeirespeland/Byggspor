@@ -2,7 +2,7 @@ import {
   useOrgSettings,
   useUpdateOrgSettings,
   useResetOrgSettings,
-} from './hooks/useOrgSettings'
+} from '../hooks/useOrgSettings'
 import CalculationSettingsPanel from './CalculationSettingsPanel'
 
 export default function OrgSettingsPanel({ orgId }: { orgId: number }) {

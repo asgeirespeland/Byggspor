@@ -1,3 +1,9 @@
+/**
+ * Materials tab composer: DataTabShell wrapping upload → parse → preview → confirm,
+ * then a list of InvoiceGroupCards with optimistic delete/undo. Manual-entry form
+ * is a placeholder. Bridges file-upload feature, inline-edit feature, and the
+ * materials entity hooks.
+ */
 import { useState } from 'react'
 import { useQueryClient } from '@tanstack/react-query'
 import { toast } from 'sonner'

@@ -1,3 +1,8 @@
+/**
+ * Right-rail panel on the project dashboard: confidence gauge + help modal, project metadata,
+ * FlaggedItems list, settings button (opens ProjectSettingsPanel in a fullscreen dialog), generate
+ * climate report CTA (routes to report tab), and generate EHF invoice CTA (opens GenerateInvoiceDialog).
+ */
 import { useState } from 'react'
 import {
   Leaf,
@@ -9,7 +14,7 @@ import {
   Settings,
 } from 'lucide-react'
 import type { Project } from '@/entities/project/hooks/useProjects'
-import ProjectSettingsPanel from '@/pages/settings/ProjectSettingsPanel'
+import ProjectSettingsPanel from '@/entities/settings/ui/ProjectSettingsPanel'
 import FullscreenDialog from '@/shared/components/FullscreenDialog'
 import ConfidenceGauge from '@/widgets/ConfidenceGauge'
 import ConfidenceInfo from './ConfidenceInfo'

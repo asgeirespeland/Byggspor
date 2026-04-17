@@ -1,3 +1,14 @@
+/**
+ * Authentication + user-sync gate for private routes.
+ * Responsibilities:
+ *   1. Wait for Clerk to load; redirect to /sign-in if unauthenticated.
+ *   2. Run useUserSync to ensure the backend has a row for this user.
+ *   3. If the user has no organizationId, force redirect to /onboarding.
+ *   4. Otherwise provide AppContext (organizationId/organization) to children.
+ *
+ * Exports: default ProtectedRoute. Local Loader is a small full-screen status helper.
+ * Coupling: Clerk useAuth, shared/hooks/useUserSync, shared/context/AppContext.
+ */
 import { useAuth } from '@clerk/react'
 import { Navigate, Outlet, useLocation } from 'react-router-dom'
 import { AppProvider } from '@/shared/context/AppContext'

@@ -1,7 +1,12 @@
+/**
+ * Shared settings editor reused by OrgSettingsPanel and ProjectSettingsPanel. Renders SETTING_GROUPS
+ * as grouped SettingRow lists, maintains a local draft diffed against resolved values, and exposes
+ * save / reset-all action buttons in a header.
+ */
 import { useState } from 'react'
 import { RotateCcw, Loader2, Save, Info } from 'lucide-react'
-import type { ResolvedSetting } from './api/settings'
-import { SETTING_GROUPS } from './settings-meta'
+import type { ResolvedSetting } from '../api'
+import { SETTING_GROUPS } from '../settings-meta'
 import SettingRow from './SettingRow'
 
 export type SettingsPanelProps = {

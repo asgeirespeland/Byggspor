@@ -1,3 +1,9 @@
+/**
+ * Fetches /users/me and the user's organization after Clerk auth is ready, returning a
+ * discriminated-union SyncState ({ status: 'loading' | 'error' | 'ready' }). App root uses the
+ * ready state to populate AppContext. Bypasses React Query because it runs before the provider
+ * is populated.
+ */
 import { useEffect, useState } from 'react'
 import { useAuth } from '@clerk/react'
 import { apiRequest } from '@/shared/api/client'

@@ -1,8 +1,8 @@
 import { useState } from 'react'
 import { RotateCcw, Pencil, Check, X } from 'lucide-react'
 import { Switch } from '@/components/ui/switch'
-import type { ResolvedSetting } from './api/settings'
-import type { SettingMeta } from './settings-meta'
+import type { ResolvedSetting } from '../api'
+import type { SettingMeta } from '../settings-meta'
 import SourceBadge from './SourceBadge'
 
 export default function SettingRow({

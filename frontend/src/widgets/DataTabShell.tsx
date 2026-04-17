@@ -1,3 +1,8 @@
+/**
+ * Composition shell shared by every data tab (materials/transport/waste): slot for the upload
+ * flow, optional ManualEntry reveal, deferred loading message, headed section for persisted
+ * items, and an optional undo bar. Pure layout — all data ownership stays with the caller.
+ */
 import type { ReactNode } from 'react'
 import { useDeferredLoading } from '@/shared/hooks/useDeferredLoading'
 import ManualEntry from './ManualEntry'

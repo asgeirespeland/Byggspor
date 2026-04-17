@@ -3,7 +3,7 @@ import { Settings } from 'lucide-react'
 
 import { useAppContext } from '@/shared/hooks/useAppContext'
 import ItemListPanel from '@/shared/components/ItemListPanel'
-import OrgSettingsPanel from '@/pages/settings/OrgSettingsPanel'
+import OrgSettingsPanel from '@/entities/settings/ui/OrgSettingsPanel'
 import { useOrgMembers, useAddMember } from './hooks/useOrgMembers'
 import MemberCard from './MemberCard'
 import AddMemberDialog from './AddMemberDialog'

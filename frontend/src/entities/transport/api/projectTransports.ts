@@ -1,3 +1,7 @@
+/**
+ * Per-project transport client: grouped list endpoint, delete-report, delete-trip, patch-trip.
+ * Exports ProjectTripItem / ProjectReportGroup / TripUpdateInput — the grouped view-shape used by the dashboard.
+ */
 import { apiRequest } from '@/shared/api/client'
 
 export interface ProjectTripItem {

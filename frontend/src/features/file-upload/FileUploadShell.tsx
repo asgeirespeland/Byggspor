@@ -1,3 +1,8 @@
+/**
+ * Standard upload → analyze → preview shell used by every entity's file-upload tab. Composes FileDropZone,
+ * SelectedFileBar, useFileSelect, and useRequireToken; exposes parsed data and a clear() fn via children
+ * render prop. Entities pass parseFn+state from their own useFileParse-derived hook.
+ */
 import ErrorMessage from '@/shared/components/ErrorMessage'
 import FileDropZone from './FileDropZone'
 import SelectedFileBar from './SelectedFileBar'

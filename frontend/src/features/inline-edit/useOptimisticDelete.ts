@@ -1,3 +1,10 @@
+/**
+ * Optimistic-delete orchestrator shared by every entity slice. Snapshots the list cache, applies the
+ * caller's prepare() patch, adjusts the co2-summary cache, schedules the real delete via useInlineUndo,
+ * and rolls back on error or user undo.
+ *
+ * Note: imports Co2Summary from @/entities/report — an upward FSD coupling that should probably move to shared.
+ */
 import { useQueryClient } from '@tanstack/react-query'
 import { useAuth } from '@clerk/react'
 import { toast } from 'sonner'

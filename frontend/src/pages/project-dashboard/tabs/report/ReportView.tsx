@@ -1,3 +1,10 @@
+/**
+ * Top-level report orchestrator. Two internal tabs (Oversikt / Metode) wrap a donut + top-emitters
+ * summary and four per-category Section components (materials/transport/waste/energy); energy uses
+ * a local ENERGY_COLUMNS config while the others delegate to MaterialsSection/TransportSection/
+ * WasteSection. Category palette duplicates the one in ProjectDashboard, FlaggedItems, and
+ * CategoryDonut — see analysis notes for unification.
+ */
 import { useState } from 'react'
 import {
   Loader2,

@@ -1,3 +1,7 @@
+/**
+ * Trip DataTable column definitions and TripRow view-model; shared by TransportPreview and TransportGroupCard.
+ * nb-NO date/number formatting here duplicates report/utils.tsx::fmt — candidate for shared formatters.
+ */
 import { type Column } from '@/widgets/DataTable'
 
 export interface TripRow {

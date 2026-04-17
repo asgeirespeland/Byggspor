@@ -1,8 +1,9 @@
-import type { SettingSource } from './api/settings'
-
-// ---------------------------------------------------------------------------
-// Setting metadata — labels, groups, display helpers
-// ---------------------------------------------------------------------------
+/**
+ * Presentation metadata for CO₂ calculation settings: SettingMeta shape, SETTING_GROUPS (per-key
+ * label + input kind + render fn, grouped by category), STAGE_LABELS enum map, and SOURCE_STYLES
+ * badge palette.
+ */
+import type { SettingSource } from './api'
 
 export type SettingMeta = {
   key: string

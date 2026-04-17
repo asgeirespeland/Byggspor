@@ -1,3 +1,9 @@
+/**
+ * CO₂ summary endpoint client.
+ * Exports: CategoryStats and Co2Summary types, plus getCo2Summary.
+ * The Co2Summary shape is structurally a subset of DetailedReport.categories
+ * in types.ts (no items array).
+ */
 import { apiRequest } from '@/shared/api/client'
 
 export interface CategoryStats {

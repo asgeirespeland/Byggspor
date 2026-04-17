@@ -1,3 +1,7 @@
+/**
+ * Waste HTTP client: XML parse/confirm, per-project list, item patch/delete, report delete, manual create.
+ * deleteWasteReport hits /waste/source/:id (endpoint naming differs from transport/report).
+ */
 import { apiRequest, postFile } from '@/shared/api/client'
 import type {
   CreateManualWastePayload,

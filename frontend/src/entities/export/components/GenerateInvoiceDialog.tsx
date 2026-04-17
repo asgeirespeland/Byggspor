@@ -1,3 +1,10 @@
+/**
+ * Generate-invoice dialog.
+ * Four panels: Faktura + Kunde header cards, Fakturalinjer table,
+ * Vedlegg uploader, and a footer with save/preview/submit actions.
+ * Wires useGenerateInvoice (submit) and useProjectLineItems (prefill + edit).
+ * Exports: default GenerateInvoiceDialog; local helpers todayFormatted, calcLineTotal.
+ */
 import { useState, useRef } from 'react'
 import {
   FileDown,

@@ -1,3 +1,8 @@
+/**
+ * Shared preview layout for file-upload flows (invoices, transport, waste): metadata header +
+ * badges + scrollable DataTable + CO₂ summary + cancel/confirm buttons, with a fullscreen dialog
+ * mirroring the table read-only. Re-exports DataTable's Column<T>.
+ */
 import { useState } from 'react'
 import { Loader2, Maximize2 } from 'lucide-react'
 import { Button } from '@/components/ui/button'

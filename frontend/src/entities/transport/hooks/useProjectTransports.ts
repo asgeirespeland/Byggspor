@@ -1,3 +1,8 @@
+/**
+ * React Query hooks for the transport tab: list, optimistic delete-report, optimistic delete-trip (tracks
+ * originating report group for the undo bar), and update-trip. Invalidates the shared co2-summary +
+ * detailed-report keys alongside project-transports.
+ */
 import { useState } from 'react'
 
 import { useAuthQuery } from '@/shared/hooks/useAuthQuery'

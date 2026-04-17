@@ -1,3 +1,7 @@
+/**
+ * Waste tab composer: FileUploadShell + WastePreview for XML upload, WasteManualInput for manual entry,
+ * WasteGroupCard list for saved waste, and inline undo bar for deleted reports.
+ */
 import { useState } from 'react'
 import { useQueryClient } from '@tanstack/react-query'
 import { toast } from 'sonner'

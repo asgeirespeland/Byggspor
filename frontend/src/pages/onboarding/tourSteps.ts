@@ -1,3 +1,7 @@
+/**
+ * Static content for the climate-tab tour: five category-step descriptions consumed by ClimateTabTour.
+ * TourIcon is a string literal union so step data can ship without direct lucide-react imports.
+ */
 export type TourIcon = 'leaf' | 'package' | 'truck' | 'trash2' | 'zap'
 
 export interface TourStep {

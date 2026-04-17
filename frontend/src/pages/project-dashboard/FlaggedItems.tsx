@@ -1,3 +1,7 @@
+/**
+ * Sidebar card that aggregates flagged materials + flagged trips (first 8) and exposes hide-session /
+ * hide-forever via useDismiss. Pulls from two entity hooks simultaneously.
+ */
 import { AlertTriangle, X } from 'lucide-react'
 import {
   Tooltip,

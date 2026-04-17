@@ -1,3 +1,7 @@
+/**
+ * Minimal generic <table> used inside report sections. Distinct from shared/components/DataTable
+ * (no row actions/sorting). Exports its own Column<T> type; see analysis for the overlap.
+ */
 export interface Column<T> {
   header: string
   align?: 'left' | 'right'

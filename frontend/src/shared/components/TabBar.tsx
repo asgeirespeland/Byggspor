@@ -1,3 +1,8 @@
+/**
+ * Horizontally scrollable tab bar used by ProjectDashboard and SettingsPage. Exports TabDef<T>
+ * so callers can type their tab id unions. scrollDeps forces canScrollLeft/canScrollRight
+ * recompute when tab content changes (e.g. while loading toggles the active panel).
+ */
 import { ChevronLeft, ChevronRight } from 'lucide-react'
 import { useScrollIndicators } from '@/shared/hooks/useScrollIndicators'
 

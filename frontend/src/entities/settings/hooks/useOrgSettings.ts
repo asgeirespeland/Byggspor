@@ -1,10 +1,11 @@
+/**
+ * React Query hooks for organisation-level calculation settings (read, patch, reset-all).
+ * Invalidates every downstream CO₂ query by key prefix because org settings are inherited
+ * by all projects.
+ */
 import { useAuthQuery } from '@/shared/hooks/useAuthQuery'
 import { useAuthMutation } from '@/shared/hooks/useAuthMutation'
-import {
-  getOrgSettings,
-  patchOrgSettings,
-  resetOrgSettings,
-} from '../api/settings'
+import { getOrgSettings, patchOrgSettings, resetOrgSettings } from '../api'
 
 export function useOrgSettings(orgId: number | undefined) {
   return useAuthQuery(

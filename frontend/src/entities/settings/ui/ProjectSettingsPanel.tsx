@@ -3,7 +3,7 @@ import {
   useUpdateProjectSettings,
   useResetProjectSetting,
   useResetAllProjectSettings,
-} from './hooks/useProjectSettings'
+} from '../hooks/useProjectSettings'
 import CalculationSettingsPanel from './CalculationSettingsPanel'
 
 export default function ProjectSettingsPanel({

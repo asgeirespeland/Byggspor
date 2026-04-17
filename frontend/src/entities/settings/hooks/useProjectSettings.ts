@@ -1,3 +1,8 @@
+/**
+ * React Query hooks for per-project calculation settings (read, patch, reset key, reset all).
+ * The invalidateKeys list fans out to every CO₂-dependent query because a settings change
+ * recomputes derived values server-side.
+ */
 import { useAuthQuery } from '@/shared/hooks/useAuthQuery'
 import { useAuthMutation } from '@/shared/hooks/useAuthMutation'
 import {
@@ -5,7 +10,7 @@ import {
   patchProjectSettings,
   deleteProjectSetting,
   resetProjectSettings,
-} from '../api/settings'
+} from '../api'
 
 export function useProjectSettings(projectId: number | undefined) {
   return useAuthQuery(

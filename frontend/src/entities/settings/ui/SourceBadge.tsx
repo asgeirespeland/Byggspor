@@ -1,5 +1,5 @@
-import type { SettingSource } from './api/settings'
-import { SOURCE_STYLES } from './settings-meta'
+import type { SettingSource } from '../api'
+import { SOURCE_STYLES } from '../settings-meta'
 
 export default function SourceBadge({ source }: { source: SettingSource }) {
   const s = SOURCE_STYLES[source]

@@ -1,3 +1,10 @@
+/**
+ * React Query hooks for the materials tab.
+ * Exports: useProjectMaterials (list), useUpdateMaterial,
+ * useDeleteInvoice (optimistic delete of full invoice), useDeleteMaterial
+ * (optimistic delete of a single row). Both deletes use features/inline-edit/useOptimisticDelete
+ * with co2Category 'materials' so global KPIs update optimistically.
+ */
 import { useAuthQuery } from '@/shared/hooks/useAuthQuery'
 import { useAuthMutation } from '@/shared/hooks/useAuthMutation'
 import { useOptimisticDelete } from '@/features/inline-edit/useOptimisticDelete'

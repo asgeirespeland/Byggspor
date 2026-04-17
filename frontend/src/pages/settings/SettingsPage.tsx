@@ -3,8 +3,8 @@ import { Building2, FolderKanban, User } from 'lucide-react'
 import TabBar, { type TabDef } from '@/shared/components/TabBar'
 import { useAppContext } from '@/shared/hooks/useAppContext'
 import { useProjects } from '@/entities/project/hooks/useProjects'
-import OrgSettingsPanel from './OrgSettingsPanel'
-import ProjectSettingsPanel from './ProjectSettingsPanel'
+import OrgSettingsPanel from '@/entities/settings/ui/OrgSettingsPanel'
+import ProjectSettingsPanel from '@/entities/settings/ui/ProjectSettingsPanel'
 
 type Tab = 'personal' | 'organization' | 'projects'
 

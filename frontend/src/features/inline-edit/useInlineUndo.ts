@@ -1,3 +1,7 @@
+/**
+ * Delayed-commit primitive used by useOptimisticDelete: schedule(id, fire, rollback) holds an action for
+ * N ms, undo() cancels it before fire, flush() commits immediately, unmount auto-commits any pending work.
+ */
 import { useState, useRef, useCallback, useEffect } from 'react'
 
 const DEFAULT_TIMEOUT = 5000

@@ -1,3 +1,8 @@
+/**
+ * Half-circle SVG confidence gauge with `size?: 'full' | 'compact'`. Tier thresholds (75/50) and
+ * colours (emerald/amber/red) are duplicated in ConfidenceInfo SCORE_ROWS and entities/report/utils
+ * confidenceBadge — unify via a shared tier module if it drifts further.
+ */
 const CONFIDENCE_HIGH = 75
 const CONFIDENCE_MEDIUM = 50
 

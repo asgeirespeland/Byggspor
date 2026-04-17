@@ -1,3 +1,7 @@
+/**
+ * Two small presentational primitives used only by MethodologySection: InfoCard (titled bordered
+ * panel) and InfoRow (label + value + optional detail). Kept together because they compose.
+ */
 export function InfoRow({
   label,
   value,

@@ -1,3 +1,11 @@
+/**
+ * Materials / invoice backend client.
+ * Exports two domain types (ProjectMaterialItem, ProjectInvoiceGroup) and
+ * CRUD functions: parseInvoiceFile, confirmInvoice, listProjectMaterials,
+ * updateMaterial, deleteMaterial, deleteInvoice.
+ * Note: ProjectMaterialItem vs LineItem (types.ts) represent the same domain
+ * at different lifecycle stages (post-confirm DB row vs parsed XML row).
+ */
 import { apiRequest, postFile } from '@/shared/api/client'
 
 export interface ProjectMaterialItem {

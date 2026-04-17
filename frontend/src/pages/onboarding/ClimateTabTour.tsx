@@ -1,3 +1,7 @@
+/**
+ * Five-step modal walkthrough of the CO₂ categories, mounted on the project dashboard climate tab.
+ * Caller owns the step state via useClimateTabTour; this component renders one step at a time.
+ */
 import {
   AlertTriangle,
   Info,

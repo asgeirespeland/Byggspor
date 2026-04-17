@@ -1,3 +1,8 @@
+/**
+ * Backend HTTP client. Exports ApiError (with code + user-facing suggestion), apiRequest<T>() for
+ * JSON endpoints, and postFile<T>() for multipart uploads. All calls accept an optional Clerk
+ * bearer token and surface structured ApiError instances on non-2xx responses.
+ */
 const BASE_URL = import.meta.env.VITE_API_URL ?? 'http://localhost:5000'
 
 type Method = 'GET' | 'POST' | 'PATCH' | 'PUT' | 'DELETE'

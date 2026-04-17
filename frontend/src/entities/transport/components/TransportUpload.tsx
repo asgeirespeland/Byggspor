@@ -1,3 +1,8 @@
+/**
+ * Transport tab composer: wires FileUploadShell + TransportPreview (upload flow), TransportManualInput
+ * (manual entry), TransportGroupCard (saved reports), and InlineUndoBar. Owns confirm-trips + manual
+ * invalidation of co2-summary / project-transports / detailed-report after writes.
+ */
 import { useState } from 'react'
 import { useQueryClient } from '@tanstack/react-query'
 import { toast } from 'sonner'
