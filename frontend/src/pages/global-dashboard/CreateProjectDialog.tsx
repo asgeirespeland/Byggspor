@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import FormDialog from '@/shared/components/FormDialog'
-import { useCreateProject } from '@/entities/project/hooks/useCreateProject'
+import { useCreateProject } from '@/entities/project/hooks/useProjects'
 
 export type BasicProjectForm = {
   navn: string

@@ -1,22 +1,30 @@
 import { useAuthQuery } from '@/shared/hooks/useAuthQuery'
-import { apiRequest } from '@/shared/api/client'
+import { useAuthMutation } from '@/shared/hooks/useAuthMutation'
+import {
+  createProject,
+  getProject,
+  listProjects,
+  type CreateProjectPayload,
+  type Project,
+} from '../api'
 
-export type Project = {
-  id: number
-  name: string
-  project_number: string | null
-  status: 'active' | 'completed' | 'archived'
-  organization_id: number
-  created_by_user_id: number
-  customer_id: number | null
-  customer_name: string | null
-  created_at: string
-  updated_at: string
-  completed_at: string | null
-}
+export type { Project } from '../api'
 
 export function useProjects() {
-  return useAuthQuery(['projects'], (token) =>
-    apiRequest<Project[]>('/projects', { token }),
+  return useAuthQuery(['projects'], (token) => listProjects(token))
+}
+
+export function useProject(projectId: number) {
+  return useAuthQuery(['projects', projectId], (token) =>
+    getProject(projectId, token),
   )
+}
+
+export function useCreateProject() {
+  return useAuthMutation<CreateProjectPayload, Project>({
+    mutationFn: (payload, token) => createProject(payload, token),
+    invalidateKeys: [['projects']],
+    successMessage: 'Prosjekt opprettet',
+    errorMessage: 'Kunne ikke opprette prosjekt',
+  })
 }

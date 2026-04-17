@@ -1,10 +1,6 @@
 /**
  * Project entity backend client.
- * Exports types CreateProjectPayload, ProjectResponse and functions
- * createProject, listProjects, getProject.
- * NOTE: hooks/useProjects.ts and hooks/useProject.ts currently call apiRequest
- * directly instead of using listProjects/getProject — there is also a duplicate
- * Project type there. Unifying is a known cleanup.
+ * Exports the Project type and createProject / listProjects / getProject.
  */
 import { apiRequest } from '@/shared/api/client'
 
@@ -15,11 +11,11 @@ export type CreateProjectPayload = {
   customer_name?: string
 }
 
-export type ProjectResponse = {
+export type Project = {
   id: number
   name: string
   project_number: string | null
-  status: string
+  status: 'active' | 'completed' | 'archived'
   organization_id: number
   created_by_user_id: number
   customer_id: number | null
@@ -32,21 +28,18 @@ export type ProjectResponse = {
 export function createProject(
   payload: CreateProjectPayload,
   token?: string,
-): Promise<ProjectResponse> {
-  return apiRequest<ProjectResponse>('/projects', {
+): Promise<Project> {
+  return apiRequest<Project>('/projects', {
     method: 'POST',
     body: payload,
     token,
   })
 }
 
-export function listProjects(token?: string): Promise<ProjectResponse[]> {
-  return apiRequest<ProjectResponse[]>('/projects', { token })
+export function listProjects(token?: string): Promise<Project[]> {
+  return apiRequest<Project[]>('/projects', { token })
 }
 
-export function getProject(
-  id: number,
-  token?: string,
-): Promise<ProjectResponse> {
-  return apiRequest<ProjectResponse>(`/projects/${id}`, { token })
+export function getProject(id: number, token?: string): Promise<Project> {
+  return apiRequest<Project>(`/projects/${id}`, { token })
 }

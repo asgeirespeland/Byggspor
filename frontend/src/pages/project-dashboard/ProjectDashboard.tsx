@@ -17,7 +17,7 @@ import {
   Leaf,
   FileText,
 } from 'lucide-react'
-import { useProject } from '@/entities/project/hooks/useProject'
+import { useProject } from '@/entities/project/hooks/useProjects'
 import { STATUS_CONFIG } from '@/entities/project/constants'
 import TabBar, { type TabDef } from '@/shared/components/TabBar'
 import InvoiceUpload from '@/entities/materials/components/InvoiceUpload'

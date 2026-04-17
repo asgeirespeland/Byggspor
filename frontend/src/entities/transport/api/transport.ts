@@ -1,6 +1,6 @@
 /**
- * Transport HTTP client: Abax XML parse/confirm, trip delete/patch, vehicle patch, and manual trip create.
- * Note: removeTrip here duplicates deleteTrip in api/projectTransports.ts — same endpoint, two helpers.
+ * Transport HTTP client: Abax XML parse/confirm, vehicle patch, and manual trip create.
+ * Trip delete lives in api/projectTransports.ts alongside the list query it invalidates.
  */
 import { apiRequest, postFile } from '@/shared/api/client'
 import type { ManualTripInput, TransportParseResponse } from '../types'
@@ -21,16 +21,6 @@ export async function confirmTrips(
   await apiRequest('/transport/confirm', {
     method: 'POST',
     body: { project_id: projectId, trips, file_name: fileName },
-    token,
-  })
-}
-
-export async function removeTrip(
-  tripId: number,
-  token?: string,
-): Promise<void> {
-  await apiRequest(`/transport/trips/${tripId}`, {
-    method: 'DELETE',
     token,
   })
 }
