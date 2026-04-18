@@ -16,6 +16,7 @@ NOTE: The detailed CO2 report service (MH13) is still under development.
 
 from __future__ import annotations
 
+import io
 import logging
 import os
 from datetime import UTC, date, datetime
@@ -38,6 +39,8 @@ from app.models.project_member import ProjectRole
 from app.models.project_transport import ProjectTransport
 from app.models.project_waste_item import ProjectWasteItem
 from app.services.ehf_generator import generate_ehf
+from app.services.pdf_generator import generate_invoice_pdf
+from app.services.report_generator import get_detailed_report
 from app.utils.db import db_commit
 
 logger = logging.getLogger(__name__)
@@ -460,4 +463,25 @@ def download_ehf(invoice_id: int):
         mimetype="application/xml",
         as_attachment=True,
         download_name=download_name,
+    )
+
+
+@export_bp.route("/<int:invoice_id>/pdf", methods=["GET"])
+@require_auth
+def download_pdf(invoice_id: int):
+    """Generate and download a PDF combining the invoice and climate report."""
+    session = g.db
+    invoice = session.get(GeneratedInvoice, invoice_id)
+    if not invoice:
+        raise ApiError("Fakturaen ble ikke funnet.", code="NOT_FOUND", status=404)
+
+    report = get_detailed_report(session, invoice.project_id)
+    pdf_bytes = generate_invoice_pdf(invoice, invoice.lines, report)
+
+    inv_num = invoice.invoice_number or str(invoice.id)
+    return send_file(
+        io.BytesIO(pdf_bytes),
+        mimetype="application/pdf",
+        as_attachment=True,
+        download_name=f"faktura_{inv_num}_klimarapport.pdf",
     )

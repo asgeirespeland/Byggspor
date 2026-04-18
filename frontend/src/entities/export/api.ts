@@ -37,6 +37,20 @@ export async function downloadEhfBlob(
   return { blob: await res.blob(), filename }
 }
 
+export async function downloadPdfBlob(
+  invoiceId: number,
+  token: string,
+): Promise<{ blob: Blob; filename: string }> {
+  const res = await fetch(`${BASE_URL}/export/${invoiceId}/pdf`, {
+    headers: { Authorization: `Bearer ${token}` },
+  })
+  if (!res.ok) throw new Error('Nedlasting av PDF feilet')
+  const disposition = res.headers.get('Content-Disposition') ?? ''
+  const match = disposition.match(/filename="?([^"]+)"?/)
+  const filename = match?.[1] ?? `faktura-${invoiceId}-klimarapport.pdf`
+  return { blob: await res.blob(), filename }
+}
+
 export function triggerDownload(blob: Blob, filename: string) {
   const url = URL.createObjectURL(blob)
   const a = document.createElement('a')
