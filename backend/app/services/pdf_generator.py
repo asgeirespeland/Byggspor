@@ -27,7 +27,7 @@ from app.models.generated_invoice import GeneratedInvoice
 from app.models.invoice_line import InvoiceLine
 
 # ── Page dimensions ────────────────────────────────────────────────────────────
-_W, _H = A4
+_W, _ = A4
 _MARGIN = 2.2 * cm
 _CONTENT_W = _W - 2 * _MARGIN
 
@@ -97,18 +97,18 @@ def _pct(val: Any) -> str:
 
 # ── Page-level drawing callbacks ───────────────────────────────────────────────
 
-def _on_invoice_page(canvas, doc):
-    canvas.saveState()
+def _noop_page(canvas, doc):
+    pass
 
-    # Bottom footer
-    canvas.setFont("Helvetica-Bold", 8)
-    canvas.setFillColorRGB(0.25, 0.25, 0.25)
-    canvas.drawCentredString(
-        _W / 2,
-        1.4 * cm,
-        doc._footer_text,
-    )
-    canvas.restoreState()
+
+def _make_invoice_page_cb(footer_text: str):
+    def _cb(canvas, doc):
+        canvas.saveState()
+        canvas.setFont("Helvetica-Bold", 8)
+        canvas.setFillColorRGB(0.25, 0.25, 0.25)
+        canvas.drawCentredString(_W / 2, 1.4 * cm, footer_text)
+        canvas.restoreState()
+    return _cb
 
 
 # ── Invoice page: section builders ────────────────────────────────────────────
@@ -116,7 +116,7 @@ def _on_invoice_page(canvas, doc):
 def _header_block(invoice: GeneratedInvoice) -> Table:
     """Return address left, company name right."""
     left = Paragraph(
-        "Retur:<br/>Byggspor AS<br/>Prosjektstyring med CO₂-sporbarhet",
+        "Retur:<br/>Byggspor AS<br/>Prosjektstyring med CO2-sporbarhet",
         _SMALL,
     )
     right = Paragraph("Byggspor", _LOGO)
@@ -173,7 +173,6 @@ def _customer_payment_block(invoice: GeneratedInvoice) -> Table:
 
     box_data  = highlighted + [[" ", " "]] + detail
     n_hi      = len(highlighted)
-    n_spacer  = 1
     n_detail  = len(detail)
 
     box = Table(box_data, colWidths=[col_a, col_b])
@@ -315,7 +314,7 @@ def _transport_table(items: list[dict]) -> list:
         vehicle = " ".join(filter(None, [v.get("make"), v.get("model")])) or "—"
         rows.append([
             vehicle,
-            f"{_str(it.get('start_address'))} → {_str(it.get('end_address'))}",
+            f"{_str(it.get('start_address'))} - {_str(it.get('end_address'))}",
             _fmt(it.get("distance_km")),
             _fmt(it.get("total_co2_kg")),
             _pct(it.get("confidence_score")),
@@ -401,9 +400,8 @@ def generate_invoice_pdf(
         bottomMargin=2.5 * cm,
     )
 
-    supplier = "Byggspor AS"
-    org      = "NO 123 456 789"
-    doc._footer_text = f"{supplier}  |  {org}"
+    footer_text = "Byggspor AS  |  NO 123 456 789"
+    on_first_page = _make_invoice_page_cb(footer_text)
 
     story: list = []
 
@@ -446,8 +444,5 @@ def generate_invoice_pdf(
 
     story.extend(_methodology_notes(report.get("settings", {})))
 
-    def _later_page(canvas, doc):
-        pass
-
-    doc.build(story, onFirstPage=_on_invoice_page, onLaterPages=_later_page)
+    doc.build(story, onFirstPage=on_first_page, onLaterPages=_noop_page)
     return buf.getvalue()
