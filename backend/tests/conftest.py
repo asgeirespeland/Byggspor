@@ -11,6 +11,7 @@ Provides:
 # ── Set required env vars BEFORE any app code is imported ────────────────────
 # The app reads these at import time, so they must exist first.
 import os
+import pathlib
 
 os.environ.setdefault("NOBB_API_USERNAME", "test_user")
 os.environ.setdefault("NOBB_API_PASSWORD", "test_pass")
@@ -20,28 +21,68 @@ os.environ.setdefault("SECRET_KEY", "test-secret")
 from unittest.mock import MagicMock, patch
 
 import pytest
-from sqlalchemy import create_engine
+from sqlalchemy import create_engine, text
 from sqlalchemy.orm import sessionmaker
 
 from app.database import Base
+
+_TEST_DATABASE_URL = os.environ.get("TEST_DATABASE_URL")
+_ALEMBIC_INI = pathlib.Path(__file__).parent.parent / "alembic.ini"
+
+
+def _run_migrations(db_url: str) -> None:
+    """Run Alembic migrations against the given database URL."""
+    from alembic.config import Config
+
+    from alembic import command
+
+    cfg = Config(str(_ALEMBIC_INI))
+    cfg.set_main_option("sqlalchemy.url", db_url)
+    command.upgrade(cfg, "head")
+
 
 # ── Database fixtures ─────────────────────────────────────────────────────────
 
 
 @pytest.fixture(scope="session")
 def engine():
-    """Create a single in-memory SQLite engine for the whole test session.
+    """Create a database engine for the test session.
 
-    scope="session" means this is created once and shared across all tests.
-    SQLite's :memory: means it is completely separate from the dev PostgreSQL DB.
+    When TEST_DATABASE_URL is set, connects to a real PostgreSQL database and
+    runs Alembic migrations — this catches migration bugs and PostgreSQL-specific
+    behaviour that SQLite cannot reproduce.
+
+    Without TEST_DATABASE_URL, falls back to an in-memory SQLite database so
+    tests run without any external dependencies.
+
+    To use PostgreSQL locally:
+        docker compose --profile test up -d test-db
+        TEST_DATABASE_URL=postgresql:
+        //postgres:postgres@localhost:5433/byggspor_test pytest
     """
-    e = create_engine(
-        "sqlite:///:memory:",
-        connect_args={"check_same_thread": False},
-    )
-    Base.metadata.create_all(e)  # Create all tables from SQLAlchemy models
+    if _TEST_DATABASE_URL:
+        e = create_engine(_TEST_DATABASE_URL)
+        # Wipe the entire public schema so FK ordering doesn't matter and
+        # alembic_version can't trick Alembic into skipping migrations.
+        with e.connect() as conn:
+            conn.execute(text("DROP SCHEMA public CASCADE"))
+            conn.execute(text("CREATE SCHEMA public"))
+            conn.commit()
+        _run_migrations(_TEST_DATABASE_URL)
+    else:
+        e = create_engine(
+            "sqlite:///:memory:",
+            connect_args={"check_same_thread": False},
+        )
+        Base.metadata.create_all(e)
     yield e
-    Base.metadata.drop_all(e)
+    if _TEST_DATABASE_URL:
+        with e.connect() as conn:
+            conn.execute(text("DROP SCHEMA public CASCADE"))
+            conn.execute(text("CREATE SCHEMA public"))
+            conn.commit()
+    else:
+        Base.metadata.drop_all(e)
 
 
 @pytest.fixture

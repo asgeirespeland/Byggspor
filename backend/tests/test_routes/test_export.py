@@ -206,6 +206,10 @@ class TestGenerateInvoice:
 
 
 class TestDownloadEhf:
+    @pytest.fixture(autouse=True)
+    def _project(self, db_session):
+        _seed_context(db_session)
+
     def test_returns_404_for_unknown_invoice(self, client):
         resp = client.get("/export/9999/ehf")
         assert resp.status_code == 404

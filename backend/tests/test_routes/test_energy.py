@@ -16,6 +16,8 @@ from unittest.mock import patch
 import pytest
 
 from app.models.energy import Energy, EnergySource
+from app.models.organization import Organization, OrgType
+from app.models.project import Project, ProjectStatus
 from app.models.project_member import ProjectRole
 from app.models.user import User
 
@@ -41,6 +43,38 @@ def _seed_user(db_session, user_id: int = 1) -> User:
     return user
 
 
+def _seed_project(db_session, user_id: int = 1, project_id: int = 1) -> Project:
+    """Insert an Organization + Project to satisfy FK constraints on project_id."""
+    from sqlalchemy import event as sa_event
+
+    from app.models.project import _add_creator_to_project_members
+
+    org = Organization(name="Test Org AS", org_type=OrgType.COMPANY)
+    db_session.add(org)
+    db_session.flush()
+
+    sa_event.remove(Project, "after_insert", _add_creator_to_project_members)
+    try:
+        project = Project(
+            id=project_id,
+            organization_id=org.id,
+            created_by_user_id=user_id,
+            name="Test Prosjekt",
+            status=ProjectStatus.ACTIVE,
+        )
+        db_session.add(project)
+        db_session.flush()
+    finally:
+        sa_event.listen(Project, "after_insert", _add_creator_to_project_members)
+    return project
+
+
+def _seed_context(db_session) -> Project:
+    """Seed user id=1 + org + project id=1."""
+    _seed_user(db_session)
+    return _seed_project(db_session)
+
+
 def _seed_energy(db_session, **kwargs) -> Energy:
     """Insert an Energy row directly and return it."""
     defaults = dict(
@@ -63,6 +97,10 @@ def _seed_energy(db_session, **kwargs) -> Energy:
 
 
 class TestCalculateEnergy:
+    @pytest.fixture(autouse=True)
+    def _project(self, db_session):
+        _seed_context(db_session)
+
     def test_returns_201_with_valid_payload(self, client):
         resp = _post_calculate(client, {"project_id": 1, "kwh_used": 1000.0})
         assert resp.status_code == 201
@@ -132,6 +170,10 @@ class TestCalculateEnergy:
 
 
 class TestUpdateEnergy:
+    @pytest.fixture(autouse=True)
+    def _project(self, db_session):
+        _seed_context(db_session)
+
     def test_returns_200_on_valid_update(self, client, db_session):
         entry = _seed_energy(db_session)
         resp = client.patch(f"/energy/entry/{entry.id}", json={"kwh_used": 2000.0})
@@ -173,6 +215,7 @@ class TestUpdateEnergy:
 class TestListEnergies:
     def test_returns_200_with_project_role(self, client, db_session):
         _seed_user(db_session)
+        _seed_project(db_session)
         _seed_energy(db_session, project_id=1)
         with patch(
             "app.middleware.roles._has_project_role",
@@ -183,6 +226,7 @@ class TestListEnergies:
 
     def test_returns_list_of_entries(self, client, db_session):
         _seed_user(db_session)
+        _seed_project(db_session)
         _seed_energy(db_session, project_id=1, kwh_used=100.0)
         _seed_energy(db_session, project_id=1, kwh_used=200.0)
         with patch(
@@ -217,6 +261,10 @@ class TestListEnergies:
 
 
 class TestDeleteEnergy:
+    @pytest.fixture(autouse=True)
+    def _project(self, db_session):
+        _seed_context(db_session)
+
     def test_returns_200_on_success(self, client, db_session):
         entry = _seed_energy(db_session)
         resp = client.delete(f"/energy/entry/{entry.id}")
