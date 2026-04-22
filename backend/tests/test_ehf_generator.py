@@ -233,7 +233,7 @@ class TestGenerateEhfInvoiceLines:
 class TestBeastCo2Extensions:
     def test_co2_equivalent_property_present(self):
         xml_bytes = generate_ehf(INVOICE, [LINE_MATERIAL])
-        assert b"CO2Equivalent" in xml_bytes
+        assert b"Byggspor_TotalCO2" in xml_bytes
 
     def test_co2_equivalent_value(self):
         root = _parse(generate_ehf(INVOICE, [LINE_MATERIAL]))
@@ -244,9 +244,9 @@ class TestBeastCo2Extensions:
             p.find(f"{{{_CBC}}}Name").text: p.find(f"{{{_CBC}}}Value").text
             for p in props
         }
-        assert float(prop_map["CO2Equivalent"]) == pytest.approx(350.0)
+        assert float(prop_map["Byggspor_TotalCO2"]) == pytest.approx(350.0)
 
-    def test_co2_category_property(self):
+    def test_gwp_per_unit_property(self):
         root = _parse(generate_ehf(INVOICE, [LINE_MATERIAL]))
         line = root.find(f"{{{_CAC}}}InvoiceLine")
         item = line.find(f"{{{_CAC}}}Item")
@@ -255,7 +255,8 @@ class TestBeastCo2Extensions:
             p.find(f"{{{_CBC}}}Name").text: p.find(f"{{{_CBC}}}Value").text
             for p in props
         }
-        assert prop_map["CO2Category"] == "MATERIAL"
+        # GWP per declared unit = total_co2_kg / quantity = 350.0 / 100.0
+        assert float(prop_map["GWP-GHG_A1-3_vA1"]) == pytest.approx(3.5)
 
     def test_co2_confidence_score_property(self):
         root = _parse(generate_ehf(INVOICE, [LINE_MATERIAL]))
@@ -266,7 +267,7 @@ class TestBeastCo2Extensions:
             p.find(f"{{{_CBC}}}Name").text: p.find(f"{{{_CBC}}}Value").text
             for p in props
         }
-        assert prop_map["CO2ConfidenceScore"] == "85"
+        assert prop_map["Byggspor_ConfidenceScore"] == "85"
 
     def test_epd_id_property_present_when_set(self):
         root = _parse(generate_ehf(INVOICE, [LINE_MATERIAL]))
@@ -277,7 +278,7 @@ class TestBeastCo2Extensions:
             p.find(f"{{{_CBC}}}Name").text: p.find(f"{{{_CBC}}}Value").text
             for p in props
         }
-        assert prop_map["EPDID"] == "EPD-NOR-12345"
+        assert prop_map["EPDNumber"] == "EPD-NOR-12345"
 
     def test_epd_id_property_absent_when_none(self):
         root = _parse(generate_ehf(INVOICE, [LINE_ENERGY]))
@@ -285,7 +286,7 @@ class TestBeastCo2Extensions:
         item = line.find(f"{{{_CAC}}}Item")
         props = item.findall(f"{{{_CAC}}}AdditionalItemProperty")
         names = {p.find(f"{{{_CBC}}}Name").text for p in props}
-        assert "EPDID" not in names
+        assert "EPDNumber" not in names
 
     def test_no_co2_properties_when_co2_is_none(self):
         root = _parse(generate_ehf(INVOICE, [LINE_MATERIAL_NO_CO2]))
@@ -293,5 +294,5 @@ class TestBeastCo2Extensions:
         item = invoice_line.find(f"{{{_CAC}}}Item")
         props = item.findall(f"{{{_CAC}}}AdditionalItemProperty")
         names = {p.find(f"{{{_CBC}}}Name").text for p in props}
-        assert "CO2Equivalent" not in names
-        assert "CO2ConfidenceScore" not in names
+        assert "Byggspor_TotalCO2" not in names
+        assert "Byggspor_ConfidenceScore" not in names
