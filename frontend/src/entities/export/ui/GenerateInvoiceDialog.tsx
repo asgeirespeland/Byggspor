@@ -41,7 +41,8 @@ export default function GenerateInvoiceDialog({
     useProjectLineItems(project.id, open)
   const { invoice, customer, setInvoice, setCustomer, buildPayload } =
     useInvoiceDraft(project)
-  const [generatedInvoice, setGeneratedInvoice] = useState<GeneratedInvoice | null>(null)
+  const [generatedInvoice, setGeneratedInvoice] =
+    useState<GeneratedInvoice | null>(null)
 
   async function handleGenerate() {
     const inv = await generate(project.id, buildPayload(lineItems))
@@ -112,7 +113,9 @@ export default function GenerateInvoiceDialog({
               variant="outline"
               size="sm"
               disabled={!generatedInvoice || pdfIsPending}
-              onClick={() => generatedInvoice && downloadPdf(generatedInvoice.id)}
+              onClick={() =>
+                generatedInvoice && downloadPdf(generatedInvoice.id)
+              }
               className="gap-2"
             >
               {pdfIsPending ? (
