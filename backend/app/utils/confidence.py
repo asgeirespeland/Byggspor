@@ -18,7 +18,7 @@ def material_confidence(
     if has_gwp and has_epd:
         return 100  # GWP sourced from a verified EPD — deterministic
     if has_gwp:
-        return 80   # GWP from generic catalog data, no EPD verification
+        return 80  # GWP from generic catalog data, no EPD verification
     return 20 if flagged else 50
 
 
