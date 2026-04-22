@@ -22,7 +22,7 @@ export async function generateInvoice(
   })
 }
 
-async function downloadBlob(
+async function  downloadBlob(
   url: string,
   token: string,
   errorMsg: string,

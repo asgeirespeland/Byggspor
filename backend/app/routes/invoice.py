@@ -150,6 +150,7 @@ def confirm_invoice():
 
             pm.confidence_score = material_confidence(
                 has_gwp=has_gwp,
+                has_epd=bool(catalog_entry and catalog_entry.has_epd),
                 flagged=pm.flagged,
                 is_manual_override=is_override,
             )

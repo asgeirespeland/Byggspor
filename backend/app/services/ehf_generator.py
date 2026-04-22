@@ -41,11 +41,16 @@ PROFILE_ID = "urn:fdc:peppol.eu:2017:poacc:billing:01:1.0"
 # Norwegian standard VAT rate
 VAT_RATE = 0.25
 
-# BEAst Supply 4.0 property names for CO2 data
-_BEAST_CO2_KG = "CO2Equivalent"
-_BEAST_CO2_CATEGORY = "CO2Category"
-_BEAST_CO2_CONFIDENCE = "CO2ConfidenceScore"
-_BEAST_EPD_ID = "EPDID"
+# BEAst Supply 4.0 / IPNC standardised property names (invoice level: Name + Value only)
+_IPNC_EPD_NUMBER        = "EPDNumber"           # IPNC: EPD registration number
+_IPNC_GWP_A1            = "GWP-GHG_A1-3_vA1"   # IPNC: combined A1-A3 GWP per declared unit (kg CO₂e)
+
+# Byggspor extensions — Byggspor_ prefix avoids future IPNC collisions
+_BS_TOTAL_CO2           = "Byggspor_TotalCO2"       # Line total CO2 (kg CO₂e, all units)
+_BS_TRANSPORT_CO2       = "Byggspor_TransportCO2"   # Transport line total CO2
+_BS_WASTE_CO2           = "Byggspor_WasteCO2"       # Waste line total CO2
+_BS_ENERGY_CO2          = "Byggspor_EnergyCO2"      # Energy line total CO2
+_BS_CONFIDENCE          = "Byggspor_ConfidenceScore" # Data quality score (0–100)
 
 
 # ── Internal helpers ───────────────────────────────────────────────────────────
@@ -138,23 +143,42 @@ def _beast_property(item_el: ET.Element, name: str, value: str) -> None:
 
 
 def _attach_co2_properties(item_el: ET.Element, line: Any) -> None:
-    """Attach BEAst Supply 4.0 CO2 AdditionalItemProperty elements."""
-    co2_kg = _get(line, "total_co2_kg")
-    if co2_kg is not None:
-        _beast_property(item_el, _BEAST_CO2_KG, f"{float(co2_kg):.4f}")
+    """Attach BEAst Supply 4.0 AdditionalItemProperty elements.
 
+    Materials use IPNC-standardised codes (EPDNumber, GWP-GHG_A1-3_vA1).
+    Transport, waste, and energy use Byggspor_ prefixed extensions because
+    BEAst Supply 4.0 does not define invoice-level fields for those categories.
+    """
     category = _get(line, "category")
-    if category is not None:
-        cat_val = category.value if hasattr(category, "value") else str(category)
-        _beast_property(item_el, _BEAST_CO2_CATEGORY, cat_val.upper())
-
+    cat_val = (category.value if hasattr(category, "value") else str(category or "")).lower()
+    co2_kg = _get(line, "total_co2_kg")
     confidence = _get(line, "confidence_score")
-    if confidence is not None:
-        _beast_property(item_el, _BEAST_CO2_CONFIDENCE, str(confidence))
 
-    epd_id = _get(line, "epd_id")
-    if epd_id:
-        _beast_property(item_el, _BEAST_EPD_ID, str(epd_id))
+    if cat_val == "material":
+        epd_id = _get(line, "epd_id")
+        if epd_id:
+            _beast_property(item_el, _IPNC_EPD_NUMBER, str(epd_id))
+
+        if co2_kg is not None:
+            qty = float(_get(line, "quantity") or 1) or 1
+            gwp_per_unit = float(co2_kg) / qty
+            _beast_property(item_el, _IPNC_GWP_A1, f"{gwp_per_unit:.6f}")
+            _beast_property(item_el, _BS_TOTAL_CO2, f"{float(co2_kg):.4f}")
+
+    elif cat_val == "transport":
+        if co2_kg is not None:
+            _beast_property(item_el, _BS_TRANSPORT_CO2, f"{float(co2_kg):.4f}")
+
+    elif cat_val == "waste":
+        if co2_kg is not None:
+            _beast_property(item_el, _BS_WASTE_CO2, f"{float(co2_kg):.4f}")
+
+    elif cat_val == "energy":
+        if co2_kg is not None:
+            _beast_property(item_el, _BS_ENERGY_CO2, f"{float(co2_kg):.4f}")
+
+    if confidence is not None:
+        _beast_property(item_el, _BS_CONFIDENCE, str(confidence))
 
 
 # ── Main generator ─────────────────────────────────────────────────────────────
