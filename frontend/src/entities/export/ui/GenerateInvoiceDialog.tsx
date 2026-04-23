@@ -5,6 +5,7 @@
  * handles submit.
  */
 import { FileDown, Loader2 } from 'lucide-react'
+import { useState } from 'react'
 import {
   Dialog,
   DialogContent,
@@ -14,8 +15,10 @@ import {
 import { Button } from '@/components/ui/button'
 import type { Project } from '@/entities/project/hooks/useProjects'
 import { useGenerateInvoice } from '../hooks/useGenerateInvoice'
+import { useDownloadPdf } from '../hooks/useDownloadPdf'
 import { useProjectLineItems } from '../hooks/useProjectLineItems'
 import { useInvoiceDraft } from '../hooks/useInvoiceDraft'
+import type { GeneratedInvoice } from '../types'
 import InvoiceDetailsCard from './InvoiceDetailsCard'
 import CustomerCard from './CustomerCard'
 import LineItemsTable from './LineItemsTable'
@@ -33,13 +36,16 @@ export default function GenerateInvoiceDialog({
   project,
 }: Props) {
   const { generate, isPending, error } = useGenerateInvoice()
+  const { downloadPdf, isPending: pdfIsPending } = useDownloadPdf()
   const { lineItems, isLoading, updateLineItem, removeLineItem, addLine } =
     useProjectLineItems(project.id, open)
   const { invoice, customer, setInvoice, setCustomer, buildPayload } =
     useInvoiceDraft(project)
+  const [generatedInvoice, setGeneratedInvoice] = useState<GeneratedInvoice | null>(null)
 
   async function handleGenerate() {
-    await generate(project.id, buildPayload(lineItems))
+    const inv = await generate(project.id, buildPayload(lineItems))
+    if (inv) setGeneratedInvoice(inv)
   }
 
   return (
@@ -101,6 +107,20 @@ export default function GenerateInvoiceDialog({
           <div className="flex items-center gap-2">
             <Button variant="outline" size="sm" disabled={isPending}>
               Forhåndsvisning
+            </Button>
+            <Button
+              variant="outline"
+              size="sm"
+              disabled={!generatedInvoice || pdfIsPending}
+              onClick={() => generatedInvoice && downloadPdf(generatedInvoice.id)}
+              className="gap-2"
+            >
+              {pdfIsPending ? (
+                <Loader2 className="h-4 w-4 animate-spin" />
+              ) : (
+                <FileDown className="h-4 w-4" />
+              )}
+              Last ned PDF
             </Button>
             <Button
               onClick={handleGenerate}

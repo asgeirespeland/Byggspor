@@ -6,6 +6,7 @@
  */
 import { useEffect, useRef, useState } from 'react'
 import { useAuth } from '@clerk/react'
+import { getTokenOrThrow } from '@/shared/auth/getToken'
 import { listProjectMaterials } from '@/entities/materials/api'
 
 export interface LineItem {
@@ -44,7 +45,7 @@ export function useProjectLineItems(projectId: number, open: boolean) {
     async function load() {
       setIsLoading(true)
       try {
-        const token = (await getToken()) ?? undefined
+        const token = await getTokenOrThrow(getToken)
         const groups = await listProjectMaterials(projectId, token)
 
         const items: LineItem[] = groups.flatMap((group) =>
@@ -72,10 +73,7 @@ export function useProjectLineItems(projectId: number, open: boolean) {
           hasFetched.current = true
         }
       } catch {
-        if (!cancelled) {
-          setLineItems([newLineItem()])
-          hasFetched.current = true
-        }
+        if (!cancelled) setLineItems([newLineItem()])
       } finally {
         if (!cancelled) setIsLoading(false)
       }
