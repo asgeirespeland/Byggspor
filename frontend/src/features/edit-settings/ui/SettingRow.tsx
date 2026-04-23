@@ -8,9 +8,9 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select'
-import type { ResolvedSetting } from '../api'
-import type { SettingMeta } from '../lib/settings-meta'
-import SourceBadge from './SourceBadge'
+import type { ResolvedSetting } from '@/entities/settings/api'
+import type { SettingMeta } from '@/entities/settings/lib/settings-meta'
+import SourceBadge from '@/entities/settings/ui/SourceBadge'
 
 export default function SettingRow({
   meta,

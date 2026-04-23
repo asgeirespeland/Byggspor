@@ -2,16 +2,16 @@ import {
   useOrgSettings,
   useUpdateOrgSettings,
   useResetOrgSettings,
-} from '../hooks/useOrgSettings'
-import CalculationSettingsPanel from './CalculationSettingsPanel'
+} from '@/entities/settings/hooks/useOrgSettings'
+import SettingsEditor from './SettingsEditor'
 
-export default function OrgSettingsPanel({ orgId }: { orgId: number }) {
+export default function EditOrgSettings({ orgId }: { orgId: number }) {
   const { data, isLoading } = useOrgSettings(orgId)
   const update = useUpdateOrgSettings(orgId)
   const resetAll = useResetOrgSettings(orgId)
 
   return (
-    <CalculationSettingsPanel
+    <SettingsEditor
       settings={data?.settings}
       loading={isLoading}
       level="organization"

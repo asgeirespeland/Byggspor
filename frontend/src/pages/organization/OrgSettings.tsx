@@ -8,7 +8,7 @@ import {
 } from '@/components/ui/collapsible'
 import { useAppContext } from '@/shared/hooks/useAppContext'
 import ItemListPanel from '@/shared/components/ItemListPanel'
-import OrgSettingsPanel from '@/entities/settings/ui/OrgSettingsPanel'
+import EditOrgSettings from '@/features/edit-settings/ui/EditOrgSettings'
 import {
   useOrgMembers,
   useAddMember,
@@ -52,7 +52,7 @@ export default function OrgSettings() {
           </span>
         </CollapsibleTrigger>
         <CollapsibleContent className="border-t border-gray-100 p-5">
-          <OrgSettingsPanel orgId={organizationId} />
+          <EditOrgSettings orgId={organizationId} />
         </CollapsibleContent>
       </Collapsible>
 

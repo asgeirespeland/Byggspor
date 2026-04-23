@@ -3,10 +3,10 @@ import {
   useUpdateProjectSettings,
   useResetProjectSetting,
   useResetAllProjectSettings,
-} from '../hooks/useProjectSettings'
-import CalculationSettingsPanel from './CalculationSettingsPanel'
+} from '@/entities/settings/hooks/useProjectSettings'
+import SettingsEditor from './SettingsEditor'
 
-export default function ProjectSettingsPanel({
+export default function EditProjectSettings({
   projectId,
 }: {
   projectId: number
@@ -17,7 +17,7 @@ export default function ProjectSettingsPanel({
   const resetAll = useResetAllProjectSettings(projectId)
 
   return (
-    <CalculationSettingsPanel
+    <SettingsEditor
       settings={data?.settings}
       loading={isLoading}
       level="project"

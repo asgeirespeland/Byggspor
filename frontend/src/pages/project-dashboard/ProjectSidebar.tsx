@@ -1,6 +1,6 @@
 /**
  * Right-rail panel on the project dashboard: confidence gauge + help modal, project metadata,
- * FlaggedItems list, settings button (opens ProjectSettingsPanel in a fullscreen dialog), generate
+ * FlaggedItems list, settings button (opens EditProjectSettings in a fullscreen dialog), generate
  * climate report CTA (routes to report tab), and generate EHF invoice CTA (opens GenerateInvoiceDialog).
  */
 import { useState } from 'react'
@@ -14,7 +14,7 @@ import {
   Settings,
 } from 'lucide-react'
 import type { Project } from '@/entities/project/hooks/useProjects'
-import ProjectSettingsPanel from '@/entities/settings/ui/ProjectSettingsPanel'
+import EditProjectSettings from '@/features/edit-settings/ui/EditProjectSettings'
 import FullscreenDialog from '@/shared/components/FullscreenDialog'
 import ConfidenceGauge from '@/widgets/ConfidenceGauge'
 import ConfidenceInfo from './ConfidenceInfo'
@@ -119,7 +119,7 @@ export default function ProjectSidebar({
         title="Beregningsinnstillinger"
         className="sm:max-w-[80vw] max-h-[85vh] overflow-y-auto"
       >
-        <ProjectSettingsPanel projectId={project.id} />
+        <EditProjectSettings projectId={project.id} />
       </FullscreenDialog>
 
       {/* Generate climate report button */}

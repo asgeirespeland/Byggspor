@@ -1,15 +1,15 @@
 /**
- * Shared settings editor reused by OrgSettingsPanel and ProjectSettingsPanel. Renders SETTING_GROUPS
+ * Shared settings editor reused by EditOrgSettings and EditProjectSettings. Renders SETTING_GROUPS
  * as grouped SettingRow lists, maintains a local draft diffed against resolved values, and exposes
  * save / reset-all action buttons in a header.
  */
 import { useState } from 'react'
 import { RotateCcw, Loader2, Save, Info } from 'lucide-react'
-import type { ResolvedSetting } from '../api'
-import { SETTING_GROUPS } from '../lib/settings-meta'
+import type { ResolvedSetting } from '@/entities/settings/api'
+import { SETTING_GROUPS } from '@/entities/settings/lib/settings-meta'
 import SettingRow from './SettingRow'
 
-export type SettingsPanelProps = {
+export type SettingsEditorProps = {
   settings: Record<string, ResolvedSetting> | undefined
   loading: boolean
   level: 'organization' | 'project'
@@ -19,7 +19,7 @@ export type SettingsPanelProps = {
   saving: boolean
 }
 
-function PanelContent({
+function EditorContent({
   settings,
   level,
   onSave,
@@ -27,7 +27,7 @@ function PanelContent({
   onReset,
   onResetAll,
   saving,
-}: Omit<SettingsPanelProps, 'loading'> & {
+}: Omit<SettingsEditorProps, 'loading'> & {
   settings: Record<string, ResolvedSetting>
 }) {
   const [draft, setDraft] = useState<Record<string, unknown>>({})
@@ -130,11 +130,11 @@ function PanelContent({
   )
 }
 
-export default function CalculationSettingsPanel({
+export default function SettingsEditor({
   settings,
   loading,
   ...rest
-}: SettingsPanelProps) {
+}: SettingsEditorProps) {
   if (loading || !settings) {
     return (
       <div className="flex items-center justify-center gap-2 py-12 text-gray-400">
@@ -144,5 +144,5 @@ export default function CalculationSettingsPanel({
     )
   }
 
-  return <PanelContent settings={settings} {...rest} />
+  return <EditorContent settings={settings} {...rest} />
 }
