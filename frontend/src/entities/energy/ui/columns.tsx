@@ -1,5 +1,5 @@
 import type { EnergyLineItem } from '@/entities/report/types'
-import type { Column } from '@/entities/report/ui/ReportDataTable'
+import type { Column } from '@/widgets/report-view/ReportDataTable'
 import { fmt, sourceLabel, confidenceBadge } from '@/entities/report/lib/utils'
 
 export const energyColumns: Column<EnergyLineItem>[] = [

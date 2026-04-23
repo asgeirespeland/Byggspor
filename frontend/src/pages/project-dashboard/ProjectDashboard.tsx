@@ -14,7 +14,7 @@ import InvoiceUpload from '@/entities/materials/ui/InvoiceUpload'
 import TransportUpload from '@/entities/transport/ui/TransportUpload'
 import WasteUpload from '@/entities/waste/ui/WasteUpload'
 import EnergyTab from '@/entities/energy/ui/EnergyTab'
-import ReportView from '@/entities/report/ui/ReportView'
+import ReportView from '@/widgets/report-view/ReportView'
 import { useCo2Summary } from '@/entities/report/hooks/useCo2Summary'
 import {
   CATEGORY_THEME,
