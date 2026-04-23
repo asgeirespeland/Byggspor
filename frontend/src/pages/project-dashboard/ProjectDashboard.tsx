@@ -11,7 +11,7 @@ import { useProject } from '@/entities/project/hooks/useProjects'
 import { STATUS_CONFIG } from '@/entities/project/lib/constants'
 import TabBar, { type TabDef } from '@/shared/components/TabBar'
 import MaterialsTab from '@/widgets/materials-tab/MaterialsTab'
-import TransportUpload from '@/entities/transport/ui/TransportUpload'
+import TransportTab from '@/widgets/transport-tab/TransportTab'
 import WasteUpload from '@/entities/waste/ui/WasteUpload'
 import EnergyTab from '@/entities/energy/ui/EnergyTab'
 import ReportView from '@/widgets/report-view/ReportView'
@@ -38,7 +38,7 @@ const TAB_RENDERERS: Record<
   (projectId: number) => React.ReactNode
 > = {
   materials: (id) => <MaterialsTab projectId={id} />,
-  transport: (id) => <TransportUpload projectId={id} />,
+  transport: (id) => <TransportTab projectId={id} />,
   waste: (id) => <WasteUpload projectId={id} />,
   energy: (id) => <EnergyTab projectId={id} />,
 }

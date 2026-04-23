@@ -10,7 +10,7 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { renderHook, act, waitFor } from '@testing-library/react'
 
-import { useTransportParse } from '@/entities/transport/hooks/useTransportParse'
+import { useTransportParse } from '@/features/import-transport/hooks/useTransportParse'
 import { parseTransportFile } from '@/entities/transport/api/transport'
 import type { TransportParseResponse } from '@/entities/transport/types'
 

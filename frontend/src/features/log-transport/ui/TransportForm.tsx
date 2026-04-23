@@ -13,7 +13,7 @@ import {
   FormMessage,
 } from '@/components/ui/form'
 import { useRequireToken } from '@/shared/auth/useRequireToken'
-import { createManualTrip } from '../api/transport'
+import { createManualTrip } from '@/entities/transport/api/transport'
 
 interface TransportFormProps {
   projectId: number

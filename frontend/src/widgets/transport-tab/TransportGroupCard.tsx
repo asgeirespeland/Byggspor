@@ -5,9 +5,9 @@ import InlineUndoBar from '@/widgets/data-table/InlineUndoBar'
 import type {
   ProjectReportGroup,
   TripUpdateInput,
-} from '../api/projectTransports'
+} from '@/entities/transport/api/projectTransports'
 import { sumBy } from '@/shared/utils/collections'
-import { tripColumns, type TripRow } from './columns'
+import { tripColumns, type TripRow } from '@/entities/transport/ui/columns'
 
 interface Props {
   group: ProjectReportGroup

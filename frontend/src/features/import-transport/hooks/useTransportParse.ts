@@ -1,5 +1,5 @@
 import { useFileParse } from '@/widgets/file-upload/useFileParse'
-import { parseTransportFile } from '../api/transport'
+import { parseTransportFile } from '@/entities/transport/api/transport'
 
 export function useTransportParse() {
   return useFileParse({
