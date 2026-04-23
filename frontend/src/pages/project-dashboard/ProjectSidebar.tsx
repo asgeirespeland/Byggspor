@@ -19,7 +19,7 @@ import FullscreenDialog from '@/shared/components/FullscreenDialog'
 import ConfidenceGauge from '@/widgets/ConfidenceGauge'
 import ConfidenceInfo from './ConfidenceInfo'
 import FlaggedItems from '@/widgets/flagged-items/FlaggedItems'
-import GenerateInvoiceDialog from '@/entities/export/ui/GenerateInvoiceDialog'
+import GenerateInvoiceDialog from '@/features/generate-invoice/ui/GenerateInvoiceDialog'
 
 export default function ProjectSidebar({
   project,

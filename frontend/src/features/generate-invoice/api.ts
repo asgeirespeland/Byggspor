@@ -28,7 +28,9 @@ async function downloadBlob(
   errorMsg: string,
   fallbackFilename: string,
 ): Promise<{ blob: Blob; filename: string }> {
-  const res = await fetch(url, { headers: { Authorization: `Bearer ${token}` } })
+  const res = await fetch(url, {
+    headers: { Authorization: `Bearer ${token}` },
+  })
   if (!res.ok) throw new Error(errorMsg)
   const disposition = res.headers.get('Content-Disposition') ?? ''
   const match = disposition.match(/filename="?([^"]+)"?/)
