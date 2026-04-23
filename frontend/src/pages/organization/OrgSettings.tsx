@@ -14,7 +14,7 @@ import {
   useAddMember,
 } from '@/entities/organization/hooks/useOrgMembers'
 import MemberCard from './MemberCard'
-import AddMemberDialog from './AddMemberDialog'
+import AddMemberDialog from '@/features/invite-member/ui/AddMemberDialog'
 
 export default function OrgSettings() {
   const { organizationId, organization } = useAppContext()

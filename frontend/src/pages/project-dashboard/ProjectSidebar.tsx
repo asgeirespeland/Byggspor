@@ -18,7 +18,7 @@ import ProjectSettingsPanel from '@/entities/settings/ui/ProjectSettingsPanel'
 import FullscreenDialog from '@/shared/components/FullscreenDialog'
 import ConfidenceGauge from '@/widgets/ConfidenceGauge'
 import ConfidenceInfo from './ConfidenceInfo'
-import FlaggedItems from './FlaggedItems'
+import FlaggedItems from '@/widgets/flagged-items/FlaggedItems'
 import GenerateInvoiceDialog from '@/entities/export/ui/GenerateInvoiceDialog'
 
 export default function ProjectSidebar({

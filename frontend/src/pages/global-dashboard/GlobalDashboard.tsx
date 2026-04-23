@@ -3,7 +3,7 @@
  * and the 'new project' dialog. Route: '/'.
  */
 import { useState } from 'react'
-import CreateProjectDialog from './CreateProjectDialog'
+import CreateProjectDialog from '@/features/create-project/ui/CreateProjectDialog'
 import ProjectCard from './ProjectCard'
 import ItemListPanel from '@/shared/components/ItemListPanel'
 import { useProjects } from '@/entities/project/hooks/useProjects'

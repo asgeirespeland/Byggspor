@@ -23,8 +23,8 @@ import {
 } from '@/shared/categories'
 import KpiCard from './KpiCard'
 import ProjectSidebar from './ProjectSidebar'
-import ClimateTabTour from '@/pages/onboarding/ClimateTabTour'
-import { useClimateTabTour } from '@/pages/onboarding/hooks/useClimateTabTour'
+import ClimateTabTour from '@/features/climate-tab-tour/ui/ClimateTabTour'
+import { useClimateTabTour } from '@/features/climate-tab-tour/hooks/useClimateTabTour'
 
 function formatKg(value: number | undefined): string {
   if (value == null || value === 0) return '—'

@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { TOUR_STEP_COUNT } from '../tourSteps'
+import { TOUR_STEP_COUNT } from '../model/tourSteps'
 
 export const CLIMATE_TOUR_STORAGE_KEY = 'byggspor_climate_tour_seen'
 

@@ -11,7 +11,7 @@ import {
 } from '@/components/ui/dialog'
 import { Button } from '@/components/ui/button'
 import { CATEGORY_THEME } from '@/shared/categories'
-import { TOUR_STEPS, TOUR_STEP_COUNT } from './tourSteps'
+import { TOUR_STEPS, TOUR_STEP_COUNT } from '../model/tourSteps'
 
 interface Props {
   open: boolean
