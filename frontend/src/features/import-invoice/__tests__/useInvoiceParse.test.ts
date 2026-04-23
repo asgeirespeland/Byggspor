@@ -10,7 +10,7 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { renderHook, act, waitFor } from '@testing-library/react'
 
-import { useInvoiceParse } from '@/entities/materials/hooks/useInvoiceParse'
+import { useInvoiceParse } from '@/features/import-invoice/hooks/useInvoiceParse'
 import { parseInvoiceFile } from '@/entities/materials/api'
 import type { InvoiceResponse } from '@/entities/materials/types'
 

@@ -2,13 +2,16 @@ import { useMemo } from 'react'
 import CollapsibleGroupCard from '@/widgets/CollapsibleGroupCard'
 import DataTable from '@/widgets/data-table/DataTable'
 import InlineUndoBar from '@/widgets/data-table/InlineUndoBar'
-import type { ProjectInvoiceGroup } from '../api'
+import type { ProjectInvoiceGroup } from '@/entities/materials/api'
 import {
   useUpdateMaterial,
   useDeleteMaterial,
-} from '../hooks/useProjectMaterials'
+} from '@/features/edit-uploaded-data/hooks/useMaterialMutations'
 import { sumBy } from '@/shared/utils/collections'
-import { materialColumns, type MaterialRow } from './columns'
+import {
+  materialColumns,
+  type MaterialRow,
+} from '@/entities/materials/ui/columns'
 
 interface Props {
   group: ProjectInvoiceGroup

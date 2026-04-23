@@ -10,7 +10,7 @@ import { ArrowLeft, HelpCircle, Loader2, FileText } from 'lucide-react'
 import { useProject } from '@/entities/project/hooks/useProjects'
 import { STATUS_CONFIG } from '@/entities/project/lib/constants'
 import TabBar, { type TabDef } from '@/shared/components/TabBar'
-import InvoiceUpload from '@/entities/materials/ui/InvoiceUpload'
+import MaterialsTab from '@/widgets/materials-tab/MaterialsTab'
 import TransportUpload from '@/entities/transport/ui/TransportUpload'
 import WasteUpload from '@/entities/waste/ui/WasteUpload'
 import EnergyTab from '@/entities/energy/ui/EnergyTab'
@@ -37,7 +37,7 @@ const TAB_RENDERERS: Record<
   Exclude<Tab, 'report'>,
   (projectId: number) => React.ReactNode
 > = {
-  materials: (id) => <InvoiceUpload projectId={id} />,
+  materials: (id) => <MaterialsTab projectId={id} />,
   transport: (id) => <TransportUpload projectId={id} />,
   waste: (id) => <WasteUpload projectId={id} />,
   energy: (id) => <EnergyTab projectId={id} />,

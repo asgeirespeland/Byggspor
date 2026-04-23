@@ -1,5 +1,5 @@
 import { useFileParse } from '@/widgets/file-upload/useFileParse'
-import { parseInvoiceFile } from '../api'
+import { parseInvoiceFile } from '@/entities/materials/api'
 
 export function useInvoiceParse() {
   return useFileParse({

@@ -10,7 +10,7 @@ import {
   FormMessage,
 } from '@/components/ui/form'
 import { useInlineEdit } from '@/widgets/data-table/useInlineEdit'
-import { useUpdateMaterial } from '@/entities/materials/hooks/useProjectMaterials'
+import { useUpdateMaterial } from '@/features/edit-uploaded-data/hooks/useMaterialMutations'
 import type { ProjectMaterialItem } from '@/entities/materials/api'
 
 interface Props {
