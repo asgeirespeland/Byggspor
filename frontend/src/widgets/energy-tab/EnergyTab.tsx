@@ -6,7 +6,8 @@
 import { useMemo } from 'react'
 import { Zap, Loader2 } from 'lucide-react'
 import InlineUndoBar from '@/widgets/data-table/InlineUndoBar'
-import DataTable, { type Column } from '@/widgets/data-table/DataTable'
+import DataTable from '@/widgets/data-table/DataTable'
+import type { EditableColumn } from '@/shared/types/tableColumn'
 import { useDeferredLoading } from '@/shared/hooks/useDeferredLoading'
 import { sumBy } from '@/shared/utils/collections'
 import { useEnergies, usePriceZones } from '@/entities/energy/hooks/useEnergies'
@@ -24,7 +25,7 @@ const INPUT =
 
 function getColumns(
   zones: { value: string; label: string }[] | undefined,
-): Column<EnergyEntry>[] {
+): EditableColumn<EnergyEntry>[] {
   return [
     {
       header: 'kWh',

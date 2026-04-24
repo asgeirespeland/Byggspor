@@ -2,7 +2,7 @@
  * Trip DataTable column definitions and TripRow view-model; shared by TransportPreview and TransportGroupCard.
  * nb-NO date/number formatting here duplicates report/utils.tsx::fmt — candidate for shared formatters.
  */
-import { type Column } from '@/widgets/data-table/DataTable'
+import type { EditableColumn } from '@/shared/types/tableColumn'
 
 export interface TripRow {
   driver_name: string | null
@@ -16,7 +16,7 @@ export interface TripRow {
   flagged: boolean
 }
 
-export const tripColumns: Column<TripRow>[] = [
+export const tripColumns: EditableColumn<TripRow>[] = [
   {
     header: 'Sjåfør',
     width: '15%',

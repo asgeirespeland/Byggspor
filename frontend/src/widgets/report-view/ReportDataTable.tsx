@@ -1,12 +1,9 @@
 /**
- * Minimal generic <table> used inside report sections. Distinct from shared/components/DataTable
- * (no row actions/sorting). Exports its own Column<T> type; see analysis for the overlap.
+ * Minimal generic <table> used inside report sections.
+ * Column spec lives in shared/types/tableColumn as DisplayColumn.
+ * Distinct from widgets/data-table/DataTable (no row actions, no inline edit).
  */
-export interface Column<T> {
-  header: string
-  align?: 'left' | 'right'
-  render: (item: T) => React.ReactNode
-}
+import type { DisplayColumn } from '@/shared/types/tableColumn'
 
 export default function DataTable<T extends { id: number }>({
   items,
@@ -14,7 +11,7 @@ export default function DataTable<T extends { id: number }>({
   emptyMessage,
 }: {
   items: T[]
-  columns: Column<T>[]
+  columns: DisplayColumn<T>[]
   emptyMessage: string
 }) {
   if (items.length === 0) {
