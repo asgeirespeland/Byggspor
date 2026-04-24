@@ -7,8 +7,8 @@ import { useAuthMutation } from '@/shared/auth/useAuthMutation'
 import { useOptimisticDelete } from './useOptimisticDelete'
 import { qk, projectReportKeys } from '@/shared/api/queryKeys'
 
-import { deleteEnergy, updateEnergy } from '@/entities/energy/api'
-import type { EnergyEntry, EnergyUpdateInput } from '@/entities/energy/types'
+import { deleteEnergy, updateEnergy } from '@/entities/energy'
+import type { EnergyEntry, EnergyUpdateInput } from '@/entities/energy'
 
 export function useUpdateEnergy(projectId: number) {
   return useAuthMutation<{ energyId: number; data: EnergyUpdateInput }>({

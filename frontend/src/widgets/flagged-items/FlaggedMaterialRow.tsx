@@ -9,9 +9,9 @@ import {
   FormItem,
   FormMessage,
 } from '@/components/ui/form'
-import { useInlineEdit } from '@/widgets/data-table/useInlineEdit'
-import { useUpdateMaterial } from '@/features/edit-uploaded-data/hooks/useMaterialMutations'
-import type { ProjectMaterialItem } from '@/entities/materials/api'
+import { useInlineEdit } from '@/widgets/data-table'
+import { useUpdateMaterial } from '@/features/edit-uploaded-data'
+import type { ProjectMaterialItem } from '@/entities/materials'
 
 interface Props {
   item: ProjectMaterialItem & { kind: 'material' }

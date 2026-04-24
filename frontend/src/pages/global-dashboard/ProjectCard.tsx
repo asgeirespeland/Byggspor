@@ -1,9 +1,9 @@
 import { useState } from 'react'
 import { ChevronDown, ChevronUp, Building2, Hash } from 'lucide-react'
-import { STATUS_CONFIG } from '@/entities/project/lib/constants'
-import { useCo2Summary } from '@/entities/report/hooks/useCo2Summary'
+import { STATUS_CONFIG } from '@/entities/project'
+import { useCo2Summary } from '@/entities/report'
 import ProjectCardDrawer from './ProjectCardDrawer'
-import type { Project } from '@/entities/project/hooks/useProjects'
+import type { Project } from '@/entities/project'
 
 export default function ProjectCard({ project }: { project: Project }) {
   const [expanded, setExpanded] = useState(false)

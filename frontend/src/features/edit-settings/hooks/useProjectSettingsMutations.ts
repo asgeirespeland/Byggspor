@@ -8,7 +8,7 @@ import {
   patchProjectSettings,
   deleteProjectSetting,
   resetProjectSettings,
-} from '@/entities/settings/api'
+} from '@/entities/settings'
 
 function projectSettingsDataKeys(projectId: number | undefined) {
   if (projectId == null) return []

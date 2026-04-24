@@ -13,13 +13,13 @@ import {
   Receipt,
   Settings,
 } from 'lucide-react'
-import type { Project } from '@/entities/project/hooks/useProjects'
-import EditProjectSettings from '@/features/edit-settings/ui/EditProjectSettings'
+import type { Project } from '@/entities/project'
+import { EditProjectSettings } from '@/features/edit-settings'
 import FullscreenDialog from '@/shared/components/FullscreenDialog'
 import ConfidenceGauge from '@/widgets/ConfidenceGauge'
 import ConfidenceInfo from './ConfidenceInfo'
-import FlaggedItems from '@/widgets/flagged-items/FlaggedItems'
-import GenerateInvoiceDialog from '@/features/generate-invoice/ui/GenerateInvoiceDialog'
+import { FlaggedItems } from '@/widgets/flagged-items'
+import { GenerateInvoiceDialog } from '@/features/generate-invoice'
 
 export default function ProjectSidebar({
   project,

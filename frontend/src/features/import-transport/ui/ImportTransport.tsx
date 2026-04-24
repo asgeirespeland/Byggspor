@@ -6,9 +6,9 @@
 import { useState } from 'react'
 import { useQueryClient } from '@tanstack/react-query'
 import { toast } from 'sonner'
-import FileUploadShell from '@/widgets/file-upload/FileUploadShell'
+import { FileUploadShell } from '@/widgets/file-upload'
 import { qk } from '@/shared/api/queryKeys'
-import { confirmTrips } from '@/entities/transport/api/transport'
+import { confirmTrips } from '@/entities/transport'
 import { useTransportParse } from '../hooks/useTransportParse'
 import TransportPreview from './TransportPreview'
 

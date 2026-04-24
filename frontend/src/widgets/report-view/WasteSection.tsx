@@ -1,8 +1,8 @@
-import type { WasteLineItem } from '@/entities/report/types'
+import type { WasteLineItem } from '@/entities/report'
 import type { Column } from './ReportDataTable'
 import DataTable from './ReportDataTable'
 import ReportGroupRow from './ReportGroupRow'
-import { fmt, sourceLabel, confidenceBadge } from '@/entities/report/lib/utils'
+import { fmt, sourceLabel, confidenceBadge } from '@/entities/report'
 import { groupBy, sumBy } from '@/shared/utils/collections'
 
 const COLUMNS: Column<WasteLineItem>[] = [

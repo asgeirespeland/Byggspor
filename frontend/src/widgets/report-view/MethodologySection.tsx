@@ -1,13 +1,9 @@
 import { useState } from 'react'
 import { ExternalLink, Info, TableProperties } from 'lucide-react'
 import FullscreenDialog from '@/shared/components/FullscreenDialog'
-import type { ReportSettings } from '@/entities/report/types'
-import { sourceLabel } from '@/entities/report/lib/utils'
-import {
-  STAGE_LABELS,
-  MIX_LABELS,
-  WEIGHTING_LABELS,
-} from '@/entities/settings/lib/settings-meta'
+import type { ReportSettings } from '@/entities/report'
+import { sourceLabel } from '@/entities/report'
+import { STAGE_LABELS, MIX_LABELS, WEIGHTING_LABELS } from '@/entities/settings'
 import { InfoRow, InfoCard } from './InfoCard'
 import { Ns9431Table, ManualFactorsTable } from './WasteFactorsTables'
 

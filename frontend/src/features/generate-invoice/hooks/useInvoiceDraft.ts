@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import type { Project } from '@/entities/project/hooks/useProjects'
+import type { Project } from '@/entities/project'
 import type { GenerateInvoiceInput } from '../types'
 import type { LineItem } from './useProjectLineItems'
 

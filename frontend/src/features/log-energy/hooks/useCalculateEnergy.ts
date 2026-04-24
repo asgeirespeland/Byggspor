@@ -1,8 +1,8 @@
 import { useAuthMutation } from '@/shared/auth/useAuthMutation'
 import { qk, projectReportKeys } from '@/shared/api/queryKeys'
 
-import { calculateEnergy } from '@/entities/energy/api'
-import type { EnergyCalculateInput } from '@/entities/energy/types'
+import { calculateEnergy } from '@/entities/energy'
+import type { EnergyCalculateInput } from '@/entities/energy'
 
 export function useCalculateEnergy(projectId: number) {
   return useAuthMutation<EnergyCalculateInput>({

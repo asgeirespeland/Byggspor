@@ -9,7 +9,7 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from '@/components/ui/tooltip'
-import { useFlaggedEntries } from '@/entities/report/hooks/useFlaggedEntries'
+import { useFlaggedEntries } from '@/entities/report'
 import { useDismiss } from '@/shared/hooks/useDismiss'
 import FlaggedMaterialRow from './FlaggedMaterialRow'
 import FlaggedTripRow from './FlaggedTripRow'

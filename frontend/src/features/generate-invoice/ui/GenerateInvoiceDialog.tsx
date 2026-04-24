@@ -13,7 +13,7 @@ import {
   DialogTitle,
 } from '@/components/ui/dialog'
 import { Button } from '@/components/ui/button'
-import type { Project } from '@/entities/project/hooks/useProjects'
+import type { Project } from '@/entities/project'
 import { useGenerateInvoice } from '../hooks/useGenerateInvoice'
 import { useDownloadPdf } from '../hooks/useDownloadPdf'
 import { useProjectLineItems } from '../hooks/useProjectLineItems'

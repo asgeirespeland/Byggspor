@@ -1,4 +1,4 @@
-import { useProjectSettings } from '@/entities/settings/hooks/useProjectSettings'
+import { useProjectSettings } from '@/entities/settings'
 import {
   useUpdateProjectSettings,
   useResetProjectSetting,

@@ -5,17 +5,17 @@
  * features/edit-uploaded-data hooks.
  */
 import { useQueryClient } from '@tanstack/react-query'
-import InlineUndoBar from '@/widgets/data-table/InlineUndoBar'
-import DataTabShell from '@/widgets/data-table/DataTabShell'
+import { InlineUndoBar } from '@/widgets/data-table'
+import { DataTabShell } from '@/widgets/data-table'
 import { qk } from '@/shared/api/queryKeys'
-import { useProjectTransports } from '@/entities/transport/hooks/useProjectTransports'
+import { useProjectTransports } from '@/entities/transport'
 import {
   useDeleteTransportReport,
   useDeleteTrip,
   useUpdateTrip,
-} from '@/features/edit-uploaded-data/hooks/useTransportMutations'
-import ImportTransport from '@/features/import-transport/ui/ImportTransport'
-import TransportForm from '@/features/log-transport/ui/TransportForm'
+} from '@/features/edit-uploaded-data'
+import { ImportTransport } from '@/features/import-transport'
+import { TransportForm } from '@/features/log-transport'
 import TransportGroupCard from './TransportGroupCard'
 
 interface Props {

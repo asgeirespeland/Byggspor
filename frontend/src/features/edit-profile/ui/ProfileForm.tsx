@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import type { UserDto } from '@/entities/user/api'
+import type { UserDto } from '@/entities/user'
 import { useUpdateProfile } from '../hooks/useUpdateProfile'
 
 export default function ProfileForm({ user }: { user: UserDto }) {

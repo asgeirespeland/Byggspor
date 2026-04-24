@@ -2,9 +2,9 @@ import { useState } from 'react'
 import { Building2, FolderKanban, User } from 'lucide-react'
 import TabBar, { type TabDef } from '@/shared/components/TabBar'
 import { useAppContext } from '@/shared/hooks/useAppContext'
-import { useProjects } from '@/entities/project/hooks/useProjects'
-import EditOrgSettings from '@/features/edit-settings/ui/EditOrgSettings'
-import EditProjectSettings from '@/features/edit-settings/ui/EditProjectSettings'
+import { useProjects } from '@/entities/project'
+import { EditOrgSettings } from '@/features/edit-settings'
+import { EditProjectSettings } from '@/features/edit-settings'
 
 type Tab = 'personal' | 'organization' | 'projects'
 

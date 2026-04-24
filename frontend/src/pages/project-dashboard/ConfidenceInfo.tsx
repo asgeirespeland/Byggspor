@@ -12,7 +12,7 @@ import {
   CONFIDENCE_TIER_LABEL,
   CONFIDENCE_TIER_RANGE,
   type ConfidenceTier,
-} from '@/entities/report/lib/confidence'
+} from '@/entities/report'
 
 const SCORE_DESCRIPTIONS: Record<ConfidenceTier, string> = {
   high: 'Produkt identifisert med EPD/GWP-data, eller manuelt korrigert.',

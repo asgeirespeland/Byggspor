@@ -8,11 +8,11 @@ import {
 } from '@/components/ui/collapsible'
 import { useAppContext } from '@/shared/hooks/useAppContext'
 import ItemListPanel from '@/shared/components/ItemListPanel'
-import EditOrgSettings from '@/features/edit-settings/ui/EditOrgSettings'
-import { useOrgMembers } from '@/entities/organization/hooks/useOrgMembers'
-import { useAddMember } from '@/features/invite-member/hooks/useAddMember'
+import { EditOrgSettings } from '@/features/edit-settings'
+import { useOrgMembers } from '@/entities/organization'
+import { useAddMember } from '@/features/invite-member'
 import MemberCard from './MemberCard'
-import AddMemberDialog from '@/features/invite-member/ui/AddMemberDialog'
+import { AddMemberDialog } from '@/features/invite-member'
 
 export default function OrgSettings() {
   const { organizationId, organization } = useAppContext()

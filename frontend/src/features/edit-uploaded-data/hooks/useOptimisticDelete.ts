@@ -9,8 +9,8 @@
 import { useQueryClient } from '@tanstack/react-query'
 import { useAuth } from '@clerk/react'
 import { toast } from 'sonner'
-import { useInlineUndo } from '@/widgets/data-table/useInlineUndo'
-import type { Co2Summary } from '@/entities/report/api/co2Summary'
+import { useInlineUndo } from '@/widgets/data-table'
+import type { Co2Summary } from '@/entities/report'
 import { qk } from '@/shared/api/queryKeys'
 
 interface UseOptimisticDeleteOptions<TSnapshot> {

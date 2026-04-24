@@ -11,7 +11,7 @@ import {
   updateMaterial,
   type ProjectInvoiceGroup,
   type ProjectMaterialItem,
-} from '@/entities/materials/api'
+} from '@/entities/materials'
 
 import { useGroupDelete } from './useGroupDelete'
 import { useItemDelete } from './useItemDelete'

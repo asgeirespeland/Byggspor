@@ -6,10 +6,10 @@
 import { useState } from 'react'
 import { useQueryClient } from '@tanstack/react-query'
 import { toast } from 'sonner'
-import FileUploadShell from '@/widgets/file-upload/FileUploadShell'
+import { FileUploadShell } from '@/widgets/file-upload'
 import { qk } from '@/shared/api/queryKeys'
-import { confirmWaste } from '@/entities/waste/api'
-import type { WasteParseResponse } from '@/entities/waste/types'
+import { confirmWaste } from '@/entities/waste'
+import type { WasteParseResponse } from '@/entities/waste'
 import { useWasteParse } from '../hooks/useWasteParse'
 import WastePreview from './WastePreview'
 

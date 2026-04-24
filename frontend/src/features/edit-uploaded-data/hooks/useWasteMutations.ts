@@ -9,8 +9,8 @@ import {
   updateWasteItem,
   deleteWasteItem,
   deleteWasteReport,
-} from '@/entities/waste/api'
-import type { WasteGroup, WasteItem } from '@/entities/waste/types'
+} from '@/entities/waste'
+import type { WasteGroup, WasteItem } from '@/entities/waste'
 
 import { useGroupDelete } from './useGroupDelete'
 import { useItemDelete } from './useItemDelete'

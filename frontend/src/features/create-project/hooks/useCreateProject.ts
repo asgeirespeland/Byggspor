@@ -4,7 +4,7 @@ import {
   createProject,
   type CreateProjectPayload,
   type Project,
-} from '@/entities/project/api'
+} from '@/entities/project'
 
 export function useCreateProject() {
   return useAuthMutation<CreateProjectPayload, Project>({

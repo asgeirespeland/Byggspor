@@ -7,7 +7,7 @@
  */
 import { useState } from 'react'
 import { useOptimisticDelete } from './useOptimisticDelete'
-import type { Co2Summary } from '@/entities/report/api/co2Summary'
+import type { Co2Summary } from '@/entities/report'
 
 interface UseItemDeleteOptions<TGroup, TItem> {
   projectId: number

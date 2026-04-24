@@ -7,7 +7,7 @@
 import { useEffect, useRef, useState } from 'react'
 import { useAuth } from '@clerk/react'
 import { getTokenOrThrow } from '@/shared/auth/getToken'
-import { listProjectMaterials } from '@/entities/materials/api'
+import { listProjectMaterials } from '@/entities/materials'
 
 export interface LineItem {
   id: string

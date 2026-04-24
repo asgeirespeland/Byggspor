@@ -1,6 +1,6 @@
 import { useAuthMutation } from '@/shared/auth/useAuthMutation'
 import { qk } from '@/shared/api/queryKeys'
-import { addOrgMember } from '@/entities/organization/api'
+import { addOrgMember } from '@/entities/organization'
 
 export function useAddMember(organizationId: number) {
   return useAuthMutation<{ userId: string; role: string }>({

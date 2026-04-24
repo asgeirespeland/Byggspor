@@ -1,5 +1,5 @@
-import type { DetailedReport } from '@/entities/report/types'
-import { fmt } from '@/entities/report/lib/utils'
+import type { DetailedReport } from '@/entities/report'
+import { fmt } from '@/entities/report'
 import {
   CATEGORY_KEYS,
   CATEGORY_THEME,

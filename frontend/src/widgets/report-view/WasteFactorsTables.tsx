@@ -2,7 +2,7 @@
  * Two read-only reference tables rendered inside the MethodologySection fullscreen modal:
  * NS 9431 fraction factors and manual override factors.
  */
-import type { ReportSettings } from '@/entities/report/types'
+import type { ReportSettings } from '@/entities/report'
 
 const TH =
   'px-4 py-2 text-xs font-semibold uppercase tracking-wide text-gray-400'

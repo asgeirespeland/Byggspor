@@ -18,7 +18,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select'
-import type { PriceZone } from '@/entities/energy/types'
+import type { PriceZone } from '@/entities/energy'
 
 interface EnergyFormProps {
   zones: { value: string; label: string }[] | undefined

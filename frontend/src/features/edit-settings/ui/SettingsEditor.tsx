@@ -5,8 +5,8 @@
  */
 import { useState } from 'react'
 import { RotateCcw, Loader2, Save, Info } from 'lucide-react'
-import type { ResolvedSetting } from '@/entities/settings/api'
-import { SETTING_GROUPS } from '@/entities/settings/lib/settings-meta'
+import type { ResolvedSetting } from '@/entities/settings'
+import { SETTING_GROUPS } from '@/entities/settings'
 import SettingRow from './SettingRow'
 
 export type SettingsEditorProps = {

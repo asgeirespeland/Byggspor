@@ -1,7 +1,7 @@
-import { useProjectMaterials } from '@/entities/materials/hooks/useProjectMaterials'
-import { useProjectTransports } from '@/entities/transport/hooks/useProjectTransports'
-import type { ProjectMaterialItem } from '@/entities/materials/api'
-import type { ProjectTripItem } from '@/entities/transport/api/projectTransports'
+import { useProjectMaterials } from '@/entities/materials'
+import { useProjectTransports } from '@/entities/transport'
+import type { ProjectMaterialItem } from '@/entities/materials'
+import type { ProjectTripItem } from '@/entities/transport'
 
 export type FlaggedMaterial = ProjectMaterialItem & { kind: 'material' }
 export type FlaggedTrip = ProjectTripItem & { kind: 'transport' }

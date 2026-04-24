@@ -3,11 +3,11 @@
  * as the upload slot, and a list of InvoiceGroupCards backed by useProjectMaterials.
  * Owns the invoice-level optimistic delete + undo bar via useDeleteInvoice.
  */
-import InlineUndoBar from '@/widgets/data-table/InlineUndoBar'
-import DataTabShell from '@/widgets/data-table/DataTabShell'
-import { useProjectMaterials } from '@/entities/materials/hooks/useProjectMaterials'
-import { useDeleteInvoice } from '@/features/edit-uploaded-data/hooks/useMaterialMutations'
-import ImportInvoice from '@/features/import-invoice/ui/ImportInvoice'
+import { InlineUndoBar } from '@/widgets/data-table'
+import { DataTabShell } from '@/widgets/data-table'
+import { useProjectMaterials } from '@/entities/materials'
+import { useDeleteInvoice } from '@/features/edit-uploaded-data'
+import { ImportInvoice } from '@/features/import-invoice'
 import InvoiceGroupCard from './InvoiceGroupCard'
 
 interface Props {

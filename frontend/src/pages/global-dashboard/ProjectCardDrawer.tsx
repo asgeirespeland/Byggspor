@@ -1,8 +1,8 @@
 import { ArrowRight } from 'lucide-react'
 import { useNavigate } from 'react-router-dom'
 import { Button } from '@/components/ui/button'
-import { STATUS_CONFIG } from '@/entities/project/lib/constants'
-import type { Project } from '@/entities/project/hooks/useProjects'
+import { STATUS_CONFIG } from '@/entities/project'
+import type { Project } from '@/entities/project'
 import ResponsiveConfidenceGauge from '@/widgets/ResponsiveConfidenceGauge'
 
 interface ProjectCardDrawerProps {

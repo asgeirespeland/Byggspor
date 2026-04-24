@@ -1,13 +1,8 @@
-import type { MaterialLineItem } from '@/entities/report/types'
+import type { MaterialLineItem } from '@/entities/report'
 import type { Column } from './ReportDataTable'
 import DataTable from './ReportDataTable'
 import ReportGroupRow from './ReportGroupRow'
-import {
-  fmt,
-  co2Label,
-  sourceLabel,
-  confidenceBadge,
-} from '@/entities/report/lib/utils'
+import { fmt, co2Label, sourceLabel, confidenceBadge } from '@/entities/report'
 import { groupBy, sumBy } from '@/shared/utils/collections'
 
 const COLUMNS: Column<MaterialLineItem>[] = [

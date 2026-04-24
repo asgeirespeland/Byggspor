@@ -1,5 +1,5 @@
 import { Truck } from 'lucide-react'
-import type { ProjectTripItem } from '@/entities/transport/api/projectTransports'
+import type { ProjectTripItem } from '@/entities/transport'
 
 type FlaggedTrip = ProjectTripItem & { kind: 'transport' }
 

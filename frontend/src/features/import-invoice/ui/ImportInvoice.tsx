@@ -6,9 +6,9 @@
 import { useState } from 'react'
 import { useQueryClient } from '@tanstack/react-query'
 import { toast } from 'sonner'
-import FileUploadShell from '@/widgets/file-upload/FileUploadShell'
+import { FileUploadShell } from '@/widgets/file-upload'
 import { qk } from '@/shared/api/queryKeys'
-import { confirmInvoice } from '@/entities/materials/api'
+import { confirmInvoice } from '@/entities/materials'
 import { useInvoiceParse } from '../hooks/useInvoiceParse'
 import InvoicePreview from './InvoicePreview'
 

@@ -5,7 +5,7 @@
  */
 import { useOptimisticDelete } from './useOptimisticDelete'
 import { sumBy } from '@/shared/utils/collections'
-import type { Co2Summary } from '@/entities/report/api/co2Summary'
+import type { Co2Summary } from '@/entities/report'
 
 interface UseGroupDeleteOptions<TGroup, TItem> {
   projectId: number

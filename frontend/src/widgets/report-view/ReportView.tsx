@@ -6,7 +6,7 @@
  */
 import { useState } from 'react'
 import { Loader2, BarChart3, Settings2 } from 'lucide-react'
-import { useDetailedReport } from '@/entities/report/hooks/useDetailedReport'
+import { useDetailedReport } from '@/entities/report'
 import DataTable from './ReportDataTable'
 import Section from './Section'
 import MaterialsSection from './MaterialsSection'
@@ -15,7 +15,7 @@ import WasteSection from './WasteSection'
 import CategoryDonut from '@/widgets/CategoryDonut'
 import TopEmitters from '@/widgets/TopEmitters'
 import MethodologySection from './MethodologySection'
-import { energyColumns } from '@/entities/energy/ui/columns'
+import { energyColumns } from '@/entities/energy'
 import { CATEGORY_KEYS, CATEGORY_THEME } from '@/shared/categories'
 import { sumBy } from '@/shared/utils/collections'
 

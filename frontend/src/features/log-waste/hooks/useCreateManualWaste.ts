@@ -1,8 +1,8 @@
 import { useAuthMutation } from '@/shared/auth/useAuthMutation'
 import { qk, projectReportKeys } from '@/shared/api/queryKeys'
 
-import { createManualWaste } from '@/entities/waste/api'
-import type { CreateManualWastePayload } from '@/entities/waste/types'
+import { createManualWaste } from '@/entities/waste'
+import type { CreateManualWastePayload } from '@/entities/waste'
 
 export function useCreateManualWaste(projectId: number) {
   return useAuthMutation<CreateManualWastePayload>({

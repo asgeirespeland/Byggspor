@@ -5,19 +5,16 @@
  */
 import { useMemo } from 'react'
 import { Zap, Loader2 } from 'lucide-react'
-import InlineUndoBar from '@/widgets/data-table/InlineUndoBar'
-import DataTable from '@/widgets/data-table/DataTable'
+import { InlineUndoBar } from '@/widgets/data-table'
+import { DataTable } from '@/widgets/data-table'
 import type { EditableColumn } from '@/shared/types/tableColumn'
 import { useDeferredLoading } from '@/shared/hooks/useDeferredLoading'
 import { sumBy } from '@/shared/utils/collections'
-import { useEnergies, usePriceZones } from '@/entities/energy/hooks/useEnergies'
-import { useCalculateEnergy } from '@/features/log-energy/hooks/useCalculateEnergy'
-import {
-  useUpdateEnergy,
-  useDeleteEnergy,
-} from '@/features/edit-uploaded-data/hooks/useEnergyMutations'
-import type { EnergyEntry, PriceZone } from '@/entities/energy/types'
-import EnergyForm from '@/features/log-energy/ui/EnergyForm'
+import { useEnergies, usePriceZones } from '@/entities/energy'
+import { useCalculateEnergy } from '@/features/log-energy'
+import { useUpdateEnergy, useDeleteEnergy } from '@/features/edit-uploaded-data'
+import type { EnergyEntry, PriceZone } from '@/entities/energy'
+import { EnergyForm } from '@/features/log-energy'
 import EnergySummary from './EnergySummary'
 
 const INPUT =

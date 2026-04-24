@@ -1,4 +1,4 @@
-import { useOrgSettings } from '@/entities/settings/hooks/useOrgSettings'
+import { useOrgSettings } from '@/entities/settings'
 import {
   useUpdateOrgSettings,
   useResetOrgSettings,

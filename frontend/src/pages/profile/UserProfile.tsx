@@ -1,5 +1,5 @@
-import { useCurrentUser } from '@/entities/user/hooks/useCurrentUser'
-import ProfileForm from '@/features/edit-profile/ui/ProfileForm'
+import { useCurrentUser } from '@/entities/user'
+import { ProfileForm } from '@/features/edit-profile'
 
 export default function UserProfile() {
   const { data: user, isLoading, error } = useCurrentUser()

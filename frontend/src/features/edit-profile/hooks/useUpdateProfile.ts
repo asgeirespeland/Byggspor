@@ -1,6 +1,6 @@
 import { useAuthMutation } from '@/shared/auth/useAuthMutation'
 import { qk } from '@/shared/api/queryKeys'
-import { updateUser, type UserDto } from '@/entities/user/api'
+import { updateUser, type UserDto } from '@/entities/user'
 
 export function useUpdateProfile(userId: number) {
   return useAuthMutation<{ name: string; phone: string }, UserDto>({

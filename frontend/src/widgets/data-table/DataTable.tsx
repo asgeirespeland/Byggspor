@@ -6,7 +6,7 @@
  */
 import { useRef, useState } from 'react'
 import { Check, X } from 'lucide-react'
-import RowActions from '@/widgets/data-table/RowActions'
+import { RowActions } from '@/widgets/data-table'
 import type { EditableColumn } from '@/shared/types/tableColumn'
 
 interface DataTableProps<T> {

@@ -1,13 +1,10 @@
 import { useMemo } from 'react'
 import CollapsibleGroupCard from '@/widgets/CollapsibleGroupCard'
-import DataTable from '@/widgets/data-table/DataTable'
-import InlineUndoBar from '@/widgets/data-table/InlineUndoBar'
-import type {
-  ProjectReportGroup,
-  TripUpdateInput,
-} from '@/entities/transport/api/projectTransports'
+import { DataTable } from '@/widgets/data-table'
+import { InlineUndoBar } from '@/widgets/data-table'
+import type { ProjectReportGroup, TripUpdateInput } from '@/entities/transport'
 import { sumBy } from '@/shared/utils/collections'
-import { tripColumns, type TripRow } from '@/entities/transport/ui/columns'
+import { tripColumns, type TripRow } from '@/entities/transport'
 
 interface Props {
   group: ProjectReportGroup

@@ -4,7 +4,7 @@ import {
   createOrganization,
   type CreateOrganizationPayload,
   type OrgDto,
-} from '@/entities/organization/api'
+} from '@/entities/organization'
 
 export function useCreateOrganization() {
   return useAuthMutation<CreateOrganizationPayload, OrgDto>({

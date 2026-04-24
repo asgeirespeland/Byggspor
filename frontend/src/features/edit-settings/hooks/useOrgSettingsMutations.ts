@@ -4,7 +4,7 @@
  */
 import { useAuthMutation } from '@/shared/auth/useAuthMutation'
 import { qkPrefix } from '@/shared/api/queryKeys'
-import { patchOrgSettings, resetOrgSettings } from '@/entities/settings/api'
+import { patchOrgSettings, resetOrgSettings } from '@/entities/settings'
 
 const ORG_DOWNSTREAM_KEYS = [
   qkPrefix.orgSettings(),

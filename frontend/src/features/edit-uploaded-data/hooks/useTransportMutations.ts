@@ -13,7 +13,7 @@ import {
   type ProjectReportGroup,
   type ProjectTripItem,
   type TripUpdateInput,
-} from '@/entities/transport/api/projectTransports'
+} from '@/entities/transport'
 
 import { useGroupDelete } from './useGroupDelete'
 import { useItemDelete } from './useItemDelete'

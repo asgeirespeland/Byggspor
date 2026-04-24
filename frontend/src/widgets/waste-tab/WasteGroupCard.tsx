@@ -1,15 +1,15 @@
 import { useMemo } from 'react'
 import CollapsibleGroupCard from '@/widgets/CollapsibleGroupCard'
-import DataTable from '@/widgets/data-table/DataTable'
-import InlineUndoBar from '@/widgets/data-table/InlineUndoBar'
+import { DataTable } from '@/widgets/data-table'
+import { InlineUndoBar } from '@/widgets/data-table'
 import {
   useUpdateWasteItem,
   useDeleteWasteItem,
   useDeleteWasteReport,
-} from '@/features/edit-uploaded-data/hooks/useWasteMutations'
-import type { WasteGroup } from '@/entities/waste/types'
+} from '@/features/edit-uploaded-data'
+import type { WasteGroup } from '@/entities/waste'
 import { sumBy } from '@/shared/utils/collections'
-import { wasteColumns, type WasteRow } from '@/entities/waste/ui/columns'
+import { wasteColumns, type WasteRow } from '@/entities/waste'
 
 interface Props {
   group: WasteGroup

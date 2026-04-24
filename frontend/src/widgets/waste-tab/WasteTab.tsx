@@ -3,12 +3,12 @@
  * slot is features/log-waste. Lists WasteGroupCard backed by useProjectWaste (entity read)
  * with delete-report / delete-item / update-item via features/edit-uploaded-data hooks.
  */
-import InlineUndoBar from '@/widgets/data-table/InlineUndoBar'
-import DataTabShell from '@/widgets/data-table/DataTabShell'
-import { useProjectWaste } from '@/entities/waste/hooks/useWaste'
-import { useDeleteWasteReport } from '@/features/edit-uploaded-data/hooks/useWasteMutations'
-import ImportWaste from '@/features/import-waste/ui/ImportWaste'
-import WasteForm from '@/features/log-waste/ui/WasteForm'
+import { InlineUndoBar } from '@/widgets/data-table'
+import { DataTabShell } from '@/widgets/data-table'
+import { useProjectWaste } from '@/entities/waste'
+import { useDeleteWasteReport } from '@/features/edit-uploaded-data'
+import { ImportWaste } from '@/features/import-waste'
+import { WasteForm } from '@/features/log-waste'
 import WasteGroupCard from './WasteGroupCard'
 
 interface Props {
