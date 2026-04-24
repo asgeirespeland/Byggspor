@@ -1,9 +1,9 @@
+import { useProjectSettings } from '@/entities/settings/hooks/useProjectSettings'
 import {
-  useProjectSettings,
   useUpdateProjectSettings,
   useResetProjectSetting,
   useResetAllProjectSettings,
-} from '@/entities/settings/hooks/useProjectSettings'
+} from '../hooks/useProjectSettingsMutations'
 import SettingsEditor from './SettingsEditor'
 
 export default function EditProjectSettings({

@@ -9,10 +9,8 @@ import {
 import { useAppContext } from '@/shared/hooks/useAppContext'
 import ItemListPanel from '@/shared/components/ItemListPanel'
 import EditOrgSettings from '@/features/edit-settings/ui/EditOrgSettings'
-import {
-  useOrgMembers,
-  useAddMember,
-} from '@/entities/organization/hooks/useOrgMembers'
+import { useOrgMembers } from '@/entities/organization/hooks/useOrgMembers'
+import { useAddMember } from '@/features/invite-member/hooks/useAddMember'
 import MemberCard from './MemberCard'
 import AddMemberDialog from '@/features/invite-member/ui/AddMemberDialog'
 

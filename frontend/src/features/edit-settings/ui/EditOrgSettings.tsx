@@ -1,8 +1,8 @@
+import { useOrgSettings } from '@/entities/settings/hooks/useOrgSettings'
 import {
-  useOrgSettings,
   useUpdateOrgSettings,
   useResetOrgSettings,
-} from '@/entities/settings/hooks/useOrgSettings'
+} from '../hooks/useOrgSettingsMutations'
 import SettingsEditor from './SettingsEditor'
 
 export default function EditOrgSettings({ orgId }: { orgId: number }) {

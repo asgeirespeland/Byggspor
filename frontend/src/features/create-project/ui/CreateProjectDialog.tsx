@@ -12,7 +12,7 @@ import {
   FormMessage,
 } from '@/components/ui/form'
 import FormDialog from '@/shared/components/FormDialog'
-import { useCreateProject } from '@/entities/project/hooks/useProjects'
+import { useCreateProject } from '../hooks/useCreateProject'
 
 const schema = z.object({
   navn: z.string().min(1, 'Prosjektnavn er påkrevd'),
