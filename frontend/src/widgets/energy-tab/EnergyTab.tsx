@@ -9,15 +9,14 @@ import InlineUndoBar from '@/widgets/data-table/InlineUndoBar'
 import DataTable, { type Column } from '@/widgets/data-table/DataTable'
 import { useDeferredLoading } from '@/shared/hooks/useDeferredLoading'
 import { sumBy } from '@/shared/utils/collections'
+import { useEnergies, usePriceZones } from '@/entities/energy/hooks/useEnergies'
+import { useCalculateEnergy } from '@/features/log-energy/hooks/useCalculateEnergy'
 import {
-  useEnergies,
-  usePriceZones,
-  useCalculateEnergy,
   useUpdateEnergy,
   useDeleteEnergy,
-} from '../hooks/useEnergies'
-import type { EnergyEntry, PriceZone } from '../types'
-import EnergyForm from './EnergyForm'
+} from '@/features/edit-uploaded-data/hooks/useEnergyMutations'
+import type { EnergyEntry, PriceZone } from '@/entities/energy/types'
+import EnergyForm from '@/features/log-energy/ui/EnergyForm'
 import EnergySummary from './EnergySummary'
 
 const INPUT =

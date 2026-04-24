@@ -13,7 +13,7 @@ import TabBar, { type TabDef } from '@/shared/components/TabBar'
 import MaterialsTab from '@/widgets/materials-tab/MaterialsTab'
 import TransportTab from '@/widgets/transport-tab/TransportTab'
 import WasteTab from '@/widgets/waste-tab/WasteTab'
-import EnergyTab from '@/entities/energy/ui/EnergyTab'
+import EnergyTab from '@/widgets/energy-tab/EnergyTab'
 import ReportView from '@/widgets/report-view/ReportView'
 import { useCo2Summary } from '@/entities/report/hooks/useCo2Summary'
 import {
