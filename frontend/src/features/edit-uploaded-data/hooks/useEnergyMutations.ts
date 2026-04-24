@@ -4,7 +4,7 @@
  * Both invalidate ['energies'] + ['co2-summary'] + ['detailed-report'] for the given projectId.
  */
 import { useAuthMutation } from '@/shared/auth/useAuthMutation'
-import { useOptimisticDelete } from '@/widgets/data-table/useOptimisticDelete'
+import { useOptimisticDelete } from './useOptimisticDelete'
 import { qk, projectReportKeys } from '@/shared/api/queryKeys'
 
 import { deleteEnergy, updateEnergy } from '@/entities/energy/api'

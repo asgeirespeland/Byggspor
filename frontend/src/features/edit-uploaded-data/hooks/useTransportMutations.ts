@@ -1,13 +1,9 @@
 /**
  * Post-upload edit/delete mutations for transport.
- * useDeleteTransportReport (whole report), useDeleteTrip (single trip — also tracks the
- * originating report group so the undo bar can render near the right card), useUpdateTrip.
+ * useUpdateTrip, useDeleteTransportReport (whole report), useDeleteTrip (single trip —
+ * also exposes pendingTripGroupId so the undo bar renders near the right card).
  */
-import { useState } from 'react'
-
 import { useAuthMutation } from '@/shared/auth/useAuthMutation'
-import { useOptimisticDelete } from '@/widgets/data-table/useOptimisticDelete'
-import { sumBy } from '@/shared/utils/collections'
 import { qk, projectReportKeys } from '@/shared/api/queryKeys'
 
 import {
@@ -15,24 +11,33 @@ import {
   deleteTrip,
   updateTrip,
   type ProjectReportGroup,
+  type ProjectTripItem,
   type TripUpdateInput,
 } from '@/entities/transport/api/projectTransports'
 
+import { useGroupDelete } from './useGroupDelete'
+import { useItemDelete } from './useItemDelete'
+
+export function useUpdateTrip(projectId: number) {
+  return useAuthMutation<{ tripId: number; data: TripUpdateInput }>({
+    mutationFn: ({ tripId, data }, token) => updateTrip(tripId, data, token),
+    invalidateKeys: [qk.transports(projectId), ...projectReportKeys(projectId)],
+    successMessage: 'Tur oppdatert',
+    errorMessage: 'Kunne ikke oppdatere tur',
+  })
+}
+
 export function useDeleteTransportReport(projectId: number) {
-  const { handleDelete, pendingId, undo } = useOptimisticDelete<
-    ProjectReportGroup[]
+  const { handleDelete, pendingId, undo } = useGroupDelete<
+    ProjectReportGroup,
+    ProjectTripItem
   >({
     projectId,
     listQueryKey: qk.transports(projectId),
     co2Category: 'transport',
-    prepare: (snapshot, id) => {
-      const trips = snapshot?.find((g) => g.report_id === id)?.trips ?? []
-      return {
-        updatedList: snapshot?.filter((g) => g.report_id !== id) ?? [],
-        co2Delta: sumBy(trips, (t) => t.total_co2_kg),
-        entryCountDelta: trips.length,
-      }
-    },
+    matchBy: (g) => g.report_id,
+    itemsOf: (g) => g.trips,
+    co2Of: (trip) => trip.total_co2_kg ?? 0,
     deleteFn: deleteTransportReport,
     errorMessage: 'Kunne ikke slette kjørerapport',
   })
@@ -45,34 +50,18 @@ export function useDeleteTransportReport(projectId: number) {
 }
 
 export function useDeleteTrip(projectId: number) {
-  const [groupId, setGroupId] = useState<number | null>(null)
-
-  const { handleDelete, pendingId, undo } = useOptimisticDelete<
-    ProjectReportGroup[]
+  const { handleDelete, pendingId, pendingGroupId, undo } = useItemDelete<
+    ProjectReportGroup,
+    ProjectTripItem
   >({
     projectId,
     listQueryKey: qk.transports(projectId),
     co2Category: 'transport',
-    prepare: (snapshot, tripId) => {
-      const trip = snapshot
-        ?.flatMap((g) => g.trips)
-        .find((t) => t.id === tripId)
-      setGroupId(
-        snapshot?.find((g) => g.trips.some((t) => t.id === tripId))
-          ?.report_id ?? null,
-      )
-      return {
-        updatedList:
-          snapshot
-            ?.map((g) => ({
-              ...g,
-              trips: g.trips.filter((t) => t.id !== tripId),
-            }))
-            .filter((g) => g.trips.length > 0) ?? [],
-        co2Delta: trip?.total_co2_kg ?? 0,
-        entryCountDelta: 1,
-      }
-    },
+    groupIdOf: (g) => g.report_id,
+    itemsOf: (g) => g.trips,
+    setItems: (g, trips) => ({ ...g, trips }),
+    idOf: (trip) => trip.id,
+    co2Of: (trip) => trip.total_co2_kg ?? 0,
     deleteFn: deleteTrip,
     errorMessage: 'Kunne ikke slette tur',
   })
@@ -80,16 +69,7 @@ export function useDeleteTrip(projectId: number) {
   return {
     deleteTrip: handleDelete,
     pendingTripId: pendingId,
-    pendingTripGroupId: pendingId != null ? groupId : null,
+    pendingTripGroupId: pendingGroupId,
     undoTripDelete: undo,
   }
-}
-
-export function useUpdateTrip(projectId: number) {
-  return useAuthMutation<{ tripId: number; data: TripUpdateInput }>({
-    mutationFn: ({ tripId, data }, token) => updateTrip(tripId, data, token),
-    invalidateKeys: [qk.transports(projectId), ...projectReportKeys(projectId)],
-    successMessage: 'Tur oppdatert',
-    errorMessage: 'Kunne ikke oppdatere tur',
-  })
 }
