@@ -6,10 +6,10 @@ import {
   useUpdateWasteItem,
   useDeleteWasteItem,
   useDeleteWasteReport,
-} from '../hooks/useWaste'
-import type { WasteGroup } from '../types'
+} from '@/features/edit-uploaded-data/hooks/useWasteMutations'
+import type { WasteGroup } from '@/entities/waste/types'
 import { sumBy } from '@/shared/utils/collections'
-import { wasteColumns, type WasteRow } from './columns'
+import { wasteColumns, type WasteRow } from '@/entities/waste/ui/columns'
 
 interface Props {
   group: WasteGroup

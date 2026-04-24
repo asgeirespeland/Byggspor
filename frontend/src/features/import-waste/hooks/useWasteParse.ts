@@ -1,5 +1,5 @@
 import { useFileParse } from '@/widgets/file-upload/useFileParse'
-import { parseWasteFile } from '../api'
+import { parseWasteFile } from '@/entities/waste/api'
 
 export function useWasteParse() {
   return useFileParse({

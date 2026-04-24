@@ -1,8 +1,8 @@
 import { useMemo } from 'react'
 import ParsePreviewShell from '@/widgets/file-upload/ParsePreviewShell'
 import Co2TotalBadge from '@/widgets/Co2TotalBadge'
-import type { WasteParseResponse } from '../types'
-import { wasteColumns, type WasteRow } from './columns'
+import type { WasteParseResponse } from '@/entities/waste/types'
+import { wasteColumns, type WasteRow } from '@/entities/waste/ui/columns'
 
 interface Props {
   data: WasteParseResponse

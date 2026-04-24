@@ -1,7 +1,7 @@
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
-import { useCreateManualWaste } from '../hooks/useWaste'
+import { useCreateManualWaste } from '../hooks/useCreateManualWaste'
 import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
 import {

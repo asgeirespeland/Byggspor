@@ -12,7 +12,7 @@ import { STATUS_CONFIG } from '@/entities/project/lib/constants'
 import TabBar, { type TabDef } from '@/shared/components/TabBar'
 import MaterialsTab from '@/widgets/materials-tab/MaterialsTab'
 import TransportTab from '@/widgets/transport-tab/TransportTab'
-import WasteUpload from '@/entities/waste/ui/WasteUpload'
+import WasteTab from '@/widgets/waste-tab/WasteTab'
 import EnergyTab from '@/entities/energy/ui/EnergyTab'
 import ReportView from '@/widgets/report-view/ReportView'
 import { useCo2Summary } from '@/entities/report/hooks/useCo2Summary'
@@ -39,7 +39,7 @@ const TAB_RENDERERS: Record<
 > = {
   materials: (id) => <MaterialsTab projectId={id} />,
   transport: (id) => <TransportTab projectId={id} />,
-  waste: (id) => <WasteUpload projectId={id} />,
+  waste: (id) => <WasteTab projectId={id} />,
   energy: (id) => <EnergyTab projectId={id} />,
 }
 
