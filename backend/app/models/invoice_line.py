@@ -33,7 +33,11 @@ class InvoiceLine(Base):
         Integer, ForeignKey("generated_invoices.id", ondelete="CASCADE"), nullable=False
     )
     category: Mapped[InvoiceLineCategory] = mapped_column(
-        Enum(InvoiceLineCategory, name="invoicelinecategory", values_callable=lambda obj: [e.value for e in obj]),
+        Enum(
+            InvoiceLineCategory,
+            name="invoicelinecategory",
+            values_callable=lambda obj: [e.value for e in obj],
+        ),
         nullable=False,
     )
     description: Mapped[str] = mapped_column(Text, nullable=False)
@@ -48,7 +52,11 @@ class InvoiceLine(Base):
 
     # Provenance back to the originating entry
     source_type: Mapped[InvoiceLineSourceType | None] = mapped_column(
-        Enum(InvoiceLineSourceType, name="invoicelinesourcetype", values_callable=lambda obj: [e.value for e in obj])
+        Enum(
+            InvoiceLineSourceType,
+            name="invoicelinesourcetype",
+            values_callable=lambda obj: [e.value for e in obj],
+        )
     )
     source_id: Mapped[int | None] = mapped_column(Integer)
 

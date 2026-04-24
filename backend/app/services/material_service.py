@@ -238,6 +238,7 @@ def process_invoice_for_project(
             pm.total_co2_kg = float(catalog_entry.gwp_per_unit) * float(pm.quantity)
         pm.confidence_score = material_confidence(
             has_gwp=has_gwp,
+            has_epd=bool(catalog_entry and catalog_entry.has_epd),
             flagged=pm.flagged,
             is_manual_override=False,
         )
