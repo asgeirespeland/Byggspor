@@ -1,5 +1,5 @@
 import type { TransportLineItem } from '@/entities/report'
-import type { Column } from './ReportDataTable'
+import type { DisplayColumn as Column } from '@/shared/types/tableColumn'
 import DataTable from './ReportDataTable'
 import ReportGroupRow from './ReportGroupRow'
 import { fmt, sourceLabel, confidenceBadge } from '@/entities/report'

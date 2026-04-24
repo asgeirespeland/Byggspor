@@ -7,9 +7,8 @@ import { useState } from 'react'
 import { Loader2, Maximize2 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import FullscreenDialog from '@/shared/components/FullscreenDialog'
-import DataTable, { type Column } from '../data-table/DataTable'
-
-export type { Column }
+import DataTable from '../data-table/DataTable'
+import type { EditableColumn as Column } from '@/shared/types/tableColumn'
 
 interface ParsePreviewShellProps<T> {
   metadata?: React.ReactNode
