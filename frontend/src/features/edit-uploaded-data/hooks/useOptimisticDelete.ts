@@ -26,7 +26,6 @@ interface UseOptimisticDeleteOptions<TSnapshot> {
     entryCountDelta: number
   }
   deleteFn: (id: number, token: string) => Promise<unknown>
-  successMessage?: string
   errorMessage: string
 }
 
@@ -36,7 +35,6 @@ export function useOptimisticDelete<TSnapshot>({
   co2Category,
   prepare,
   deleteFn,
-  successMessage = 'Slettet',
   errorMessage,
 }: UseOptimisticDeleteOptions<TSnapshot>) {
   const { getToken } = useAuth()
@@ -55,11 +53,6 @@ export function useOptimisticDelete<TSnapshot>({
 
     queryClient.setQueryData<TSnapshot>(listQueryKey, () => updatedList)
     adjustCo2(queryClient, projectId, co2Category, -co2Delta, -entryCountDelta)
-
-    toast(successMessage, {
-      action: { label: 'Angre', onClick: undo },
-      duration: 5000,
-    })
 
     schedule(
       id,
