@@ -3,12 +3,13 @@
  * badges + scrollable DataTable + CO₂ summary + cancel/confirm buttons, with a fullscreen dialog
  * mirroring the table read-only. Re-exports DataTable's Column<T>.
  */
-import { useState } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { Loader2, Maximize2 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import FullscreenDialog from '@/shared/components/FullscreenDialog'
 import DataTable from '../data-table/DataTable'
 import type { EditableColumn as Column } from '@/shared/types/tableColumn'
+import { usePendingUpload } from '@/shared/context/PendingUploadContext'
 
 interface ParsePreviewShellProps<T> {
   metadata?: React.ReactNode
@@ -44,6 +45,20 @@ export default function ParsePreviewShell<T>({
   afterTable,
 }: ParsePreviewShellProps<T>) {
   const [fullscreen, setFullscreen] = useState(false)
+  const pendingUpload = usePendingUpload()
+  const onConfirmRef = useRef(onConfirm)
+  useEffect(() => {
+    onConfirmRef.current = onConfirm
+  }, [onConfirm])
+
+  useEffect(() => {
+    if (rows.length === 0 || confirming) {
+      pendingUpload?.unregister()
+      return
+    }
+    pendingUpload?.register(() => onConfirmRef.current())
+    return () => pendingUpload?.unregister()
+  }, [rows.length, confirming, pendingUpload])
 
   return (
     <>
