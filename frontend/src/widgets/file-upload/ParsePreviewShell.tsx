@@ -78,7 +78,7 @@ export default function ParsePreviewShell<T>({
         </div>
 
         <div className="rounded-xl border border-gray-200 overflow-hidden">
-          <div className="max-h-[60vh] overflow-y-auto overflow-x-auto">
+          <div className="max-h-[40vh] overflow-y-auto overflow-x-auto">
             <DataTable
               columns={columns}
               rows={rows}
