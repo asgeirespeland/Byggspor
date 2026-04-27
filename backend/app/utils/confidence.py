@@ -10,13 +10,15 @@ Single source of truth for all confidence thresholds:
 
 
 def material_confidence(
-    *, has_gwp: bool, flagged: bool, is_manual_override: bool
+    *, has_gwp: bool, has_epd: bool = False, flagged: bool, is_manual_override: bool
 ) -> int:
     """Return confidence score for a project material entry."""
     if is_manual_override:
         return 90
+    if has_gwp and has_epd:
+        return 100  # GWP sourced from a verified EPD — deterministic
     if has_gwp:
-        return 80
+        return 80  # GWP from generic catalog data, no EPD verification
     return 20 if flagged else 50
 
 

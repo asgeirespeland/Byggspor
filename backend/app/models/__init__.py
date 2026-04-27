@@ -1,5 +1,6 @@
 from app.models.energy import Energy
 from app.models.generated_invoice import GeneratedInvoice
+from app.models.invoice_line import InvoiceLine
 from app.models.material import Material
 from app.models.material_invoice import MaterialInvoice
 from app.models.organization import Organization
@@ -18,6 +19,7 @@ from app.models.waste_invoice import WasteInvoice
 __all__ = [
     "Energy",
     "GeneratedInvoice",
+    "InvoiceLine",
     "Material",
     "MaterialInvoice",
     "OrgRole",
