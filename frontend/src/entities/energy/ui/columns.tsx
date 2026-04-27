@@ -3,7 +3,14 @@ import type { DisplayColumn } from '@/shared/types/tableColumn'
 import { fmt, sourceLabel, confidenceBadge } from '@/entities/report'
 
 export const energyColumns: DisplayColumn<EnergyLineItem>[] = [
-  { header: 'Dato', render: (i) => i.recorded_date ?? '—' },
+  {
+    header: 'Periode',
+    render: (i) => {
+      if (i.period_start && i.recorded_date)
+        return `${i.period_start} – ${i.recorded_date}`
+      return i.recorded_date ?? '—'
+    },
+  },
   { header: 'Prissone', render: (i) => i.price_zone ?? '—' },
   { header: 'kWh', align: 'right', render: (i) => fmt(i.kwh_used) },
   {

@@ -57,6 +57,7 @@ export interface EnergyLineItem {
   grid_emission_factor: number | null
   total_co2_kg: number | null
   confidence_score: number | null
+  period_start: string | null
   recorded_date: string | null
   source: string | null
 }

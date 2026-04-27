@@ -70,16 +70,20 @@ function getColumns(
       ),
     },
     {
-      header: 'Dato',
-      render: (e) => (
-        <span className="text-gray-500">
-          {e.recorded_date
-            ? new Date(e.recorded_date + 'T00:00:00').toLocaleDateString(
-                'nb-NO',
-              )
-            : '—'}
-        </span>
-      ),
+      header: 'Periode',
+      render: (e) => {
+        const fmt = (d: string) =>
+          new Date(d + 'T00:00:00').toLocaleDateString('nb-NO')
+        if (e.period_start && e.recorded_date)
+          return (
+            <span className="text-gray-500">
+              {fmt(e.period_start)} – {fmt(e.recorded_date)}
+            </span>
+          )
+        if (e.recorded_date)
+          return <span className="text-gray-500">{fmt(e.recorded_date)}</span>
+        return <span className="text-gray-400">—</span>
+      },
       editable: {
         type: 'date',
         getValue: (e) => e.recorded_date ?? '',
@@ -123,12 +127,13 @@ export default function EnergyTab({ projectId }: EnergyTabProps) {
 
       <EnergyForm
         zones={zones}
-        onSubmit={({ kwh, priceZone, recordedDate }) =>
+        onSubmit={({ kwh, priceZone, periodStart, periodEnd }) =>
           calculateMutation.mutate({
             project_id: projectId,
             kwh_used: kwh,
             ...(priceZone ? { price_zone: priceZone } : {}),
-            ...(recordedDate ? { recorded_date: recordedDate } : {}),
+            ...(periodStart ? { period_start: periodStart } : {}),
+            ...(periodEnd ? { recorded_date: periodEnd } : {}),
           })
         }
         isPending={calculateMutation.isPending}
