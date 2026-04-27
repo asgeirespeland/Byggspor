@@ -70,7 +70,10 @@ function EditorContent({
         {onResetAll && (
           <button
             type="button"
-            onClick={onResetAll}
+            onClick={() => {
+              setDraft({})
+              onResetAll()
+            }}
             disabled={saving || (!hasOverrides && !hasDraftChanges)}
             className="inline-flex items-center gap-1.5 rounded-md border border-gray-300 bg-white px-3 py-1.5 text-sm text-gray-700 hover:bg-gray-50 disabled:opacity-50"
           >
