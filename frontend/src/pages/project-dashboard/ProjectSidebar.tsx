@@ -4,6 +4,7 @@
  * climate report CTA (routes to report tab), and generate EHF invoice CTA (opens GenerateInvoiceDialog).
  */
 import { useState } from 'react'
+import { useNavigate } from 'react-router-dom'
 import {
   Leaf,
   FileBarChart2,
@@ -13,10 +14,20 @@ import {
   Receipt,
   Settings,
   Pencil,
+  Trash2,
 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog'
 import { Input } from '@/components/ui/input'
 import type { Project } from '@/entities/project'
+import { useDeleteProject } from '@/features/edit-project/hooks/useDeleteProject'
 import { useUpdateProject } from '@/features/edit-project/hooks/useUpdateProject'
 import { EditProjectSettings } from '@/features/edit-settings'
 import FullscreenDialog from '@/shared/components/FullscreenDialog'
@@ -36,12 +47,15 @@ export default function ProjectSidebar({
     tab: 'materials' | 'transport' | 'waste' | 'energy' | 'report',
   ) => void
 }) {
+  const navigate = useNavigate()
   const [invoiceOpen, setInvoiceOpen] = useState(false)
   const [settingsOpen, setSettingsOpen] = useState(false)
+  const [deleteOpen, setDeleteOpen] = useState(false)
   const [isEditingName, setIsEditingName] = useState(false)
   const [draftName, setDraftName] = useState(project.name)
 
   const updateProjectMutation = useUpdateProject(project.id)
+  const deleteProjectMutation = useDeleteProject(project.id)
 
   function handleStartEditName() {
     setDraftName(project.name)
@@ -58,6 +72,12 @@ export default function ProjectSidebar({
 
     await updateProjectMutation.mutateAsync({ name: trimmed })
     setIsEditingName(false)
+  }
+
+  async function handleDeleteProject() {
+    await deleteProjectMutation.mutateAsync()
+    setDeleteOpen(false)
+    navigate('/')
   }
 
   return (
@@ -234,6 +254,44 @@ export default function ProjectSidebar({
           </div>
         </div>
       </button>
+
+      <Button
+        type="button"
+        variant="destructive"
+        className="w-full justify-start"
+        onClick={() => setDeleteOpen(true)}
+      >
+        <Trash2 className="h-4 w-4" />
+        Slett prosjekt
+      </Button>
+
+      <Dialog open={deleteOpen} onOpenChange={setDeleteOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Slett prosjekt?</DialogTitle>
+            <DialogDescription>
+              Dette vil slette prosjektet og tilknyttede prosjektdata.
+              Handlingen kan ikke angres.
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter>
+            <Button
+              variant="outline"
+              onClick={() => setDeleteOpen(false)}
+              disabled={deleteProjectMutation.isPending}
+            >
+              Avbryt
+            </Button>
+            <Button
+              variant="destructive"
+              onClick={() => void handleDeleteProject()}
+              disabled={deleteProjectMutation.isPending}
+            >
+              Slett prosjekt
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
 
       <GenerateInvoiceDialog
         open={invoiceOpen}

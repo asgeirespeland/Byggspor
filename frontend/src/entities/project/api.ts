@@ -59,3 +59,13 @@ export function updateProject(
     token,
   })
 }
+
+export function deleteProject(
+  id: number,
+  token?: string,
+): Promise<{ status: string }> {
+  return apiRequest<{ status: string }>(`/projects/${id}`, {
+    method: 'DELETE',
+    token,
+  })
+}

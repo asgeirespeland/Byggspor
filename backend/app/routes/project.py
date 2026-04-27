@@ -11,10 +11,19 @@ from app.config.settings_resolver import (
 from app.errors import ApiError
 from app.middleware.auth import require_auth
 from app.middleware.roles import require_project_role
+from app.models.energy import Energy
+from app.models.generated_invoice import GeneratedInvoice
+from app.models.material_invoice import MaterialInvoice
 from app.models.organization import Organization, OrgType
 from app.models.organization_member import OrganizationMember
 from app.models.project import Project, ProjectStatus
+from app.models.project_material import ProjectMaterial
 from app.models.project_member import ProjectRole
+from app.models.project_transport import ProjectTransport
+from app.models.project_waste_item import ProjectWasteItem
+from app.models.transport import Transport
+from app.models.transport_report import TransportReport
+from app.models.waste_invoice import WasteInvoice
 from app.services.recalculation import recalculate_project
 from app.utils.db import db_commit
 
@@ -175,6 +184,140 @@ def update_project(project_id: int):
         pass
     session.refresh(project)
     return jsonify(project.to_dict())
+
+
+@project_bp.route("/<int:project_id>", methods=["DELETE"])
+@require_auth
+@require_project_role((ProjectRole.OWNER, ProjectRole.EDITOR))
+def delete_project(project_id: int):
+    """Delete a project and its project-owned data."""
+    session = g.db
+    project = session.get(Project, project_id)
+    if not project:
+        raise ApiError("Prosjektet ble ikke funnet.", code="NOT_FOUND", status=404)
+
+    material_invoice_ids = [
+        source_id
+        for (source_id,) in (
+            session.query(ProjectMaterial.source_id)
+            .filter(
+                ProjectMaterial.project_id == project_id,
+                ProjectMaterial.source_id.isnot(None),
+            )
+            .distinct()
+            .all()
+        )
+    ]
+    transport_report_ids = [
+        source_id
+        for (source_id,) in (
+            session.query(ProjectTransport.source_id)
+            .filter(
+                ProjectTransport.project_id == project_id,
+                ProjectTransport.source_id.isnot(None),
+            )
+            .distinct()
+            .all()
+        )
+    ]
+    waste_invoice_ids = [
+        source_id
+        for (source_id,) in (
+            session.query(ProjectWasteItem.source_id)
+            .filter(
+                ProjectWasteItem.project_id == project_id,
+                ProjectWasteItem.source_id.isnot(None),
+            )
+            .distinct()
+            .all()
+        )
+    ]
+
+    session.query(ProjectMaterial).filter(
+        ProjectMaterial.project_id == project_id
+    ).delete(synchronize_session=False)
+    session.query(ProjectTransport).filter(
+        ProjectTransport.project_id == project_id
+    ).delete(synchronize_session=False)
+    session.query(ProjectWasteItem).filter(
+        ProjectWasteItem.project_id == project_id
+    ).delete(synchronize_session=False)
+    session.query(Transport).filter(Transport.project_id == project_id).delete(
+        synchronize_session=False
+    )
+    session.query(Energy).filter(Energy.project_id == project_id).delete(
+        synchronize_session=False
+    )
+    session.query(GeneratedInvoice).filter(
+        GeneratedInvoice.project_id == project_id
+    ).delete(synchronize_session=False)
+
+    if material_invoice_ids:
+        remaining_material_invoice_ids = {
+            source_id
+            for (source_id,) in (
+                session.query(ProjectMaterial.source_id)
+                .filter(ProjectMaterial.source_id.in_(material_invoice_ids))
+                .distinct()
+                .all()
+            )
+        }
+        orphan_material_invoice_ids = [
+            source_id
+            for source_id in material_invoice_ids
+            if source_id not in remaining_material_invoice_ids
+        ]
+        if orphan_material_invoice_ids:
+            session.query(MaterialInvoice).filter(
+                MaterialInvoice.id.in_(orphan_material_invoice_ids)
+            ).delete(synchronize_session=False)
+
+    if transport_report_ids:
+        remaining_transport_report_ids = {
+            source_id
+            for (source_id,) in (
+                session.query(ProjectTransport.source_id)
+                .filter(ProjectTransport.source_id.in_(transport_report_ids))
+                .distinct()
+                .all()
+            )
+        }
+        orphan_transport_report_ids = [
+            source_id
+            for source_id in transport_report_ids
+            if source_id not in remaining_transport_report_ids
+        ]
+        if orphan_transport_report_ids:
+            session.query(TransportReport).filter(
+                TransportReport.id.in_(orphan_transport_report_ids)
+            ).delete(synchronize_session=False)
+
+    if waste_invoice_ids:
+        remaining_waste_invoice_ids = {
+            source_id
+            for (source_id,) in (
+                session.query(ProjectWasteItem.source_id)
+                .filter(ProjectWasteItem.source_id.in_(waste_invoice_ids))
+                .distinct()
+                .all()
+            )
+        }
+        orphan_waste_invoice_ids = [
+            source_id
+            for source_id in waste_invoice_ids
+            if source_id not in remaining_waste_invoice_ids
+        ]
+        if orphan_waste_invoice_ids:
+            session.query(WasteInvoice).filter(
+                WasteInvoice.id.in_(orphan_waste_invoice_ids)
+            ).delete(synchronize_session=False)
+
+    session.delete(project)
+
+    with db_commit(session, "Kunne ikke slette prosjektet.", "DELETE_FAILED"):
+        pass
+
+    return jsonify({"status": "deleted"})
 
 
 # ---------------------------------------------------------------------------
