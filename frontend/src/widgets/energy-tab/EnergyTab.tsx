@@ -60,7 +60,7 @@ function getColumns(
       },
     },
     {
-      header: 'CO₂ (kg)',
+      header: 'CO₂e (kg)',
       render: (e) => (
         <span className="text-gray-600">
           {e.total_co2_kg?.toLocaleString('nb-NO', {

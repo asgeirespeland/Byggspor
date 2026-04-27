@@ -12,7 +12,7 @@ export const energyColumns: DisplayColumn<EnergyLineItem>[] = [
     render: (i) => fmt(i.grid_emission_factor, 4),
   },
   {
-    header: 'CO₂ (kg)',
+    header: 'CO₂e (kg)',
     align: 'right',
     render: (i) => <span className="font-medium">{fmt(i.total_co2_kg)}</span>,
   },
