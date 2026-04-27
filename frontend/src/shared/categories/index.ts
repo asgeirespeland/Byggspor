@@ -1,4 +1,4 @@
-import { Leaf, Package, Truck, Trash2, Zap } from 'lucide-react'
+import { Leaf, Package, Truck, Recycle, Zap } from 'lucide-react'
 import type { LucideIcon } from 'lucide-react'
 
 export type CategoryKey = 'materials' | 'transport' | 'waste' | 'energy'
@@ -44,7 +44,7 @@ export const CATEGORY_THEME: Record<CategoryOrTotal, CategoryTheme> = {
   },
   waste: {
     label: 'Avfall',
-    Icon: Trash2,
+    Icon: Recycle,
     textStrong: 'text-waste-strong',
     bg: 'bg-waste',
     bgSoft: 'bg-waste-soft',
