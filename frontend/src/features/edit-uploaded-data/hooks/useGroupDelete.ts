@@ -15,6 +15,7 @@ interface UseGroupDeleteOptions<TGroup, TItem> {
   itemsOf: (group: TGroup) => TItem[]
   co2Of: (item: TItem) => number
   deleteFn: (id: number, token: string) => Promise<unknown>
+  successMessage?: string
   errorMessage: string
 }
 
@@ -26,6 +27,7 @@ export function useGroupDelete<TGroup, TItem>({
   itemsOf,
   co2Of,
   deleteFn,
+  successMessage,
   errorMessage,
 }: UseGroupDeleteOptions<TGroup, TItem>) {
   return useOptimisticDelete<TGroup[]>({
@@ -42,6 +44,7 @@ export function useGroupDelete<TGroup, TItem>({
       }
     },
     deleteFn,
+    successMessage,
     errorMessage,
   })
 }
