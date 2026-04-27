@@ -151,6 +151,32 @@ def get_project(project_id: int):
     return jsonify(project.to_dict())
 
 
+@project_bp.route("/<int:project_id>", methods=["PATCH"])
+@require_auth
+@require_project_role((ProjectRole.OWNER, ProjectRole.EDITOR))
+def update_project(project_id: int):
+    """Update the name of the project provided"""
+    payload = request.get_json(silent=True) or {}
+
+    name = (payload.get("name") or "").strip()
+    if not name:
+        raise ApiError(
+            "Prosjektnavn er påkrevd",
+            code="MISSING_FIELD",
+            suggestion="Oppgi et navn for prosjektet",
+        )
+    session = g.db
+    project = session.get(Project, project_id)
+    if not project:
+        raise ApiError("Prosjektet ble ikke funnet", code="NOT_FOUND", status=404)
+    project.name = name
+
+    with db_commit(session, "Kunne ikke oppdatere prosjektet", "SAVE_FAILED"):
+        pass
+    session.refresh(project)
+    return jsonify(project.to_dict())
+
+
 # ---------------------------------------------------------------------------
 # Project calculation settings
 # ---------------------------------------------------------------------------

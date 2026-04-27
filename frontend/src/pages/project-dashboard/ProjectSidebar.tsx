@@ -12,8 +12,12 @@ import {
   User,
   Receipt,
   Settings,
+  Pencil,
 } from 'lucide-react'
+import { Button } from '@/components/ui/button'
+import { Input } from '@/components/ui/input'
 import type { Project } from '@/entities/project'
+import { useUpdateProject } from '@/features/edit-project/hooks/useUpdateProject'
 import { EditProjectSettings } from '@/features/edit-settings'
 import FullscreenDialog from '@/shared/components/FullscreenDialog'
 import ConfidenceGauge from '@/widgets/ConfidenceGauge'
@@ -34,6 +38,27 @@ export default function ProjectSidebar({
 }) {
   const [invoiceOpen, setInvoiceOpen] = useState(false)
   const [settingsOpen, setSettingsOpen] = useState(false)
+  const [isEditingName, setIsEditingName] = useState(false)
+  const [draftName, setDraftName] = useState(project.name)
+
+  const updateProjectMutation = useUpdateProject(project.id)
+
+  function handleStartEditName() {
+    setDraftName(project.name)
+    setIsEditingName(true)
+  }
+
+  function handleCancelEditName() {
+    setDraftName(project.name)
+    setIsEditingName(false)
+  }
+  async function handleSaveName() {
+    const trimmed = draftName.trim()
+    if (!trimmed) return
+
+    await updateProjectMutation.mutateAsync({ name: trimmed })
+    setIsEditingName(false)
+  }
 
   return (
     <div className="flex w-full lg:w-60 shrink-0 flex-col gap-3 self-stretch">
@@ -62,11 +87,58 @@ export default function ProjectSidebar({
           </p>
           <div className="flex items-start gap-2">
             <Building2 className="mt-0.5 h-3.5 w-3.5 shrink-0 text-gray-300" />
-            <div>
+            <div className="flex-1">
               <p className="text-xs text-gray-400">Navn</p>
-              <p className="text-sm font-medium text-gray-800 leading-tight">
-                {project.name}
-              </p>
+
+              {isEditingName ? (
+                <div className="mt-1 space-y-2">
+                  <Input
+                    value={draftName}
+                    onChange={(e) => setDraftName(e.target.value)}
+                    onKeyDown={(e) => {
+                      if (e.key === 'Enter') void handleSaveName()
+                      if (e.key === 'Escape') handleCancelEditName()
+                    }}
+                    disabled={updateProjectMutation.isPending}
+                    autoFocus
+                  />
+                  <div className="flex gap-2">
+                    <Button
+                      size="sm"
+                      onClick={() => void handleSaveName()}
+                      disabled={
+                        updateProjectMutation.isPending || !draftName.trim()
+                      }
+                    >
+                      Lagre
+                    </Button>
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      onClick={handleCancelEditName}
+                      disabled={updateProjectMutation.isPending}
+                    >
+                      Avbryt
+                    </Button>
+                  </div>
+                </div>
+              ) : (
+                <div className="mt-1 flex items-center gap-2">
+                  <p className="text-sm font-medium text-gray-800 leading-tight">
+                    {project.name}
+                  </p>
+                  <Button
+                    type="button"
+                    size="sm"
+                    variant="ghost"
+                    className="h-auto px-2 py-1 text-xs text-gray-500 hover:text-gray-700"
+                    onClick={handleStartEditName}
+                  >
+                    <Pencil className="mr-1 h-3 w-3" />
+                    Rediger
+                  </Button>
+                </div>
+              )}
             </div>
           </div>
           {project.project_number && (
