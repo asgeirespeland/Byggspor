@@ -1,8 +1,8 @@
-import type { EnergyLineItem } from '@/entities/report/types'
-import type { Column } from '@/entities/report/ui/ReportDataTable'
-import { fmt, sourceLabel, confidenceBadge } from '@/entities/report/lib/utils'
+import type { EnergyLineItem } from '@/entities/report'
+import type { DisplayColumn } from '@/shared/types/tableColumn'
+import { fmt, sourceLabel, confidenceBadge } from '@/entities/report'
 
-export const energyColumns: Column<EnergyLineItem>[] = [
+export const energyColumns: DisplayColumn<EnergyLineItem>[] = [
   { header: 'Dato', render: (i) => i.recorded_date ?? '—' },
   { header: 'Prissone', render: (i) => i.price_zone ?? '—' },
   { header: 'kWh', align: 'right', render: (i) => fmt(i.kwh_used) },

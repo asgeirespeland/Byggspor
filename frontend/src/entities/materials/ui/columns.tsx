@@ -4,7 +4,7 @@
  * (post-confirm) and InvoicePreview (pre-confirm) map their domain rows into
  * MaterialRow and feed this same column array.
  */
-import { type Column } from '@/widgets/data-table/DataTable'
+import type { EditableColumn } from '@/shared/types/tableColumn'
 import {
   Tooltip,
   TooltipContent,
@@ -27,7 +27,7 @@ export interface MaterialRow {
   manual_override: boolean
 }
 
-export const materialColumns: Column<MaterialRow>[] = [
+export const materialColumns: EditableColumn<MaterialRow>[] = [
   {
     header: 'Navn',
     width: '40%',

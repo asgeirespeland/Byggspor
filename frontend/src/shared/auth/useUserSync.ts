@@ -7,7 +7,7 @@
 import { useEffect, useState } from 'react'
 import { useAuth } from '@clerk/react'
 import { apiRequest } from '@/shared/api/client'
-import { getOrganization, type OrgDto } from '@/entities/organization/api'
+import { getOrganization, type OrgDto } from '@/entities/organization'
 
 type UserMe = {
   id: number

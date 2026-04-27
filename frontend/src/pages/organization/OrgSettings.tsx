@@ -8,13 +8,11 @@ import {
 } from '@/components/ui/collapsible'
 import { useAppContext } from '@/shared/hooks/useAppContext'
 import ItemListPanel from '@/shared/components/ItemListPanel'
-import OrgSettingsPanel from '@/entities/settings/ui/OrgSettingsPanel'
-import {
-  useOrgMembers,
-  useAddMember,
-} from '@/entities/organization/hooks/useOrgMembers'
+import { EditOrgSettings } from '@/features/edit-settings'
+import { useOrgMembers } from '@/entities/organization'
+import { useAddMember } from '@/features/invite-member'
 import MemberCard from './MemberCard'
-import AddMemberDialog from './AddMemberDialog'
+import { AddMemberDialog } from '@/features/invite-member'
 
 export default function OrgSettings() {
   const { organizationId, organization } = useAppContext()
@@ -52,7 +50,7 @@ export default function OrgSettings() {
           </span>
         </CollapsibleTrigger>
         <CollapsibleContent className="border-t border-gray-100 p-5">
-          <OrgSettingsPanel orgId={organizationId} />
+          <EditOrgSettings orgId={organizationId} />
         </CollapsibleContent>
       </Collapsible>
 

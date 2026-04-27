@@ -7,15 +7,15 @@ import { useParams, useNavigate } from 'react-router-dom'
 import { useState } from 'react'
 import { useDeferredLoading } from '@/shared/hooks/useDeferredLoading'
 import { ArrowLeft, HelpCircle, Loader2, FileText } from 'lucide-react'
-import { useProject } from '@/entities/project/hooks/useProjects'
-import { STATUS_CONFIG } from '@/entities/project/lib/constants'
+import { useProject } from '@/entities/project'
+import { STATUS_CONFIG } from '@/entities/project'
 import TabBar, { type TabDef } from '@/shared/components/TabBar'
-import InvoiceUpload from '@/entities/materials/ui/InvoiceUpload'
-import TransportUpload from '@/entities/transport/ui/TransportUpload'
-import WasteUpload from '@/entities/waste/ui/WasteUpload'
-import EnergyTab from '@/entities/energy/ui/EnergyTab'
-import ReportView from '@/entities/report/ui/ReportView'
-import { useCo2Summary } from '@/entities/report/hooks/useCo2Summary'
+import { MaterialsTab } from '@/widgets/materials-tab'
+import { TransportTab } from '@/widgets/transport-tab'
+import { WasteTab } from '@/widgets/waste-tab'
+import { EnergyTab } from '@/widgets/energy-tab'
+import { ReportView } from '@/widgets/report-view'
+import { useCo2Summary } from '@/entities/report'
 import {
   CATEGORY_THEME,
   CATEGORY_KEYS,
@@ -23,8 +23,8 @@ import {
 } from '@/shared/categories'
 import KpiCard from './KpiCard'
 import ProjectSidebar from './ProjectSidebar'
-import ClimateTabTour from '@/pages/onboarding/ClimateTabTour'
-import { useClimateTabTour } from '@/pages/onboarding/hooks/useClimateTabTour'
+import { ClimateTabTour } from '@/features/climate-tab-tour'
+import { useClimateTabTour } from '@/features/climate-tab-tour'
 
 function formatKg(value: number | undefined): string {
   if (value == null || value === 0) return '—'
@@ -37,9 +37,9 @@ const TAB_RENDERERS: Record<
   Exclude<Tab, 'report'>,
   (projectId: number) => React.ReactNode
 > = {
-  materials: (id) => <InvoiceUpload projectId={id} />,
-  transport: (id) => <TransportUpload projectId={id} />,
-  waste: (id) => <WasteUpload projectId={id} />,
+  materials: (id) => <MaterialsTab projectId={id} />,
+  transport: (id) => <TransportTab projectId={id} />,
+  waste: (id) => <WasteTab projectId={id} />,
   energy: (id) => <EnergyTab projectId={id} />,
 }
 

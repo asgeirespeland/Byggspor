@@ -2,9 +2,9 @@ import { useState } from 'react'
 import { Building2, FolderKanban, User } from 'lucide-react'
 import TabBar, { type TabDef } from '@/shared/components/TabBar'
 import { useAppContext } from '@/shared/hooks/useAppContext'
-import { useProjects } from '@/entities/project/hooks/useProjects'
-import OrgSettingsPanel from '@/entities/settings/ui/OrgSettingsPanel'
-import ProjectSettingsPanel from '@/entities/settings/ui/ProjectSettingsPanel'
+import { useProjects } from '@/entities/project'
+import { EditOrgSettings } from '@/features/edit-settings'
+import { EditProjectSettings } from '@/features/edit-settings'
 
 type Tab = 'personal' | 'organization' | 'projects'
 
@@ -48,7 +48,7 @@ export default function SettingsPage() {
           )}
 
           {activeTab === 'organization' && (
-            <OrgSettingsPanel orgId={organizationId} />
+            <EditOrgSettings orgId={organizationId} />
           )}
 
           {activeTab === 'projects' && (
@@ -81,7 +81,7 @@ export default function SettingsPage() {
               </div>
 
               {selectedProjectId != null && (
-                <ProjectSettingsPanel projectId={selectedProjectId} />
+                <EditProjectSettings projectId={selectedProjectId} />
               )}
 
               {selectedProjectId == null && (

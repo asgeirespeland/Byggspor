@@ -6,7 +6,7 @@ import {
   ChartTooltip,
   type ChartConfig,
 } from '@/components/ui/chart'
-import { fmt } from '@/entities/report/lib/utils'
+import { fmt } from '@/entities/report'
 import { CATEGORY_KEYS, CATEGORY_THEME } from '@/shared/categories'
 
 const CHART_CONFIG: ChartConfig = Object.fromEntries(

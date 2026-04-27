@@ -14,7 +14,7 @@ import {
   FormLabel,
   FormMessage,
 } from '@/components/ui/form'
-import { useCreateOrganization } from '@/entities/organization/hooks/useOrganization'
+import { useCreateOrganization } from '@/features/create-organization'
 
 const schema = z.object({
   name: z.string().min(1, 'Organisasjonsnavn er påkrevd'),

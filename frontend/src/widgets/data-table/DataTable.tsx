@@ -1,27 +1,16 @@
 /**
- * Rich generic table with optional per-column inline edit and per-row delete. Exports Column<T>
- * (re-exported by ParsePreviewShell). Locks column widths via getBoundingClientRect on edit to
- * prevent layout shift. Distinct from the simpler entities/report/ui/ReportDataTable.
+ * Rich generic table with optional per-column inline edit and per-row delete.
+ * Column spec lives in shared/types/tableColumn as EditableColumn.
+ * Locks column widths via getBoundingClientRect on edit to prevent layout shift.
+ * Distinct from the simpler widgets/report-view/ReportDataTable.
  */
 import { useRef, useState } from 'react'
 import { Check, X } from 'lucide-react'
-import RowActions from '@/widgets/data-table/RowActions'
-
-export interface Column<T> {
-  header: string
-  width?: string
-  align?: 'left' | 'right'
-  render: (row: T, index: number) => React.ReactNode
-  editable?: {
-    getValue: (row: T) => string
-    type?: 'text' | 'number' | 'date'
-    /** Custom edit input — overrides the default <input>. */
-    render?: (value: string, onChange: (v: string) => void) => React.ReactNode
-  }
-}
+import { RowActions } from '@/widgets/data-table'
+import type { EditableColumn } from '@/shared/types/tableColumn'
 
 interface DataTableProps<T> {
-  columns: Column<T>[]
+  columns: EditableColumn<T>[]
   rows: T[]
   rowKey: (row: T, index: number) => string | number
   rowClassName?: (row: T, index: number) => string
@@ -112,7 +101,7 @@ export default function DataTable<T>({
   }
 
   const renderEditCell = (
-    col: Column<T>,
+    col: EditableColumn<T>,
     ci: number,
     value: string,
     onChange: (v: string) => void,
