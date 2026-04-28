@@ -22,6 +22,30 @@ export default function OrgSettings() {
   const { data: members = [], isLoading, error } = useOrgMembers(organizationId)
   const addMember = useAddMember(organizationId)
 
+  if (organizationId == null) {
+    return (
+      <div className="space-y-6">
+        <h1 className="text-2xl font-bold text-gray-900">
+          Ingen organisasjon enn&#229;
+        </h1>
+        <div className="rounded-xl border border-gray-200 bg-white p-6 shadow-sm">
+          <div className="flex flex-col items-center justify-center py-12 text-center">
+            <Settings className="mb-3 h-8 w-8 text-gray-300" />
+            <p className="text-sm font-medium text-gray-700">
+              Organisasjonssiden er l&#229;st
+            </p>
+            <p className="mt-2 max-w-md text-sm text-gray-400">
+              Du m&#229; bli invitert til eller opprette en organisasjon for
+              &#229; se medlemmer og organisasjonsinnstillinger.
+            </p>
+          </div>
+        </div>
+      </div>
+    )
+  }
+
+  const orgId = organizationId as number
+
   async function handleAddMember(userId: string, role: string) {
     await addMember.mutateAsync({ userId, role })
     setDialogOpen(false)
@@ -50,7 +74,7 @@ export default function OrgSettings() {
           </span>
         </CollapsibleTrigger>
         <CollapsibleContent className="border-t border-gray-100 p-5">
-          <EditOrgSettings orgId={organizationId} />
+          <EditOrgSettings orgId={orgId} />
         </CollapsibleContent>
       </Collapsible>
 

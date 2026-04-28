@@ -6,6 +6,7 @@
  */
 import { useEffect, useState } from 'react'
 import { useAuth } from '@clerk/react'
+import { useLocation } from 'react-router-dom'
 import { apiRequest } from '@/shared/api/client'
 import { getOrganization, type OrgDto } from '@/entities/organization'
 
@@ -33,6 +34,8 @@ export type SyncState =
  */
 export function useUserSync(): SyncState {
   const { isLoaded, isSignedIn, userId, getToken } = useAuth()
+  const location = useLocation()
+  const isOnboardingRoute = location.pathname === '/onboarding'
   const [sync, setSync] = useState<SyncState>({ status: 'loading' })
 
   useEffect(() => {
@@ -81,7 +84,7 @@ export function useUserSync(): SyncState {
     return () => {
       cancelled = true
     }
-  }, [isLoaded, isSignedIn, userId]) // eslint-disable-line react-hooks/exhaustive-deps
+  }, [isLoaded, isSignedIn, userId, isOnboardingRoute]) // eslint-disable-line react-hooks/exhaustive-deps
 
   return sync
 }

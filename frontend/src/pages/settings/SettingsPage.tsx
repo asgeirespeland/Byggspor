@@ -25,10 +25,35 @@ const TABS: TabDef<Tab>[] = [
 export default function SettingsPage() {
   const [activeTab, setActiveTab] = useState<Tab>('organization')
   const { organizationId } = useAppContext()
-  const { data: projects } = useProjects()
+  const hasOrganization = organizationId != null
+  const { data: projects } = useProjects(hasOrganization)
   const [selectedProjectId, setSelectedProjectId] = useState<number | null>(
     null,
   )
+
+  if (!hasOrganization) {
+    return (
+      <div className="space-y-4">
+        <h1 className="text-2xl font-bold text-gray-900">Innstillinger</h1>
+
+        <div className="rounded-xl border border-gray-200 bg-white p-6 shadow-sm">
+          <div className="flex flex-col items-center justify-center py-12 text-center">
+            <Building2 className="mb-3 h-8 w-8 text-gray-300" />
+            <p className="text-sm font-medium text-gray-700">
+              Organisasjons- og prosjektinnstillinger er ikke tilgjengelige
+              enn&#229;
+            </p>
+            <p className="mt-2 max-w-md text-sm text-gray-400">
+              Disse seksjonene blir tilgjengelige n&#229;r du blir medlem av en
+              organisasjon eller oppretter en selv.
+            </p>
+          </div>
+        </div>
+      </div>
+    )
+  }
+
+  const orgId = organizationId as number
 
   return (
     <div className="space-y-4">
@@ -47,9 +72,7 @@ export default function SettingsPage() {
             </div>
           )}
 
-          {activeTab === 'organization' && (
-            <EditOrgSettings orgId={organizationId} />
-          )}
+          {activeTab === 'organization' && <EditOrgSettings orgId={orgId} />}
 
           {activeTab === 'projects' && (
             <div className="space-y-4">

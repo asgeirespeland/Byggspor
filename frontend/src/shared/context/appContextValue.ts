@@ -2,7 +2,7 @@ import { createContext } from 'react'
 import type { OrgDto } from '@/entities/organization'
 
 export type AppContextValue = {
-  organizationId: number
+  organizationId: number | null
   organization: OrgDto | null
 }
 

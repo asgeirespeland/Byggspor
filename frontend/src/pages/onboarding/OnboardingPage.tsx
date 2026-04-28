@@ -1,5 +1,6 @@
 import { useState } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useAuth, useClerk } from '@clerk/react'
+import { useLocation, useNavigate } from 'react-router-dom'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
@@ -16,26 +17,36 @@ import {
 } from '@/components/ui/form'
 import { useCreateOrganization } from '@/features/create-organization'
 
+function continueWithoutOrgKey(userId: string | null | undefined) {
+  return `continueWithoutOrganization:${userId ?? 'anonymous'}`
+}
+
 const schema = z.object({
-  name: z.string().min(1, 'Organisasjonsnavn er påkrevd'),
+  name: z.string().min(1, 'Organisasjonsnavn er p\u00e5krevd'),
   org_number: z.string(),
 })
 
 type FormValues = z.infer<typeof schema>
 
 export default function OnboardingPage() {
+  const { userId } = useAuth()
+  const { signOut } = useClerk()
+  const location = useLocation()
   const form = useForm<FormValues>({
     resolver: zodResolver(schema),
     defaultValues: { name: '', org_number: '' },
   })
   const [error, setError] = useState('')
   const navigate = useNavigate()
+  const fromLimitedMode = location.state?.fromLimitedMode === true
+  const storageKey = continueWithoutOrgKey(userId)
 
   const createOrg = useCreateOrganization()
 
   async function onSubmit(values: FormValues) {
     setError('')
     try {
+      window.sessionStorage.removeItem(storageKey)
       await createOrg.mutateAsync({
         name: values.name.trim(),
         org_number: values.org_number.trim() || undefined,
@@ -51,8 +62,18 @@ export default function OnboardingPage() {
     }
   }
 
+  async function handleInvitedLater() {
+    window.sessionStorage.removeItem(storageKey)
+    await signOut({ redirectUrl: '/sign-in' })
+  }
+
+  function handleContinueWithoutOrganization() {
+    window.sessionStorage.setItem(storageKey, 'true')
+    navigate('/', { replace: true })
+  }
+
   return (
-    <div className="min-h-screen bg-gray-50 grid place-items-center px-4">
+    <div className="grid min-h-screen place-items-center bg-gray-50 px-4">
       <div className="w-full max-w-md">
         <div className="mb-8 text-center">
           <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-xl bg-green-600">
@@ -62,7 +83,7 @@ export default function OnboardingPage() {
             Opprett din organisasjon
           </h1>
           <p className="mt-2 text-sm text-gray-500">
-            F&oslash;r du kan opprette prosjekter m&aring; du registrere en
+            F&#248;r du kan opprette prosjekter m&#229; du registrere en
             organisasjon.
           </p>
         </div>
@@ -103,7 +124,7 @@ export default function OnboardingPage() {
               />
 
               {error && (
-                <p className="rounded-md bg-danger-soft px-3 py-2 text-sm text-danger-strong border border-danger/20">
+                <p className="rounded-md border border-danger/20 bg-danger-soft px-3 py-2 text-sm text-danger-strong">
                   {error}
                 </p>
               )}
@@ -113,8 +134,38 @@ export default function OnboardingPage() {
                 className="w-full"
                 disabled={createOrg.isPending}
               >
-                {createOrg.isPending ? 'Oppretter…' : 'Kom i gang'}
+                {createOrg.isPending ? 'Oppretter...' : 'Kom i gang'}
               </Button>
+
+              {!fromLimitedMode && (
+                <div className="rounded-lg border border-gray-200 bg-gray-50 px-4 py-3 text-left">
+                  <p className="text-sm font-medium text-gray-800">
+                    Jeg skal bli invitert til en organisasjon
+                  </p>
+                  <p className="mt-1 text-sm text-gray-500">
+                    Hvis noen andre skal legge deg til i en eksisterende
+                    organisasjon, kan du fortsette uten organisasjon og vente
+                    p&#229; invitasjonen, eller logge ut og komme tilbake
+                    senere.
+                  </p>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    className="mt-3 w-full"
+                    onClick={handleContinueWithoutOrganization}
+                  >
+                    Fortsett uten organisasjon
+                  </Button>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    className="mt-2 w-full"
+                    onClick={() => void handleInvitedLater()}
+                  >
+                    Logg ut og vent p&#229; invitasjon
+                  </Button>
+                </div>
+              )}
             </form>
           </Form>
         </div>
