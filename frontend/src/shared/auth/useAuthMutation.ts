@@ -10,6 +10,7 @@ import { getTokenOrThrow } from '@/shared/auth/getToken'
 export function useAuthMutation<TInput, TResult = unknown>(opts: {
   mutationFn: (input: TInput, token: string) => Promise<TResult>
   invalidateKeys?: QueryKey[]
+  removeKeys?: QueryKey[]
   successMessage?: string
   errorMessage?: string
 }) {
@@ -22,6 +23,9 @@ export function useAuthMutation<TInput, TResult = unknown>(opts: {
     onSuccess: () => {
       opts.invalidateKeys?.forEach((key) =>
         queryClient.invalidateQueries({ queryKey: key }),
+      )
+      opts.removeKeys?.forEach((key) =>
+        queryClient.removeQueries({ queryKey: key }),
       )
       if (opts.successMessage) toast.success(opts.successMessage)
     },
