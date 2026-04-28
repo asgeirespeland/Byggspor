@@ -19,6 +19,7 @@ interface UseItemDeleteOptions<TGroup, TItem> {
   idOf: (item: TItem) => number
   co2Of: (item: TItem) => number
   deleteFn: (id: number, token: string) => Promise<unknown>
+  successMessage?: string
   errorMessage: string
 }
 
@@ -32,6 +33,7 @@ export function useItemDelete<TGroup, TItem>({
   idOf,
   co2Of,
   deleteFn,
+  successMessage,
   errorMessage,
 }: UseItemDeleteOptions<TGroup, TItem>) {
   const [groupId, setGroupId] = useState<number | null>(null)
@@ -65,6 +67,7 @@ export function useItemDelete<TGroup, TItem>({
       }
     },
     deleteFn,
+    successMessage,
     errorMessage,
   })
 

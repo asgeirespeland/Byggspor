@@ -18,7 +18,7 @@ const COLUMNS: Column<TransportLineItem>[] = [
   { header: 'Til', render: (i) => i.end_address ?? '—' },
   { header: 'Km', align: 'right', render: (i) => fmt(i.distance_km) },
   {
-    header: 'CO₂ (kg)',
+    header: 'CO₂e (kg)',
     align: 'right',
     render: (i) => <span className="font-medium">{fmt(i.total_co2_kg)}</span>,
   },

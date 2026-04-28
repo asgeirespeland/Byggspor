@@ -19,7 +19,7 @@ const COLUMNS: Column<MaterialLineItem>[] = [
     render: (i) => fmt(i.gwp_per_unit, 4),
   },
   {
-    header: 'CO₂ (kg)',
+    header: 'CO₂e (kg)',
     align: 'right',
     render: (i) => co2Label(i.total_co2_kg),
   },

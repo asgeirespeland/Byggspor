@@ -49,6 +49,7 @@ export function useDeleteWasteItem(projectId: number) {
     idOf: (item) => item.id,
     co2Of: (item) => item.total_co2_kg ?? 0,
     deleteFn: deleteWasteItem,
+    successMessage: 'Avfallspost slettet',
     errorMessage: 'Kunne ikke slette avfallsposten',
   })
 
@@ -71,6 +72,7 @@ export function useDeleteWasteReport(projectId: number) {
     itemsOf: (g) => g.items,
     co2Of: (item) => item.total_co2_kg ?? 0,
     deleteFn: deleteWasteReport,
+    successMessage: 'Avfallsrapport slettet',
     errorMessage: 'Kunne ikke slette avfallsrapporten',
   })
 

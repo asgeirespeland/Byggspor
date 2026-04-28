@@ -109,7 +109,7 @@ export default function ReportView({ projectId }: { projectId: number }) {
           </div>
 
           {/* Category sections */}
-          {CATEGORY_KEYS.map((key, idx) => {
+          {CATEGORY_KEYS.map((key) => {
             const theme = CATEGORY_THEME[key]
             return (
               <Section
@@ -119,7 +119,7 @@ export default function ReportView({ projectId }: { projectId: number }) {
                 totalCo2={categories[key].total_co2_kg}
                 entryCount={categories[key].entry_count}
                 avgConfidence={categories[key].avg_confidence}
-                defaultOpen={idx === 0}
+                defaultOpen={false}
               >
                 {key === 'materials' ? (
                   <MaterialsSection items={categories.materials.items} />

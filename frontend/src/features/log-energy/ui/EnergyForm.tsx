@@ -25,26 +25,33 @@ interface EnergyFormProps {
   onSubmit: (data: {
     kwh: number
     priceZone: PriceZone | ''
-    recordedDate: string
+    periodStart: string
+    periodEnd: string
   }) => void
   isPending: boolean
   error: Error | null
 }
 
-const schema = z.object({
-  kwh: z
-    .string()
-    .min(1, 'Påkrevd')
-    .refine(
-      (v) => {
-        const n = Number(v)
-        return Number.isFinite(n) && n >= 0
-      },
-      { message: 'Må være et ikke-negativt tall' },
-    ),
-  priceZone: z.string(),
-  recordedDate: z.string(),
-})
+const schema = z
+  .object({
+    kwh: z
+      .string()
+      .min(1, 'Påkrevd')
+      .refine(
+        (v) => {
+          const n = Number(v)
+          return Number.isFinite(n) && n >= 0
+        },
+        { message: 'Må være et ikke-negativt tall' },
+      ),
+    priceZone: z.string(),
+    periodStart: z.string(),
+    periodEnd: z.string(),
+  })
+  .refine(
+    (d) => !d.periodStart || !d.periodEnd || d.periodStart <= d.periodEnd,
+    { message: 'Startdato må være før sluttdato', path: ['periodStart'] },
+  )
 
 type FormValues = z.infer<typeof schema>
 
@@ -61,7 +68,8 @@ export default function EnergyForm({
     defaultValues: {
       kwh: '',
       priceZone: '',
-      recordedDate: new Date().toISOString().split('T')[0],
+      periodStart: '',
+      periodEnd: new Date().toISOString().split('T')[0],
     },
   })
 
@@ -69,7 +77,8 @@ export default function EnergyForm({
     onSubmit({
       kwh: Number(values.kwh),
       priceZone: values.priceZone as PriceZone | '',
-      recordedDate: values.recordedDate,
+      periodStart: values.periodStart,
+      periodEnd: values.periodEnd,
     })
     form.reset({ ...values, kwh: '' })
   }
@@ -79,7 +88,7 @@ export default function EnergyForm({
   return (
     <Form {...form}>
       <form onSubmit={form.handleSubmit(handleValid)} className="space-y-4">
-        <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
           <FormField
             control={form.control}
             name="kwh"
@@ -135,10 +144,23 @@ export default function EnergyForm({
           />
           <FormField
             control={form.control}
-            name="recordedDate"
+            name="periodStart"
             render={({ field }) => (
               <FormItem className="space-y-1.5">
-                <FormLabel>Dato (valgfritt)</FormLabel>
+                <FormLabel>Periode fra (valgfritt)</FormLabel>
+                <FormControl>
+                  <Input type="date" {...field} />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+          <FormField
+            control={form.control}
+            name="periodEnd"
+            render={({ field }) => (
+              <FormItem className="space-y-1.5">
+                <FormLabel>Periode til</FormLabel>
                 <FormControl>
                   <Input type="date" {...field} />
                 </FormControl>

@@ -43,6 +43,7 @@ export function useDeleteInvoice(projectId: number) {
     itemsOf: (g) => g.items,
     co2Of: (item) => item.total_co2_kg ?? 0,
     deleteFn: deleteInvoice,
+    successMessage: 'Faktura slettet',
     errorMessage: 'Kunne ikke slette faktura',
   })
 
@@ -67,6 +68,7 @@ export function useDeleteMaterial(projectId: number) {
     idOf: (item) => item.id,
     co2Of: (item) => item.total_co2_kg ?? 0,
     deleteFn: deleteMaterial,
+    successMessage: 'Materialpost slettet',
     errorMessage: 'Kunne ikke slette materialposten',
   })
 

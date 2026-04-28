@@ -67,6 +67,7 @@ def calculate_energy():
             suggestion="Velg en prissone fra NO1 til NO5.",
         )
 
+    period_start = optional_date(payload, "period_start")
     recorded_date = optional_date(payload, "recorded_date")
     cost_per_kwh = (
         parse_float(
@@ -90,6 +91,7 @@ def calculate_energy():
         kwh_used=kwh_used,
         grid_emission_factor=emission_factor,
         total_co2_kg=total_co2_kg,
+        period_start=period_start,
         recorded_date=recorded_date,
         cost_per_kwh=cost_per_kwh,
         confidence_score=ENERGY_CONFIDENCE,
@@ -143,6 +145,9 @@ def update_energy(energy_id: int):
                 suggestion="Velg en prissone fra NO1 til NO5.",
             )
         energy.price_zone = pz
+
+    if "period_start" in payload:
+        energy.period_start = optional_date(payload, "period_start")
 
     if "recorded_date" in payload:
         energy.recorded_date = optional_date(payload, "recorded_date")

@@ -4,7 +4,7 @@
  * Each tab's content is declared inline on the TABS array via the render field on TabDef.
  */
 import { useParams, useNavigate } from 'react-router-dom'
-import { useState } from 'react'
+import { useState, useRef, useCallback } from 'react'
 import { useDeferredLoading } from '@/shared/hooks/useDeferredLoading'
 import { ArrowLeft, HelpCircle, Loader2, FileText } from 'lucide-react'
 import { useProject } from '@/entities/project'
@@ -25,6 +25,14 @@ import KpiCard from './KpiCard'
 import ProjectSidebar from './ProjectSidebar'
 import { ClimateTabTour } from '@/features/climate-tab-tour'
 import { useClimateTabTour } from '@/features/climate-tab-tour'
+import { PendingUploadContext } from '@/shared/context/PendingUploadContext'
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog'
+import { Button } from '@/components/ui/button'
 
 function formatKg(value: number | undefined): string {
   if (value == null || value === 0) return '—'
@@ -83,10 +91,41 @@ export default function ProjectDashboard() {
   const { projectId } = useParams<{ projectId: string }>()
   const navigate = useNavigate()
   const [activeTab, setActiveTab] = useState<Tab>('materials')
+  const [requestedTab, setRequestedTab] = useState<Tab | null>(null)
+  const pendingConfirmRef = useRef<(() => void) | null>(null)
   const { data: project, isLoading, error } = useProject(Number(projectId))
   const { data: co2 } = useCo2Summary(Number(projectId))
   const showLoading = useDeferredLoading(isLoading)
   const tour = useClimateTabTour()
+
+  const register = useCallback((onConfirm: () => void) => {
+    pendingConfirmRef.current = onConfirm
+  }, [])
+
+  const unregister = useCallback(() => {
+    pendingConfirmRef.current = null
+  }, [])
+
+  function handleTabChange(tab: Tab) {
+    if (pendingConfirmRef.current) {
+      setRequestedTab(tab)
+    } else {
+      setActiveTab(tab)
+    }
+  }
+
+  function handleSaveAndSwitch() {
+    pendingConfirmRef.current?.()
+    pendingConfirmRef.current = null
+    if (requestedTab) setActiveTab(requestedTab)
+    setRequestedTab(null)
+  }
+
+  function handleDiscardAndSwitch() {
+    pendingConfirmRef.current = null
+    if (requestedTab) setActiveTab(requestedTab)
+    setRequestedTab(null)
+  }
 
   if (showLoading) {
     return (
@@ -181,12 +220,14 @@ export default function ProjectDashboard() {
             <TabBar
               tabs={tabs}
               activeTab={activeTab}
-              onTabChange={setActiveTab}
+              onTabChange={handleTabChange}
               scrollDeps={[isLoading]}
             />
-            <div className="p-6 min-h-[30rem]">
-              {tabs.find((t) => t.id === activeTab)?.render?.()}
-            </div>
+            <PendingUploadContext.Provider value={{ register, unregister }}>
+              <div className="p-6 min-h-[30rem]">
+                {tabs.find((t) => t.id === activeTab)?.render?.()}
+              </div>
+            </PendingUploadContext.Provider>
           </div>
         </div>
 
@@ -207,6 +248,33 @@ export default function ProjectDashboard() {
         onPrev={tour.prev}
         onClose={tour.close}
       />
+
+      <Dialog
+        open={requestedTab !== null}
+        onOpenChange={() => setRequestedTab(null)}
+      >
+        <DialogContent className="sm:max-w-sm">
+          <DialogHeader>
+            <DialogTitle>Ulagrede endringer</DialogTitle>
+          </DialogHeader>
+          <p className="text-sm text-gray-500">
+            Du har analysert en fil som ikke er lagret ennå. Vil du lagre den
+            før du bytter fane?
+          </p>
+          <div className="flex justify-end gap-2 pt-2">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={handleDiscardAndSwitch}
+            >
+              Bytt uten å lagre
+            </Button>
+            <Button size="sm" onClick={handleSaveAndSwitch}>
+              Lagre og bytt
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   )
 }
