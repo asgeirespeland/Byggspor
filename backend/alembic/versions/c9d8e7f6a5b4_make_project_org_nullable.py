@@ -25,13 +25,8 @@ def upgrade():
 
 
 def downgrade():
-    op.execute(
-        """
-        UPDATE projects
-        SET organization_id = customer_id
-        WHERE organization_id IS NULL AND customer_id IS NOT NULL
-        """
-    )
+    # Projects created without an org cannot exist in the pre-nullable world.
+    op.execute("DELETE FROM projects WHERE organization_id IS NULL")
     with op.batch_alter_table("projects") as batch_op:
         batch_op.alter_column(
             "organization_id",

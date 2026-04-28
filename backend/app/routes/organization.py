@@ -171,20 +171,30 @@ def search_member_candidates(organization_id: int):
     if not query:
         return jsonify([])
 
-    pattern = f"%{query}%"
+    escaped = query.replace("\\", "\\\\").replace("%", "\\%").replace("_", "\\_")
+    pattern = f"%{escaped}%"
     existing_member_ids = (
         session.query(OrganizationMember.user_id)
         .filter(OrganizationMember.organization_id == organization_id)
         .subquery()
     )
 
+    username_query = query.lstrip("@")
     users = (
         session.query(User)
         .filter(
             ~User.id.in_(existing_member_ids),
-            or_(User.name.ilike(pattern), User.email.ilike(pattern)),
+            or_(
+                User.name.ilike(pattern, escape="\\"),
+                User.email.ilike(pattern, escape="\\"),
+                User.username.ilike(pattern, escape="\\"),
+            ),
         )
-        .order_by(User.name.asc(), User.email.asc())
+        .order_by(
+            (User.username == username_query).desc(),
+            User.name.asc(),
+            User.email.asc(),
+        )
         .limit(10)
         .all()
     )
@@ -194,6 +204,7 @@ def search_member_candidates(organization_id: int):
             {
                 "id": user.id,
                 "name": user.name,
+                "username": user.username,
                 "email": user.email,
                 "phone": user.phone,
             }

@@ -50,7 +50,7 @@ def create_project():
     name = payload.get("name", "").strip()
     if not name:
         raise ApiError(
-            "Prosjektnavn er pÃ¥krevd.",
+            "Prosjektnavn er påkrevd.",
             code="MISSING_FIELD",
             suggestion="Oppgi et navn for prosjektet.",
         )
@@ -90,7 +90,7 @@ def create_project():
         session,
         "Kunne ikke opprette prosjektet.",
         "SAVE_FAILED",
-        integrity_msg="Kunne ikke opprette prosjektet â€” duplikat eller ugyldig data.",
+        integrity_msg="Kunne ikke opprette prosjektet — duplikat eller ugyldig data.",
     ):
         pass
 
@@ -161,7 +161,7 @@ def update_project(project_id: int):
     name = (payload.get("name") or "").strip()
     if not name:
         raise ApiError(
-            "Prosjektnavn er pÃ¥krevd",
+            "Prosjektnavn er påkrevd",
             code="MISSING_FIELD",
             suggestion="Oppgi et navn for prosjektet",
         )
@@ -187,7 +187,7 @@ def delete_project(project_id: int):
     if not project:
         raise ApiError("Prosjektet ble ikke funnet.", code="NOT_FOUND", status=404)
 
-    # Invoices/reports have no DB-level CASCADE â€” they can be shared across projects.
+    # Invoices/reports have no DB-level CASCADE — they can be shared across projects.
     # Compute which ones become orphaned before we delete anything.
     def _orphan_source_ids(link_model, source_col):
         this_ids = {
@@ -329,7 +329,7 @@ def delete_project_setting(project_id: int, key: str):
 
     if not project.settings or key not in project.settings:
         raise ApiError(
-            f"Innstillingen '{key}' er ikke overstyrt pÃ¥ prosjektnivÃ¥.",
+            f"Innstillingen '{key}' er ikke overstyrt på prosjektnivå.",
             code="NOT_FOUND",
             status=404,
         )

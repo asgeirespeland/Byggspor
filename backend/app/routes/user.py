@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+import re
+
 from flask import Blueprint, g, jsonify, request
 
 from app.errors import ApiError
@@ -7,6 +9,8 @@ from app.middleware.auth import require_auth
 from app.models.organization_member import OrganizationMember
 from app.models.user import User
 from app.utils.db import db_commit
+
+_USERNAME_RE = re.compile(r"^[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,37}[a-zA-Z0-9])?$")
 
 user_bp = Blueprint("users", __name__, url_prefix="/users")
 
@@ -41,7 +45,7 @@ def get_me():
 def update_user(user_id: int):
     """Update user fields with self-service + system-admin override rules."""
     payload = request.get_json(silent=True) or {}
-    allowed_self_fields = {"name", "phone"}
+    allowed_self_fields = {"name", "phone", "username"}
     allowed_admin_fields = {"is_system_admin"}
 
     session = g.db
@@ -77,8 +81,32 @@ def update_user(user_id: int):
                 status=403,
             )
 
+    if "username" in payload:
+        raw = payload["username"]
+        if raw is None:
+            target_user.username = None
+        else:
+            uname = str(raw).strip()
+            if not _USERNAME_RE.match(uname):
+                raise ApiError(
+                    "Ugyldig brukernavn (1–39 tegn, bokstaver, tall og bindestreker).",
+                    code="INVALID_FIELD",
+                )
+            existing = (
+                session.query(User)
+                .filter(User.username == uname, User.id != target_user.id)
+                .one_or_none()
+            )
+            if existing:
+                raise ApiError(
+                    "Brukernavnet er allerede i bruk.",
+                    code="CONFLICT",
+                    status=409,
+                )
+            target_user.username = uname
+
     # All permission checks passed — now apply mutations.
-    for field in allowed_self_fields:
+    for field in allowed_self_fields - {"username"}:
         if field in payload:
             setattr(target_user, field, payload[field])
 
