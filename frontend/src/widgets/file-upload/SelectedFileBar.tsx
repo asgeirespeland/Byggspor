@@ -19,15 +19,15 @@ export default function SelectedFileBar({
   onClear,
 }: SelectedFileBarProps) {
   return (
-    <div className="flex items-center gap-3 rounded-xl border border-gray-200 bg-gray-50 px-4 py-3">
-      <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg border border-gray-200 bg-white">
-        <FileX className="h-4 w-4 text-gray-400" />
+    <div className="flex items-center gap-3 rounded-xl border border-border bg-muted/50 px-4 py-3">
+      <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg border border-border bg-card">
+        <FileX className="h-4 w-4 text-muted-foreground" />
       </div>
       <div className="min-w-0 flex-1">
-        <p className="truncate text-sm font-medium text-gray-800">
+        <p className="truncate text-sm font-medium text-foreground">
           {file.name}
         </p>
-        <p className="text-xs text-gray-400">
+        <p className="text-xs text-muted-foreground">
           {(file.size / 1024).toFixed(1)} KB
         </p>
       </div>

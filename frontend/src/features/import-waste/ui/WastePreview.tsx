@@ -75,22 +75,22 @@ export default function WastePreview({
         })
       }}
       metadata={
-        <div className="flex flex-wrap gap-x-6 gap-y-1 text-sm text-gray-600">
+        <div className="flex flex-wrap gap-x-6 gap-y-1 text-sm text-muted-foreground">
           {data.receiver?.name && (
             <span>
-              <span className="font-medium text-gray-800">Mottaker:</span>{' '}
+              <span className="font-medium text-foreground">Mottaker:</span>{' '}
               {data.receiver.name}
             </span>
           )}
           {data.issue_date && (
             <span>
-              <span className="font-medium text-gray-800">Dato:</span>{' '}
+              <span className="font-medium text-foreground">Dato:</span>{' '}
               {data.issue_date}
             </span>
           )}
           {data.report_id && (
             <span>
-              <span className="font-medium text-gray-800">Rapport:</span>{' '}
+              <span className="font-medium text-foreground">Rapport:</span>{' '}
               {data.report_id}
             </span>
           )}
@@ -98,7 +98,7 @@ export default function WastePreview({
       }
       badges={
         <>
-          <span className="rounded-full bg-gray-100 px-3 py-1 text-xs font-medium text-gray-600">
+          <span className="rounded-full bg-muted px-3 py-1 text-xs font-medium text-muted-foreground">
             {rows.length} poster
           </span>
           {flaggedCount > 0 && (

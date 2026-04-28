@@ -21,7 +21,7 @@ export const tripColumns: EditableColumn<TripRow>[] = [
     header: 'Sjåfør',
     width: '15%',
     render: (row) => (
-      <span className="text-gray-800">{row.driver_name ?? '—'}</span>
+      <span className="text-foreground">{row.driver_name ?? '—'}</span>
     ),
     editable: {
       type: 'text',
@@ -31,7 +31,7 @@ export const tripColumns: EditableColumn<TripRow>[] = [
   {
     header: 'Dato',
     render: (row) => (
-      <span className="text-gray-500 text-xs">
+      <span className="text-muted-foreground text-xs">
         {row.trip_date
           ? new Date(row.trip_date + 'T00:00:00').toLocaleDateString('nb-NO')
           : '—'}
@@ -46,7 +46,7 @@ export const tripColumns: EditableColumn<TripRow>[] = [
     header: 'Rute',
     width: '25%',
     render: (row) => (
-      <span className="text-gray-600">
+      <span className="text-muted-foreground">
         {row.start_address && row.end_address
           ? `${row.start_address} → ${row.end_address}`
           : '—'}
@@ -57,10 +57,12 @@ export const tripColumns: EditableColumn<TripRow>[] = [
     header: 'Reg.nr',
     width: '10%',
     render: (row) => (
-      <span className="font-mono text-xs text-gray-600">
+      <span className="font-mono text-xs text-muted-foreground">
         {row.registration_number ?? '—'}
         {row.vehicle_make && (
-          <span className="ml-1 text-gray-400">({row.vehicle_make})</span>
+          <span className="ml-1 text-muted-foreground">
+            ({row.vehicle_make})
+          </span>
         )}
       </span>
     ),
@@ -70,7 +72,7 @@ export const tripColumns: EditableColumn<TripRow>[] = [
     width: '8%',
     align: 'right',
     render: (row) => (
-      <span className="text-gray-800">
+      <span className="text-foreground">
         {row.distance_km?.toLocaleString('nb-NO', {
           maximumFractionDigits: 1,
         }) ?? '—'}
@@ -87,7 +89,7 @@ export const tripColumns: EditableColumn<TripRow>[] = [
     width: '10%',
     align: 'right',
     render: (row) => (
-      <span className="text-gray-800">
+      <span className="text-foreground">
         {row.total_co2_kg?.toLocaleString('nb-NO', {
           maximumFractionDigits: 2,
         }) ?? '—'}

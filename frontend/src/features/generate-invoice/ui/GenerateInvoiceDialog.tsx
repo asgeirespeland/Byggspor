@@ -52,12 +52,14 @@ export default function GenerateInvoiceDialog({
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="w-[95vw] max-w-[95vw] sm:max-w-[95vw] max-h-[95vh] overflow-y-auto p-0 gap-0">
-        <DialogHeader className="flex flex-row items-center px-6 py-4 border-b border-gray-200 sticky top-0 bg-white z-10">
+        <DialogHeader className="flex flex-row items-center px-6 py-4 border-b border-border sticky top-0 bg-card z-10">
           <div>
-            <DialogTitle className="text-base font-semibold text-gray-900">
+            <DialogTitle className="text-base font-semibold text-foreground">
               Generer EHF-faktura
             </DialogTitle>
-            <p className="text-xs text-gray-400 mt-0.5">{project.name}</p>
+            <p className="text-xs text-muted-foreground mt-0.5">
+              {project.name}
+            </p>
           </div>
         </DialogHeader>
 
@@ -84,7 +86,7 @@ export default function GenerateInvoiceDialog({
           )}
         </div>
 
-        <div className="sticky bottom-0 flex items-center justify-between gap-3 border-t border-gray-200 bg-white px-6 py-4">
+        <div className="sticky bottom-0 flex items-center justify-between gap-3 border-t border-border bg-card px-6 py-4">
           <div className="flex items-center gap-2">
             <Button variant="outline" size="sm" disabled={isPending}>
               Lagre utkast

@@ -24,12 +24,12 @@ interface DataTableProps<T> {
 }
 
 const INPUT =
-  'w-full rounded border border-gray-300 px-2 text-sm h-7 focus:outline-none focus:ring-1 focus:ring-gray-400 [appearance:textfield] [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none'
+  'w-full rounded border border-border px-2 text-sm h-7 focus:outline-none focus:ring-1 focus:ring-ring [appearance:textfield] [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none'
 
-const DEFAULT_THEAD = 'border-b border-gray-200 bg-gray-50'
+const DEFAULT_THEAD = 'border-b border-border bg-muted/50'
 const DEFAULT_TBODY = 'divide-y divide-gray-100'
 const DEFAULT_TH =
-  'px-4 py-3 text-xs font-semibold uppercase tracking-wide text-gray-400'
+  'px-4 py-3 text-xs font-semibold uppercase tracking-wide text-muted-foreground'
 
 export default function DataTable<T>({
   columns,
@@ -218,7 +218,7 @@ export default function DataTable<T>({
                     <button
                       type="button"
                       onClick={cancelEdit}
-                      className="text-gray-400 hover:text-gray-600"
+                      className="text-muted-foreground hover:text-muted-foreground"
                     >
                       <X className="h-3.5 w-3.5" />
                     </button>

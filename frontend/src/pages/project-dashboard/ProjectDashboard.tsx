@@ -129,7 +129,7 @@ export default function ProjectDashboard() {
 
   if (showLoading) {
     return (
-      <div className="flex items-center justify-center gap-2 py-24 text-gray-400">
+      <div className="flex items-center justify-center gap-2 py-24 text-muted-foreground">
         <Loader2 className="h-5 w-5 animate-spin" />
         <span className="text-sm">Laster prosjekt…</span>
       </div>
@@ -146,7 +146,7 @@ export default function ProjectDashboard() {
         </p>
         <button
           type="button"
-          className="mt-3 text-xs text-gray-400 underline"
+          className="mt-3 text-xs text-muted-foreground underline"
           onClick={() => navigate('/')}
         >
           Tilbake til dashboard
@@ -165,13 +165,13 @@ export default function ProjectDashboard() {
         <button
           type="button"
           onClick={() => navigate('/')}
-          className="flex items-center gap-1.5 text-sm text-gray-400 transition-colors hover:text-gray-700"
+          className="flex items-center gap-1.5 text-sm text-muted-foreground transition-colors hover:text-muted-foreground"
         >
           <ArrowLeft className="h-4 w-4" />
           Tilbake
         </button>
-        <span className="text-gray-300">/</span>
-        <span className="text-sm font-medium text-gray-700">
+        <span className="text-muted-foreground">/</span>
+        <span className="text-sm font-medium text-muted-foreground">
           {project.name}
         </span>
         <span
@@ -185,7 +185,7 @@ export default function ProjectDashboard() {
           type="button"
           onClick={tour.restart}
           title="Vis omvisning"
-          className="ml-auto flex items-center gap-1 rounded-md px-2 py-1 text-xs text-gray-400 transition-colors hover:bg-gray-100 hover:text-gray-600"
+          className="ml-auto flex items-center gap-1 rounded-md px-2 py-1 text-xs text-muted-foreground transition-colors hover:bg-muted hover:text-muted-foreground"
         >
           <HelpCircle className="h-3.5 w-3.5" />
           Omvisning
@@ -216,7 +216,7 @@ export default function ProjectDashboard() {
           </div>
 
           {/* Tabbed panel */}
-          <div className="rounded-xl border border-gray-200 bg-white shadow-sm overflow-hidden">
+          <div className="rounded-xl border border-border bg-card shadow-sm overflow-hidden">
             <TabBar
               tabs={tabs}
               activeTab={activeTab}
@@ -257,7 +257,7 @@ export default function ProjectDashboard() {
           <DialogHeader>
             <DialogTitle>Ulagrede endringer</DialogTitle>
           </DialogHeader>
-          <p className="text-sm text-gray-500">
+          <p className="text-sm text-muted-foreground">
             Du har analysert en fil som ikke er lagret ennå. Vil du lagre den
             før du bytter fane?
           </p>

@@ -67,8 +67,8 @@ export default function FileUploadShell<TData>({
   return (
     <div className="space-y-4">
       <div>
-        <h3 className="text-base font-semibold text-gray-900">{title}</h3>
-        <p className="mt-0.5 text-sm text-gray-500">{description}</p>
+        <h3 className="text-base font-semibold text-foreground">{title}</h3>
+        <p className="mt-0.5 text-sm text-muted-foreground">{description}</p>
       </div>
 
       {!selectedFile && !data && (
@@ -105,7 +105,7 @@ export default function FileUploadShell<TData>({
             <button
               type="button"
               onClick={clear}
-              className="text-sm text-gray-400 underline hover:text-gray-600"
+              className="text-sm text-muted-foreground underline hover:text-muted-foreground"
             >
               Last opp ny fil
             </button>

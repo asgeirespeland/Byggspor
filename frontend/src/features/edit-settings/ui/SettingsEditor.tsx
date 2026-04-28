@@ -75,7 +75,7 @@ function EditorContent({
               onResetAll()
             }}
             disabled={saving || (!hasOverrides && !hasDraftChanges)}
-            className="inline-flex items-center gap-1.5 rounded-md border border-gray-300 bg-white px-3 py-1.5 text-sm text-gray-700 hover:bg-gray-50 disabled:opacity-50"
+            className="inline-flex items-center gap-1.5 rounded-md border border-border bg-card px-3 py-1.5 text-sm text-muted-foreground hover:bg-muted/50 disabled:opacity-50"
           >
             <RotateCcw className="h-3.5 w-3.5" />
             Tilbakestill til standardverdier
@@ -85,7 +85,7 @@ function EditorContent({
           type="button"
           onClick={handleSave}
           disabled={saving || !hasDraftChanges}
-          className="inline-flex items-center gap-1.5 rounded-md bg-primary px-3 py-1.5 text-sm font-medium text-white hover:bg-primary/90 disabled:opacity-50"
+          className="inline-flex items-center gap-1.5 rounded-md bg-primary px-3 py-1.5 text-sm font-medium text-primary-foreground hover:bg-primary/90 disabled:opacity-50"
         >
           {saving ? (
             <Loader2 className="h-3.5 w-3.5 animate-spin" />
@@ -100,14 +100,14 @@ function EditorContent({
         {SETTING_GROUPS.map((group) => (
           <div
             key={group.title}
-            className="rounded-lg border border-gray-200 bg-white"
+            className="rounded-lg border border-border bg-card"
           >
-            <div className="px-4 py-3 border-b border-gray-100">
-              <h3 className="text-sm font-medium text-gray-700">
+            <div className="px-4 py-3 border-b border-border">
+              <h3 className="text-sm font-medium text-muted-foreground">
                 {group.title}
               </h3>
             </div>
-            <div className="px-4 divide-y divide-gray-100">
+            <div className="px-4 divide-y divide-border">
               {group.settings.map((meta) => {
                 const resolved = settings[meta.key]
                 if (!resolved) return null
@@ -140,7 +140,7 @@ export default function SettingsEditor({
 }: SettingsEditorProps) {
   if (loading || !settings) {
     return (
-      <div className="flex items-center justify-center gap-2 py-12 text-gray-400">
+      <div className="flex items-center justify-center gap-2 py-12 text-muted-foreground">
         <Loader2 className="h-5 w-5 animate-spin" />
         <span className="text-sm">Laster innstillinger…</span>
       </div>

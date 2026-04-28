@@ -37,36 +37,38 @@ export default function ProjectCardDrawer({
   }
 
   return (
-    <div className="border-t border-gray-100 bg-gray-50/60 px-5 py-4">
+    <div className="border-t border-border bg-muted/40 px-5 py-4">
       <div className="flex flex-wrap items-center gap-6">
         <div className="space-y-2 text-sm">
           <div className="flex items-center gap-2">
-            <span className="w-20 text-xs text-gray-400">Kunde</span>
-            <span className="text-gray-700">
+            <span className="w-20 text-xs text-muted-foreground">Kunde</span>
+            <span className="text-muted-foreground">
               {project.customer_name ?? '—'}
             </span>
           </div>
           <div className="flex items-center gap-2">
-            <span className="w-20 text-xs text-gray-400">Status</span>
-            <span className="text-gray-700">{status.label}</span>
+            <span className="w-20 text-xs text-muted-foreground">Status</span>
+            <span className="text-muted-foreground">{status.label}</span>
           </div>
           <div className="flex items-center gap-2">
-            <span className="w-20 text-xs text-gray-400">Opprettet</span>
-            <span className="text-gray-700">{createdDate}</span>
+            <span className="w-20 text-xs text-muted-foreground">
+              Opprettet
+            </span>
+            <span className="text-muted-foreground">{createdDate}</span>
           </div>
         </div>
 
         {confidenceScore != null ? (
           <ResponsiveConfidenceGauge score={Math.round(confidenceScore)} />
         ) : (
-          <p className="text-xs text-gray-400">Ingen data</p>
+          <p className="text-xs text-muted-foreground">Ingen data</p>
         )}
 
         <div className="ml-auto flex shrink-0 items-center gap-2">
           <Button
             size="sm"
             variant="ghost"
-            className="gap-1.5 text-gray-400 hover:bg-red-50 hover:text-red-600"
+            className="gap-1.5 text-muted-foreground hover:bg-red-50 hover:text-red-600"
             onClick={(e) => {
               e.stopPropagation()
               setDeleteOpen(true)

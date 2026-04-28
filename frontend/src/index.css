@@ -50,6 +50,11 @@
   --carbon: #34d399;
   --carbon-strong: #059669;
 
+  /* Gauge SVG */
+  --gauge-track: #e5e7eb;
+  --gauge-text: #111827;
+  --gauge-subtext: #9ca3af;
+
   --background: oklch(1 0 0);
   --foreground: oklch(0.145 0 0);
   --card: oklch(1 0 0);
@@ -91,8 +96,8 @@
   --card-foreground: oklch(0.985 0 0);
   --popover: oklch(0.205 0 0);
   --popover-foreground: oklch(0.985 0 0);
-  --primary: oklch(0.922 0 0);
-  --primary-foreground: oklch(0.205 0 0);
+  --primary: oklch(0.97 0 0);
+  --primary-foreground: oklch(0.145 0 0);
   --secondary: oklch(0.269 0 0);
   --secondary-foreground: oklch(0.985 0 0);
   --muted: oklch(0.269 0 0);
@@ -116,6 +121,34 @@
   --sidebar-accent-foreground: oklch(0.985 0 0);
   --sidebar-border: oklch(1 0 0 / 10%);
   --sidebar-ring: oklch(0.556 0 0);
+
+  /* Domain soft backgrounds — low-opacity tints that work on any dark surface */
+  --materials-soft: rgba(59, 130, 246, 0.15);
+  --transport-soft: rgba(249, 115, 22, 0.15);
+  --waste-soft: rgba(217, 70, 239, 0.15);
+  --energy-soft: rgba(234, 179, 8, 0.15);
+  --total-soft: rgba(16, 185, 129, 0.15);
+
+  /* Semantic soft backgrounds */
+  --success-soft: rgba(16, 185, 129, 0.15);
+  --warning-soft: rgba(245, 158, 11, 0.15);
+  --danger-soft: rgba(239, 68, 68, 0.15);
+  --info-soft: rgba(59, 130, 246, 0.15);
+
+  /* Domain strong text — lightened to 400-level for dark backgrounds */
+  --materials-strong: #60a5fa;
+  --transport-strong: #fb923c;
+  --waste-strong: #e879f9;
+  --energy-strong: #facc15;
+  --total-strong: #34d399;
+  --warning-strong: #fbbf24;
+  --danger-strong: #f87171;
+  --success-strong: #34d399;
+
+  /* Gauge SVG */
+  --gauge-track: oklch(0.3 0 0);
+  --gauge-text: oklch(0.985 0 0);
+  --gauge-subtext: oklch(0.556 0 0);
 }
 
 @theme inline {
@@ -194,6 +227,9 @@
 @layer base {
   * {
     @apply border-border outline-ring/50;
+    transition-property: color, background-color, border-color, fill, stroke;
+    transition-duration: 200ms;
+    transition-timing-function: ease;
   }
   body {
     @apply bg-background text-foreground;
@@ -208,5 +244,18 @@
   scrollbar-width: none;
   &::-webkit-scrollbar {
     display: none;
+  }
+}
+
+@layer base {
+  .dark {
+    scrollbar-color: oklch(0.35 0 0) transparent;
+  }
+  .dark ::-webkit-scrollbar-thumb {
+    background: oklch(0.35 0 0);
+    border-radius: 9999px;
+  }
+  .dark ::-webkit-scrollbar-track {
+    background: transparent;
   }
 }

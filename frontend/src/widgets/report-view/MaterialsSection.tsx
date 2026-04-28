@@ -31,7 +31,7 @@ const COLUMNS: Column<MaterialLineItem>[] = [
           {i.epd_id ?? 'Ja'}
         </span>
       ) : (
-        <span className="text-gray-300">Nei</span>
+        <span className="text-muted-foreground">Nei</span>
       ),
   },
   { header: 'Kilde', render: (i) => sourceLabel(i.source_type) },
@@ -52,7 +52,7 @@ export default function MaterialsSection({
 }) {
   if (items.length === 0) {
     return (
-      <p className="px-4 py-6 text-sm text-gray-400">
+      <p className="px-4 py-6 text-sm text-muted-foreground">
         Ingen materialer registrert.
       </p>
     )

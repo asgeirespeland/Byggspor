@@ -36,30 +36,30 @@ export default function LineItemsTable({
   )
 
   return (
-    <div className="rounded-lg border border-gray-200 bg-white p-5 space-y-3">
-      <h2 className="text-base font-semibold text-gray-900">Fakturalinjer</h2>
+    <div className="rounded-lg border border-border bg-card p-5 space-y-3">
+      <h2 className="text-base font-semibold text-foreground">Fakturalinjer</h2>
 
       {isLoading ? (
-        <div className="flex items-center gap-2 py-6 justify-center text-sm text-gray-400">
+        <div className="flex items-center gap-2 py-6 justify-center text-sm text-muted-foreground">
           <Loader2 className="h-4 w-4 animate-spin" />
           Laster linjer fra prosjektet…
         </div>
       ) : (
         <>
           <div className={`${GRID} px-1`}>
-            <span className="text-xs font-medium text-gray-500">
+            <span className="text-xs font-medium text-muted-foreground">
               Beskrivelse
             </span>
-            <span className="text-xs font-medium text-gray-500 text-right">
+            <span className="text-xs font-medium text-muted-foreground text-right">
               Enhetspris
             </span>
-            <span className="text-xs font-medium text-gray-500 text-right">
+            <span className="text-xs font-medium text-muted-foreground text-right">
               Antall
             </span>
-            <span className="text-xs font-medium text-gray-500 text-right">
+            <span className="text-xs font-medium text-muted-foreground text-right">
               Rabatt
             </span>
-            <span className="text-xs font-medium text-gray-500 text-right">
+            <span className="text-xs font-medium text-muted-foreground text-right">
               Total
             </span>
             <span />
@@ -96,7 +96,7 @@ export default function LineItemsTable({
                     }
                     className="text-right pr-9 text-sm"
                   />
-                  <span className="absolute right-2.5 top-1/2 -translate-y-1/2 text-xs text-gray-400 pointer-events-none">
+                  <span className="absolute right-2.5 top-1/2 -translate-y-1/2 text-xs text-muted-foreground pointer-events-none">
                     {item.unit}
                   </span>
                 </div>
@@ -111,11 +111,11 @@ export default function LineItemsTable({
                     }
                     className="text-right pr-7 text-sm"
                   />
-                  <span className="absolute right-2.5 top-1/2 -translate-y-1/2 text-xs text-gray-400 pointer-events-none">
+                  <span className="absolute right-2.5 top-1/2 -translate-y-1/2 text-xs text-muted-foreground pointer-events-none">
                     %
                   </span>
                 </div>
-                <span className="text-sm text-right tabular-nums text-gray-700">
+                <span className="text-sm text-right tabular-nums text-muted-foreground">
                   {calcLineTotal(
                     item.price,
                     item.quantity,
@@ -125,7 +125,7 @@ export default function LineItemsTable({
                 <Button
                   variant="ghost"
                   size="icon"
-                  className="h-8 w-8 text-gray-300 hover:text-danger"
+                  className="h-8 w-8 text-muted-foreground hover:text-danger"
                   onClick={() => removeLineItem(item.id)}
                 >
                   <Trash2 className="h-4 w-4" />
@@ -134,7 +134,7 @@ export default function LineItemsTable({
             ))}
           </div>
 
-          <div className="flex items-center justify-between pt-2 border-t border-gray-100">
+          <div className="flex items-center justify-between pt-2 border-t border-border">
             <Button
               variant="outline"
               size="sm"
@@ -145,14 +145,14 @@ export default function LineItemsTable({
               Ny linje
             </Button>
 
-            <div className="flex items-center gap-5 text-xs text-gray-500">
+            <div className="flex items-center gap-5 text-xs text-muted-foreground">
               <span>
                 Total rabatt:{' '}
-                <span className="text-gray-700 tabular-nums">
+                <span className="text-muted-foreground tabular-nums">
                   {totalDiscount.toLocaleString('nb-NO', MONEY_FMT)}
                 </span>
               </span>
-              <span className="text-sm font-semibold text-gray-900 tabular-nums">
+              <span className="text-sm font-semibold text-foreground tabular-nums">
                 {grandTotal.toLocaleString('nb-NO', MONEY_FMT)}
               </span>
             </div>

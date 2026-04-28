@@ -30,7 +30,7 @@ const sumCo2 = (items: WasteLineItem[]) => sumBy(items, (i) => i.total_co2_kg)
 export default function WasteSection({ items }: { items: WasteLineItem[] }) {
   if (items.length === 0) {
     return (
-      <p className="px-4 py-6 text-sm text-gray-400">
+      <p className="px-4 py-6 text-sm text-muted-foreground">
         Ingen avfall registrert.
       </p>
     )

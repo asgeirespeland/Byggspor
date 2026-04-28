@@ -40,7 +40,7 @@ export default function TransportSection({
 }) {
   if (items.length === 0) {
     return (
-      <p className="px-4 py-6 text-sm text-gray-400">
+      <p className="px-4 py-6 text-sm text-muted-foreground">
         Ingen transport registrert.
       </p>
     )

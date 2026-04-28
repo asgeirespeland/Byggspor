@@ -13,7 +13,7 @@ export default function FlaggedTripRow({ trip, onNavigate }: Props) {
     <div className="flex items-start gap-2">
       <Truck className="mt-0.5 h-3.5 w-3.5 shrink-0 text-warning" />
       <div className="min-w-0 flex-1">
-        <p className="truncate text-xs font-medium text-gray-700">
+        <p className="truncate text-xs font-medium text-muted-foreground">
           {trip.start_address ?? '?'} &rarr; {trip.end_address ?? '?'}
         </p>
         <p className="text-[11px] text-warning-strong">Mangler utslippsdata</p>

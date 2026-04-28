@@ -33,10 +33,10 @@ export default function TabBar<T extends string>({
   const { ref, canScrollLeft, canScrollRight } = useScrollIndicators(scrollDeps)
 
   return (
-    <div className="relative border-b border-gray-200">
+    <div className="relative border-b border-border">
       {canScrollLeft && (
-        <div className="pointer-events-none absolute left-0 top-0 z-10 flex h-full w-10 items-center justify-start bg-gradient-to-r from-white via-white/80 to-transparent pl-1">
-          <ChevronLeft className="h-4 w-4 text-gray-400" />
+        <div className="pointer-events-none absolute left-0 top-0 z-10 flex h-full w-10 items-center justify-start bg-gradient-to-r from-card via-card/80 to-transparent pl-1">
+          <ChevronLeft className="h-4 w-4 text-muted-foreground" />
         </div>
       )}
       <div
@@ -50,8 +50,8 @@ export default function TabBar<T extends string>({
             onClick={() => onTabChange(tab.id)}
             className={`flex shrink-0 items-center gap-2 px-5 py-3.5 text-sm font-medium transition-colors border-b-2 -mb-px cursor-pointer ${
               activeTab === tab.id
-                ? (tab.activeClassName ?? 'border-gray-900 text-gray-900')
-                : 'border-transparent text-gray-400 hover:text-gray-600 hover:border-gray-300'
+                ? (tab.activeClassName ?? 'border-foreground text-foreground')
+                : 'border-transparent text-muted-foreground hover:text-muted-foreground hover:border-border'
             } ${tab.className ?? ''}`}
           >
             {tab.icon}
@@ -60,8 +60,8 @@ export default function TabBar<T extends string>({
         ))}
       </div>
       {canScrollRight && (
-        <div className="pointer-events-none absolute right-0 top-0 z-10 flex h-full w-10 items-center justify-end bg-gradient-to-l from-white via-white/80 to-transparent pr-1">
-          <ChevronRight className="h-4 w-4 text-gray-400" />
+        <div className="pointer-events-none absolute right-0 top-0 z-10 flex h-full w-10 items-center justify-end bg-gradient-to-l from-card via-card/80 to-transparent pr-1">
+          <ChevronRight className="h-4 w-4 text-muted-foreground" />
         </div>
       )}
     </div>

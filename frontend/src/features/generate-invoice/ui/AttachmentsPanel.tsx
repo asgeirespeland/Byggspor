@@ -20,10 +20,10 @@ export default function AttachmentsPanel() {
   }
 
   return (
-    <div className="rounded-lg border border-gray-200 bg-white p-5 w-1/2 space-y-3">
+    <div className="rounded-lg border border-border bg-card p-5 w-1/2 space-y-3">
       <div className="flex items-center justify-between">
-        <h2 className="text-base font-semibold text-gray-900 flex items-center gap-2">
-          <Upload className="h-4 w-4 text-gray-500" />
+        <h2 className="text-base font-semibold text-foreground flex items-center gap-2">
+          <Upload className="h-4 w-4 text-muted-foreground" />
           Vedlegg
         </h2>
         <div className="flex gap-2">
@@ -52,10 +52,10 @@ export default function AttachmentsPanel() {
       <div
         onDragOver={(e) => e.preventDefault()}
         onDrop={handleFileDrop}
-        className="rounded-md border border-dashed border-gray-300 bg-gray-50 px-4 py-5 text-center cursor-pointer hover:bg-gray-100 transition-colors"
+        className="rounded-md border border-dashed border-border bg-muted/50 px-4 py-5 text-center cursor-pointer hover:bg-muted transition-colors"
         onClick={() => fileInputRef.current?.click()}
       >
-        <p className="text-xs text-gray-400">
+        <p className="text-xs text-muted-foreground">
           Dra og slipp filer, lim inn, last opp eller hent fra innboks
         </p>
       </div>
@@ -65,11 +65,11 @@ export default function AttachmentsPanel() {
           {attachments.map((f, i) => (
             <li
               key={i}
-              className="flex items-center justify-between text-xs text-gray-600"
+              className="flex items-center justify-between text-xs text-muted-foreground"
             >
               <span>{f.name}</span>
               <button
-                className="text-gray-400 hover:text-danger ml-2"
+                className="text-muted-foreground hover:text-danger ml-2"
                 onClick={() =>
                   setAttachments((prev) => prev.filter((_, j) => j !== i))
                 }

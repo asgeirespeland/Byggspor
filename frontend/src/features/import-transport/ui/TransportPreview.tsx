@@ -69,9 +69,9 @@ export default function TransportPreview({
       }}
       metadata={
         data.file_name ? (
-          <div className="flex flex-wrap gap-x-6 gap-y-1 text-sm text-gray-600">
+          <div className="flex flex-wrap gap-x-6 gap-y-1 text-sm text-muted-foreground">
             <span>
-              <span className="font-medium text-gray-800">Fil:</span>{' '}
+              <span className="font-medium text-foreground">Fil:</span>{' '}
               {data.file_name}
             </span>
           </div>
@@ -79,7 +79,7 @@ export default function TransportPreview({
       }
       badges={
         <>
-          <span className="rounded-full bg-gray-100 px-3 py-1 text-xs font-medium text-gray-600">
+          <span className="rounded-full bg-muted px-3 py-1 text-xs font-medium text-muted-foreground">
             {rows.length} turer
           </span>
           {flaggedCount > 0 && (

@@ -70,14 +70,14 @@ export default function ParsePreviewShell<T>({
           <button
             type="button"
             onClick={() => setFullscreen(true)}
-            className="ml-auto text-gray-300 hover:text-gray-500 transition-colors"
+            className="ml-auto text-muted-foreground hover:text-muted-foreground transition-colors"
             title="Utvid"
           >
             <Maximize2 className="h-4 w-4" />
           </button>
         </div>
 
-        <div className="rounded-xl border border-gray-200 overflow-hidden">
+        <div className="rounded-xl border border-border overflow-hidden">
           <div className="max-h-[40vh] overflow-y-auto overflow-x-auto">
             <DataTable
               columns={columns}
@@ -99,7 +99,7 @@ export default function ParsePreviewShell<T>({
             <button
               type="button"
               onClick={onCancel}
-              className="text-sm text-gray-400 hover:text-gray-600"
+              className="text-sm text-muted-foreground hover:text-muted-foreground"
             >
               Avbryt
             </button>

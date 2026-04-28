@@ -81,22 +81,22 @@ export default function InvoicePreview({
         })
       }}
       metadata={
-        <div className="flex flex-wrap gap-x-6 gap-y-1 text-sm text-gray-600">
+        <div className="flex flex-wrap gap-x-6 gap-y-1 text-sm text-muted-foreground">
           {data.invoice_number && (
             <span>
-              <span className="font-medium text-gray-800">Faktura:</span>{' '}
+              <span className="font-medium text-foreground">Faktura:</span>{' '}
               {data.invoice_number}
             </span>
           )}
           {data.issue_date && (
             <span>
-              <span className="font-medium text-gray-800">Dato:</span>{' '}
+              <span className="font-medium text-foreground">Dato:</span>{' '}
               {data.issue_date}
             </span>
           )}
           {data.supplier?.name && (
             <span>
-              <span className="font-medium text-gray-800">Leverandør:</span>{' '}
+              <span className="font-medium text-foreground">Leverandør:</span>{' '}
               {data.supplier.name}
             </span>
           )}
@@ -104,7 +104,7 @@ export default function InvoicePreview({
       }
       badges={
         <>
-          <span className="rounded-full bg-gray-100 px-3 py-1 text-xs font-medium text-gray-600">
+          <span className="rounded-full bg-muted px-3 py-1 text-xs font-medium text-muted-foreground">
             {rows.length} linjer
           </span>
           {flaggedCount > 0 && (

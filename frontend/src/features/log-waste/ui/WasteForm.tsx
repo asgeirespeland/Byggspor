@@ -75,7 +75,7 @@ export default function WasteForm({ projectId }: Props) {
   return (
     <Form {...form}>
       <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-        <h4 className="text-sm font-semibold text-gray-700">
+        <h4 className="text-sm font-semibold text-muted-foreground">
           Registrer avfall manuelt
         </h4>
 

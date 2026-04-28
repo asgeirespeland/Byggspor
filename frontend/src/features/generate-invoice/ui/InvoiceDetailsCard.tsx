@@ -13,12 +13,14 @@ interface Props {
 
 export default function InvoiceDetailsCard({ invoice, setInvoice }: Props) {
   return (
-    <div className="rounded-lg border border-gray-200 bg-white p-5 space-y-4">
-      <h2 className="text-base font-semibold text-gray-900">Faktura</h2>
+    <div className="rounded-lg border border-border bg-card p-5 space-y-4">
+      <h2 className="text-base font-semibold text-foreground">Faktura</h2>
 
       <div className="grid grid-cols-2 gap-4">
         <div className="space-y-1.5">
-          <Label className="text-xs text-gray-600">Dager til forfall</Label>
+          <Label className="text-xs text-muted-foreground">
+            Dager til forfall
+          </Label>
           <Input
             type="number"
             min={0}
@@ -27,8 +29,8 @@ export default function InvoiceDetailsCard({ invoice, setInvoice }: Props) {
           />
         </div>
         <div className="space-y-1.5">
-          <Label className="text-xs text-gray-600">Dato</Label>
-          <div className="flex items-center h-9 px-3 rounded-md border border-gray-200 bg-gray-50 text-sm text-gray-500">
+          <Label className="text-xs text-muted-foreground">Dato</Label>
+          <div className="flex items-center h-9 px-3 rounded-md border border-border bg-muted/50 text-sm text-muted-foreground">
             {todayFormatted()}
             <span className="ml-1 text-xs text-info-strong cursor-pointer">
               (endre)
@@ -38,7 +40,7 @@ export default function InvoiceDetailsCard({ invoice, setInvoice }: Props) {
       </div>
 
       <div className="space-y-1.5">
-        <Label className="text-xs text-gray-600">
+        <Label className="text-xs text-muted-foreground">
           Kontonummer{' '}
           <span className="text-info-strong cursor-pointer">
             endre standard
@@ -51,7 +53,7 @@ export default function InvoiceDetailsCard({ invoice, setInvoice }: Props) {
               onChange={(e) => setInvoice('bankAccount', e.target.value)}
               className="pr-8"
             />
-            <ChevronDown className="absolute right-2 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400 pointer-events-none" />
+            <ChevronDown className="absolute right-2 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground pointer-events-none" />
           </div>
           <Button variant="outline" size="icon" className="shrink-0">
             <Plus className="h-4 w-4" />
@@ -65,7 +67,7 @@ export default function InvoiceDetailsCard({ invoice, setInvoice }: Props) {
       </div>
 
       <div className="space-y-1.5">
-        <Label className="text-xs text-gray-600">
+        <Label className="text-xs text-muted-foreground">
           Kommentar{' '}
           <span className="text-info-strong cursor-pointer">
             endre standard
