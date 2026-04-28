@@ -59,13 +59,15 @@ export default function DataTabShell({
       )}
 
       {showLoading && (
-        <p className="py-4 text-center text-sm text-gray-400">{loadingText}</p>
+        <p className="py-4 text-center text-sm text-muted-foreground">
+          {loadingText}
+        </p>
       )}
 
       {itemCount > 0 || undoBar ? (
         <div className="space-y-3">
           {itemCount > 0 && (
-            <p className="text-xs font-semibold uppercase tracking-wide text-gray-400">
+            <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
               {sectionHeading} ({itemCount})
             </p>
           )}

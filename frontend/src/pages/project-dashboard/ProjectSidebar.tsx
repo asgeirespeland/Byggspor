@@ -65,15 +65,17 @@ export default function ProjectSidebar({
     <div className="flex w-full lg:w-60 shrink-0 flex-col gap-3 self-stretch">
       <div className="grid grid-cols-2 gap-3 lg:grid-cols-1">
         {/* Confidence score */}
-        <div className="rounded-xl border border-gray-200 bg-white p-4 shadow-sm">
-          <p className="mb-3 text-xs font-semibold uppercase tracking-wide text-gray-400">
+        <div className="rounded-xl border border-border bg-card p-4 shadow-sm">
+          <p className="mb-3 text-xs font-semibold uppercase tracking-wide text-muted-foreground">
             CO₂ Konfidens
           </p>
           <div className="flex justify-center">
             {confidenceScore != null ? (
               <ConfidenceGauge score={Math.round(confidenceScore)} />
             ) : (
-              <p className="text-sm text-gray-400 py-4">Ingen data ennå</p>
+              <p className="text-sm text-muted-foreground py-4">
+                Ingen data ennå
+              </p>
             )}
           </div>
           <div className="mt-2 flex justify-center">
@@ -82,14 +84,14 @@ export default function ProjectSidebar({
         </div>
 
         {/* Project info */}
-        <div className="rounded-xl border border-gray-200 bg-white p-4 shadow-sm space-y-3">
-          <p className="text-xs font-semibold uppercase tracking-wide text-gray-400">
+        <div className="rounded-xl border border-border bg-card p-4 shadow-sm space-y-3">
+          <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
             Prosjektinfo
           </p>
           <div className="flex items-start gap-2">
-            <Building2 className="mt-0.5 h-3.5 w-3.5 shrink-0 text-gray-300" />
+            <Building2 className="mt-0.5 h-3.5 w-3.5 shrink-0 text-muted-foreground" />
             <div className="flex-1">
-              <p className="text-xs text-gray-400">Navn</p>
+              <p className="text-xs text-muted-foreground">Navn</p>
 
               {isEditingName ? (
                 <div className="mt-1 space-y-2">
@@ -125,14 +127,14 @@ export default function ProjectSidebar({
                 </div>
               ) : (
                 <div className="mt-1 flex items-center gap-2">
-                  <p className="text-sm font-medium text-gray-800 leading-tight">
+                  <p className="text-sm font-medium text-foreground leading-tight">
                     {project.name}
                   </p>
                   <Button
                     type="button"
                     size="sm"
                     variant="ghost"
-                    className="h-auto px-2 py-1 text-xs text-gray-500 hover:text-gray-700"
+                    className="h-auto px-2 py-1 text-xs text-muted-foreground hover:text-muted-foreground"
                     onClick={handleStartEditName}
                   >
                     <Pencil className="mr-1 h-3 w-3" />
@@ -144,10 +146,10 @@ export default function ProjectSidebar({
           </div>
           {project.project_number && (
             <div className="flex items-start gap-2">
-              <Hash className="mt-0.5 h-3.5 w-3.5 shrink-0 text-gray-300" />
+              <Hash className="mt-0.5 h-3.5 w-3.5 shrink-0 text-muted-foreground" />
               <div>
-                <p className="text-xs text-gray-400">Prosjektnummer</p>
-                <p className="text-sm font-medium text-gray-800">
+                <p className="text-xs text-muted-foreground">Prosjektnummer</p>
+                <p className="text-sm font-medium text-foreground">
                   {project.project_number}
                 </p>
               </div>
@@ -155,10 +157,10 @@ export default function ProjectSidebar({
           )}
           {project.customer_name && (
             <div className="flex items-start gap-2">
-              <User className="mt-0.5 h-3.5 w-3.5 shrink-0 text-gray-300" />
+              <User className="mt-0.5 h-3.5 w-3.5 shrink-0 text-muted-foreground" />
               <div>
-                <p className="text-xs text-gray-400">Kunde</p>
-                <p className="text-sm font-medium text-gray-800">
+                <p className="text-xs text-muted-foreground">Kunde</p>
+                <p className="text-sm font-medium text-foreground">
                   {project.customer_name}
                 </p>
               </div>
@@ -178,10 +180,10 @@ export default function ProjectSidebar({
       <button
         type="button"
         onClick={() => setSettingsOpen(true)}
-        className="flex w-full items-center gap-3 rounded-xl border border-gray-200 bg-white px-4 py-3 shadow-sm text-left hover:bg-gray-50 transition-colors cursor-pointer"
+        className="flex w-full items-center gap-3 rounded-xl border border-border bg-card px-4 py-3 shadow-sm text-left hover:bg-muted/50 transition-colors cursor-pointer"
       >
-        <Settings className="h-4 w-4 text-gray-400" />
-        <span className="text-sm font-medium text-gray-700">
+        <Settings className="h-4 w-4 text-muted-foreground" />
+        <span className="text-sm font-medium text-muted-foreground">
           Beregningsinnstillinger
         </span>
       </button>
@@ -210,9 +212,11 @@ export default function ProjectSidebar({
             <p className="text-sm font-semibold text-white">
               Generer klimarapport
             </p>
-            <p className="text-xs text-gray-400">Vis detaljert CO₂-oversikt</p>
+            <p className="text-xs text-muted-foreground">
+              Vis detaljert CO₂-oversikt
+            </p>
           </div>
-          <FileBarChart2 className="ml-auto h-4 w-4 shrink-0 text-gray-500 group-hover:text-carbon transition-colors" />
+          <FileBarChart2 className="ml-auto h-4 w-4 shrink-0 text-muted-foreground group-hover:text-carbon transition-colors" />
         </div>
       </button>
 
@@ -231,7 +235,7 @@ export default function ProjectSidebar({
             <p className="text-sm font-semibold text-white">
               Generer EHF-faktura
             </p>
-            <p className="text-xs text-gray-400">Med CO₂-data</p>
+            <p className="text-xs text-muted-foreground">Med CO₂-data</p>
           </div>
         </div>
       </button>

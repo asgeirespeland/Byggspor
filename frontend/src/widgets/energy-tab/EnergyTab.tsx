@@ -18,7 +18,7 @@ import { EnergyForm } from '@/features/log-energy'
 import EnergySummary from './EnergySummary'
 
 const INPUT =
-  'w-full rounded border border-gray-300 px-2 text-sm h-7 focus:outline-none focus:ring-1 focus:ring-gray-400 [appearance:textfield] [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none'
+  'w-full rounded border border-border px-2 text-sm h-7 focus:outline-none focus:ring-1 focus:ring-ring [appearance:textfield] [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none'
 
 function getColumns(
   zones: { value: string; label: string }[] | undefined,
@@ -27,7 +27,7 @@ function getColumns(
     {
       header: 'kWh',
       render: (e) => (
-        <span className="font-medium text-gray-900">
+        <span className="font-medium text-foreground">
           {e.kwh_used?.toLocaleString('nb-NO', { maximumFractionDigits: 1 })}
         </span>
       ),
@@ -39,7 +39,7 @@ function getColumns(
     {
       header: 'Prisområde',
       render: (e) => (
-        <span className="text-gray-600">{e.price_zone ?? '—'}</span>
+        <span className="text-muted-foreground">{e.price_zone ?? '—'}</span>
       ),
       editable: {
         getValue: (e) => e.price_zone ?? '',
@@ -62,7 +62,7 @@ function getColumns(
     {
       header: 'CO₂e (kg)',
       render: (e) => (
-        <span className="text-gray-600">
+        <span className="text-muted-foreground">
           {e.total_co2_kg?.toLocaleString('nb-NO', {
             maximumFractionDigits: 2,
           })}
@@ -76,13 +76,17 @@ function getColumns(
           new Date(d + 'T00:00:00').toLocaleDateString('nb-NO')
         if (e.period_start && e.recorded_date)
           return (
-            <span className="text-gray-500">
+            <span className="text-muted-foreground">
               {fmt(e.period_start)} – {fmt(e.recorded_date)}
             </span>
           )
         if (e.recorded_date)
-          return <span className="text-gray-500">{fmt(e.recorded_date)}</span>
-        return <span className="text-gray-400">—</span>
+          return (
+            <span className="text-muted-foreground">
+              {fmt(e.recorded_date)}
+            </span>
+          )
+        return <span className="text-muted-foreground">—</span>
       },
       editable: {
         type: 'date',
@@ -118,8 +122,10 @@ export default function EnergyTab({ projectId }: EnergyTabProps) {
   return (
     <div className="space-y-6">
       <div>
-        <h3 className="text-base font-semibold text-gray-900">Energiforbruk</h3>
-        <p className="mt-0.5 text-sm text-gray-500">
+        <h3 className="text-base font-semibold text-foreground">
+          Energiforbruk
+        </h3>
+        <p className="mt-0.5 text-sm text-muted-foreground">
           Registrer strømforbruk (kWh) for å beregne CO₂-utslipp.
           Utslippsfaktor: 11,9 g CO₂/kWh (NVE klimadeklarasjon 2024).
         </p>
@@ -145,14 +151,14 @@ export default function EnergyTab({ projectId }: EnergyTabProps) {
       )}
 
       {showEntriesLoading && (
-        <div className="flex items-center justify-center gap-2 py-8 text-gray-400">
+        <div className="flex items-center justify-center gap-2 py-8 text-muted-foreground">
           <Loader2 className="h-4 w-4 animate-spin" />
           <span className="text-sm">Laster…</span>
         </div>
       )}
 
       {entries && entries.length > 0 && (
-        <div className="overflow-hidden rounded-lg border border-gray-200">
+        <div className="overflow-hidden rounded-lg border border-border">
           <div
             className={needsScroll ? 'overflow-y-auto' : undefined}
             style={
@@ -183,7 +189,7 @@ export default function EnergyTab({ projectId }: EnergyTabProps) {
             />
           </div>
           {needsScroll && (
-            <div className="border-t border-gray-100 bg-gray-50 px-4 py-1.5 text-center text-xs text-gray-400">
+            <div className="border-t border-border bg-muted/50 px-4 py-1.5 text-center text-xs text-muted-foreground">
               {entries.length} registreringer
             </div>
           )}
@@ -202,10 +208,10 @@ export default function EnergyTab({ projectId }: EnergyTabProps) {
             <div className="mx-auto mb-3 flex h-10 w-10 items-center justify-center rounded-xl bg-energy-soft">
               <Zap className="h-5 w-5 text-energy" />
             </div>
-            <p className="text-sm text-gray-500">
+            <p className="text-sm text-muted-foreground">
               Ingen energiregistreringer ennå
             </p>
-            <p className="mt-0.5 text-xs text-gray-400">
+            <p className="mt-0.5 text-xs text-muted-foreground">
               Legg til strømforbruk i skjemaet over
             </p>
           </div>

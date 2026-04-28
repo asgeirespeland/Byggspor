@@ -93,7 +93,7 @@ export default function TransportForm({
   return (
     <Form {...form}>
       <form onSubmit={form.handleSubmit(onSubmit)} className="mt-4 space-y-4">
-        <h4 className="text-sm font-semibold text-gray-700">
+        <h4 className="text-sm font-semibold text-muted-foreground">
           Legg til tur manuelt
         </h4>
 

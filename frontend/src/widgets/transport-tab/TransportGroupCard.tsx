@@ -71,7 +71,7 @@ export default function TransportGroupCard({
         rowClassName={(row) =>
           row.flagged
             ? 'bg-warning-soft/50 hover:bg-warning-soft'
-            : 'hover:bg-gray-50'
+            : 'hover:bg-muted/50'
         }
         onSaveEdit={(_row, i, values) => {
           const trip = group.trips[i]

@@ -29,11 +29,11 @@ export default function ReportGroupRow({
   return (
     <Collapsible open={open} onOpenChange={setOpen}>
       <CollapsibleTrigger
-        className={`flex w-full items-center gap-2 ${pl} py-2 text-left text-xs cursor-pointer hover:bg-gray-50`}
+        className={`flex w-full items-center gap-2 ${pl} py-2 text-left text-xs cursor-pointer hover:bg-muted/50`}
       >
-        <Chevron className="h-3 w-3 text-gray-400" />
-        <span className="font-medium text-gray-700">{label}</span>
-        <span className="ml-auto text-gray-500">
+        <Chevron className="h-3 w-3 text-muted-foreground" />
+        <span className="font-medium text-muted-foreground">{label}</span>
+        <span className="ml-auto text-muted-foreground">
           {itemCount} poster · {fmt(totalCo2)} kg CO₂e
         </span>
       </CollapsibleTrigger>

@@ -111,7 +111,7 @@ export default function MethodologySection({
               .join(' + ')}
           />
           <div className="flex items-start justify-between gap-4 py-2">
-            <div className="text-sm text-gray-500 shrink-0">
+            <div className="text-sm text-muted-foreground shrink-0">
               Fraksjonsfaktorer
             </div>
             <button
@@ -124,7 +124,7 @@ export default function MethodologySection({
             </button>
           </div>
           <div className="flex items-start justify-between gap-4 py-2">
-            <div className="text-sm text-gray-500 shrink-0">
+            <div className="text-sm text-muted-foreground shrink-0">
               Manuelle faktorer
             </div>
             <button
@@ -196,14 +196,14 @@ export default function MethodologySection({
       >
         {factorsModal === 'ns9431' ? (
           <>
-            <p className="text-xs text-gray-400 mb-3">
+            <p className="text-xs text-muted-foreground mb-3">
               {settings.waste.ns9431_source}
             </p>
             <Ns9431Table factors={settings.waste.ns9431_factors} />
           </>
         ) : factorsModal === 'manual' ? (
           <>
-            <p className="text-xs text-gray-400 mb-3">
+            <p className="text-xs text-muted-foreground mb-3">
               {settings.waste.manual_factors_note}
             </p>
             <ManualFactorsTable factors={settings.waste.manual_factors} />

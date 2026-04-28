@@ -16,7 +16,7 @@ export default function GlobalDashboard() {
 
   return (
     <div className="space-y-6">
-      <h1 className="text-2xl font-bold text-gray-900">
+      <h1 className="text-2xl font-bold text-foreground">
         {organization?.name ?? '\u00A0'}
       </h1>
 
@@ -33,10 +33,12 @@ export default function GlobalDashboard() {
         ].map((stat) => (
           <div
             key={stat.label}
-            className="rounded-xl border bg-white p-5 shadow-sm"
+            className="rounded-xl border bg-card p-5 shadow-sm"
           >
-            <p className="text-sm font-medium text-gray-500">{stat.label}</p>
-            <p className="mt-2 text-3xl font-bold text-gray-900">
+            <p className="text-sm font-medium text-muted-foreground">
+              {stat.label}
+            </p>
+            <p className="mt-2 text-3xl font-bold text-foreground">
               {stat.value}
             </p>
           </div>

@@ -15,15 +15,19 @@ export default function ProfileForm({ user }: { user: UserDto }) {
     <>
       <div className="space-y-3">
         <div>
-          <label className="mb-1 block text-sm text-gray-700">E-post</label>
+          <label className="mb-1 block text-sm text-muted-foreground">
+            E-post
+          </label>
           <input
             value={user.email}
             readOnly
-            className="w-full rounded border bg-gray-100 px-3 py-2 text-sm"
+            className="w-full rounded border bg-muted px-3 py-2 text-sm"
           />
         </div>
         <div>
-          <label className="mb-1 block text-sm text-gray-700">Navn</label>
+          <label className="mb-1 block text-sm text-muted-foreground">
+            Navn
+          </label>
           <input
             value={name}
             onChange={(event) => setName(event.target.value)}
@@ -31,7 +35,9 @@ export default function ProfileForm({ user }: { user: UserDto }) {
           />
         </div>
         <div>
-          <label className="mb-1 block text-sm text-gray-700">Telefon</label>
+          <label className="mb-1 block text-sm text-muted-foreground">
+            Telefon
+          </label>
           <input
             value={phone}
             onChange={(event) => setPhone(event.target.value)}
@@ -46,7 +52,7 @@ export default function ProfileForm({ user }: { user: UserDto }) {
           >
             {updateProfile.isPending ? 'Lagrer…' : 'Lagre'}
           </button>
-          <span className="self-center text-xs text-gray-500">
+          <span className="self-center text-xs text-muted-foreground">
             Admin: {user.is_system_admin ? 'Ja' : 'Nei'}
           </span>
         </div>

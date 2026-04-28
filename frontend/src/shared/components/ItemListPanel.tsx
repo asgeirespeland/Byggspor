@@ -51,12 +51,12 @@ export default function ItemListPanel<T>({
     : items
 
   return (
-    <div className="rounded-xl border bg-white p-6 shadow-sm">
+    <div className="rounded-xl border bg-card p-6 shadow-sm">
       <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
-        <h2 className="text-sm font-semibold text-gray-700">{title}</h2>
+        <h2 className="text-sm font-semibold text-muted-foreground">{title}</h2>
         <div className="flex items-center gap-3">
           <div className="relative">
-            <Search className="absolute left-2.5 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" />
+            <Search className="absolute left-2.5 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
             <Input
               placeholder={searchPlaceholder}
               value={search}
@@ -83,7 +83,7 @@ export default function ItemListPanel<T>({
       </div>
 
       {showLoading && (
-        <div className="flex items-center justify-center gap-2 py-12 text-gray-400">
+        <div className="flex items-center justify-center gap-2 py-12 text-muted-foreground">
           <Loader2 className="h-4 w-4 animate-spin" />
           <span className="text-sm">Laster...</span>
         </div>
@@ -97,12 +97,12 @@ export default function ItemListPanel<T>({
         <div className="flex flex-col items-center justify-center py-12 text-center">
           {search ? (
             <>
-              <p className="text-sm text-gray-400">
+              <p className="text-sm text-muted-foreground">
                 Ingen resultater for &ldquo;{search}&rdquo;
               </p>
               <button
                 type="button"
-                className="mt-2 text-xs text-gray-400 underline"
+                className="mt-2 text-xs text-muted-foreground underline"
                 onClick={() => setSearch('')}
               >
                 Nullstill søk
@@ -110,8 +110,8 @@ export default function ItemListPanel<T>({
             </>
           ) : (
             <>
-              <p className="text-sm text-gray-400">{emptyLabel}</p>
-              <p className="mt-1 text-xs text-gray-300">{emptyHint}</p>
+              <p className="text-sm text-muted-foreground">{emptyLabel}</p>
+              <p className="mt-1 text-xs text-muted-foreground">{emptyHint}</p>
             </>
           )}
         </div>

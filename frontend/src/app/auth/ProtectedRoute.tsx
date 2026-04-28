@@ -72,7 +72,7 @@ export default function ProtectedRoute() {
 
 function Loader({ text }: { text: string }) {
   return (
-    <div className="min-h-screen grid place-items-center text-gray-600">
+    <div className="min-h-screen grid place-items-center text-muted-foreground">
       {text}
     </div>
   )

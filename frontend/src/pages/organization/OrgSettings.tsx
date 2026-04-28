@@ -29,27 +29,27 @@ export default function OrgSettings() {
 
   return (
     <div className="space-y-6">
-      <h1 className="text-2xl font-bold text-gray-900">
+      <h1 className="text-2xl font-bold text-foreground">
         {organization?.name ?? '\u00A0'}
       </h1>
 
       <Collapsible
         open={showCalcSettings}
         onOpenChange={setShowCalcSettings}
-        className="rounded-xl border border-gray-200 bg-white shadow-sm overflow-hidden"
+        className="rounded-xl border border-border bg-card shadow-sm overflow-hidden"
       >
-        <CollapsibleTrigger className="flex w-full items-center justify-between px-5 py-4 text-left hover:bg-gray-50 transition-colors">
+        <CollapsibleTrigger className="flex w-full items-center justify-between px-5 py-4 text-left hover:bg-muted/50 transition-colors">
           <div className="flex items-center gap-3">
-            <Settings className="h-4 w-4 text-gray-400" />
-            <span className="text-sm font-medium text-gray-700">
+            <Settings className="h-4 w-4 text-muted-foreground" />
+            <span className="text-sm font-medium text-muted-foreground">
               Beregningsinnstillinger
             </span>
           </div>
-          <span className="text-xs text-gray-400">
+          <span className="text-xs text-muted-foreground">
             {showCalcSettings ? 'Skjul' : 'Vis'}
           </span>
         </CollapsibleTrigger>
-        <CollapsibleContent className="border-t border-gray-100 p-5">
+        <CollapsibleContent className="border-t border-border p-5">
           <EditOrgSettings orgId={organizationId} />
         </CollapsibleContent>
       </Collapsible>

@@ -24,10 +24,10 @@ export const wasteColumns: EditableColumn<WasteRow>[] = [
     header: 'Materiale',
     width: '30%',
     render: (row) => (
-      <span className="text-gray-800">
+      <span className="text-foreground">
         {row.name ?? '—'}
         {row.fraction_code && (
-          <span className="ml-1 text-xs text-gray-400">
+          <span className="ml-1 text-xs text-muted-foreground">
             ({row.fraction_code})
           </span>
         )}
@@ -43,7 +43,7 @@ export const wasteColumns: EditableColumn<WasteRow>[] = [
     width: '15%',
     align: 'right',
     render: (row) => (
-      <span className="text-gray-800">{row.quantity ?? '—'}</span>
+      <span className="text-foreground">{row.quantity ?? '—'}</span>
     ),
     editable: {
       type: 'number',
@@ -52,14 +52,20 @@ export const wasteColumns: EditableColumn<WasteRow>[] = [
   },
   {
     header: 'Enhet',
-    render: (row) => <span className="text-gray-600">{row.unit ?? '—'}</span>,
+    render: (row) => (
+      <span className="text-muted-foreground">{row.unit ?? '—'}</span>
+    ),
   },
   {
     header: 'CO₂ (kg)',
     width: '15%',
     align: 'right',
     render: (row) => (
-      <span className={row.co2_kg == null ? 'text-gray-400' : 'text-gray-800'}>
+      <span
+        className={
+          row.co2_kg == null ? 'text-muted-foreground' : 'text-foreground'
+        }
+      >
         {row.co2_kg != null ? row.co2_kg.toFixed(2) : '—'}
       </span>
     ),
@@ -72,7 +78,7 @@ export const wasteColumns: EditableColumn<WasteRow>[] = [
     header: 'Kilde',
     width: '20%',
     render: (row) => (
-      <span className="text-gray-600">
+      <span className="text-muted-foreground">
         {row.co2_source
           ? (CO2_SOURCE_LABELS[row.co2_source] ?? row.co2_source)
           : '—'}

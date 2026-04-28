@@ -8,7 +8,7 @@ export default function AuthLayout() {
 
   if (!isLoaded) {
     return (
-      <div className="min-h-screen grid place-items-center text-gray-500 text-sm">
+      <div className="min-h-screen grid place-items-center text-muted-foreground text-sm">
         Laster autentisering…
       </div>
     )
@@ -30,23 +30,23 @@ export default function AuthLayout() {
           <h1 className="text-4xl font-bold leading-tight">
             Spor klimaavtrykket til dine byggeprosjekter.
           </h1>
-          <p className="text-gray-400 text-lg leading-relaxed">
+          <p className="text-muted-foreground text-lg leading-relaxed">
             Beregn CO₂-utslipp fra materialer, transport, avfall og energi — og
             gjør klimaansvaret synlig i hele verdikjeden.
           </p>
         </div>
 
-        <p className="text-gray-600 text-sm">
+        <p className="text-muted-foreground text-sm">
           © {new Date().getFullYear()} Byggspor
         </p>
       </div>
 
       {/* Right form panel */}
-      <div className="flex flex-1 flex-col items-center justify-center bg-white px-6 py-12">
+      <div className="flex flex-1 flex-col items-center justify-center bg-card px-6 py-12">
         {/* Mobile logo */}
         <div className="mb-8 lg:hidden text-center">
-          <span className="text-2xl font-bold text-gray-900">Byggspor</span>
-          <p className="mt-1 text-sm text-gray-500">
+          <span className="text-2xl font-bold text-foreground">Byggspor</span>
+          <p className="mt-1 text-sm text-muted-foreground">
             Klimasporing for byggebransjen
           </p>
         </div>

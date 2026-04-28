@@ -5,7 +5,7 @@
 import type { ReportSettings } from '@/entities/report'
 
 const TH =
-  'px-4 py-2 text-xs font-semibold uppercase tracking-wide text-gray-400'
+  'px-4 py-2 text-xs font-semibold uppercase tracking-wide text-muted-foreground'
 
 export function Ns9431Table({
   factors,
@@ -15,7 +15,7 @@ export function Ns9431Table({
   const sorted = [...factors].sort((a, b) => b.factor - a.factor)
   return (
     <table className="w-full text-left text-sm">
-      <thead className="border-b border-gray-200 bg-gray-50">
+      <thead className="border-b border-border bg-muted/50">
         <tr>
           <th className={TH}>Kode</th>
           <th className={TH}>Avfallstype</th>
@@ -25,9 +25,11 @@ export function Ns9431Table({
       <tbody className="divide-y divide-gray-100">
         {sorted.map(({ code, label, factor }) => (
           <tr key={code}>
-            <td className="px-4 py-2 text-gray-400 tabular-nums">{code}</td>
-            <td className="px-4 py-2 text-gray-700">{label}</td>
-            <td className="px-4 py-2 text-right font-medium text-gray-800 tabular-nums">
+            <td className="px-4 py-2 text-muted-foreground tabular-nums">
+              {code}
+            </td>
+            <td className="px-4 py-2 text-muted-foreground">{label}</td>
+            <td className="px-4 py-2 text-right font-medium text-foreground tabular-nums">
               {factor}
             </td>
           </tr>
@@ -45,7 +47,7 @@ export function ManualFactorsTable({
   const entries = Object.entries(factors).sort(([, a], [, b]) => b - a)
   return (
     <table className="w-full text-left text-sm">
-      <thead className="border-b border-gray-200 bg-gray-50">
+      <thead className="border-b border-border bg-muted/50">
         <tr>
           <th className={TH}>Avfallstype</th>
           <th className={`${TH} text-right`}>Faktor (kg CO₂e/t)</th>
@@ -54,8 +56,8 @@ export function ManualFactorsTable({
       <tbody className="divide-y divide-gray-100">
         {entries.map(([key, value]) => (
           <tr key={key} className="capitalize">
-            <td className="px-4 py-2 text-gray-700">{key}</td>
-            <td className="px-4 py-2 text-right font-medium text-gray-800 tabular-nums">
+            <td className="px-4 py-2 text-muted-foreground">{key}</td>
+            <td className="px-4 py-2 text-right font-medium text-foreground tabular-nums">
               {value}
             </td>
           </tr>
