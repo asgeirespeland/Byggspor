@@ -87,9 +87,9 @@ def get_organization(organization_id: int):
 
 
 @organization_bp.route("/<int:organization_id>", methods=["PATCH"])
-@require_org_role((OrgRole.OWNER, OrgRole.ADMIN))
+@require_org_role((OrgRole.OWNER,))
 def update_organization(organization_id: int):
-    """Update organization metadata (restricted to OWNER/ADMIN)."""
+    """Update organization metadata (restricted to OWNER)."""
     payload = request.get_json(silent=True) or {}
 
     session = g.db
@@ -107,6 +107,8 @@ def update_organization(organization_id: int):
         org.name = new_name
     if "org_number" in payload:
         org.org_number = payload.get("org_number")
+    if "account_number" in payload:
+        org.account_number = payload.get("account_number")
     if "address" in payload:
         org.address = payload.get("address")
     if "phone" in payload:

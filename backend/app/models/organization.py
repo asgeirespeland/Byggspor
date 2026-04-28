@@ -20,6 +20,7 @@ class Organization(Base):
     id: Mapped[int] = mapped_column(Integer, primary_key=True)
     name: Mapped[str] = mapped_column(String(255), nullable=False)
     org_number: Mapped[str | None] = mapped_column(String(50))
+    account_number: Mapped[str | None] = mapped_column(String(50))
     address: Mapped[str | None] = mapped_column(Text)
     phone: Mapped[str | None] = mapped_column(String(50))
     email: Mapped[str | None] = mapped_column(String(255))
@@ -46,6 +47,7 @@ class Organization(Base):
             "id": self.id,
             "name": self.name,
             "org_number": self.org_number,
+            "account_number": self.account_number,
             "address": self.address,
             "phone": self.phone,
             "email": self.email,

@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import type { Project } from '@/entities/project'
+import type { OrgDto } from '@/entities/organization'
 import type { GenerateInvoiceInput } from '../types'
 import type { LineItem } from './useProjectLineItems'
 
@@ -30,10 +31,13 @@ export interface InvoiceDraft {
   buildPayload: (lineItems: LineItem[]) => GenerateInvoiceInput
 }
 
-export function useInvoiceDraft(project: Project): InvoiceDraft {
+export function useInvoiceDraft(
+  project: Project,
+  org?: OrgDto | null,
+): InvoiceDraft {
   const [invoice, setInvoiceState] = useState<InvoiceFields>({
     daysUntilDue: 14,
-    bankAccount: '',
+    bankAccount: org?.account_number ?? '',
     comment: '',
   })
   const [customer, setCustomerState] = useState<CustomerFields>({
@@ -60,6 +64,14 @@ export function useInvoiceDraft(project: Project): InvoiceDraft {
       our_reference: customer.ourReference || undefined,
       their_reference: customer.theirReference || undefined,
       customer_name: customer.customerName || undefined,
+      supplier: org
+        ? {
+            name: org.name,
+            org_number: org.org_number ?? undefined,
+            address: org.address ?? undefined,
+            email: org.email ?? undefined,
+          }
+        : undefined,
       line_items: lineItems
         .filter((item) => item.description.trim() !== '')
         .map((item) => ({
