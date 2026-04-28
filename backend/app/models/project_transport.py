@@ -32,7 +32,7 @@ class ProjectTransport(Base):
 
     id: Mapped[int] = mapped_column(Integer, primary_key=True)
     project_id: Mapped[int] = mapped_column(
-        Integer, ForeignKey("projects.id"), nullable=False
+        Integer, ForeignKey("projects.id", ondelete="CASCADE"), nullable=False
     )
     vehicle_id: Mapped[int | None] = mapped_column(Integer, ForeignKey("vehicles.id"))
     source_id: Mapped[int | None] = mapped_column(

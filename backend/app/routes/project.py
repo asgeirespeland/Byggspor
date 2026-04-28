@@ -12,8 +12,6 @@ from app.config.settings_resolver import (
 from app.errors import ApiError
 from app.middleware.auth import require_auth
 from app.middleware.roles import require_project_role
-from app.models.energy import Energy
-from app.models.generated_invoice import GeneratedInvoice
 from app.models.material_invoice import MaterialInvoice
 from app.models.organization import Organization, OrgType
 from app.models.organization_member import OrganizationMember
@@ -22,7 +20,6 @@ from app.models.project_material import ProjectMaterial
 from app.models.project_member import ProjectRole
 from app.models.project_transport import ProjectTransport
 from app.models.project_waste_item import ProjectWasteItem
-from app.models.transport import Transport
 from app.models.transport_report import TransportReport
 from app.models.waste_invoice import WasteInvoice
 from app.services.recalculation import recalculate_project
@@ -214,17 +211,9 @@ def delete_project(project_id: int):
     )
     orphan_waste_ids = _orphan_source_ids(ProjectWasteItem, ProjectWasteItem.source_id)
 
-    for model_cls in (
-        ProjectMaterial,
-        ProjectTransport,
-        ProjectWasteItem,
-        Transport,
-        Energy,
-        GeneratedInvoice,
-    ):
-        session.query(model_cls).filter(model_cls.project_id == project_id).delete(
-            synchronize_session=False
-        )
+    # Project-owned children cascade via ON DELETE CASCADE on their project_id FKs.
+    session.delete(project)
+    session.flush()
 
     if orphan_material_ids:
         session.query(MaterialInvoice).filter(
@@ -238,8 +227,6 @@ def delete_project(project_id: int):
         session.query(WasteInvoice).filter(
             WasteInvoice.id.in_(orphan_waste_ids)
         ).delete(synchronize_session=False)
-
-    session.delete(project)
 
     with db_commit(session, "Kunne ikke slette prosjektet.", "DELETE_FAILED"):
         pass
