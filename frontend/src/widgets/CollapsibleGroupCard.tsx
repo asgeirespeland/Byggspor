@@ -43,7 +43,7 @@ export default function CollapsibleGroupCard({
               <p className="text-sm font-medium text-foreground truncate">
                 {title}
               </p>
-              <div className="flex gap-3 text-xs text-muted-foreground mt-0.5">
+              <div className="flex flex-wrap gap-x-3 gap-y-0.5 text-xs text-muted-foreground mt-0.5">
                 {summary}
               </div>
             </div>

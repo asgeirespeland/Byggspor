@@ -8,7 +8,7 @@
  * Coupling: imports every top-level page module and the auth wrappers.
  */
 import { Navigate, Outlet, Route, Routes } from 'react-router-dom'
-import Sidebar from '@/shared/components/layout/Sidebar'
+import Sidebar, { BottomNav } from '@/shared/components/layout/Sidebar'
 import AuthLayout from './auth/AuthLayout'
 import ProtectedRoute from './auth/ProtectedRoute'
 import OrgSettings from '@/pages/organization/OrgSettings'
@@ -22,9 +22,10 @@ function AppShell() {
   return (
     <div className="flex h-screen overflow-hidden bg-muted">
       <Sidebar />
-      <main className="flex-1 min-w-0 overflow-y-auto scrollbar-hide p-6">
+      <main className="flex-1 min-w-0 overflow-y-auto scrollbar-hide p-6 pb-20 md:pb-6">
         <Outlet />
       </main>
+      <BottomNav />
     </div>
   )
 }
