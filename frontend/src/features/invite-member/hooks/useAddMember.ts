@@ -10,6 +10,6 @@ export function useAddMember(organizationId: number | null) {
         { user_id: Number(userId), role },
         token,
       ),
-    invalidateKeys: [qk.orgMembers(organizationId ?? 0)],
+    invalidateKeys: [qk.orgMembers(organizationId)],
   })
 }

@@ -20,6 +20,7 @@ export type OrgMemberDto = {
 export type OrgMemberCandidateDto = {
   id: number
   name: string
+  username: string | null
   email: string
   phone: string | null
 }

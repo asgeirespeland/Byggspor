@@ -4,7 +4,7 @@ import { listOrgMembers, type OrgMemberDto } from '../api'
 
 export function useOrgMembers(organizationId: number | null) {
   return useAuthQuery<OrgMemberDto[]>(
-    qk.orgMembers(organizationId ?? 0),
+    qk.orgMembers(organizationId),
     (token) => listOrgMembers(organizationId as number, token),
     { enabled: typeof organizationId === 'number' },
   )

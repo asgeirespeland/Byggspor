@@ -10,7 +10,7 @@ export function useOrgMemberCandidates(
   const normalizedQuery = query.trim()
 
   return useAuthQuery<OrgMemberCandidateDto[]>(
-    qk.orgMemberCandidates(organizationId ?? 0, normalizedQuery),
+    qk.orgMemberCandidates(organizationId, normalizedQuery),
     (token) =>
       searchOrgMemberCandidates(
         organizationId as number,

@@ -6,7 +6,7 @@ export function useRemoveMember(organizationId: number | null) {
   return useAuthMutation<{ userId: number }>({
     mutationFn: ({ userId }, token) =>
       removeOrgMember(organizationId as number, userId, token),
-    invalidateKeys: [qk.orgMembers(organizationId ?? 0)],
+    invalidateKeys: [qk.orgMembers(organizationId)],
     successMessage: 'Medlemmet ble fjernet',
     errorMessage: 'Kunne ikke fjerne medlemmet',
   })

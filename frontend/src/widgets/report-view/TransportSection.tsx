@@ -58,7 +58,7 @@ export default function TransportSection({
   }
 
   return (
-    <div className="divide-y divide-gray-100">
+    <div className="divide-y divide-border">
       {[...sources.entries()].map(([source, sourceItems]) => (
         <ReportGroupRow
           key={source}

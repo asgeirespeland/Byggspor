@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { Check, Search } from 'lucide-react'
 import { useForm } from 'react-hook-form'
@@ -58,19 +58,28 @@ export default function AddMemberDialog({
     defaultValues: { userId: '', role: 'MEMBER' },
   })
   const [query, setQuery] = useState('')
+  const [debouncedQuery, setDebouncedQuery] = useState('')
+
+  useEffect(() => {
+    const id = setTimeout(() => setDebouncedQuery(query), 300)
+    return () => clearTimeout(id)
+  }, [query])
+
   const { data: candidates = [], isLoading: isSearching } =
-    useOrgMemberCandidates(organizationId, query, open)
+    useOrgMemberCandidates(organizationId, debouncedQuery, open)
 
   async function handleValid(values: FormValues) {
     await onSubmit(values.userId, values.role)
     form.reset({ userId: '', role: 'MEMBER' })
     setQuery('')
+    setDebouncedQuery('')
   }
 
   function handleClose(nextOpen: boolean) {
     if (!nextOpen) {
       form.reset({ userId: '', role: 'MEMBER' })
       setQuery('')
+      setDebouncedQuery('')
     }
     onOpenChange(nextOpen)
   }
@@ -129,7 +138,7 @@ export default function AddMemberDialog({
                     </p>
                     <p className="text-gray-500">{selectedCandidate.email}</p>
                   </div>
-                ) : query.trim() ? (
+                ) : debouncedQuery.trim() ? (
                   <div className="max-h-56 space-y-2 overflow-y-auto rounded-lg border border-gray-200 p-2">
                     {isSearching ? (
                       <p className="px-2 py-1 text-sm text-gray-400">
