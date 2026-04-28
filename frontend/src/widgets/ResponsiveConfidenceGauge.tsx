@@ -15,7 +15,9 @@ export default function ResponsiveConfidenceGauge({
   return (
     <>
       <div className="hidden min-[704px]:flex flex-col items-center">
-        <p className="mb-1 text-xs font-medium text-gray-500">CO₂ Konfidens</p>
+        <p className="mb-1 text-xs font-medium text-muted-foreground">
+          CO₂ Konfidens
+        </p>
         <ConfidenceGauge score={score} />
       </div>
       <div className="min-[704px]:hidden">

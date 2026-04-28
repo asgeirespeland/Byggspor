@@ -102,7 +102,7 @@ export default function CategoryDonut({
           innerRadius={55}
           outerRadius={80}
           strokeWidth={2}
-          stroke="white"
+          stroke="var(--card)"
           isAnimationActive={false}
           onMouseEnter={(_: unknown, i: number) => setActiveIndex(i)}
           onMouseLeave={() => setActiveIndex(undefined)}
@@ -124,14 +124,14 @@ export default function CategoryDonut({
                     <tspan
                       x={viewBox.cx}
                       y={(viewBox.cy ?? 0) - 6}
-                      className="fill-gray-900 text-lg font-bold"
+                      className="fill-foreground text-lg font-bold"
                     >
                       {fmt(total)}
                     </tspan>
                     <tspan
                       x={viewBox.cx}
                       y={(viewBox.cy ?? 0) + 12}
-                      className="fill-gray-400 text-[10px]"
+                      className="fill-muted-foreground text-[10px]"
                     >
                       kg CO₂e netto
                     </tspan>

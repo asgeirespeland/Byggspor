@@ -55,7 +55,7 @@ function FullGauge({ score }: { score: number }) {
         <path
           d={`M ${cx - radius} ${cy} A ${radius} ${radius} 0 0 1 ${cx + radius} ${cy}`}
           fill="none"
-          stroke="#e5e7eb"
+          stroke="var(--gauge-track)"
           strokeWidth={FULL_GAUGE.strokeWidth}
           strokeLinecap="round"
         />
@@ -74,7 +74,7 @@ function FullGauge({ score }: { score: number }) {
           textAnchor="middle"
           fontSize="24"
           fontWeight="700"
-          fill="#111827"
+          fill="var(--gauge-text)"
         >
           {score}
         </text>
@@ -83,7 +83,7 @@ function FullGauge({ score }: { score: number }) {
           y={cy + 12}
           textAnchor="middle"
           fontSize="11"
-          fill="#9ca3af"
+          fill="var(--gauge-subtext)"
         >
           / 100
         </text>
@@ -114,7 +114,7 @@ function CompactGauge({ score }: { score: number }) {
         <path
           d={`M ${cx - radius} ${cy} A ${radius} ${radius} 0 0 1 ${cx + radius} ${cy}`}
           fill="none"
-          stroke="#e5e7eb"
+          stroke="var(--gauge-track)"
           strokeWidth={COMPACT_GAUGE.strokeWidth}
           strokeLinecap="round"
         />
@@ -133,12 +133,12 @@ function CompactGauge({ score }: { score: number }) {
           textAnchor="middle"
           fontSize="14"
           fontWeight="700"
-          fill="#111827"
+          fill="var(--gauge-text)"
         >
           {score}
         </text>
       </svg>
-      <span className="text-xs text-gray-400">/ 100</span>
+      <span className="text-xs text-muted-foreground">/ 100</span>
     </div>
   )
 }

@@ -58,9 +58,9 @@ export default function FlaggedMaterialRow({ item, projectId }: Props) {
       <Form {...form}>
         <form
           onSubmit={form.handleSubmit(handleValid)}
-          className="rounded-lg bg-white p-2 space-y-1.5"
+          className="rounded-lg bg-card p-2 space-y-1.5"
         >
-          <p className="text-xs text-gray-600 truncate">
+          <p className="text-xs text-muted-foreground truncate">
             {item.material_name ?? 'Ukjent'}
           </p>
           <div className="flex items-center gap-1.5">
@@ -74,7 +74,7 @@ export default function FlaggedMaterialRow({ item, projectId }: Props) {
                       type="number"
                       step="any"
                       placeholder="kg CO₂"
-                      className="h-7 w-full rounded border border-gray-200 px-2 text-xs focus:border-warning focus:outline-none focus:ring-1 focus:ring-warning"
+                      className="h-7 w-full rounded border border-border px-2 text-xs focus:border-warning focus:outline-none focus:ring-1 focus:ring-warning"
                       autoFocus
                       {...field}
                     />
@@ -97,7 +97,7 @@ export default function FlaggedMaterialRow({ item, projectId }: Props) {
             <button
               type="button"
               onClick={cancelEdit}
-              className="text-xs text-gray-400 hover:text-gray-600"
+              className="text-xs text-muted-foreground hover:text-muted-foreground"
             >
               Avbryt
             </button>
@@ -111,7 +111,7 @@ export default function FlaggedMaterialRow({ item, projectId }: Props) {
     <div className="flex items-start gap-2">
       <Package className="mt-0.5 h-3.5 w-3.5 shrink-0 text-warning" />
       <div className="min-w-0 flex-1">
-        <p className="truncate text-xs font-medium text-gray-700">
+        <p className="truncate text-xs font-medium text-muted-foreground">
           {item.material_name ?? 'Ukjent materiale'}
         </p>
         <p className="text-[11px] text-warning-strong">

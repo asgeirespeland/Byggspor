@@ -23,7 +23,7 @@ export default function MaterialsTab({ projectId }: Props) {
     <DataTabShell
       upload={<ImportInvoice projectId={projectId} />}
       manualEntryForm={
-        <p className="text-sm text-gray-400">
+        <p className="text-sm text-muted-foreground">
           Manuell registrering av materialer kommer snart.
         </p>
       }

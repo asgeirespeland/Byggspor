@@ -31,15 +31,15 @@ export default function FileDropZone({
       }}
       className={`flex flex-col items-center justify-center rounded-xl border-2 border-dashed px-6 py-12 text-center transition-colors ${
         isDragging
-          ? 'border-gray-400 bg-gray-50'
-          : 'border-gray-200 bg-gray-50/50 hover:border-gray-300 hover:bg-gray-50'
+          ? 'border-border bg-muted/50'
+          : 'border-border bg-muted/30 hover:border-border hover:bg-muted/50'
       }`}
     >
-      <div className="mb-3 flex h-10 w-10 items-center justify-center rounded-lg bg-gray-100">
-        <Upload className="h-5 w-5 text-gray-400" />
+      <div className="mb-3 flex h-10 w-10 items-center justify-center rounded-lg bg-muted">
+        <Upload className="h-5 w-5 text-muted-foreground" />
       </div>
-      <p className="text-sm font-medium text-gray-600">{description}</p>
-      <p className="mt-1 text-xs text-gray-400">— eller —</p>
+      <p className="text-sm font-medium text-muted-foreground">{description}</p>
+      <p className="mt-1 text-xs text-muted-foreground">— eller —</p>
       <input
         id={inputId}
         type="file"

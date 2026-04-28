@@ -52,14 +52,14 @@ export default function SettingRow({
     <div className="flex items-center justify-between gap-4 py-3">
       <div className="min-w-0 flex-1">
         <div className="flex items-center gap-2">
-          <span className="text-sm text-gray-700">{meta.label}</span>
+          <span className="text-sm text-muted-foreground">{meta.label}</span>
           <SourceBadge
             source={draftValue !== undefined ? level : resolved.source}
           />
         </div>
 
         {meta.input === 'number' && !editing && (
-          <p className="text-sm font-medium text-gray-900 mt-0.5">
+          <p className="text-sm font-medium text-foreground mt-0.5">
             {meta.render(displayValue)}
           </p>
         )}
@@ -70,7 +70,7 @@ export default function SettingRow({
               step="any"
               value={numberDraft}
               onChange={(e) => setNumberDraft(e.target.value)}
-              className="w-32 rounded border border-gray-300 px-2 py-1 text-sm"
+              className="w-32 rounded border border-border px-2 py-1 text-sm"
               autoFocus
               onKeyDown={(e) => {
                 if (e.key === 'Enter') commitEdit()
@@ -87,7 +87,7 @@ export default function SettingRow({
             <button
               type="button"
               onClick={cancelEdit}
-              className="rounded p-1 text-gray-400 hover:bg-gray-100"
+              className="rounded p-1 text-muted-foreground hover:bg-muted"
             >
               <X className="h-4 w-4" />
             </button>
@@ -95,7 +95,7 @@ export default function SettingRow({
         )}
 
         {meta.input === 'boolean' && (
-          <p className="text-sm font-medium text-gray-900 mt-0.5">
+          <p className="text-sm font-medium text-foreground mt-0.5">
             {meta.render(displayValue)}
           </p>
         )}
@@ -124,7 +124,7 @@ export default function SettingRow({
         )}
 
         {meta.input === 'readonly' && (
-          <p className="text-sm font-medium text-gray-900 mt-0.5">
+          <p className="text-sm font-medium text-foreground mt-0.5">
             {meta.render(displayValue)}
           </p>
         )}
@@ -143,7 +143,7 @@ export default function SettingRow({
           <button
             type="button"
             onClick={startNumberEdit}
-            className="rounded p-1.5 text-gray-400 hover:bg-gray-100 hover:text-gray-600"
+            className="rounded p-1.5 text-muted-foreground hover:bg-muted hover:text-muted-foreground"
             title="Rediger"
           >
             <Pencil className="h-3.5 w-3.5" />
@@ -154,7 +154,7 @@ export default function SettingRow({
           <button
             type="button"
             onClick={() => onReset(meta.key)}
-            className="rounded p-1.5 text-gray-400 hover:bg-warning-soft hover:text-warning-strong"
+            className="rounded p-1.5 text-muted-foreground hover:bg-warning-soft hover:text-warning-strong"
             title="Tilbakestill til arvet verdi"
           >
             <RotateCcw className="h-3.5 w-3.5" />

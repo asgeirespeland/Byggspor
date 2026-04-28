@@ -43,7 +43,7 @@ export default function ClimateTabTour({
     >
       <DialogContent className="sm:max-w-md w-full flex flex-col max-h-[85vh]">
         <DialogHeader className="shrink-0">
-          <div className="flex items-center gap-2 text-xs font-medium text-gray-400 mb-1">
+          <div className="flex items-center gap-2 text-xs font-medium text-muted-foreground mb-1">
             <span>Omvisning</span>
             <span>·</span>
             <span>
@@ -55,20 +55,24 @@ export default function ClimateTabTour({
           >
             <Icon className={`h-7 w-7 ${theme.textStrong}`} />
           </div>
-          <DialogTitle className="text-center text-base font-semibold text-gray-900 leading-snug">
+          <DialogTitle className="text-center text-base font-semibold text-foreground leading-snug">
             {current.title}
           </DialogTitle>
         </DialogHeader>
 
         {/* Body — fixed height so dialog doesn't shift between steps */}
         <div className="h-[30vh] max-h-72 overflow-y-auto space-y-3 text-sm">
-          <p className="text-gray-600 leading-relaxed">{current.what}</p>
+          <p className="text-muted-foreground leading-relaxed">
+            {current.what}
+          </p>
 
-          <div className="rounded-lg border border-gray-100 bg-gray-50 px-3 py-2.5">
-            <p className="text-xs font-semibold uppercase tracking-wide text-gray-400 mb-1">
+          <div className="rounded-lg border border-border bg-muted/50 px-3 py-2.5">
+            <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground mb-1">
               Hva legger du inn?
             </p>
-            <p className="text-gray-700 leading-relaxed">{current.how}</p>
+            <p className="text-muted-foreground leading-relaxed">
+              {current.how}
+            </p>
           </div>
 
           {current.note && (
@@ -103,7 +107,7 @@ export default function ClimateTabTour({
             <span
               key={i}
               className={`block h-1.5 rounded-full transition-all duration-200 ${
-                i === step ? 'w-4 bg-gray-700' : 'w-1.5 bg-gray-200'
+                i === step ? 'w-4 bg-foreground' : 'w-1.5 bg-muted'
               }`}
             />
           ))}
@@ -115,7 +119,7 @@ export default function ClimateTabTour({
             variant="ghost"
             size="sm"
             onClick={onClose}
-            className="text-gray-400 hover:text-gray-600"
+            className="text-muted-foreground hover:text-muted-foreground"
           >
             Hopp over
           </Button>

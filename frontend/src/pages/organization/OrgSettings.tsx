@@ -85,16 +85,16 @@ export default function OrgSettings() {
   if (organizationId == null) {
     return (
       <div className="space-y-6">
-        <h1 className="text-2xl font-bold text-gray-900">
+        <h1 className="text-2xl font-bold text-foreground">
           Opprett organisasjon
         </h1>
 
-        <div className="rounded-xl border border-gray-200 bg-white p-6 shadow-sm">
+        <div className="rounded-xl border border-border bg-card p-6 shadow-sm">
           <div className="mb-6 text-center">
             <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-xl bg-green-600">
               <Building2 className="h-6 w-6 text-white" />
             </div>
-            <p className="text-sm text-gray-500">
+            <p className="text-sm text-muted-foreground">
               Opprett en organisasjon når du er klar til å samarbeide med andre.
             </p>
           </div>
@@ -137,7 +137,7 @@ export default function OrgSettings() {
               />
 
               {createOrgError && (
-                <p className="rounded-md border border-danger/20 bg-danger-soft px-3 py-2 text-sm text-danger-strong">
+                <p className="rounded-md bg-danger-soft px-3 py-2 text-sm text-danger-strong border border-danger/20">
                   {createOrgError}
                 </p>
               )}
@@ -156,8 +156,6 @@ export default function OrgSettings() {
     )
   }
 
-  const orgId = organizationId
-
   async function handleAddMember(userId: string, role: string) {
     await addMember.mutateAsync({ userId, role })
     setDialogOpen(false)
@@ -175,28 +173,28 @@ export default function OrgSettings() {
 
   return (
     <div className="space-y-6">
-      <h1 className="text-2xl font-bold text-gray-900">
+      <h1 className="text-2xl font-bold text-foreground">
         {organization?.name ?? '\u00A0'}
       </h1>
 
       <Collapsible
         open={showCalcSettings}
         onOpenChange={setShowCalcSettings}
-        className="rounded-xl border border-gray-200 bg-white shadow-sm overflow-hidden"
+        className="rounded-xl border border-border bg-card shadow-sm overflow-hidden"
       >
-        <CollapsibleTrigger className="flex w-full items-center justify-between px-5 py-4 text-left hover:bg-gray-50 transition-colors">
+        <CollapsibleTrigger className="flex w-full items-center justify-between px-5 py-4 text-left hover:bg-muted/50 transition-colors">
           <div className="flex items-center gap-3">
-            <Settings className="h-4 w-4 text-gray-400" />
-            <span className="text-sm font-medium text-gray-700">
+            <Settings className="h-4 w-4 text-muted-foreground" />
+            <span className="text-sm font-medium text-muted-foreground">
               Beregningsinnstillinger
             </span>
           </div>
-          <span className="text-xs text-gray-400">
+          <span className="text-xs text-muted-foreground">
             {showCalcSettings ? 'Skjul' : 'Vis'}
           </span>
         </CollapsibleTrigger>
-        <CollapsibleContent className="border-t border-gray-100 p-5">
-          <EditOrgSettings orgId={orgId} />
+        <CollapsibleContent className="border-t border-border p-5">
+          <EditOrgSettings orgId={organizationId} />
         </CollapsibleContent>
       </Collapsible>
 
@@ -230,7 +228,7 @@ export default function OrgSettings() {
       <AddMemberDialog
         open={dialogOpen}
         onOpenChange={setDialogOpen}
-        organizationId={orgId}
+        organizationId={organizationId}
         onSubmit={handleAddMember}
         loading={addMember.isPending}
       />

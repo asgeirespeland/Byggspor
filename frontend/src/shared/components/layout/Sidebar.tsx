@@ -14,13 +14,13 @@ export default function Sidebar() {
 
   return (
     <div className="relative z-50 shrink-0 w-16 sm:w-16 sm:hover:w-48 md:w-48 transition-all duration-200">
-      <aside className="group absolute min-[380px]:static inset-y-0 left-0 z-50 flex h-screen w-16 hover:w-48 md:w-48 flex-col items-center border-r bg-white py-4 overflow-hidden transition-all duration-200 hover:shadow-lg min-[380px]:hover:shadow-none">
+      <aside className="group absolute min-[380px]:static inset-y-0 left-0 z-50 flex h-screen w-16 hover:w-48 md:w-48 flex-col items-center border-r bg-card py-4 overflow-hidden transition-all duration-200 hover:shadow-lg min-[380px]:hover:shadow-none">
         <nav className="flex flex-col gap-1 w-full px-2">
           <div className="flex items-center gap-3 rounded-lg px-3 py-2.5 mb-4">
             <div className="flex h-[18px] w-[18px] shrink-0 items-center justify-center rounded bg-violet-600 text-white text-[10px] font-bold">
               B
             </div>
-            <span className="opacity-0 md:opacity-100 group-hover:opacity-100 transition-opacity duration-200 whitespace-nowrap text-sm font-bold text-gray-900">
+            <span className="opacity-0 md:opacity-100 group-hover:opacity-100 transition-opacity duration-200 whitespace-nowrap text-sm font-bold text-foreground">
               Byggspor
             </span>
           </div>
@@ -33,8 +33,8 @@ export default function Sidebar() {
                 cn(
                   'flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors',
                   isActive
-                    ? 'bg-violet-50 text-violet-600'
-                    : 'text-gray-500 hover:bg-gray-100 hover:text-gray-900',
+                    ? 'bg-violet-600/10 text-violet-600 dark:text-violet-400'
+                    : 'text-muted-foreground hover:bg-muted hover:text-foreground',
                 )
               }
             >
@@ -44,7 +44,7 @@ export default function Sidebar() {
                     size={18}
                     className={cn(
                       'shrink-0',
-                      isActive ? 'text-violet-600' : 'text-gray-400',
+                      isActive ? 'text-violet-600' : 'text-muted-foreground',
                     )}
                   />
                   <span className="opacity-0 md:opacity-100 group-hover:opacity-100 transition-opacity duration-200 whitespace-nowrap">
@@ -61,7 +61,7 @@ export default function Sidebar() {
         <div className="w-full px-2">
           <div className="flex items-center gap-3 rounded-lg px-3 py-2.5">
             <UserButton />
-            <span className="opacity-0 md:opacity-100 group-hover:opacity-100 transition-opacity duration-200 whitespace-nowrap text-sm font-medium text-gray-700 truncate">
+            <span className="opacity-0 md:opacity-100 group-hover:opacity-100 transition-opacity duration-200 whitespace-nowrap text-sm font-medium text-muted-foreground truncate">
               {user?.firstName ?? ''}
             </span>
           </div>

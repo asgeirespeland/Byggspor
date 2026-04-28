@@ -53,7 +53,7 @@ export default function InvoiceGroupCard({
         <>
           {group.supplier_name ?? 'Ukjent leverandør'}
           {group.invoice_number && (
-            <span className="ml-2 text-gray-400 font-normal">
+            <span className="ml-2 text-muted-foreground font-normal">
               #{group.invoice_number}
             </span>
           )}
@@ -83,7 +83,7 @@ export default function InvoiceGroupCard({
             ? 'bg-info-soft/50'
             : row.flagged
               ? 'bg-warning-soft/50'
-              : 'hover:bg-gray-50'
+              : 'hover:bg-muted/50'
         }
         onSaveEdit={(_row, i, values) => {
           const item = group.items[i]

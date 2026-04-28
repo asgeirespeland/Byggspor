@@ -15,13 +15,15 @@ export default function DataTable<T extends { id: number }>({
   emptyMessage: string
 }) {
   if (items.length === 0) {
-    return <p className="px-4 py-6 text-sm text-gray-400">{emptyMessage}</p>
+    return (
+      <p className="px-4 py-6 text-sm text-muted-foreground">{emptyMessage}</p>
+    )
   }
 
   return (
     <table className="w-full text-xs">
       <thead>
-        <tr className="border-b border-gray-100 text-left text-gray-400">
+        <tr className="border-b border-border text-left text-muted-foreground">
           {columns.map((col) => (
             <th
               key={col.header}
@@ -34,7 +36,7 @@ export default function DataTable<T extends { id: number }>({
       </thead>
       <tbody className="divide-y divide-gray-50">
         {items.map((item) => (
-          <tr key={item.id} className="text-gray-600">
+          <tr key={item.id} className="text-muted-foreground">
             {columns.map((col) => (
               <td
                 key={col.header}

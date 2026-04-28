@@ -31,7 +31,7 @@ const SCORE_ROWS = (['high', 'medium', 'low'] as const).map((tier) => ({
 export default function ConfidenceInfo() {
   return (
     <Dialog>
-      <DialogTrigger className="inline-flex items-center gap-1 text-xs text-gray-400 transition-colors hover:text-gray-600">
+      <DialogTrigger className="inline-flex items-center gap-1 text-xs text-muted-foreground transition-colors hover:text-muted-foreground">
         <HelpCircle className="h-3.5 w-3.5" />
         Hva betyr dette?
       </DialogTrigger>
@@ -46,7 +46,7 @@ export default function ConfidenceInfo() {
         </DialogHeader>
 
         <div className="space-y-3">
-          <p className="text-xs font-semibold uppercase tracking-wide text-gray-400">
+          <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
             Skala
           </p>
           <div className="space-y-2">
@@ -58,31 +58,33 @@ export default function ConfidenceInfo() {
                   {row.range}
                 </span>
                 <div className="min-w-0">
-                  <p className="text-sm font-medium text-gray-800">
+                  <p className="text-sm font-medium text-foreground">
                     {row.label}
                   </p>
-                  <p className="text-xs text-gray-500">{row.description}</p>
+                  <p className="text-xs text-muted-foreground">
+                    {row.description}
+                  </p>
                 </div>
               </div>
             ))}
           </div>
         </div>
 
-        <div className="space-y-2 border-t border-gray-100 pt-3">
-          <p className="text-xs font-semibold uppercase tracking-wide text-gray-400">
+        <div className="space-y-2 border-t border-border pt-3">
+          <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
             Slik forbedrer du scoren
           </p>
-          <ul className="space-y-1 text-xs text-gray-600">
+          <ul className="space-y-1 text-xs text-muted-foreground">
             <li className="flex items-start gap-1.5">
-              <span className="mt-0.5 text-gray-300">•</span>
+              <span className="mt-0.5 text-muted-foreground">•</span>
               Korriger flaggede poster med manuell CO₂-verdi (GWP A1-A3)
             </li>
             <li className="flex items-start gap-1.5">
-              <span className="mt-0.5 text-gray-300">•</span>
+              <span className="mt-0.5 text-muted-foreground">•</span>
               Bruk fakturaer med gyldige NOBB- eller GTIN-numre
             </li>
             <li className="flex items-start gap-1.5">
-              <span className="mt-0.5 text-gray-300">•</span>
+              <span className="mt-0.5 text-muted-foreground">•</span>
               Legg inn energidata manuelt for høyeste konfidens (100)
             </li>
           </ul>

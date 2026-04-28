@@ -19,28 +19,28 @@ export default function ProjectCard({ project }: { project: Project }) {
   })
 
   return (
-    <div className="rounded-xl border border-gray-200 bg-white shadow-sm overflow-hidden transition-shadow hover:shadow-md">
+    <div className="rounded-xl border border-border bg-card shadow-sm overflow-hidden transition-shadow hover:shadow-md">
       {/* Main card row */}
       <div
         className="flex items-center gap-4 px-5 py-4 cursor-pointer select-none"
         onClick={() => setExpanded((v) => !v)}
       >
-        <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-gray-100">
-          <Building2 className="h-4 w-4 text-gray-500" />
+        <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-muted">
+          <Building2 className="h-4 w-4 text-muted-foreground" />
         </div>
 
         <div className="min-w-0 flex-1">
-          <p className="truncate text-sm font-semibold text-gray-900">
+          <p className="truncate text-sm font-semibold text-foreground">
             {project.name}
           </p>
           <div className="mt-0.5 flex items-center gap-3">
             {project.project_number && (
-              <span className="flex items-center gap-1 text-xs text-gray-400">
+              <span className="flex items-center gap-1 text-xs text-muted-foreground">
                 <Hash className="h-3 w-3" />
                 {project.project_number}
               </span>
             )}
-            <span className="text-xs text-gray-400">{createdDate}</span>
+            <span className="text-xs text-muted-foreground">{createdDate}</span>
           </div>
         </div>
 
@@ -51,7 +51,7 @@ export default function ProjectCard({ project }: { project: Project }) {
           {status.label}
         </span>
 
-        <div className="text-gray-400">
+        <div className="text-muted-foreground">
           {expanded ? (
             <ChevronUp className="h-4 w-4" />
           ) : (

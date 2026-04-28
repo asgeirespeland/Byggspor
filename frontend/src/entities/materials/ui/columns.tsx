@@ -34,7 +34,7 @@ export const materialColumns: EditableColumn<MaterialRow>[] = [
     render: (row) => {
       const hasIds = row.gtin || row.nobb_number
       const name = (
-        <span className="text-gray-800">
+        <span className="text-foreground">
           {row.name ?? '—'}
           {row.flagged && !row.manual_override && (
             <span className="ml-2 inline-block rounded bg-warning-soft px-1.5 py-0.5 text-xs font-medium text-warning-strong">
@@ -68,7 +68,7 @@ export const materialColumns: EditableColumn<MaterialRow>[] = [
     width: '12%',
     align: 'right',
     render: (row) => (
-      <span className="text-gray-800">{row.quantity ?? '—'}</span>
+      <span className="text-foreground">{row.quantity ?? '—'}</span>
     ),
     editable: {
       type: 'number',
@@ -78,14 +78,16 @@ export const materialColumns: EditableColumn<MaterialRow>[] = [
   {
     header: 'Enhet',
     width: '10%',
-    render: (row) => <span className="text-gray-600">{row.unit ?? '—'}</span>,
+    render: (row) => (
+      <span className="text-muted-foreground">{row.unit ?? '—'}</span>
+    ),
   },
   {
     header: 'Sum',
     width: '12%',
     align: 'right',
     render: (row) => (
-      <span className="text-gray-800">
+      <span className="text-foreground">
         {row.line_total != null ? row.line_total.toFixed(2) : '—'}
       </span>
     ),
@@ -95,7 +97,11 @@ export const materialColumns: EditableColumn<MaterialRow>[] = [
     width: '10%',
     align: 'right',
     render: (row) => (
-      <span className={row.co2_kg == null ? 'text-gray-400' : 'text-gray-800'}>
+      <span
+        className={
+          row.co2_kg == null ? 'text-muted-foreground' : 'text-foreground'
+        }
+      >
         {row.co2_kg != null ? row.co2_kg.toFixed(2) : '—'}
       </span>
     ),

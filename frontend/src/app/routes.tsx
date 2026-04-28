@@ -13,7 +13,7 @@ import SettingsPage from '@/pages/settings/SettingsPage'
 
 function AppShell() {
   return (
-    <div className="flex h-screen overflow-hidden bg-gray-100">
+    <div className="flex h-screen overflow-hidden bg-muted">
       <Sidebar />
       <main className="flex-1 min-w-0 overflow-y-auto scrollbar-hide p-6">
         <Outlet />

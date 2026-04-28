@@ -22,7 +22,7 @@ export function fmt(value: number | null | undefined, decimals = 1): string {
 
 export function co2Label(value: number | null | undefined) {
   if (value == null || value === 0)
-    return <span className="text-gray-400">—</span>
+    return <span className="text-muted-foreground">—</span>
   if (value < 0) {
     return (
       <span className="text-carbon-strong font-medium">
@@ -39,7 +39,7 @@ export function sourceLabel(type: string | null): string {
 }
 
 export function confidenceBadge(score: number | null) {
-  if (score == null) return <span className="text-gray-300">—</span>
+  if (score == null) return <span className="text-muted-foreground">—</span>
   const color = CONFIDENCE_TIER_BADGE_CLASS[confidenceTier(score)]
   return (
     <span
