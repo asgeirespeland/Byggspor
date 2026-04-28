@@ -44,7 +44,7 @@ export default function WasteSection({ items }: { items: WasteLineItem[] }) {
   )
 
   return (
-    <div className="divide-y divide-gray-100">
+    <div className="divide-y divide-border">
       {[...suppliers.entries()].map(([supplier, supplierItems]) => {
         const sources = groupBy(
           supplierItems,
@@ -60,7 +60,7 @@ export default function WasteSection({ items }: { items: WasteLineItem[] }) {
             totalCo2={sumCo2(supplierItems)}
           >
             {hasMultipleSources ? (
-              <div className="divide-y divide-gray-50">
+              <div className="divide-y divide-border">
                 {[...sources.entries()].map(([source, sourceItems]) => (
                   <ReportGroupRow
                     key={source}

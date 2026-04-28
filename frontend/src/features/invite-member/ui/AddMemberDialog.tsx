@@ -1,5 +1,7 @@
-import { useForm } from 'react-hook-form'
+import { useEffect, useState } from 'react'
 import { zodResolver } from '@hookform/resolvers/zod'
+import { Check, Search } from 'lucide-react'
+import { useForm } from 'react-hook-form'
 import { z } from 'zod'
 import { Input } from '@/components/ui/input'
 import {
@@ -17,11 +19,13 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select'
+import { useOrgMemberCandidates } from '@/entities/organization'
 import FormDialog from '@/shared/components/FormDialog'
 
 type Props = {
   open: boolean
   onOpenChange: (open: boolean) => void
+  organizationId: number
   onSubmit: (userId: string, role: string) => Promise<void>
   loading: boolean
 }
@@ -34,7 +38,7 @@ const ROLE_LABELS: Record<string, string> = {
 }
 
 const schema = z.object({
-  userId: z.string().min(1, 'Bruker-ID er påkrevd'),
+  userId: z.string().min(1, 'Velg en bruker'),
   role: z.enum(['OWNER', 'ADMIN', 'MEMBER', 'VIEWER']),
 })
 
@@ -45,6 +49,7 @@ const FORM_ID = 'add-member-form'
 export default function AddMemberDialog({
   open,
   onOpenChange,
+  organizationId,
   onSubmit,
   loading,
 }: Props) {
@@ -52,20 +57,48 @@ export default function AddMemberDialog({
     resolver: zodResolver(schema),
     defaultValues: { userId: '', role: 'MEMBER' },
   })
+  const [query, setQuery] = useState('')
+  const [debouncedQuery, setDebouncedQuery] = useState('')
+
+  useEffect(() => {
+    const id = setTimeout(() => setDebouncedQuery(query), 300)
+    return () => clearTimeout(id)
+  }, [query])
+
+  const { data: candidates = [], isLoading: isSearching } =
+    useOrgMemberCandidates(organizationId, debouncedQuery, open)
 
   async function handleValid(values: FormValues) {
     await onSubmit(values.userId, values.role)
     form.reset({ userId: '', role: 'MEMBER' })
+    setQuery('')
+    setDebouncedQuery('')
+  }
+
+  function handleClose(nextOpen: boolean) {
+    if (!nextOpen) {
+      form.reset({ userId: '', role: 'MEMBER' })
+      setQuery('')
+      setDebouncedQuery('')
+    }
+    onOpenChange(nextOpen)
+  }
+
+  function handleSelectCandidate(candidateId: number) {
+    form.setValue('userId', String(candidateId), { shouldValidate: true })
   }
 
   const userId = form.watch('userId')
+  const selectedCandidate = candidates.find(
+    (candidate) => String(candidate.id) === userId,
+  )
 
   return (
     <FormDialog
       open={open}
-      onOpenChange={onOpenChange}
+      onOpenChange={handleClose}
       title="Legg til medlem"
-      description="Angi bruker-ID og velg en rolle for det nye medlemmet."
+      description="Søk etter en eksisterende bruker og velg en rolle for det nye medlemmet."
       submitLabel="Legg til"
       loadingLabel="Lagrer..."
       submitDisabled={!userId.trim()}
@@ -81,19 +114,74 @@ export default function AddMemberDialog({
           <FormField
             control={form.control}
             name="userId"
-            render={({ field }) => (
+            render={() => (
               <FormItem className="space-y-1.5">
-                <FormLabel>Bruker-ID</FormLabel>
-                <FormControl>
+                <FormLabel>Søk bruker</FormLabel>
+                <div className="relative">
+                  <Search className="pointer-events-none absolute top-2.5 left-3 h-4 w-4 text-gray-400" />
                   <Input
-                    placeholder="ID"
+                    value={query}
+                    onChange={(e) => setQuery(e.target.value)}
+                    placeholder="Søk på navn eller e-post"
                     autoComplete="off"
                     data-1p-ignore
                     data-lpignore="true"
                     autoFocus
-                    {...field}
+                    className="pl-9"
                   />
-                </FormControl>
+                </div>
+
+                {selectedCandidate ? (
+                  <div className="rounded-lg border border-green-200 bg-green-50 px-3 py-2 text-sm">
+                    <p className="font-medium text-gray-900">
+                      {selectedCandidate.name}
+                    </p>
+                    <p className="text-gray-500">{selectedCandidate.email}</p>
+                  </div>
+                ) : debouncedQuery.trim() ? (
+                  <div className="max-h-56 space-y-2 overflow-y-auto rounded-lg border border-gray-200 p-2">
+                    {isSearching ? (
+                      <p className="px-2 py-1 text-sm text-gray-400">
+                        Søker...
+                      </p>
+                    ) : candidates.length > 0 ? (
+                      candidates.map((candidate) => {
+                        const isSelected = userId === String(candidate.id)
+                        return (
+                          <button
+                            key={candidate.id}
+                            type="button"
+                            onClick={() => handleSelectCandidate(candidate.id)}
+                            className={`
+                              flex w-full items-start justify-between rounded-lg px-3 py-2 text-left transition-colors
+                              ${isSelected ? 'bg-violet-50 text-violet-700' : 'hover:bg-gray-50'}
+                            `}
+                          >
+                            <div className="min-w-0">
+                              <p className="truncate text-sm font-medium text-gray-900">
+                                {candidate.name}
+                              </p>
+                              <p className="truncate text-sm text-gray-500">
+                                {candidate.email}
+                              </p>
+                            </div>
+                            {isSelected && (
+                              <Check className="mt-0.5 h-4 w-4 shrink-0 text-violet-600" />
+                            )}
+                          </button>
+                        )
+                      })
+                    ) : (
+                      <p className="px-2 py-1 text-sm text-gray-400">
+                        Ingen brukere funnet
+                      </p>
+                    )}
+                  </div>
+                ) : (
+                  <p className="text-sm text-gray-400">
+                    Skriv inn navn eller e-post for å søke etter brukere.
+                  </p>
+                )}
                 <FormMessage />
               </FormItem>
             )}
@@ -107,14 +195,14 @@ export default function AddMemberDialog({
                 <FormLabel>Rolle</FormLabel>
                 <Select
                   value={field.value}
-                  onValueChange={(v) =>
-                    field.onChange((v ?? 'MEMBER') as FormValues['role'])
+                  onValueChange={(value) =>
+                    field.onChange((value ?? 'MEMBER') as FormValues['role'])
                   }
                 >
                   <FormControl>
                     <SelectTrigger className="w-full">
                       <SelectValue>
-                        {(v) => ROLE_LABELS[String(v)] ?? String(v)}
+                        {(value) => ROLE_LABELS[String(value)] ?? String(value)}
                       </SelectValue>
                     </SelectTrigger>
                   </FormControl>

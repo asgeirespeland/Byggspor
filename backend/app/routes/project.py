@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from flask import Blueprint, g, jsonify, request
+from sqlalchemy import or_
 
 from app.config.settings_resolver import (
     clean_overrides,
@@ -43,7 +44,7 @@ def _get_user_org_id(session, user_id: int) -> int | None:
 @project_bp.route("", methods=["POST"])
 @require_auth
 def create_project():
-    """Create a new project linked to the authenticated user's organization."""
+    """Create a new project for the authenticated user."""
     payload = request.get_json(silent=True) or {}
 
     name = payload.get("name", "").strip()
@@ -55,16 +56,7 @@ def create_project():
         )
 
     session = g.db
-
     organization_id = _get_user_org_id(session, g.current_user_id)
-    if not organization_id:
-        raise ApiError(
-            "Brukeren er ikke medlem av noen organisasjon.",
-            code="NO_ORGANIZATION",
-            suggestion=(
-                "Du må være tilknyttet en organisasjon for å opprette prosjekter."
-            ),
-        )
 
     customer_id = payload.get("customer_id") or None
     customer_name = (payload.get("customer_name") or "").strip()
@@ -85,7 +77,7 @@ def create_project():
 
     project = Project(
         name=name,
-        organization_id=organization_id,
+        organization_id=organization_id or None,
         created_by_user_id=g.current_user_id,
         project_number=payload.get("project_number") or None,
         customer_id=customer_id,
@@ -109,51 +101,50 @@ def create_project():
 @project_bp.route("", methods=["GET"])
 @require_auth
 def list_projects():
-    """Return all projects belonging to the authenticated user's organization."""
-
+    """Return projects visible to the authenticated user."""
     session = g.db
 
     organization_id = _get_user_org_id(session, g.current_user_id)
-    if not organization_id:
-        raise ApiError(
-            "Brukeren er ikke medlem av noen organisasjon.",
-            code="NO_ORGANIZATION",
-            suggestion="Du må være tilknyttet en organisasjon for å se prosjekter.",
+    query = session.query(Project)
+    if organization_id is None:
+        query = query.filter(Project.created_by_user_id == g.current_user_id)
+    else:
+        query = query.filter(
+            or_(
+                Project.organization_id == organization_id,
+                (
+                    (Project.organization_id.is_(None))
+                    & (Project.created_by_user_id == g.current_user_id)
+                ),
+            )
         )
 
-    projects = (
-        session.query(Project)
-        .filter(Project.organization_id == organization_id)
-        .order_by(Project.created_at.desc())
-        .all()
-    )
-
+    projects = query.order_by(Project.created_at.desc()).all()
     return jsonify([p.to_dict() for p in projects])
 
 
 @project_bp.route("/<int:project_id>", methods=["GET"])
 @require_auth
 def get_project(project_id: int):
-    """Return a single project by ID, scoped to the user's organization."""
-
+    """Return a single project by ID, scoped to the authenticated user."""
     session = g.db
 
     organization_id = _get_user_org_id(session, g.current_user_id)
-    if not organization_id:
-        raise ApiError(
-            "Brukeren er ikke medlem av noen organisasjon.",
-            code="NO_ORGANIZATION",
+    query = session.query(Project).filter(Project.id == project_id)
+    if organization_id is None:
+        query = query.filter(Project.created_by_user_id == g.current_user_id)
+    else:
+        query = query.filter(
+            or_(
+                Project.organization_id == organization_id,
+                (
+                    (Project.organization_id.is_(None))
+                    & (Project.created_by_user_id == g.current_user_id)
+                ),
+            )
         )
 
-    project = (
-        session.query(Project)
-        .filter(
-            Project.id == project_id,
-            Project.organization_id == organization_id,
-        )
-        .first()
-    )
-
+    project = query.first()
     if not project:
         raise ApiError("Prosjektet ble ikke funnet.", code="NOT_FOUND", status=404)
 

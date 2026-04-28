@@ -27,7 +27,7 @@ const INPUT =
   'w-full rounded border border-border px-2 text-sm h-7 focus:outline-none focus:ring-1 focus:ring-ring [appearance:textfield] [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none'
 
 const DEFAULT_THEAD = 'border-b border-border bg-muted/50'
-const DEFAULT_TBODY = 'divide-y divide-gray-100'
+const DEFAULT_TBODY = 'divide-y divide-border'
 const DEFAULT_TH =
   'px-4 py-3 text-xs font-semibold uppercase tracking-wide text-muted-foreground'
 

@@ -34,7 +34,7 @@ export default function DataTable<T extends { id: number }>({
           ))}
         </tr>
       </thead>
-      <tbody className="divide-y divide-gray-50">
+      <tbody className="divide-y divide-border">
         {items.map((item) => (
           <tr key={item.id} className="text-muted-foreground">
             {columns.map((col) => (

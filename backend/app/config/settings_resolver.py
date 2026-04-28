@@ -146,11 +146,13 @@ def resolve_settings(session: Session, project_id: int) -> dict[str, Any]:
     return resolved
 
 
-def resolve_org_settings(session: Session, org_id: int) -> dict[str, Any]:
+def resolve_org_settings(session: Session, org_id: int | None) -> dict[str, Any]:
     """Resolve settings for an org (no project layer). Returns flat dict."""
     from app.models.organization import Organization
 
     resolved = {**SETTINGS_DEFAULTS}
+    if org_id is None:
+        return resolved
 
     org = session.get(Organization, org_id)
     if org and org.settings:

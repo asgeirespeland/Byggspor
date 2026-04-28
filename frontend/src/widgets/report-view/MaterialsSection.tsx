@@ -64,7 +64,7 @@ export default function MaterialsSection({
   )
 
   return (
-    <div className="divide-y divide-gray-100">
+    <div className="divide-y divide-border">
       {[...suppliers.entries()].map(([supplier, supplierItems]) => {
         const invoices = groupBy(
           supplierItems,
@@ -80,7 +80,7 @@ export default function MaterialsSection({
             totalCo2={sumCo2(supplierItems)}
           >
             {hasMultipleInvoices ? (
-              <div className="divide-y divide-gray-50">
+              <div className="divide-y divide-border">
                 {[...invoices.entries()].map(([invoice, invoiceItems]) => (
                   <ReportGroupRow
                     key={invoice}

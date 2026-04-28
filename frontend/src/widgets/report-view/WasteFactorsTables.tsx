@@ -22,7 +22,7 @@ export function Ns9431Table({
           <th className={`${TH} text-right`}>Faktor (kg CO₂e/t)</th>
         </tr>
       </thead>
-      <tbody className="divide-y divide-gray-100">
+      <tbody className="divide-y divide-border">
         {sorted.map(({ code, label, factor }) => (
           <tr key={code}>
             <td className="px-4 py-2 text-muted-foreground tabular-nums">
@@ -53,7 +53,7 @@ export function ManualFactorsTable({
           <th className={`${TH} text-right`}>Faktor (kg CO₂e/t)</th>
         </tr>
       </thead>
-      <tbody className="divide-y divide-gray-100">
+      <tbody className="divide-y divide-border">
         {entries.map(([key, value]) => (
           <tr key={key} className="capitalize">
             <td className="px-4 py-2 text-muted-foreground">{key}</td>

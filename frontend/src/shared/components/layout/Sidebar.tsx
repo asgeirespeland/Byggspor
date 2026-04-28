@@ -11,12 +11,11 @@ const navItems = [
 
 export default function Sidebar() {
   const { user } = useUser()
+
   return (
     <div className="relative z-50 shrink-0 hidden md:block w-16 md:w-16 md:hover:w-48 lg:w-48 transition-all duration-200">
       <aside className="group absolute md:static inset-y-0 left-0 z-50 flex h-screen w-16 hover:w-48 lg:w-48 flex-col items-center border-r bg-card py-4 overflow-hidden transition-all duration-200 hover:shadow-lg md:hover:shadow-none">
-        {/* Nav items */}
         <nav className="flex flex-col gap-1 w-full px-2">
-          {/* Logo */}
           <div className="flex items-center gap-3 rounded-lg px-3 py-2.5 mb-4">
             <div className="flex h-[18px] w-[18px] shrink-0 items-center justify-center rounded bg-violet-600 text-white text-[10px] font-bold">
               B
@@ -57,10 +56,8 @@ export default function Sidebar() {
           ))}
         </nav>
 
-        {/* Spacer */}
         <div className="flex-1" />
 
-        {/* User */}
         <div className="w-full px-2">
           <div className="flex items-center gap-3 rounded-lg px-3 py-2.5">
             <UserButton />

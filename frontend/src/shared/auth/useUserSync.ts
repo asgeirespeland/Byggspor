@@ -1,13 +1,12 @@
 /**
  * Fetches /users/me and the user's organization after Clerk auth is ready, returning a
- * discriminated-union SyncState ({ status: 'loading' | 'error' | 'ready' }). App root uses the
- * ready state to populate AppContext. Bypasses React Query because it runs before the provider
- * is populated.
+ * discriminated-union SyncState ({ status: 'loading' | 'error' | 'ready' }).
  */
-import { useEffect, useState } from 'react'
 import { useAuth } from '@clerk/react'
-import { apiRequest } from '@/shared/api/client'
 import { getOrganization, type OrgDto } from '@/entities/organization'
+import { apiRequest } from '@/shared/api/client'
+import { qk } from '@/shared/api/queryKeys'
+import { useAuthQuery } from '@/shared/auth/useAuthQuery'
 
 type UserMe = {
   id: number
@@ -27,61 +26,59 @@ export type SyncState =
       organization: OrgDto | null
     }
 
-/**
- * Fetches the current user profile and their organization (if any)
- * after Clerk auth is ready. Returns a discriminated-union state.
- */
 export function useUserSync(): SyncState {
-  const { isLoaded, isSignedIn, userId, getToken } = useAuth()
-  const [sync, setSync] = useState<SyncState>({ status: 'loading' })
+  const { isLoaded, isSignedIn } = useAuth()
+  const userQuery = useAuthQuery<UserMe>(
+    qk.currentUser(),
+    (token) => getUserMe(token),
+    { enabled: isLoaded && isSignedIn },
+  )
 
-  useEffect(() => {
-    if (!isLoaded) return
+  const organizationId = userQuery.data?.organization_id ?? null
+  const organizationQuery = useAuthQuery<OrgDto>(
+    qk.organization(organizationId ?? 0),
+    (token) => getOrganization(organizationId as number, token),
+    {
+      enabled:
+        isLoaded &&
+        isSignedIn &&
+        userQuery.status === 'success' &&
+        typeof organizationId === 'number',
+    },
+  )
 
-    if (!isSignedIn || !userId) {
-      setSync({ status: 'loading' })
-      return
+  if (!isLoaded || (isSignedIn && userQuery.isPending)) {
+    return { status: 'loading' }
+  }
+
+  if (userQuery.isError) {
+    return {
+      status: 'error',
+      message:
+        userQuery.error instanceof Error
+          ? userQuery.error.message
+          : 'Klarte ikke synkronisere brukerprofil',
     }
+  }
 
-    let cancelled = false
+  if (typeof organizationId === 'number' && organizationQuery.isPending) {
+    return { status: 'loading' }
+  }
 
-    async function run() {
-      setSync({ status: 'loading' })
-      try {
-        const token = await getToken()
-        if (!token) throw new Error('Ikke autentisert')
-
-        const user = await getUserMe(token)
-        if (cancelled) return
-
-        let organization: OrgDto | null = null
-        if (user.organization_id) {
-          organization = await getOrganization(user.organization_id, token)
-          if (cancelled) return
-        }
-
-        setSync({
-          status: 'ready',
-          organizationId: user.organization_id,
-          organization,
-        })
-      } catch (err) {
-        if (cancelled) return
-        setSync({
-          status: 'error',
-          message:
-            err instanceof Error
-              ? err.message
-              : 'Klarte ikke synkronisere brukerprofil',
-        })
-      }
+  if (organizationQuery.isError) {
+    return {
+      status: 'error',
+      message:
+        organizationQuery.error instanceof Error
+          ? organizationQuery.error.message
+          : 'Klarte ikke hente organisasjonen',
     }
+  }
 
-    void run()
-    return () => {
-      cancelled = true
-    }
-  }, [isLoaded, isSignedIn, userId]) // eslint-disable-line react-hooks/exhaustive-deps
-
-  return sync
+  return {
+    status: 'ready',
+    organizationId,
+    organization:
+      typeof organizationId === 'number' ? organizationQuery.data! : null,
+  }
 }

@@ -1,6 +1,5 @@
 /**
- * Organization-level landing page: heading, stat-cards, searchable list of projects,
- * and the 'new project' dialog. Route: '/'.
+ * Organization-level landing page.
  */
 import { useState } from 'react'
 import { useQueries } from '@tanstack/react-query'
@@ -22,8 +21,8 @@ function formatCo2(kg: number): string {
 
 export default function GlobalDashboard() {
   const [dialogOpen, setDialogOpen] = useState(false)
-  const { data: projects = [], isLoading, error } = useProjects()
   const { organization } = useAppContext()
+  const { data: projects = [], isLoading, error } = useProjects()
   const { getToken } = useAuth()
 
   const co2Queries = useQueries({
@@ -45,10 +44,9 @@ export default function GlobalDashboard() {
   return (
     <div className="space-y-6">
       <h1 className="text-2xl font-bold text-foreground">
-        {organization?.name ?? ' '}
+        {organization?.name ?? 'Dashboard'}
       </h1>
 
-      {/* Stat cards */}
       <div className="grid grid-cols-2 gap-4 lg:grid-cols-3">
         {[
           {
@@ -78,7 +76,6 @@ export default function GlobalDashboard() {
         ))}
       </div>
 
-      {/* Project list */}
       <ItemListPanel
         title="Prosjekter"
         items={projects}

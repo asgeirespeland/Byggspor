@@ -64,6 +64,10 @@ def upsert_user_from_clerk(session: Session, claims: dict) -> User:
             .one_or_none()
         )
 
+    clerk_username = claims.get("username") or None
+    if isinstance(clerk_username, str):
+        clerk_username = clerk_username.strip() or None
+
     if user:
         # Keep identity fields synchronized with Clerk, but preserve the local
         # profile name after the account has been created or linked.
@@ -71,6 +75,8 @@ def upsert_user_from_clerk(session: Session, claims: dict) -> User:
             user.clerk_id = clerk_id
         if user.email != email:
             user.email = email
+        if clerk_username and not user.username:
+            user.username = clerk_username
         return user
 
     # Seed the initial local profile name from Clerk for new users.
@@ -78,6 +84,7 @@ def upsert_user_from_clerk(session: Session, claims: dict) -> User:
         clerk_id=clerk_id,
         email=email,
         name=name,
+        username=clerk_username,
         phone=None,
         is_system_admin=False,
     )

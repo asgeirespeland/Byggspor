@@ -19,8 +19,8 @@ class Project(Base):
     __tablename__ = "projects"
 
     id: Mapped[int] = mapped_column(Integer, primary_key=True)
-    organization_id: Mapped[int] = mapped_column(
-        Integer, ForeignKey("organizations.id"), nullable=False
+    organization_id: Mapped[int | None] = mapped_column(
+        Integer, ForeignKey("organizations.id"), nullable=True
     )
     created_by_user_id: Mapped[int] = mapped_column(
         Integer, ForeignKey("users.id"), nullable=False
@@ -42,7 +42,7 @@ class Project(Base):
     )
     completed_at: Mapped[datetime | None] = mapped_column(DateTime)
 
-    organization: Mapped["Organization"] = relationship(
+    organization: Mapped["Organization | None"] = relationship(
         back_populates="projects",
         foreign_keys=[organization_id],
     )

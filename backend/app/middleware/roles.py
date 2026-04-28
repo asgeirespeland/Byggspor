@@ -67,7 +67,12 @@ def _has_project_role(
     user: User,
     project_id: int,
 ) -> ProjectRole | None:
-    """Return the user's role in a project, or None."""
+    """Return the user's effective role in a project, or None.
+
+    Explicit ProjectMember rows take precedence. If none exists, org membership
+    grants implicit access: OWNER/ADMIN → EDITOR, MEMBER/VIEWER → VIEWER.
+    Projects without an org require an explicit ProjectMember row.
+    """
     if user.is_system_admin:
         return ProjectRole.OWNER  # System admins bypass project role checks.
 
@@ -80,7 +85,28 @@ def _has_project_role(
         )
         .one_or_none()
     )
-    return membership.role if membership else None
+    if membership:
+        return membership.role
+
+    from app.models.project import Project
+
+    project = session.get(Project, project_id)
+    if not project or project.organization_id is None:
+        return None
+
+    org_membership = (
+        session.query(OrganizationMember)
+        .filter(
+            OrganizationMember.user_id == user.id,
+            OrganizationMember.organization_id == project.organization_id,
+        )
+        .one_or_none()
+    )
+    if org_membership is None:
+        return None
+    if org_membership.role in (OrgRole.OWNER, OrgRole.ADMIN):
+        return ProjectRole.EDITOR
+    return ProjectRole.VIEWER
 
 
 def require_project_role(

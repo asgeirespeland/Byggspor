@@ -63,6 +63,7 @@ function PersonalSettings() {
 export default function SettingsPage() {
   const [activeTab, setActiveTab] = useState<Tab>('personal')
   const { organizationId } = useAppContext()
+  const hasOrganization = organizationId != null
   const { data: projects } = useProjects()
   const [selectedProjectId, setSelectedProjectId] = useState<number | null>(
     null,
@@ -83,9 +84,15 @@ export default function SettingsPage() {
         <div className="p-6">
           {activeTab === 'personal' && <PersonalSettings />}
 
-          {activeTab === 'organization' && (
-            <EditOrgSettings orgId={organizationId} />
-          )}
+          {activeTab === 'organization' &&
+            (hasOrganization ? (
+              <EditOrgSettings orgId={organizationId} />
+            ) : (
+              <div className="flex flex-col items-center justify-center py-12 text-center">
+                <Building2 className="h-8 w-8 text-gray-300 mb-3" />
+                <p className="text-sm text-gray-400">Ingen organisasjon ennå</p>
+              </div>
+            ))}
 
           {activeTab === 'projects' && (
             <div className="space-y-4">
