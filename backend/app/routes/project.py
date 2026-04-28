@@ -188,7 +188,7 @@ def update_project(project_id: int):
 
 @project_bp.route("/<int:project_id>", methods=["DELETE"])
 @require_auth
-@require_project_role((ProjectRole.OWNER, ProjectRole.EDITOR))
+@require_project_role((ProjectRole.OWNER,))
 def delete_project(project_id: int):
     """Delete a project and its project-owned data."""
     session = g.db
@@ -196,121 +196,57 @@ def delete_project(project_id: int):
     if not project:
         raise ApiError("Prosjektet ble ikke funnet.", code="NOT_FOUND", status=404)
 
-    material_invoice_ids = [
-        source_id
-        for (source_id,) in (
-            session.query(ProjectMaterial.source_id)
-            .filter(
-                ProjectMaterial.project_id == project_id,
-                ProjectMaterial.source_id.isnot(None),
-            )
+    # Invoices/reports have no DB-level CASCADE — they can be shared across projects.
+    # Compute which ones become orphaned before we delete anything.
+    def _orphan_source_ids(link_model, source_col):
+        this_ids = {
+            id
+            for (id,) in session.query(source_col)
+            .filter(link_model.project_id == project_id, source_col.isnot(None))
             .distinct()
             .all()
-        )
-    ]
-    transport_report_ids = [
-        source_id
-        for (source_id,) in (
-            session.query(ProjectTransport.source_id)
-            .filter(
-                ProjectTransport.project_id == project_id,
-                ProjectTransport.source_id.isnot(None),
-            )
+        }
+        if not this_ids:
+            return []
+        shared_ids = {
+            id
+            for (id,) in session.query(source_col)
+            .filter(source_col.in_(this_ids), link_model.project_id != project_id)
             .distinct()
             .all()
-        )
-    ]
-    waste_invoice_ids = [
-        source_id
-        for (source_id,) in (
-            session.query(ProjectWasteItem.source_id)
-            .filter(
-                ProjectWasteItem.project_id == project_id,
-                ProjectWasteItem.source_id.isnot(None),
-            )
-            .distinct()
-            .all()
-        )
-    ]
+        }
+        return list(this_ids - shared_ids)
 
-    session.query(ProjectMaterial).filter(
-        ProjectMaterial.project_id == project_id
-    ).delete(synchronize_session=False)
-    session.query(ProjectTransport).filter(
-        ProjectTransport.project_id == project_id
-    ).delete(synchronize_session=False)
-    session.query(ProjectWasteItem).filter(
-        ProjectWasteItem.project_id == project_id
-    ).delete(synchronize_session=False)
-    session.query(Transport).filter(Transport.project_id == project_id).delete(
-        synchronize_session=False
+    orphan_material_ids = _orphan_source_ids(ProjectMaterial, ProjectMaterial.source_id)
+    orphan_transport_ids = _orphan_source_ids(
+        ProjectTransport, ProjectTransport.source_id
     )
-    session.query(Energy).filter(Energy.project_id == project_id).delete(
-        synchronize_session=False
-    )
-    session.query(GeneratedInvoice).filter(
-        GeneratedInvoice.project_id == project_id
-    ).delete(synchronize_session=False)
+    orphan_waste_ids = _orphan_source_ids(ProjectWasteItem, ProjectWasteItem.source_id)
 
-    if material_invoice_ids:
-        remaining_material_invoice_ids = {
-            source_id
-            for (source_id,) in (
-                session.query(ProjectMaterial.source_id)
-                .filter(ProjectMaterial.source_id.in_(material_invoice_ids))
-                .distinct()
-                .all()
-            )
-        }
-        orphan_material_invoice_ids = [
-            source_id
-            for source_id in material_invoice_ids
-            if source_id not in remaining_material_invoice_ids
-        ]
-        if orphan_material_invoice_ids:
-            session.query(MaterialInvoice).filter(
-                MaterialInvoice.id.in_(orphan_material_invoice_ids)
-            ).delete(synchronize_session=False)
+    for model_cls in (
+        ProjectMaterial,
+        ProjectTransport,
+        ProjectWasteItem,
+        Transport,
+        Energy,
+        GeneratedInvoice,
+    ):
+        session.query(model_cls).filter(model_cls.project_id == project_id).delete(
+            synchronize_session=False
+        )
 
-    if transport_report_ids:
-        remaining_transport_report_ids = {
-            source_id
-            for (source_id,) in (
-                session.query(ProjectTransport.source_id)
-                .filter(ProjectTransport.source_id.in_(transport_report_ids))
-                .distinct()
-                .all()
-            )
-        }
-        orphan_transport_report_ids = [
-            source_id
-            for source_id in transport_report_ids
-            if source_id not in remaining_transport_report_ids
-        ]
-        if orphan_transport_report_ids:
-            session.query(TransportReport).filter(
-                TransportReport.id.in_(orphan_transport_report_ids)
-            ).delete(synchronize_session=False)
-
-    if waste_invoice_ids:
-        remaining_waste_invoice_ids = {
-            source_id
-            for (source_id,) in (
-                session.query(ProjectWasteItem.source_id)
-                .filter(ProjectWasteItem.source_id.in_(waste_invoice_ids))
-                .distinct()
-                .all()
-            )
-        }
-        orphan_waste_invoice_ids = [
-            source_id
-            for source_id in waste_invoice_ids
-            if source_id not in remaining_waste_invoice_ids
-        ]
-        if orphan_waste_invoice_ids:
-            session.query(WasteInvoice).filter(
-                WasteInvoice.id.in_(orphan_waste_invoice_ids)
-            ).delete(synchronize_session=False)
+    if orphan_material_ids:
+        session.query(MaterialInvoice).filter(
+            MaterialInvoice.id.in_(orphan_material_ids)
+        ).delete(synchronize_session=False)
+    if orphan_transport_ids:
+        session.query(TransportReport).filter(
+            TransportReport.id.in_(orphan_transport_ids)
+        ).delete(synchronize_session=False)
+    if orphan_waste_ids:
+        session.query(WasteInvoice).filter(
+            WasteInvoice.id.in_(orphan_waste_ids)
+        ).delete(synchronize_session=False)
 
     session.delete(project)
 
