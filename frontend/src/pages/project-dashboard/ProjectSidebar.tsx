@@ -64,37 +64,18 @@ export default function ProjectSidebar({
   return (
     <div className="flex w-full lg:w-60 shrink-0 flex-col gap-3 self-stretch">
       <div className="grid grid-cols-2 gap-3 lg:grid-cols-1">
-        {/* Confidence score */}
-        <div className="rounded-xl border border-border bg-card p-4 shadow-sm">
-          <p className="mb-3 text-xs font-semibold uppercase tracking-wide text-muted-foreground">
-            CO₂ Konfidens
-          </p>
-          <div className="flex justify-center">
-            {confidenceScore != null ? (
-              <ConfidenceGauge score={Math.round(confidenceScore)} />
-            ) : (
-              <p className="text-sm text-muted-foreground py-4">
-                Ingen data ennå
-              </p>
-            )}
-          </div>
-          <div className="mt-2 flex justify-center">
-            <ConfidenceInfo />
-          </div>
-        </div>
-
         {/* Project info */}
-        <div className="rounded-xl border border-border bg-card p-4 shadow-sm space-y-3">
+        <div className="col-span-2 lg:col-span-1 rounded-xl border border-border bg-card p-4 shadow-sm space-y-3 overflow-hidden">
           <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
             Prosjektinfo
           </p>
-          <div className="flex items-start gap-2">
+          <div className="flex items-start gap-2 min-w-0">
             <Building2 className="mt-0.5 h-3.5 w-3.5 shrink-0 text-muted-foreground" />
-            <div className="flex-1">
+            <div className="flex-1 min-w-0">
               <p className="text-xs text-muted-foreground">Navn</p>
 
               {isEditingName ? (
-                <div className="mt-1 space-y-2">
+                <div className="mt-1 space-y-2 w-full">
                   <Input
                     value={draftName}
                     onChange={(e) => setDraftName(e.target.value)}
@@ -108,6 +89,7 @@ export default function ProjectSidebar({
                   <div className="flex gap-2">
                     <Button
                       size="sm"
+                      className="flex-1"
                       onClick={() => void handleSaveName()}
                       disabled={
                         updateProjectMutation.isPending || !draftName.trim()
@@ -118,6 +100,7 @@ export default function ProjectSidebar({
                     <Button
                       size="sm"
                       variant="outline"
+                      className="flex-1"
                       onClick={handleCancelEditName}
                       disabled={updateProjectMutation.isPending}
                     >
@@ -127,18 +110,17 @@ export default function ProjectSidebar({
                 </div>
               ) : (
                 <div className="mt-1 flex items-center gap-2">
-                  <p className="text-sm font-medium text-foreground leading-tight">
+                  <p className="text-sm font-medium text-foreground leading-tight min-w-0 truncate">
                     {project.name}
                   </p>
                   <Button
                     type="button"
-                    size="sm"
+                    size="icon"
                     variant="ghost"
-                    className="h-auto px-2 py-1 text-xs text-muted-foreground hover:text-muted-foreground"
+                    className="h-6 w-6 shrink-0 text-muted-foreground"
                     onClick={handleStartEditName}
                   >
-                    <Pencil className="mr-1 h-3 w-3" />
-                    Rediger
+                    <Pencil className="h-3 w-3" />
                   </Button>
                 </div>
               )}
@@ -166,6 +148,25 @@ export default function ProjectSidebar({
               </div>
             </div>
           )}
+        </div>
+
+        {/* Confidence score */}
+        <div className="col-span-2 lg:col-span-1 rounded-xl border border-border bg-card p-4 shadow-sm">
+          <p className="mb-3 text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+            CO₂ Konfidens
+          </p>
+          <div className="flex justify-center">
+            {confidenceScore != null ? (
+              <ConfidenceGauge score={Math.round(confidenceScore)} />
+            ) : (
+              <p className="text-sm text-muted-foreground py-4">
+                Ingen data ennå
+              </p>
+            )}
+          </div>
+          <div className="mt-2 flex justify-center">
+            <ConfidenceInfo />
+          </div>
         </div>
       </div>
       {/* end grid */}

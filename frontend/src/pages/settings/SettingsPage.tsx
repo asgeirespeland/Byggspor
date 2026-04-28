@@ -61,7 +61,7 @@ function PersonalSettings() {
 }
 
 export default function SettingsPage() {
-  const [activeTab, setActiveTab] = useState<Tab>('organization')
+  const [activeTab, setActiveTab] = useState<Tab>('personal')
   const { organizationId } = useAppContext()
   const hasOrganization = organizationId != null
   const { data: projects } = useProjects()
