@@ -10,6 +10,7 @@ import UserProfile from '@/pages/profile/UserProfile'
 import GlobalDashboard from '@/pages/global-dashboard/GlobalDashboard'
 import ProjectDashboard from '@/pages/project-dashboard/ProjectDashboard'
 import SettingsPage from '@/pages/settings/SettingsPage'
+import WikiPage from '@/pages/information/WikiPage'
 
 function AppShell() {
   return (
@@ -36,6 +37,8 @@ export default function AppRoutes() {
           <Route path="profile" element={<UserProfile />} />
           <Route path="organization" element={<OrgSettings />} />
           <Route path="settings" element={<SettingsPage />} />
+          <Route path="wiki" element={<Navigate to="/wiki/intro" replace />} />
+          <Route path="wiki/:articleId" element={<WikiPage />} />
         </Route>
       </Route>
 
