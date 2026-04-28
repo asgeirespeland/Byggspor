@@ -5,6 +5,10 @@ export type OrgDto = {
   name: string
   org_type: string
   org_number: string | null
+  account_number: string | null
+  address: string | null
+  phone: string | null
+  email: string | null
 }
 
 export type OrgMemberDto = {
@@ -80,6 +84,27 @@ export function addOrgMember(
 ): Promise<void> {
   return apiRequest(`/organizations/${organizationId}/members`, {
     method: 'POST',
+    body: payload,
+    token,
+  })
+}
+
+export type UpdateOrganizationPayload = {
+  name?: string
+  org_number?: string
+  account_number?: string
+  address?: string
+  phone?: string
+  email?: string
+}
+
+export function updateOrganization(
+  id: number,
+  payload: UpdateOrganizationPayload,
+  token?: string,
+): Promise<OrgDto> {
+  return apiRequest<OrgDto>(`/organizations/${id}`, {
+    method: 'PATCH',
     body: payload,
     token,
   })

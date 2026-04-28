@@ -1,6 +1,6 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { zodResolver } from '@hookform/resolvers/zod'
-import { Building2, Settings } from 'lucide-react'
+import { Building2, Pencil, Settings, X } from 'lucide-react'
 import { useForm } from 'react-hook-form'
 import { z } from 'zod'
 
@@ -31,7 +31,11 @@ import { useAppContext } from '@/shared/hooks/useAppContext'
 import ItemListPanel from '@/shared/components/ItemListPanel'
 import { EditOrgSettings } from '@/features/edit-settings'
 import { useCreateOrganization } from '@/features/create-organization'
-import { useOrgMembers } from '@/entities/organization'
+import {
+  useOrgMembers,
+  useOrganization,
+  useUpdateOrganization,
+} from '@/entities/organization'
 import { useCurrentUser } from '@/entities/user'
 import { useAddMember, useRemoveMember } from '@/features/invite-member'
 import MemberCard from './MemberCard'
@@ -44,8 +48,24 @@ const createOrgSchema = z.object({
 
 type CreateOrgValues = z.infer<typeof createOrgSchema>
 
+const orgInfoSchema = z.object({
+  name: z.string().min(1, 'Navn er påkrevd'),
+  org_number: z
+    .string()
+    .refine(
+      (v) => !v || /^\d{9}$/.test(v.replace(/\s/g, '')),
+      'Organisasjonsnummer må være 9 sifre',
+    ),
+  account_number: z.string(),
+  address: z.string(),
+  email: z.union([z.string().email('Ugyldig e-postadresse'), z.literal('')]),
+  phone: z.string(),
+})
+
+type OrgInfoValues = z.infer<typeof orgInfoSchema>
+
 export default function OrgSettings() {
-  const { organizationId, organization } = useAppContext()
+  const { organizationId, organization: ctxOrg } = useAppContext()
   const [dialogOpen, setDialogOpen] = useState(false)
   const [showCalcSettings, setShowCalcSettings] = useState(false)
   const [memberPendingRemoval, setMemberPendingRemoval] = useState<{
@@ -169,13 +189,15 @@ export default function OrgSettings() {
   }
 
   const currentMembership = members.find((m) => m.user_id === currentUser?.id)
-  const canRemoveMembers = currentMembership?.role === 'OWNER'
+  const isOwner = currentMembership?.role === 'OWNER'
 
   return (
     <div className="space-y-6">
       <h1 className="text-2xl font-bold text-foreground">
-        {organization?.name ?? '\u00A0'}
+        {ctxOrg?.name ?? ' '}
       </h1>
+
+      <OrgInfoCard orgId={organizationId} isOwner={isOwner} />
 
       <Collapsible
         open={showCalcSettings}
@@ -209,7 +231,7 @@ export default function OrgSettings() {
         renderItem={(m) => (
           <MemberCard
             member={m}
-            canRemove={canRemoveMembers && m.user_id !== currentUser?.id}
+            canRemove={isOwner && m.user_id !== currentUser?.id}
             removing={removeMember.isPending}
             onRemove={() =>
               setMemberPendingRemoval({ userId: m.user_id, name: m.user.name })
@@ -271,6 +293,222 @@ export default function OrgSettings() {
           </DialogFooter>
         </DialogContent>
       </Dialog>
+    </div>
+  )
+}
+
+function OrgInfoCard({ orgId, isOwner }: { orgId: number; isOwner: boolean }) {
+  const { data: org } = useOrganization(orgId)
+  const updateOrg = useUpdateOrganization(orgId)
+  const [isEditing, setIsEditing] = useState(false)
+
+  const form = useForm<OrgInfoValues>({
+    resolver: zodResolver(orgInfoSchema),
+    defaultValues: {
+      name: '',
+      org_number: '',
+      account_number: '',
+      address: '',
+      email: '',
+      phone: '',
+    },
+  })
+
+  useEffect(() => {
+    if (org) {
+      form.reset({
+        name: org.name ?? '',
+        org_number: org.org_number ?? '',
+        account_number: org.account_number ?? '',
+        address: org.address ?? '',
+        email: org.email ?? '',
+        phone: org.phone ?? '',
+      })
+    }
+  }, [org, form])
+
+  function handleCancel() {
+    form.reset({
+      name: org?.name ?? '',
+      org_number: org?.org_number ?? '',
+      account_number: org?.account_number ?? '',
+      address: org?.address ?? '',
+      email: org?.email ?? '',
+      phone: org?.phone ?? '',
+    })
+    setIsEditing(false)
+  }
+
+  async function handleSave(values: OrgInfoValues) {
+    const stripped = values.org_number.replace(/\s/g, '')
+    await updateOrg.mutateAsync({
+      name: values.name.trim(),
+      org_number: stripped || undefined,
+      account_number: values.account_number.trim() || undefined,
+      address: values.address.trim() || undefined,
+      email: values.email.trim() || undefined,
+      phone: values.phone.trim() || undefined,
+    })
+    setIsEditing(false)
+  }
+
+  const fields: { label: string; key: keyof OrgInfoValues }[] = [
+    { label: 'Navn', key: 'name' },
+    { label: 'Organisasjonsnummer', key: 'org_number' },
+    { label: 'Kontonummer', key: 'account_number' },
+    { label: 'E-post', key: 'email' },
+    { label: 'Telefon', key: 'phone' },
+    { label: 'Adresse', key: 'address' },
+  ]
+
+  return (
+    <div className="rounded-xl border border-border bg-card shadow-sm">
+      <div className="px-5 py-4 border-b border-border flex items-center justify-between">
+        <div className="flex items-center gap-3">
+          <Building2 className="h-4 w-4 text-muted-foreground" />
+          <span className="text-sm font-medium text-muted-foreground">
+            Organisasjonsinfo
+          </span>
+        </div>
+        {isOwner && !isEditing && (
+          <button
+            type="button"
+            onClick={() => setIsEditing(true)}
+            className="flex items-center gap-1.5 text-xs text-muted-foreground hover:text-foreground transition-colors"
+          >
+            <Pencil className="h-3.5 w-3.5" />
+            Rediger
+          </button>
+        )}
+        {isOwner && isEditing && (
+          <button
+            type="button"
+            onClick={handleCancel}
+            className="flex items-center gap-1.5 text-xs text-muted-foreground hover:text-foreground transition-colors"
+          >
+            <X className="h-3.5 w-3.5" />
+            Avbryt
+          </button>
+        )}
+      </div>
+
+      {!isEditing ? (
+        <div className="p-5 grid grid-cols-1 sm:grid-cols-2 gap-x-8 gap-y-4">
+          {fields.map(({ label, key }) => (
+            <div key={key}>
+              <p className="text-xs text-muted-foreground mb-0.5">{label}</p>
+              <p className="text-sm text-foreground">
+                {org?.[key] || (
+                  <span className="text-muted-foreground/50">—</span>
+                )}
+              </p>
+            </div>
+          ))}
+        </div>
+      ) : (
+        <Form {...form}>
+          <form
+            onSubmit={form.handleSubmit(handleSave)}
+            className="p-5 space-y-4"
+          >
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <FormField
+                control={form.control}
+                name="name"
+                render={({ field }) => (
+                  <FormItem className="space-y-1.5">
+                    <FormLabel>Navn *</FormLabel>
+                    <FormControl>
+                      <Input placeholder="Organisasjonsnavn" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={form.control}
+                name="org_number"
+                render={({ field }) => (
+                  <FormItem className="space-y-1.5">
+                    <FormLabel>Organisasjonsnummer</FormLabel>
+                    <FormControl>
+                      <Input placeholder="123456789" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={form.control}
+                name="account_number"
+                render={({ field }) => (
+                  <FormItem className="space-y-1.5">
+                    <FormLabel>Kontonummer</FormLabel>
+                    <FormControl>
+                      <Input placeholder="1234.56.78901" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={form.control}
+                name="email"
+                render={({ field }) => (
+                  <FormItem className="space-y-1.5">
+                    <FormLabel>E-post</FormLabel>
+                    <FormControl>
+                      <Input
+                        placeholder="post@firma.no"
+                        type="email"
+                        {...field}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={form.control}
+                name="phone"
+                render={({ field }) => (
+                  <FormItem className="space-y-1.5">
+                    <FormLabel>Telefon</FormLabel>
+                    <FormControl>
+                      <Input placeholder="+47 000 00 000" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={form.control}
+                name="address"
+                render={({ field }) => (
+                  <FormItem className="space-y-1.5">
+                    <FormLabel>Adresse</FormLabel>
+                    <FormControl>
+                      <Input placeholder="Gateveien 1, 0000 Oslo" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            </div>
+
+            <div className="flex justify-end">
+              <Button type="submit" size="sm" disabled={updateOrg.isPending}>
+                {updateOrg.isPending ? 'Lagrer...' : 'Lagre'}
+              </Button>
+            </div>
+          </form>
+        </Form>
+      )}
     </div>
   )
 }

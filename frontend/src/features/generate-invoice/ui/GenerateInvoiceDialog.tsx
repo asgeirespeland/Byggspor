@@ -14,6 +14,7 @@ import {
 } from '@/components/ui/dialog'
 import { Button } from '@/components/ui/button'
 import type { Project } from '@/entities/project'
+import { useAppContext } from '@/shared/hooks/useAppContext'
 import { useGenerateInvoice } from '../hooks/useGenerateInvoice'
 import { useDownloadPdf } from '../hooks/useDownloadPdf'
 import { useProjectLineItems } from '../hooks/useProjectLineItems'
@@ -35,12 +36,13 @@ export default function GenerateInvoiceDialog({
   onOpenChange,
   project,
 }: Props) {
+  const { organization } = useAppContext()
   const { generate, isPending, error } = useGenerateInvoice()
   const { downloadPdf, isPending: pdfIsPending } = useDownloadPdf()
   const { lineItems, isLoading, updateLineItem, removeLineItem, addLine } =
     useProjectLineItems(project.id, open)
   const { invoice, customer, setInvoice, setCustomer, buildPayload } =
-    useInvoiceDraft(project)
+    useInvoiceDraft(project, organization)
   const [generatedInvoice, setGeneratedInvoice] =
     useState<GeneratedInvoice | null>(null)
 
