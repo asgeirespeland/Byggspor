@@ -11,10 +11,19 @@ from app.config.settings_resolver import (
 from app.errors import ApiError
 from app.middleware.auth import require_auth
 from app.middleware.roles import require_project_role
+from app.models.energy import Energy
+from app.models.generated_invoice import GeneratedInvoice
+from app.models.material_invoice import MaterialInvoice
 from app.models.organization import Organization, OrgType
 from app.models.organization_member import OrganizationMember
 from app.models.project import Project, ProjectStatus
+from app.models.project_material import ProjectMaterial
 from app.models.project_member import ProjectRole
+from app.models.project_transport import ProjectTransport
+from app.models.project_waste_item import ProjectWasteItem
+from app.models.transport import Transport
+from app.models.transport_report import TransportReport
+from app.models.waste_invoice import WasteInvoice
 from app.services.recalculation import recalculate_project
 from app.utils.db import db_commit
 
@@ -149,6 +158,102 @@ def get_project(project_id: int):
         raise ApiError("Prosjektet ble ikke funnet.", code="NOT_FOUND", status=404)
 
     return jsonify(project.to_dict())
+
+
+@project_bp.route("/<int:project_id>", methods=["PATCH"])
+@require_auth
+@require_project_role((ProjectRole.OWNER, ProjectRole.EDITOR))
+def update_project(project_id: int):
+    """Update the name of the project provided"""
+    payload = request.get_json(silent=True) or {}
+
+    name = (payload.get("name") or "").strip()
+    if not name:
+        raise ApiError(
+            "Prosjektnavn er påkrevd",
+            code="MISSING_FIELD",
+            suggestion="Oppgi et navn for prosjektet",
+        )
+    session = g.db
+    project = session.get(Project, project_id)
+    if not project:
+        raise ApiError("Prosjektet ble ikke funnet", code="NOT_FOUND", status=404)
+    project.name = name
+
+    with db_commit(session, "Kunne ikke oppdatere prosjektet", "SAVE_FAILED"):
+        pass
+    session.refresh(project)
+    return jsonify(project.to_dict())
+
+
+@project_bp.route("/<int:project_id>", methods=["DELETE"])
+@require_auth
+@require_project_role((ProjectRole.OWNER,))
+def delete_project(project_id: int):
+    """Delete a project and its project-owned data."""
+    session = g.db
+    project = session.get(Project, project_id)
+    if not project:
+        raise ApiError("Prosjektet ble ikke funnet.", code="NOT_FOUND", status=404)
+
+    # Invoices/reports have no DB-level CASCADE — they can be shared across projects.
+    # Compute which ones become orphaned before we delete anything.
+    def _orphan_source_ids(link_model, source_col):
+        this_ids = {
+            id
+            for (id,) in session.query(source_col)
+            .filter(link_model.project_id == project_id, source_col.isnot(None))
+            .distinct()
+            .all()
+        }
+        if not this_ids:
+            return []
+        shared_ids = {
+            id
+            for (id,) in session.query(source_col)
+            .filter(source_col.in_(this_ids), link_model.project_id != project_id)
+            .distinct()
+            .all()
+        }
+        return list(this_ids - shared_ids)
+
+    orphan_material_ids = _orphan_source_ids(ProjectMaterial, ProjectMaterial.source_id)
+    orphan_transport_ids = _orphan_source_ids(
+        ProjectTransport, ProjectTransport.source_id
+    )
+    orphan_waste_ids = _orphan_source_ids(ProjectWasteItem, ProjectWasteItem.source_id)
+
+    for model_cls in (
+        ProjectMaterial,
+        ProjectTransport,
+        ProjectWasteItem,
+        Transport,
+        Energy,
+        GeneratedInvoice,
+    ):
+        session.query(model_cls).filter(model_cls.project_id == project_id).delete(
+            synchronize_session=False
+        )
+
+    if orphan_material_ids:
+        session.query(MaterialInvoice).filter(
+            MaterialInvoice.id.in_(orphan_material_ids)
+        ).delete(synchronize_session=False)
+    if orphan_transport_ids:
+        session.query(TransportReport).filter(
+            TransportReport.id.in_(orphan_transport_ids)
+        ).delete(synchronize_session=False)
+    if orphan_waste_ids:
+        session.query(WasteInvoice).filter(
+            WasteInvoice.id.in_(orphan_waste_ids)
+        ).delete(synchronize_session=False)
+
+    session.delete(project)
+
+    with db_commit(session, "Kunne ikke slette prosjektet.", "DELETE_FAILED"):
+        pass
+
+    return jsonify({"status": "deleted"})
 
 
 # ---------------------------------------------------------------------------

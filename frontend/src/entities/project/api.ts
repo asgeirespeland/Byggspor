@@ -25,6 +25,10 @@ export type Project = {
   completed_at: string | null
 }
 
+export type UpdateProjectPayload = {
+  name: string
+}
+
 export function createProject(
   payload: CreateProjectPayload,
   token?: string,
@@ -42,4 +46,26 @@ export function listProjects(token?: string): Promise<Project[]> {
 
 export function getProject(id: number, token?: string): Promise<Project> {
   return apiRequest<Project>(`/projects/${id}`, { token })
+}
+
+export function updateProject(
+  id: number,
+  payload: UpdateProjectPayload,
+  token?: string,
+): Promise<Project> {
+  return apiRequest<Project>(`/projects/${id}`, {
+    method: 'PATCH',
+    body: payload,
+    token,
+  })
+}
+
+export function deleteProject(
+  id: number,
+  token?: string,
+): Promise<{ status: string }> {
+  return apiRequest<{ status: string }>(`/projects/${id}`, {
+    method: 'DELETE',
+    token,
+  })
 }
