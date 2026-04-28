@@ -4,10 +4,8 @@ import { getProject, listProjects } from '../api'
 
 export type { Project } from '../api'
 
-export function useProjects(enabled = true) {
-  return useAuthQuery(qk.projects(), (token) => listProjects(token), {
-    enabled,
-  })
+export function useProjects() {
+  return useAuthQuery(qk.projects(), (token) => listProjects(token))
 }
 
 export function useProject(projectId: number) {

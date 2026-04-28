@@ -1,5 +1,8 @@
 import { useState } from 'react'
-import { Settings } from 'lucide-react'
+import { zodResolver } from '@hookform/resolvers/zod'
+import { Building2, Settings } from 'lucide-react'
+import { useForm } from 'react-hook-form'
+import { z } from 'zod'
 
 import { Button } from '@/components/ui/button'
 import {
@@ -15,14 +18,31 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog'
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from '@/components/ui/form'
+import { Input } from '@/components/ui/input'
 import { useAppContext } from '@/shared/hooks/useAppContext'
 import ItemListPanel from '@/shared/components/ItemListPanel'
 import { EditOrgSettings } from '@/features/edit-settings'
+import { useCreateOrganization } from '@/features/create-organization'
 import { useOrgMembers } from '@/entities/organization'
 import { useCurrentUser } from '@/entities/user'
 import { useAddMember, useRemoveMember } from '@/features/invite-member'
 import MemberCard from './MemberCard'
 import { AddMemberDialog } from '@/features/invite-member'
+
+const createOrgSchema = z.object({
+  name: z.string().min(1, 'Organisasjonsnavn er påkrevd'),
+  org_number: z.string(),
+})
+
+type CreateOrgValues = z.infer<typeof createOrgSchema>
 
 export default function OrgSettings() {
   const { organizationId, organization } = useAppContext()
@@ -32,35 +52,111 @@ export default function OrgSettings() {
     userId: number
     name: string
   } | null>(null)
+  const [createOrgError, setCreateOrgError] = useState('')
 
+  const createOrgForm = useForm<CreateOrgValues>({
+    resolver: zodResolver(createOrgSchema),
+    defaultValues: { name: '', org_number: '' },
+  })
+
+  const createOrg = useCreateOrganization()
   const { data: members = [], isLoading, error } = useOrgMembers(organizationId)
   const { data: currentUser } = useCurrentUser()
   const addMember = useAddMember(organizationId)
   const removeMember = useRemoveMember(organizationId)
 
+  async function handleCreateOrganization(values: CreateOrgValues) {
+    setCreateOrgError('')
+    try {
+      await createOrg.mutateAsync({
+        name: values.name.trim(),
+        org_number: values.org_number.trim() || undefined,
+        org_type: 'COMPANY',
+      })
+    } catch (err) {
+      setCreateOrgError(
+        err instanceof Error
+          ? err.message
+          : 'Klarte ikke opprette organisasjon',
+      )
+    }
+  }
+
   if (organizationId == null) {
     return (
       <div className="space-y-6">
         <h1 className="text-2xl font-bold text-gray-900">
-          Ingen organisasjon enn&#229;
+          Opprett organisasjon
         </h1>
+
         <div className="rounded-xl border border-gray-200 bg-white p-6 shadow-sm">
-          <div className="flex flex-col items-center justify-center py-12 text-center">
-            <Settings className="mb-3 h-8 w-8 text-gray-300" />
-            <p className="text-sm font-medium text-gray-700">
-              Organisasjonssiden er l&#229;st
-            </p>
-            <p className="mt-2 max-w-md text-sm text-gray-400">
-              Du m&#229; bli invitert til eller opprette en organisasjon for
-              &#229; se medlemmer og organisasjonsinnstillinger.
+          <div className="mb-6 text-center">
+            <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-xl bg-green-600">
+              <Building2 className="h-6 w-6 text-white" />
+            </div>
+            <p className="text-sm text-gray-500">
+              Opprett en organisasjon når du er klar til å samarbeide med andre.
             </p>
           </div>
+
+          <Form {...createOrgForm}>
+            <form
+              onSubmit={createOrgForm.handleSubmit(handleCreateOrganization)}
+              className="space-y-4"
+            >
+              <FormField
+                control={createOrgForm.control}
+                name="name"
+                render={({ field }) => (
+                  <FormItem className="space-y-1.5">
+                    <FormLabel>Organisasjonsnavn *</FormLabel>
+                    <FormControl>
+                      <Input
+                        placeholder="f.eks. Byggfirma AS"
+                        autoFocus
+                        {...field}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={createOrgForm.control}
+                name="org_number"
+                render={({ field }) => (
+                  <FormItem className="space-y-1.5">
+                    <FormLabel>Organisasjonsnummer</FormLabel>
+                    <FormControl>
+                      <Input placeholder="f.eks. 123 456 789" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              {createOrgError && (
+                <p className="rounded-md border border-danger/20 bg-danger-soft px-3 py-2 text-sm text-danger-strong">
+                  {createOrgError}
+                </p>
+              )}
+
+              <Button
+                type="submit"
+                className="w-full"
+                disabled={createOrg.isPending}
+              >
+                {createOrg.isPending ? 'Oppretter...' : 'Opprett organisasjon'}
+              </Button>
+            </form>
+          </Form>
         </div>
       </div>
     )
   }
 
-  const orgId = organizationId as number
+  const orgId = organizationId
 
   async function handleAddMember(userId: string, role: string) {
     await addMember.mutateAsync({ userId, role })
