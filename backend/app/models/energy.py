@@ -36,6 +36,7 @@ class Energy(Base):
     kwh_used: Mapped[float | None] = mapped_column(Numeric(12, 2))
     grid_emission_factor: Mapped[float | None] = mapped_column(Numeric(10, 6))
     total_co2_kg: Mapped[float | None] = mapped_column(Numeric(12, 4))
+    period_start: Mapped[date | None] = mapped_column(Date)
     recorded_date: Mapped[date | None] = mapped_column(Date)
     cost_per_kwh: Mapped[float | None] = mapped_column(Numeric(10, 4))
     confidence_score: Mapped[int | None] = mapped_column(Integer)
@@ -64,6 +65,9 @@ class Energy(Base):
             "confidence_score": self.confidence_score,
             "cost_per_kwh": (
                 float(self.cost_per_kwh) if self.cost_per_kwh is not None else None
+            ),
+            "period_start": (
+                self.period_start.isoformat() if self.period_start else None
             ),
             "recorded_date": (
                 self.recorded_date.isoformat() if self.recorded_date else None

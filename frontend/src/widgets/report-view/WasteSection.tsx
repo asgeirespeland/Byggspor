@@ -13,7 +13,7 @@ const COLUMNS: Column<WasteLineItem>[] = [
     render: (i) => `${fmt(i.quantity, 3)} ${i.unit ?? ''}`.trim(),
   },
   {
-    header: 'CO₂ (kg)',
+    header: 'CO₂e (kg)',
     align: 'right',
     render: (i) => <span className="font-medium">{fmt(i.total_co2_kg)}</span>,
   },

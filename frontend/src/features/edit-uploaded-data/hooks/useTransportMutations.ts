@@ -39,6 +39,7 @@ export function useDeleteTransportReport(projectId: number) {
     itemsOf: (g) => g.trips,
     co2Of: (trip) => trip.total_co2_kg ?? 0,
     deleteFn: deleteTransportReport,
+    successMessage: 'Kjørerapport slettet',
     errorMessage: 'Kunne ikke slette kjørerapport',
   })
 
@@ -63,6 +64,7 @@ export function useDeleteTrip(projectId: number) {
     idOf: (trip) => trip.id,
     co2Of: (trip) => trip.total_co2_kg ?? 0,
     deleteFn: deleteTrip,
+    successMessage: 'Tur slettet',
     errorMessage: 'Kunne ikke slette tur',
   })
 

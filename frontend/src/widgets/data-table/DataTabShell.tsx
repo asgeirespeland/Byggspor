@@ -69,7 +69,9 @@ export default function DataTabShell({
               {sectionHeading} ({itemCount})
             </p>
           )}
-          {children}
+          <div className="max-h-[40vh] overflow-y-auto space-y-3 pr-1">
+            {children}
+          </div>
           {undoBar}
         </div>
       ) : null}

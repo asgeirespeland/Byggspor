@@ -7,6 +7,7 @@ export interface EnergyEntry {
   grid_emission_factor: number | null
   total_co2_kg: number | null
   confidence_score: number | null
+  period_start: string | null
   recorded_date: string | null
   created_at: string | null
 }
@@ -22,11 +23,13 @@ export interface EnergyCalculateInput {
   project_id: number
   kwh_used: number
   price_zone?: PriceZone
+  period_start?: string
   recorded_date?: string
 }
 
 export interface EnergyUpdateInput {
   kwh_used?: number
   price_zone?: PriceZone | null
+  period_start?: string | null
   recorded_date?: string | null
 }

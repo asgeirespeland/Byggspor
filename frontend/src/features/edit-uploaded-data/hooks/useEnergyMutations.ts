@@ -31,6 +31,7 @@ export function useDeleteEnergy(projectId: number) {
       entryCountDelta: 1,
     }),
     deleteFn: deleteEnergy,
+    successMessage: 'Energidata slettet',
     errorMessage: 'Kunne ikke slette energidata',
   })
 
