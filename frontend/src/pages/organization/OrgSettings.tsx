@@ -1,16 +1,26 @@
 import { useState } from 'react'
 import { Settings } from 'lucide-react'
 
+import { Button } from '@/components/ui/button'
 import {
   Collapsible,
   CollapsibleContent,
   CollapsibleTrigger,
 } from '@/components/ui/collapsible'
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog'
 import { useAppContext } from '@/shared/hooks/useAppContext'
 import ItemListPanel from '@/shared/components/ItemListPanel'
 import { EditOrgSettings } from '@/features/edit-settings'
 import { useOrgMembers } from '@/entities/organization'
-import { useAddMember } from '@/features/invite-member'
+import { useCurrentUser } from '@/entities/user'
+import { useAddMember, useRemoveMember } from '@/features/invite-member'
 import MemberCard from './MemberCard'
 import { AddMemberDialog } from '@/features/invite-member'
 
@@ -18,9 +28,15 @@ export default function OrgSettings() {
   const { organizationId, organization } = useAppContext()
   const [dialogOpen, setDialogOpen] = useState(false)
   const [showCalcSettings, setShowCalcSettings] = useState(false)
+  const [memberPendingRemoval, setMemberPendingRemoval] = useState<{
+    userId: number
+    name: string
+  } | null>(null)
 
   const { data: members = [], isLoading, error } = useOrgMembers(organizationId)
+  const { data: currentUser } = useCurrentUser()
   const addMember = useAddMember(organizationId)
+  const removeMember = useRemoveMember(organizationId)
 
   if (organizationId == null) {
     return (
@@ -50,6 +66,16 @@ export default function OrgSettings() {
     await addMember.mutateAsync({ userId, role })
     setDialogOpen(false)
   }
+
+  async function handleConfirmRemoveMember() {
+    if (!memberPendingRemoval) return
+
+    await removeMember.mutateAsync({ userId: memberPendingRemoval.userId })
+    setMemberPendingRemoval(null)
+  }
+
+  const currentMembership = members.find((m) => m.user_id === currentUser?.id)
+  const canRemoveMembers = currentMembership?.role === 'OWNER'
 
   return (
     <div className="space-y-6">
@@ -86,7 +112,16 @@ export default function OrgSettings() {
           m.user.name.toLowerCase().includes(q) ||
           m.user.email.toLowerCase().includes(q)
         }
-        renderItem={(m) => <MemberCard member={m} />}
+        renderItem={(m) => (
+          <MemberCard
+            member={m}
+            canRemove={canRemoveMembers && m.user_id !== currentUser?.id}
+            removing={removeMember.isPending}
+            onRemove={() =>
+              setMemberPendingRemoval({ userId: m.user_id, name: m.user.name })
+            }
+          />
+        )}
         searchPlaceholder="Søk medlemmer..."
         addLabel="Legg til medlem"
         emptyLabel="Ingen medlemmer enda"
@@ -99,9 +134,49 @@ export default function OrgSettings() {
       <AddMemberDialog
         open={dialogOpen}
         onOpenChange={setDialogOpen}
+        organizationId={orgId}
         onSubmit={handleAddMember}
         loading={addMember.isPending}
       />
+
+      <Dialog
+        open={memberPendingRemoval != null}
+        onOpenChange={(open) => {
+          if (!open && !removeMember.isPending) setMemberPendingRemoval(null)
+        }}
+      >
+        <DialogContent className="sm:max-w-md" showCloseButton={false}>
+          <DialogHeader>
+            <DialogTitle>Fjern medlem</DialogTitle>
+            <DialogDescription>
+              {memberPendingRemoval
+                ? `Er du sikker på at du vil fjerne ${memberPendingRemoval.name} fra organisasjonen?`
+                : 'Er du sikker på at du vil fjerne dette medlemmet fra organisasjonen?'}
+            </DialogDescription>
+          </DialogHeader>
+
+          <DialogFooter>
+            <Button
+              type="button"
+              variant="outline"
+              className="cursor-pointer"
+              disabled={removeMember.isPending}
+              onClick={() => setMemberPendingRemoval(null)}
+            >
+              Avbryt
+            </Button>
+            <Button
+              type="button"
+              variant="destructive"
+              className="cursor-pointer"
+              disabled={removeMember.isPending}
+              onClick={() => void handleConfirmRemoveMember()}
+            >
+              {removeMember.isPending ? 'Fjerner...' : 'Fjern medlem'}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   )
 }

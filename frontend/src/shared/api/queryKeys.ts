@@ -9,6 +9,8 @@ export const qk = {
   energies: (id: number) => ['energies', id] as const,
   priceZones: () => ['price-zones'] as const,
   orgMembers: (orgId: number) => ['organizations', orgId, 'members'] as const,
+  orgMemberCandidates: (orgId: number, query: string) =>
+    ['organizations', orgId, 'member-candidates', query] as const,
   orgSettings: (orgId: number | undefined) => ['org-settings', orgId] as const,
   projectSettings: (id: number | undefined) =>
     ['project-settings', id] as const,

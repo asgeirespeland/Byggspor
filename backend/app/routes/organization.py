@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from flask import Blueprint, g, jsonify, request
+from sqlalchemy import or_
 
 from app.config.settings_resolver import (
     SETTINGS_DEFAULTS,
@@ -38,7 +39,6 @@ def create_organization():
             "org_type må være COMPANY eller CUSTOMER.",
             code="INVALID_FIELD",
         )
-
     session = g.db
     user = session.get(User, g.current_user_id)
     if not user:
@@ -153,15 +153,59 @@ def get_organization_members(organization_id: int):
     return jsonify([m.to_dict() for m in members])
 
 
+@organization_bp.route("/<int:organization_id>/member-candidates", methods=["GET"])
+@require_org_role(
+    (
+        OrgRole.OWNER,
+        OrgRole.ADMIN,
+    )
+)
+def search_member_candidates(organization_id: int):
+    """Search existing users who are not already members of the organization."""
+    session = g.db
+    org = session.get(Organization, organization_id)
+    if not org:
+        raise ApiError("Organisasjonen ble ikke funnet.", code="NOT_FOUND", status=404)
+
+    query = (request.args.get("query") or "").strip()
+    if not query:
+        return jsonify([])
+
+    pattern = f"%{query}%"
+    existing_member_ids = (
+        session.query(OrganizationMember.user_id)
+        .filter(OrganizationMember.organization_id == organization_id)
+        .subquery()
+    )
+
+    users = (
+        session.query(User)
+        .filter(
+            ~User.id.in_(existing_member_ids),
+            or_(User.name.ilike(pattern), User.email.ilike(pattern)),
+        )
+        .order_by(User.name.asc(), User.email.asc())
+        .limit(10)
+        .all()
+    )
+
+    return jsonify(
+        [
+            {
+                "id": user.id,
+                "name": user.name,
+                "email": user.email,
+                "phone": user.phone,
+            }
+            for user in users
+        ]
+    )
+
+
 @organization_bp.route("/<int:organization_id>/members", methods=["POST"])
 @require_org_role((OrgRole.OWNER, OrgRole.ADMIN))
 def add_organization_member(organization_id: int):
-    """Add or update an organization member role (upsert behavior).
-
-    ADMINs are intentionally allowed to assign any role, including OWNER.
-    This is by design: org admins act as trusted delegates for business owners
-    and need the ability to manage the full role hierarchy.
-    """
+    """Add or update an organization member role (upsert behavior)."""
     payload = request.get_json(silent=True) or {}
 
     user_id = payload.get("user_id")
@@ -228,10 +272,17 @@ def add_organization_member(organization_id: int):
 @organization_bp.route(
     "/<int:organization_id>/members/<int:user_id>", methods=["DELETE"]
 )
-@require_org_role((OrgRole.OWNER, OrgRole.ADMIN))
+@require_org_role((OrgRole.OWNER,))
 def remove_organization_member(organization_id: int, user_id: int):
     """Remove a member from an organization."""
     session = g.db
+
+    if user_id == g.current_user_id:
+        raise ApiError(
+            "Du kan ikke fjerne deg selv fra organisasjonen her.",
+            code="INVALID_OPERATION",
+            status=400,
+        )
 
     membership = (
         session.query(OrganizationMember)

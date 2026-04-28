@@ -17,6 +17,13 @@ export type OrgMemberDto = {
   }
 }
 
+export type OrgMemberCandidateDto = {
+  id: number
+  name: string
+  email: string
+  phone: string | null
+}
+
 export type CreateOrganizationPayload = {
   name: string
   org_number?: string
@@ -48,6 +55,18 @@ export function listOrgMembers(
   )
 }
 
+export function searchOrgMemberCandidates(
+  organizationId: number,
+  query: string,
+  token?: string,
+): Promise<OrgMemberCandidateDto[]> {
+  const params = new URLSearchParams({ query })
+  return apiRequest<OrgMemberCandidateDto[]>(
+    `/organizations/${organizationId}/member-candidates?${params.toString()}`,
+    { token },
+  )
+}
+
 export type AddMemberPayload = {
   user_id: number
   role: string
@@ -61,6 +80,17 @@ export function addOrgMember(
   return apiRequest(`/organizations/${organizationId}/members`, {
     method: 'POST',
     body: payload,
+    token,
+  })
+}
+
+export function removeOrgMember(
+  organizationId: number,
+  userId: number,
+  token?: string,
+): Promise<void> {
+  return apiRequest(`/organizations/${organizationId}/members/${userId}`, {
+    method: 'DELETE',
     token,
   })
 }

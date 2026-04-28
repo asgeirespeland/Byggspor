@@ -1,4 +1,4 @@
-import { User } from 'lucide-react'
+import { Trash2, User } from 'lucide-react'
 import type { OrgMemberDto } from '@/entities/organization'
 
 const ROLE_LABELS: Record<string, string> = {
@@ -15,7 +15,19 @@ const ROLE_STYLE: Record<string, string> = {
   VIEWER: 'bg-gray-100 text-gray-500',
 }
 
-export default function MemberCard({ member }: { member: OrgMemberDto }) {
+type Props = {
+  member: OrgMemberDto
+  canRemove?: boolean
+  removing?: boolean
+  onRemove?: () => void
+}
+
+export default function MemberCard({
+  member,
+  canRemove = false,
+  removing = false,
+  onRemove,
+}: Props) {
   return (
     <div className="flex items-center gap-4 rounded-xl border border-gray-200 bg-white px-5 py-4 shadow-sm transition-shadow hover:shadow-md">
       <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-gray-100">
@@ -34,6 +46,18 @@ export default function MemberCard({ member }: { member: OrgMemberDto }) {
       >
         {ROLE_LABELS[member.role] ?? member.role}
       </span>
+
+      {canRemove && onRemove ? (
+        <button
+          type="button"
+          onClick={onRemove}
+          disabled={removing}
+          className="inline-flex items-center gap-1 rounded-md px-2 py-1 text-xs font-medium text-red-600 transition-colors hover:bg-red-50 disabled:cursor-not-allowed disabled:opacity-50"
+        >
+          <Trash2 className="h-3.5 w-3.5" />
+          Fjern
+        </button>
+      ) : null}
     </div>
   )
 }
