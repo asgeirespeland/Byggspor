@@ -234,6 +234,7 @@ def list_project_waste(project_id: int):
             "source_id": item.source_id,
             "source_type": item.source_type.value if item.source_type else None,
             "file_name": inv.file_path if inv else None,
+            "supplier_name": inv.supplier_name if inv else None,
             "uploaded_at": (
                 inv.uploaded_at.isoformat() if inv and inv.uploaded_at else None
             ),

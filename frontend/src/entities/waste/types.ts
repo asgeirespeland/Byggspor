@@ -1,4 +1,4 @@
-export type WasteSourceType = 'MANUAL' | 'WASTE_REPORT'
+export type WasteSourceType = 'manual' | 'waste_report'
 
 export interface WasteItem {
   id: number
@@ -50,6 +50,7 @@ export interface WasteGroup {
   source_id: number | null
   source_type: WasteSourceType | null
   file_name: string | null
+  supplier_name: string | null
   uploaded_at: string | null
   items: WasteItem[]
 }

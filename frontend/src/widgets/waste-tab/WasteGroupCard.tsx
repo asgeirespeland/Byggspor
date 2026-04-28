@@ -37,8 +37,8 @@ export default function WasteGroupCard({ group, projectId }: Props) {
   )
 
   const label =
-    group.source_type === 'WASTE_REPORT'
-      ? (group.file_name ?? 'Avfallsrapport')
+    group.source_type === 'waste_report'
+      ? (group.supplier_name ?? group.file_name ?? 'Avfallsrapport')
       : 'Manuell registrering'
 
   const totalCo2 = sumBy(group.items, (item) => item.total_co2_kg)
