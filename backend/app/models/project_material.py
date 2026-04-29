@@ -32,7 +32,7 @@ class ProjectMaterial(Base):
 
     id: Mapped[int] = mapped_column(Integer, primary_key=True)
     project_id: Mapped[int] = mapped_column(
-        Integer, ForeignKey("projects.id"), nullable=False
+        Integer, ForeignKey("projects.id", ondelete="CASCADE"), nullable=False
     )
     material_id: Mapped[int] = mapped_column(
         Integer, ForeignKey("materials.id"), nullable=False

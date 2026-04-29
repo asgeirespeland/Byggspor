@@ -29,7 +29,7 @@ class Energy(Base):
 
     id: Mapped[int] = mapped_column(Integer, primary_key=True)
     project_id: Mapped[int] = mapped_column(
-        Integer, ForeignKey("projects.id"), nullable=False
+        Integer, ForeignKey("projects.id", ondelete="CASCADE"), nullable=False
     )
     source: Mapped[EnergySource | None] = mapped_column(Enum(EnergySource))
     price_zone: Mapped[PriceZone | None] = mapped_column(Enum(PriceZone))

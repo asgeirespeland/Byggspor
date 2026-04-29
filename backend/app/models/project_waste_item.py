@@ -30,7 +30,7 @@ class ProjectWasteItem(Base):
 
     id: Mapped[int] = mapped_column(Integer, primary_key=True)
     project_id: Mapped[int] = mapped_column(
-        Integer, ForeignKey("projects.id"), nullable=False
+        Integer, ForeignKey("projects.id", ondelete="CASCADE"), nullable=False
     )
     source_id: Mapped[int | None] = mapped_column(
         Integer, ForeignKey("waste_invoices.id")
