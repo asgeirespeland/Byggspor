@@ -2,11 +2,14 @@
 
 POST /export/project/<project_id>/generate
     Accepts customer info + format options in JSON body.
-    Creates GeneratedInvoice + InvoiceLine records, generates EHF XML,
-    stores the file, and returns the invoice record.
+    Creates GeneratedInvoice + InvoiceLine records and returns the invoice record.
+    No files are written to disk.
 
 GET /export/<invoice_id>/ehf
-    Downloads the generated EHF XML file for the given invoice.
+    Regenerates and streams the EHF XML for the given invoice.
+
+GET /export/<invoice_id>/pdf
+    Generates and streams the PDF climate report for the given invoice.
 
 NOTE: The detailed CO2 report service (MH13) is still under development.
       This route builds InvoiceLines from the project's raw entries directly.
@@ -18,8 +21,7 @@ from __future__ import annotations
 
 import io
 import logging
-import os
-from datetime import UTC, date, datetime
+from datetime import date
 
 from flask import Blueprint, g, jsonify, request, send_file
 
@@ -46,19 +48,6 @@ from app.utils.db import db_commit
 logger = logging.getLogger(__name__)
 
 export_bp = Blueprint("export", __name__, url_prefix="/export")
-
-# Storage directory for generated EHF XML files.
-# Override with INVOICE_STORAGE_PATH env var in production.
-_DEFAULT_STORAGE = os.path.join(
-    os.path.dirname(__file__), "..", "..", "storage", "invoices"
-)
-INVOICE_STORAGE_PATH = os.environ.get("INVOICE_STORAGE_PATH", _DEFAULT_STORAGE)
-
-
-def _ensure_storage_dir() -> str:
-    path = os.path.abspath(INVOICE_STORAGE_PATH)
-    os.makedirs(path, exist_ok=True)
-    return path
 
 
 def _collect_lines(
@@ -296,7 +285,6 @@ def _invoice_to_dict(inv: GeneratedInvoice) -> dict:
         if inv.total_energy_co2_kg
         else None,
         "overall_confidence_score": inv.overall_confidence_score,
-        "ehf_xml_path": inv.ehf_xml_path,
         "generated_at": inv.generated_at.isoformat() if inv.generated_at else None,
     }
 
@@ -409,10 +397,20 @@ def generate_invoice(project_id: int):
             line.generated_invoice_id = invoice.id
             session.add(line)
 
-    # Generate EHF XML
-    supplier_info = body.get("supplier") or {}
+    return jsonify(_invoice_to_dict(invoice)), 201
+
+
+@export_bp.route("/<int:invoice_id>/ehf", methods=["GET"])
+@require_auth
+def download_ehf(invoice_id: int):
+    """Regenerate and stream the EHF XML for the given invoice."""
+    session = g.db
+    invoice = session.get(GeneratedInvoice, invoice_id)
+    if not invoice:
+        raise ApiError("Fakturaen ble ikke funnet.", code="NOT_FOUND", status=404)
+
     try:
-        xml_bytes = generate_ehf(invoice, lines, supplier_info or None)
+        xml_bytes = generate_ehf(invoice, invoice.lines, None)
     except Exception:
         logger.exception("EHF generation failed for invoice %s", invoice.id)
         raise ApiError(
@@ -422,47 +420,12 @@ def generate_invoice(project_id: int):
             suggestion="Sjekk at alle påkrevde felter er fylt ut og prøv igjen.",
         )
 
-    # Persist XML file
-    storage_dir = _ensure_storage_dir()
-    filename = f"invoice_{invoice.id}_{datetime.now(UTC).strftime('%Y%m%d%H%M%S')}.xml"
-    file_path = os.path.join(storage_dir, filename)
-    with open(file_path, "wb") as fh:
-        fh.write(xml_bytes)
-
-    with db_commit(session, "Kunne ikke lagre filbanen.", "SAVE_FAILED"):
-        invoice.ehf_xml_path = file_path
-
-    return jsonify(_invoice_to_dict(invoice)), 201
-
-
-@export_bp.route("/<int:invoice_id>/ehf", methods=["GET"])
-@require_auth
-def download_ehf(invoice_id: int):
-    """Download the generated EHF XML file for the given invoice.
-
-    Returns the XML file as an attachment.
-    """
-    session = g.db
-    invoice = session.get(GeneratedInvoice, invoice_id)
-    if not invoice:
-        raise ApiError("Fakturaen ble ikke funnet.", code="NOT_FOUND", status=404)
-
-    if not invoice.ehf_xml_path or not os.path.isfile(invoice.ehf_xml_path):
-        raise ApiError(
-            "EHF-filen er ikke tilgjengelig.",
-            code="FILE_NOT_FOUND",
-            status=404,
-            suggestion="Generer fakturaen på nytt.",
-        )
-
     inv_num = invoice.invoice_number or str(invoice.id)
-    download_name = f"faktura_{inv_num}.xml"
-
     return send_file(
-        invoice.ehf_xml_path,
+        io.BytesIO(xml_bytes),
         mimetype="application/xml",
         as_attachment=True,
-        download_name=download_name,
+        download_name=f"faktura_{inv_num}.xml",
     )
 
 

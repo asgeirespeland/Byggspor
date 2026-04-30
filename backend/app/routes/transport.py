@@ -49,6 +49,7 @@ def parse_transport_route():
     try:
         result = preview_transport_report(session, xml_content)
         result["file_name"] = file.filename
+        session.commit()
         return jsonify(result), 200
     except ET.ParseError:
         session.rollback()
