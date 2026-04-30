@@ -11,7 +11,6 @@ What's tested:
 
 from __future__ import annotations
 
-import os
 from unittest.mock import patch
 
 import pytest
@@ -169,19 +168,6 @@ class TestGenerateInvoice:
         assert resp.status_code == 400
         assert resp.get_json()["code"] == "INVALID_DUE_DATE"
 
-    def test_ehf_xml_path_set_on_invoice(self, client, db_session):
-        _seed_context(db_session)
-        with _role_patch:
-            data = _generate(client).get_json()
-        assert data["ehf_xml_path"] is not None
-        assert data["ehf_xml_path"].endswith(".xml")
-
-    def test_ehf_file_is_written_to_disk(self, client, db_session):
-        _seed_context(db_session)
-        with _role_patch:
-            data = _generate(client).get_json()
-        assert os.path.isfile(data["ehf_xml_path"])
-
     def test_unauthenticated_returns_401(self, app):
         """Bypass the conftest auth mock for this one test."""
         app.config["TESTING"] = True
@@ -214,37 +200,15 @@ class TestDownloadEhf:
         resp = client.get("/export/9999/ehf")
         assert resp.status_code == 404
 
-    def test_returns_404_when_file_path_missing(self, client, db_session):
-        inv = _seed_invoice(db_session, ehf_xml_path=None)
-        resp = client.get(f"/export/{inv.id}/ehf")
-        assert resp.status_code == 404
-        assert resp.get_json()["code"] == "FILE_NOT_FOUND"
-
-    def test_returns_404_when_file_does_not_exist_on_disk(self, client, db_session):
-        inv = _seed_invoice(db_session, ehf_xml_path="/tmp/nonexistent_invoice.xml")
-        resp = client.get(f"/export/{inv.id}/ehf")
-        assert resp.status_code == 404
-        assert resp.get_json()["code"] == "FILE_NOT_FOUND"
-
-    def test_returns_xml_file_when_present(self, client, db_session, tmp_path):
-        xml_file = tmp_path / "test_invoice.xml"
-        xml_file.write_bytes(b"<?xml version='1.0'?><Invoice/>")
-
-        inv = _seed_invoice(db_session, ehf_xml_path=str(xml_file))
+    def test_returns_xml_file(self, client, db_session):
+        inv = _seed_invoice(db_session)
         resp = client.get(f"/export/{inv.id}/ehf")
 
         assert resp.status_code == 200
         assert "xml" in resp.content_type
 
-    def test_download_filename_uses_invoice_number(self, client, db_session, tmp_path):
-        xml_file = tmp_path / "test.xml"
-        xml_file.write_bytes(b"<?xml version='1.0'?><Invoice/>")
-
-        inv = _seed_invoice(
-            db_session,
-            invoice_number="INV-2026-001",
-            ehf_xml_path=str(xml_file),
-        )
+    def test_download_filename_uses_invoice_number(self, client, db_session):
+        inv = _seed_invoice(db_session, invoice_number="INV-2026-001")
         resp = client.get(f"/export/{inv.id}/ehf")
         assert resp.status_code == 200
         content_disposition = resp.headers.get("Content-Disposition", "")
