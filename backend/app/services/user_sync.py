@@ -40,10 +40,7 @@ def _claim_name(claims: dict) -> str:
 
 
 def upsert_user_from_clerk(session: Session, claims: dict) -> User:
-    """Create or update a local user record from the authenticated Clerk identity.
-    Uses Clerk's subject claim as the primary identity and only links legacy users
-    by email if they are not already linked.
-    """
+    """Create or update a local user record from the authenticated Clerk identity."""
     clerk_id = claims.get("sub")
     if not clerk_id:
         raise ValueError("Token missing sub claim")
@@ -56,30 +53,17 @@ def upsert_user_from_clerk(session: Session, claims: dict) -> User:
 
     user = session.query(User).filter(User.clerk_id == clerk_id).one_or_none()
 
-    if not user:
-        # Link a legacy user by emailif not already been connected to Clerk.
-        user = (
-            session.query(User)
-            .filter(User.email == email, User.clerk_id.is_(None))
-            .one_or_none()
-        )
-
     clerk_username = claims.get("username") or None
     if isinstance(clerk_username, str):
         clerk_username = clerk_username.strip() or None
 
     if user:
-        # Keep identity fields synchronized with Clerk, but preserve the local
-        # profile name after the account has been created or linked.
-        if user.clerk_id != clerk_id:
-            user.clerk_id = clerk_id
         if user.email != email:
             user.email = email
         if clerk_username and not user.username:
             user.username = clerk_username
         return user
 
-    # Seed the initial local profile name from Clerk for new users.
     user = User(
         clerk_id=clerk_id,
         email=email,

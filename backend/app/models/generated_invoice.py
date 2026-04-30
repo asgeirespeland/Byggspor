@@ -62,8 +62,6 @@ class GeneratedInvoice(Base):
 
     overall_confidence_score: Mapped[int | None] = mapped_column(Integer)
     recycled_content_percent: Mapped[float | None] = mapped_column(Numeric(5, 2))
-    ehf_xml_path: Mapped[str | None] = mapped_column(String(500))
-    pdf_report_path: Mapped[str | None] = mapped_column(String(500))
     generated_at: Mapped[datetime] = mapped_column(
         DateTime, server_default=func.now(), nullable=False
     )
