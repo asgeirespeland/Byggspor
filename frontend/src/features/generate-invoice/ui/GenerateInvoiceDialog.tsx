@@ -23,7 +23,6 @@ import type { GeneratedInvoice } from '../types'
 import InvoiceDetailsCard from './InvoiceDetailsCard'
 import CustomerCard from './CustomerCard'
 import LineItemsTable from './LineItemsTable'
-import AttachmentsPanel from './AttachmentsPanel'
 
 interface Props {
   open: boolean
@@ -79,8 +78,6 @@ export default function GenerateInvoiceDialog({
             addLine={addLine}
           />
 
-          <AttachmentsPanel />
-
           {error && (
             <p className="rounded-lg bg-danger-soft px-4 py-2.5 text-sm text-danger-strong">
               {error}
@@ -88,31 +85,8 @@ export default function GenerateInvoiceDialog({
           )}
         </div>
 
-        <div className="sticky bottom-0 flex items-center justify-between gap-3 border-t border-border bg-card px-6 py-4">
+        <div className="sticky bottom-0 flex items-center justify-end gap-3 border-t border-border bg-card px-6 py-4">
           <div className="flex items-center gap-2">
-            <Button variant="outline" size="sm" disabled={isPending}>
-              Lagre utkast
-            </Button>
-            <Button
-              variant="outline"
-              size="sm"
-              disabled={isPending}
-              className="text-danger hover:text-danger-strong hover:border-danger/30"
-            >
-              Slett utkast
-            </Button>
-            <button
-              className="text-sm text-info-strong hover:underline ml-1"
-              onClick={() => onOpenChange(false)}
-            >
-              Fakturaoversikten
-            </button>
-          </div>
-
-          <div className="flex items-center gap-2">
-            <Button variant="outline" size="sm" disabled={isPending}>
-              Forhåndsvisning
-            </Button>
             <Button
               variant="outline"
               size="sm"

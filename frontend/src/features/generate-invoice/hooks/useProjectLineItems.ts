@@ -38,7 +38,11 @@ export function useProjectLineItems(projectId: number, open: boolean) {
   const hasFetched = useRef(false)
 
   useEffect(() => {
-    if (!open || hasFetched.current) return
+    if (!open) {
+      hasFetched.current = false
+      return
+    }
+    if (hasFetched.current) return
 
     let cancelled = false
 
