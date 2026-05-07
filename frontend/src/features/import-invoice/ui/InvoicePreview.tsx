@@ -68,9 +68,14 @@ export default function InvoicePreview({
       rowClassName={(row) => (row.flagged ? 'bg-warning-soft' : '')}
       onSaveEdit={(_row, i, values) => {
         const items = [...data.line_items]
+        const newQty = values[1] ? parseFloat(values[1]) : null
         items[i] = {
           ...items[i],
-          quantity: values[1] ? parseFloat(values[1]) : null,
+          quantity: newQty,
+          line_total:
+            newQty != null && items[i].price_per_unit != null
+              ? newQty * items[i].price_per_unit!
+              : items[i].line_total,
         }
         setData({ ...data, line_items: items })
       }}

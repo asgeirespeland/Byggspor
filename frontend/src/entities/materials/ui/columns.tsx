@@ -105,10 +105,6 @@ export const materialColumns: EditableColumn<MaterialRow>[] = [
         {row.co2_kg != null ? row.co2_kg.toFixed(2) : '—'}
       </span>
     ),
-    editable: {
-      type: 'number',
-      getValue: (row) => (row.co2_kg != null ? String(row.co2_kg) : ''),
-    },
   },
   {
     header: 'EPD',
